@@ -1,150 +1,206 @@
 export class Team {
-    private name: string;
-    public id: number;
-    private players: string[];
-    private totalCount: number = 0;
-    private count: number[];
+    public readonly name: string;
+    public readonly id: number;
+    private readonly answers: Answer[];
 
-    constructor(name: string, teammates: string[]) {
+    constructor(name: string) {
         this.name = name
         this.id = Math.round(Math.random() * 1000000);
-        this.players = teammates;
-        this.count = [];
+        this.answers = [];
     }
 
-    renameTeam(newName: string) {
-        this.name = newName;
+    addAnswer(answer: Answer): void {
+        this.answers.push(answer);
     }
 
-    changePlayers(players: string[]) {
-        this.players = players;
+    getTotalScore(): number {
+        let sum = 0;
+        for (const answer of this.answers) {
+            sum += answer.score;
+        }
+        return sum;
     }
 
-    addPlayer(player: string) {
-        this.players.push(player);
+    getAnswer(roundNumber: number, questionNumber: number): Answer | undefined {
+        return this.answers.find((value, index, obj) =>
+            value.roundNumber === roundNumber && value.questionNumber === questionNumber);
     }
 
-    deletePlayer(player: string) {
-        const ind = this.players.indexOf(player);
-        if (ind >= 0)
-            this.players.splice(ind, 1);
-    }
-
-    processRightAnswer(questionNumber: number) {
-        this.totalCount += 1;
-        this.count[questionNumber - 1] = 1; // см в ноушн
-    }
-
-    processWrongAnswer() {
-
+    getScoreTable(): number[][] {
+        // TODO
+        return [];
     }
 }
 
 export class Question {
-    private cost: number;
-    private number: number;
-    private time: number;
-    answers: Answer[];
-    private appeal: Appeal[];
+    public readonly cost: number;
+    public readonly number: number;
+    public readonly time: number;
+    public readonly roundNumber: number;
+    private readonly answers: Answer[]; // TODO: public? Сейчас непонятно, как получить ответы
+    private readonly appeals: Appeal[]; // TODO: public? Сейчас непонятно, как получить апелляции
 
-    constructor(cost: number, number: number, time: number) {
-        this.cost = cost
+    constructor(cost: number, roundNumber: number, number: number, time: number) {
+        this.cost = cost;
+        this.roundNumber = roundNumber;
         this.number = number;
-        this.time = number;
+        this.time = time;
         this.answers = [];
-        this.appeal = [];
+        this.appeals = [];
+    }
+
+    giveAnswer(team: Team, text: string): void {
+        const answer = new Answer(team.id, this.roundNumber, this.number, text);
+        this.answers.push(answer);
+        team.addAnswer(answer);
+    }
+
+    giveAppeal(teamNumber: number, text: string): void {
+        const appeal = new Appeal(teamNumber, this.roundNumber, this.number, text);
+        this.appeals.push(appeal);
+    }
+
+    acceptAnswers(rightAnswer: string): void {
+        for (let answer of this.answers) {
+            if (answer.text === rightAnswer) {
+                answer.accept(this.cost);
+            }
+        }
+    }
+
+    acceptAppeal(team: Team, comment: string): void {
+        const appeal = this.appeals.find((value, index, obj) =>
+            value.teamNumber === team.id);
+
+        if (appeal !== undefined) {
+            appeal.accept(comment);
+        }
+
+        const answer = this.answers.find((value, index, obj) =>
+            value.teamNumber === team.id);
+
+        if (answer !== undefined) {
+            answer.accept(this.cost);
+        }
     }
 }
 
-enum Status { Right, Wrong, UnChecked};
+enum Status { Right, Wrong, UnChecked}
 
 export class Answer {
     public readonly teamNumber: number;
     public readonly text: string;
-    private status: Status;
+    public readonly roundNumber: number;
+    public readonly questionNumber: number;
+    private _score: number;
+    private _status: Status;
 
-    constructor(teamNumber: number, text: string) {
+    constructor(teamNumber: number, roundNumber: number, questionNumber: number, text: string) {
         this.teamNumber = teamNumber;
+        this.roundNumber = roundNumber;
+        this.questionNumber = questionNumber;
         this.text = text;
-        this.status = Status.UnChecked;
+        this._status = Status.UnChecked;
+        this._score = 0;
     }
 
-    accept() {
-        this.status = Status.Right;
+    public get status() {
+        return this._status;
     }
 
-    reject() {
-        this.status = Status.Wrong;
+    public get score() {
+        return this._score;
+    }
+
+    accept(score: number): void {
+        this._status = Status.Right;
+        this._score = score;
+    }
+
+    reject(): void {
+        this._status = Status.Wrong;
+        this._score = 0;
     }
 }
 
 export class Appeal {
-    private teamNumber: number;
-    private text: string;
-    public comment: string;
-    private status: Status;
+    public readonly teamNumber: number;
+    public readonly text: string;
+    public readonly roundNumber: number;
+    public readonly questionNumber: number;
+    private _comment: string;
+    private _status: Status;
 
-    constructor(teamNumber: number, text: string) {
+    constructor(teamNumber: number, roundNumber: number, questionNumber: number, text: string) {
         this.teamNumber = teamNumber;
+        this.roundNumber = roundNumber;
+        this.questionNumber = questionNumber;
         this.text = text;
-        this.status = Status.UnChecked;
-        this.comment = "";
+        this._status = Status.UnChecked;
+        this._comment = "";
+    }
+
+    public get status() {
+        return this._status;
+    }
+
+    public get comment() {
+        return this._comment;
+    }
+
+    accept(comment: string): void {
+        this._status = Status.Right;
+        this._comment = comment;
+    }
+
+    reject(comment: string): void {
+        this._comment = comment;
+        this._status = Status.Wrong;
     }
 }
 
 export class Round {
-    public questions: Question[];
-    private readonly questionsCount: number;
-    private readonly questionTime: number;
-    private readonly questionCost: number;
+    public readonly number: number;
+    public readonly questions: Question[]; // TODO: public?
+    public readonly questionsCount: number;
+    public readonly questionTime: number;
+    public readonly questionCost: number;
 
-    constructor(questionsCount: number, questionTime: number, questionCost: number) {
+    constructor(number: number, questionsCount: number, questionTime: number, questionCost: number) {
         this.questionCost = questionCost;
         this.questionsCount = questionsCount;
         this.questionTime = questionTime;
         this.questions = this.createQuestions();
+        this.number = number;
     }
 
-    createQuestions() {
-        let result = [];
+    createQuestions(): Question[] {
+        const result = [];
         for (let i = 1; i <= this.questionsCount; i++) {
-            result.push(new Question(this.questionCost, i, this.questionTime));
+            result.push(new Question(this.questionCost, this.number, i, this.questionTime));
         }
         return result;
     }
 }
 
 export class Game {
-    private id: number;
-    private name: string;
-    private rounds: Round[];
-    private teams: Map<number, Team>;
-    private chillTime: number;
+    public readonly id: number;
+    public readonly name: string;
+    public readonly rounds: Round[]; // TODO: public?
+    public readonly teams: { [name: number]: Team }; // TODO: public?
 
-    constructor(name: string, chillTime: number) {
+    constructor(name: string) {
         this.id = Math.round(Math.random() * 1000000)
         this.name = name;
         this.rounds = [];
-        this.teams = new Map<number, Team>();
-        this.chillTime = chillTime;
+        this.teams = {};
     }
 
-    addTeam(team: Team) {
-        this.teams.set(team.id, team);
+    addTeam(team: Team): void {
+        this.teams[team.id] = team;
     }
 
-    addRound(round: Round) {
+    addRound(round: Round): void {
         this.rounds.push(round);
-    }
-
-    acceptAnswers(roundNumber: number, questionNumber: number, rightAnswer: string) {
-        let r = this.rounds[roundNumber-1];
-        let q = r.questions[questionNumber-1];
-        for (let answer of q.answers) {
-            if (answer.text === rightAnswer) {
-                answer.accept()
-                    //addpoint
-            }
-        }
     }
 }
