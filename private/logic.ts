@@ -44,7 +44,7 @@ export class Question {
     private cost: number;
     private number: number;
     private time: number;
-    private answers: Answer[];
+    answers: Answer[];
     private appeal: Appeal[];
 
     constructor(cost: number, number: number, time: number) {
@@ -53,14 +53,6 @@ export class Question {
         this.time = number;
         this.answers = [];
         this.appeal = [];
-    }
-
-    acceptAnswers(rightAnswer: string) {
-        for (let answer of this.answers) {
-            if (answer.text === rightAnswer) {
-                answer.accept()
-            }
-        }
     }
 }
 
@@ -79,7 +71,6 @@ export class Answer {
 
     accept() {
         this.status = Status.Right;
-        //this.teamNumber processRightAnswer
     }
 
     reject() {
@@ -102,7 +93,7 @@ export class Appeal {
 }
 
 export class Round {
-    private questions: Question[];
+    public questions: Question[];
     private readonly questionsCount: number;
     private readonly questionTime: number;
     private readonly questionCost: number;
@@ -127,22 +118,33 @@ export class Game {
     private id: number;
     private name: string;
     private rounds: Round[];
-    private teams: Team[];
+    private teams: Map<number, Team>;
     private chillTime: number;
 
     constructor(name: string, chillTime: number) {
         this.id = Math.round(Math.random() * 1000000)
         this.name = name;
         this.rounds = [];
-        this.teams = [];
+        this.teams = new Map<number, Team>();
         this.chillTime = chillTime;
     }
 
     addTeam(team: Team) {
-        this.teams.push(team);
+        this.teams.set(team.id, team);
     }
 
     addRound(round: Round) {
         this.rounds.push(round);
+    }
+
+    acceptAnswers(roundNumber: number, questionNumber: number, rightAnswer: string) {
+        let r = this.rounds[roundNumber-1];
+        let q = r.questions[questionNumber-1];
+        for (let answer of q.answers) {
+            if (answer.text === rightAnswer) {
+                answer.accept()
+                    //addpoint
+            }
+        }
     }
 }
