@@ -62,7 +62,18 @@ let q3 = new Question(1, 2, 1, 50);
 q3.giveAnswer(team, "2");
 q3.giveAnswer(otherTeam, "3");
 q3.acceptAnswers("3");
+let q4 = new Question(1, 2, 2, 50);
+q4.giveAnswer(team, "4");
+q4.giveAnswer(otherTeam, "4");
+q4.acceptAnswers("6");
 let score = team.getScoreTable();
 let otherScore = otherTeam.getScoreTable();
+console.log(score);
+console.log(otherScore);
+q4.giveAppeal(team.id, "you are wrong!");
+q4.acceptAppeal(team, "yes");
+
+score = team.getScoreTable();
+otherScore = otherTeam.getScoreTable();
 console.log(score);
 console.log(otherScore);

@@ -49,7 +49,7 @@ export class Question {
             value.teamNumber === team.id);
 
         if (answer !== undefined) {
-            answer.accept(this.cost);
+            this.acceptAnswers(answer.text);
         }
     }
 }
