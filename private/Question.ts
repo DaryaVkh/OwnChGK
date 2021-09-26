@@ -37,7 +37,7 @@ export class Question {
         }
     }
 
-    acceptAppeal(team: Team, comment: string): void {
+    acceptAppeal(team: Team, comment: string = ""): void {
         const appeal = this.appeals.find((value, index, obj) =>
             value.teamNumber === team.id);
 

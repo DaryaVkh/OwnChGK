@@ -13,8 +13,8 @@ export class Round {
         this.questionCost = questionCost;
         this.questionsCount = questionsCount;
         this.questionTime = questionTime;
-        this.questions = this.createQuestions();
         this.number = number;
+        this.questions = this.createQuestions();
     }
 
     createQuestions(): Question[] {
@@ -46,34 +46,13 @@ export class Game {
     addRound(round: Round): void {
         this.rounds.push(round);
     }
+
+    getScoreTable(): { [name: string]: number[][] } {
+        const table = {};
+        for (let teamId in this.teams)
+        {
+            table[this.teams[teamId].name] = this.teams[teamId].getScoreTable();
+        }
+        return table;
+    }
 }
-
-let team = new Team("cool");
-let otherTeam = new Team("not cool");
-let q = new Question(1, 1, 1, 50);
-q.giveAnswer(team, "la");
-q.giveAnswer(otherTeam, "la");
-q.acceptAnswers("la");
-let q2 = new Question(1, 1, 2, 50);
-q2.giveAnswer(team, "2");
-q2.giveAnswer(otherTeam, "1");
-q2.acceptAnswers("2");
-let q3 = new Question(1, 2, 1, 50);
-q3.giveAnswer(team, "2");
-q3.giveAnswer(otherTeam, "3");
-q3.acceptAnswers("3");
-let q4 = new Question(1, 2, 2, 50);
-q4.giveAnswer(team, "4");
-q4.giveAnswer(otherTeam, "4");
-q4.acceptAnswers("6");
-let score = team.getScoreTable();
-let otherScore = otherTeam.getScoreTable();
-console.log(score);
-console.log(otherScore);
-q4.giveAppeal(team.id, "you are wrong!");
-q4.acceptAppeal(team, "yes");
-
-score = team.getScoreTable();
-otherScore = otherTeam.getScoreTable();
-console.log(score);
-console.log(otherScore);

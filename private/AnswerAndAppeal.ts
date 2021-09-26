@@ -71,4 +71,4 @@ export class Appeal {
     }
 }
 
-enum Status { Right, Wrong, UnChecked}
+export enum Status { Right, Wrong, UnChecked}
