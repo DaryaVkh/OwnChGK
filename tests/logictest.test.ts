@@ -33,40 +33,123 @@ test('Should_not_set_wrong_answer', () => {
     }
 });
 
-test('Should_get_right_total_count', () => {
+test('Should_get_total_score_when_exist_right_answers', () => {
     const team = new Team("cool");
-    const question = new Question(1, 1, 1, 50);
+    const round = new Round(1, 2, 50, 1);
 
-    question.giveAnswer(team, "rightAnswer");
-    question.acceptAnswers("rightAnswer");
+    round.questions[0].giveAnswer(team, "rightAnswer");
+    round.questions[0].acceptAnswers("rightAnswer");
 
-    expect(team.getTotalScore()).toBe(question.cost);
+    round.questions[1].giveAnswer(team, "rightAnswer");
+    round.questions[1].acceptAnswers("rightAnswer");
+
+    expect(team.getTotalScore()).toBe(round.questionsCount*round.questionCost);
+});
+
+test('Should_get_0_in_total_score_when_no_right_answer', () => {
+    const team = new Team("cool");
+    const round = new Round(1, 2, 50, 1);
+
+    round.questions[0].giveAnswer(team, "wrongAnswer");
+    round.questions[0].acceptAnswers("rightAnswer");
+
+    round.questions[1].giveAnswer(team, "wrongAnswer");
+    round.questions[1].acceptAnswers("rightAnswer");
+
+    expect(team.getTotalScore()).toBe(0);
+});
+
+test('Should_get_0_in_total_score_when_answer_without_score', () => {
+    const team = new Team("cool");
+    const round = new Round(1, 2, 50, 0);
+
+    round.questions[0].giveAnswer(team, "wrongAnswer");
+    round.questions[0].acceptAnswers("rightAnswer");
+
+    round.questions[1].giveAnswer(team, "wrongAnswer");
+    round.questions[1].acceptAnswers("rightAnswer");
+
+    expect(team.getTotalScore()).toBe(0);
+});
+
+test('Should_get_0_in_total_score_when_no_answers', () => {
+    const team = new Team("cool");
+    const round = new Round(1, 2, 50, 1);
+
+    round.questions[0].acceptAnswers("rightAnswer");
+    round.questions[1].acceptAnswers("rightAnswer");
+
+    expect(team.getTotalScore()).toBe(0);
 });
 
 test('Should_get_right_score_table_for_one_team_when_one_round', () => {
     const team = new Team("cool");
+    const round = new Round(1, 2, 50, 1);
+
+    round.questions[0].giveAnswer(team, "rightAnswer");
+    round.questions[0].acceptAnswers("rightAnswer");
+
+    round.questions[1].giveAnswer(team, "rightAnswer");
+    round.questions[1].acceptAnswers("rightAnswer");
+
+    expect(team.getScoreTable()).toStrictEqual([[round.questionCost, round.questionCost]]);
+});
+
+test('Should_get_right_score_table_for_one_team_when_two_rounds', () => {
+    const team = new Team("cool");
+    const round1 = new Round(1, 1, 50, 1);
+    const round2 = new Round(1, 1, 50, 1);
+
+    round1.questions[0].giveAnswer(team, "rightAnswer");
+    round1.questions[0].acceptAnswers("rightAnswer");
+
+    round2.questions[1].giveAnswer(team, "rightAnswer");
+    round2.questions[1].acceptAnswers("rightAnswer");
+
+    expect(team.getScoreTable().length).toBe(2);
+    expect(team.getScoreTable()).toStrictEqual([[round1.questionCost], [round2.questionCost]]);
+});
+
+test('Should_get_team_answer_when_it_exist', () => {
+    const team = new Team("cool");
+    const round1 = new Round(1, 5, 50, 1);
+    const round2 = new Round(2, 5, 50, 1);
+
+    round1.questions[0].giveAnswer(team, "right1");
+    round1.questions[0].acceptAnswers("right1");
+
+    round1.questions[1].giveAnswer(team, "right2");
+    round1.questions[1].acceptAnswers("right2");
+
+    round2.questions[0].giveAnswer(team, "right3");
+    round2.questions[0].acceptAnswers("right3");
+
+    const answer = team.getAnswer(1, 2);
+    expect(answer).not.toBeUndefined();
+    if (answer !== undefined) {
+        expect(answer.text).toBe("right2");
+        expect(answer.score).toBe(1);
+        expect(answer.status).toBe(Status.Right);
+    }
+})
+
+test('Should_get_team_answer_when_it_not_exist', () => {
+    const team = new Team("cool");
     const question = new Question(1, 1, 1, 50);
 
-    question.giveAnswer(team, "rightAnswer");
-    question.acceptAnswers("rightAnswer");
+    question.acceptAnswers("right");
 
-    expect(team.getScoreTable()).toStrictEqual([[question.cost]]);
-});
+    expect(team.getAnswer(1, 1)).toBeUndefined();
+})
 
-test('Should_get_right_score_table_for_one_team_when_2_rounds', () => {
+test('Should_create_questions_as_in_setting', () => {
     const team = new Team("cool");
-    const question1 = new Question(1, 1, 1, 50);
-    const question2 = new Question(1, 2, 1, 50);
+    const round = new Round(1, 5, 50, 1);
 
-    question1.giveAnswer(team, "rightAnswer");
-    question1.acceptAnswers("rightAnswer");
-    question2.giveAnswer(team, "rightAnswer");
-    question2.acceptAnswers("rightAnswer");
-
-    expect(team.getScoreTable()).toStrictEqual([[question1.cost], [question2.cost]]);
+    expect(round.questions.length).toBe(round.questionsCount);
 });
 
-test('Should_accept_appeal_for_one_team', () => {
+test('Should_accept_appeal_and_change_answer_state_for_one_team', () => {
     const team = new Team("cool");
     const question = new Question(1, 1, 1, 50);
     question.giveAnswer(team, "otherAnswer");
@@ -81,6 +164,23 @@ test('Should_accept_appeal_for_one_team', () => {
         expect(teamAnswer.status).toBe(Status.Right);
         expect(teamAnswer.score).toBe(question.cost);
     }
+});
+
+test('Should_accept_appeal_and_change_score_for_one_team', () => {
+    const team = new Team("cool");
+    const question = new Question(1, 1, 1, 50);
+    question.giveAnswer(team, "otherAnswer");
+    question.acceptAnswers("rightAnswer");
+    const totalScore = team.getTotalScore();
+
+    question.giveAppeal(team.id, "otherAnswer");
+    question.acceptAppeal(team, "");
+
+    const newTotalScore = team.getTotalScore();
+    const newScoreTable = team.getScoreTable();
+    expect(newTotalScore).toBe(totalScore + 1);
+    expect(newScoreTable).toBe([[1]]);
+
 });
 
 test('Should_accept_appeal_for_all_team', () => {
@@ -121,5 +221,6 @@ test('Should_get_score_table_for_all_team', () => {
     question.giveAnswer(team2, "otherAnswer");
     question.acceptAnswers("rightAnswer");
 
-    expect(game.getScoreTable()).toStrictEqual({"cool":[[1]], "good": [[0]]});
-});
+    expect(game.getScoreTable()).toStrictEqual({"cool": [[1]], "good": [[0]]});
+}
+);

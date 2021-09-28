@@ -49,8 +49,8 @@ export class Game {
 
     getScoreTable(): { [name: string]: number[][] } {
         const table = {};
-        for (let teamId in this.teams)
-        {
+        for (let teamId in this.teams) {
+            // @ts-ignore
             table[this.teams[teamId].name] = this.teams[teamId].getScoreTable();
         }
         return table;

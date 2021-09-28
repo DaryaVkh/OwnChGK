@@ -1,12 +1,12 @@
 import {Team} from "./Team";
-import {AnswerAndAppeal, Appeal} from "./AnswerAndAppeal";
+import {Answer, Appeal} from "./AnswerAndAppeal";
 
 export class Question {
     public readonly cost: number;
     public readonly number: number;
     public readonly time: number;
     public readonly roundNumber: number;
-    private readonly answers: AnswerAndAppeal[]; // TODO: public? Сейчас непонятно, как получить ответы
+    private readonly answers: Answer[]; // TODO: public? Сейчас непонятно, как получить ответы
     private readonly appeals: Appeal[]; // TODO: public? Сейчас непонятно, как получить апелляции
 
     constructor(cost: number, roundNumber: number, number: number, time: number) {
@@ -19,7 +19,7 @@ export class Question {
     }
 
     giveAnswer(team: Team, text: string): void {
-        const answer = new AnswerAndAppeal(team.id, this.roundNumber, this.number, text);
+        const answer = new Answer(team.id, this.roundNumber, this.number, text);
         this.answers.push(answer);
         team.addAnswer(answer);
     }

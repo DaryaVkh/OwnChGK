@@ -1,9 +1,9 @@
-import {AnswerAndAppeal} from "./AnswerAndAppeal";
+import {Answer, Appeal} from "./AnswerAndAppeal";
 
 export class Team {
     public readonly name: string;
     public readonly id: number;
-    private readonly answers: AnswerAndAppeal[];
+    private readonly answers: Answer[];
 
     constructor(name: string) {
         this.name = name
@@ -11,7 +11,7 @@ export class Team {
         this.answers = [];
     }
 
-    addAnswer(answer: AnswerAndAppeal): void {
+    addAnswer(answer: Answer): void {
         this.answers.push(answer);
     }
 
@@ -23,20 +23,18 @@ export class Team {
         return sum;
     }
 
-    getAnswer(roundNumber: number, questionNumber: number): AnswerAndAppeal | undefined {
+    getAnswer(roundNumber: number, questionNumber: number): Answer | undefined {
         return this.answers.find((value, index, obj) =>
             value.roundNumber === roundNumber && value.questionNumber === questionNumber);
     }
 
     getScoreTable(): number[][] {
         const scoreTable = [];
-        for (let answer of this.answers)
-        {
+        for (let answer of this.answers) {
             if (answer.roundNumber > scoreTable.length) {
                 scoreTable.push([answer.score]);
-            }
-            else
-                scoreTable[scoreTable.length-1].push(answer.score);
+            } else
+                scoreTable[scoreTable.length - 1].push(answer.score);
         }
         return scoreTable;
     }

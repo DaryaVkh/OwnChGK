@@ -1,4 +1,4 @@
-export class AnswerAndAppeal {
+export class Answer {
     public readonly teamNumber: number;
     public readonly text: string;
     public readonly roundNumber: number;
