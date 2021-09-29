@@ -149,6 +149,89 @@ test('Should_create_questions_as_in_setting', () => {
     expect(round.questions.length).toBe(round.questionsCount);
 });
 
+test('Should_give_questions_different_numbers', () => {
+    const team = new Team("cool");
+    const round = new Round(1, 5, 50, 1);
+
+    expect(round.questions[0].number).toBe(1);
+    expect(round.questions[1].number).toBe(2);
+    expect(round.questions[4].number).toBe(5);
+});
+
+test('Should_not_change_score_when_answer_alredy_accept', () => {
+    const team = new Team("cool");
+    const round = new Round(1, 5, 50, 1);
+    round.questions[0].giveAnswer(team, "right");
+    round.questions[0].acceptAnswers("right");
+    const scoreTable = team.getScoreTable();
+
+    round.questions[0].acceptAnswers("right");
+
+    expect(team.getTotalScore()).toBe(1);
+    const answer = team.getAnswer(1, 1);
+    // @ts-ignore
+    expect(answer.score).toBe(round.questionCost);
+    // @ts-ignore
+    expect(answer.status).toBe(Status.Right);
+    expect(team.getScoreTable()).toStrictEqual(scoreTable);
+});
+
+test('Should_change_score_when_accept_answer_reject', () => {
+    const team = new Team("cool");
+    const round = new Round(1, 5, 50, 1);
+    round.questions[0].giveAnswer(team, "right");
+    round.questions[0].acceptAnswers("right");
+
+    const answer = team.getAnswer(1, 1);
+    // @ts-ignore
+    answer.reject();
+
+    expect(team.getTotalScore()).toBe(0);
+    // @ts-ignore
+    expect(answer.score).toBe(0);
+    // @ts-ignore
+    expect(answer.status).toBe(Status.Wrong);
+    expect(team.getScoreTable()[0][0]).toBe(0);
+});
+
+test('Should_not_change_score_when_answer_reject', () => {
+    const team = new Team("cool");
+    const round = new Round(1, 5, 50, 1);
+    round.questions[0].giveAnswer(team, "wrong");
+    round.questions[0].acceptAnswers("right");
+    const scoreTable = team.getScoreTable();
+
+    const answer = team.getAnswer(1, 1);
+    // @ts-ignore
+    answer.reject();
+
+    expect(team.getTotalScore()).toBe(0);
+    // @ts-ignore
+    expect(answer.score).toBe(0);
+    // @ts-ignore
+    expect(answer.status).toBe(Status.Wrong);
+    expect(team.getScoreTable()).toStrictEqual(scoreTable);
+});
+
+test('Should_change_score_when_rejected_answer_accept', () => {
+    const team = new Team("cool");
+    const round = new Round(1, 5, 50, 1);
+    round.questions[0].giveAnswer(team, "wrong");
+    round.questions[0].acceptAnswers("right");
+    const scoreTable = team.getScoreTable();
+
+    const answer = team.getAnswer(1, 1);
+    // @ts-ignore
+    answer.accept();
+
+    expect(team.getTotalScore()).toBe(1);
+    // @ts-ignore
+    expect(answer.score).toBe(round.questionCost);
+    // @ts-ignore
+    expect(answer.status).toBe(Status.Right);
+    expect(team.getScoreTable()[0][0]).toStrictEqual(round.questionCost);
+});
+
 test('Should_accept_appeal_and_change_answer_state_for_one_team', () => {
     const team = new Team("cool");
     const question = new Question(1, 1, 1, 50);
