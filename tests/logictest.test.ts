@@ -98,13 +98,13 @@ test('Should_get_right_score_table_for_one_team_when_one_round', () => {
 test('Should_get_right_score_table_for_one_team_when_two_rounds', () => {
     const team = new Team("cool");
     const round1 = new Round(1, 1, 50, 1);
-    const round2 = new Round(1, 1, 50, 1);
+    const round2 = new Round(2, 1, 50, 1);
 
     round1.questions[0].giveAnswer(team, "rightAnswer");
     round1.questions[0].acceptAnswers("rightAnswer");
 
-    round2.questions[1].giveAnswer(team, "rightAnswer");
-    round2.questions[1].acceptAnswers("rightAnswer");
+    round2.questions[0].giveAnswer(team, "rightAnswer");
+    round2.questions[0].acceptAnswers("rightAnswer");
 
     expect(team.getScoreTable().length).toBe(2);
     expect(team.getScoreTable()).toStrictEqual([[round1.questionCost], [round2.questionCost]]);
@@ -218,12 +218,10 @@ test('Should_change_score_when_rejected_answer_accept', () => {
     const round = new Round(1, 5, 50, 1);
     round.questions[0].giveAnswer(team, "wrong");
     round.questions[0].acceptAnswers("right");
-    const scoreTable = team.getScoreTable();
+
+    round.questions[0].acceptAnswers("wrong");
 
     const answer = team.getAnswer(1, 1);
-    // @ts-ignore
-    answer.accept();
-
     expect(team.getTotalScore()).toBe(1);
     // @ts-ignore
     expect(answer.score).toBe(round.questionCost);
@@ -262,7 +260,7 @@ test('Should_accept_appeal_and_change_score_for_one_team', () => {
     const newTotalScore = team.getTotalScore();
     const newScoreTable = team.getScoreTable();
     expect(newTotalScore).toBe(totalScore + 1);
-    expect(newScoreTable).toBe([[1]]);
+    expect(newScoreTable).toStrictEqual([[1]]);
 
 });
 
