@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import './App.css';
 import Layout from './Layout/Layout';
-import Authorization from './Desktop/Authorization/Authorization';
+import FirstPage from './Desktop/FirstPage/FirstPage'
 
 class App extends Component {
     render() {
         return (
             <Layout>
-                <Authorization isAdmin={ false } />
+                <FirstPage type='Authorization' isAdmin={true}/>
             </Layout>
         );
     }

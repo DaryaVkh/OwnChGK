@@ -12,4 +12,5 @@
     position: fixed;
     left: 9.6%;
     top: 20%;
+    user-select: none;
 }

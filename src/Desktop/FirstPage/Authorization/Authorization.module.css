@@ -1,0 +1,29 @@
+.restorePasswordLink {
+    color: #3282B8;
+    text-decoration: none;
+    user-select: none;
+}
+
+.restoreLinkWrapper {
+    width: 100%;
+    text-align: center;
+    font-size: 1vw;
+}
+
+.registerLinkWrapper {
+    width: 100%;
+    font-size: 1vw;
+    text-align: center;
+    margin-top: 10vh;
+    user-select: none;
+}
+
+.registerParagraph {
+    color: #E5E5E5;
+    display: inline-block;
+}
+
+.registerLink {
+    text-decoration: none;
+    color: #3282B8;
+}

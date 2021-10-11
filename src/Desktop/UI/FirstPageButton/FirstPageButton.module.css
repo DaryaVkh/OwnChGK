@@ -1,0 +1,26 @@
+.buttonWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.Button {
+    height: 6vh;
+    font-size: 1.3vw;
+    font-weight: bold;
+    border: 2px solid #3282B8;
+    border-radius: 7px;
+    margin-top: 4vh;
+    margin-bottom: 2.5vh;
+    filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25));
+    overflow: hidden;
+    user-select: none;
+}
+
+.signInButton {
+    width: 13vw;
+}
+
+.signUpButton {
+    width: 16vw;
+}
