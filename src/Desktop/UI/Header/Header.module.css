@@ -1,0 +1,15 @@
+.Header {
+    width: 100vw;
+    height: 9%;
+    position: fixed;
+    top: 0;
+    background-color: #1B262C;
+    filter: drop-shadow(0 1vh 1vh rgba(50, 130, 184, 0.25));
+}
+
+.logo {
+    height: 60%;
+    position: fixed;
+    left: 9.6%;
+    top: 20%;
+}
