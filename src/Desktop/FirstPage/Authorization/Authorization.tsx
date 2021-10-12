@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import classes from './Authorization.module.css';
-import Header from '../../UI/Header/Header';
 import {Input} from '../../UI/Input/Input';
 import {Button} from '../../UI/FirstPageButton/FirstPageButton'
 
