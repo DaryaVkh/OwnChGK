@@ -7,7 +7,7 @@
 .Button {
     height: 6vh;
     font-size: 1.3vw;
-    font-weight: bold;
+    font-weight: var(--bold-weight);
     border: 2px solid #3282B8;
     border-radius: 7px;
     margin-top: 4vh;
@@ -15,6 +15,16 @@
     filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25));
     overflow: hidden;
     user-select: none;
+    font-family: Roboto, sans-serif;
+
+    &:hover {
+        cursor: pointer;
+        box-shadow: 0 0 2vh 2px #3282B8;
+    }
+
+    &:active {
+        box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+    }
 }
 
 .signInButton {

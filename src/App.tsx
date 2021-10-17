@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import './App.css';
+import classes from './App.module.scss';
 import Layout from './Layout/Layout';
 import FirstPage from './Desktop/FirstPage/FirstPage'
 
@@ -7,7 +7,7 @@ class App extends Component {
     render() {
         return (
             <Layout>
-                <FirstPage type='Authorization' isAdmin={true}/>
+                <FirstPage type='Registration'/>
             </Layout>
         );
     }

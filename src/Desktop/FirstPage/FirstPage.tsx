@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import classes from './FirstPage.module.css';
+import classes from './FirstPage.module.scss';
 import Header from '../UI/Header/Header';
 import Authorization from './Authorization/Authorization';
 import Registration from './Registration/Registration';

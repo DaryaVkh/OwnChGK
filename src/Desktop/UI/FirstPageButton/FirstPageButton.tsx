@@ -1,5 +1,5 @@
 import React from 'react';
-import classes from './FirstPageButton.module.css';
+import classes from './FirstPageButton.module.scss';
 
 export const Button = (props: { type: string, text: string }) => {
     const cls = [
@@ -9,7 +9,7 @@ export const Button = (props: { type: string, text: string }) => {
 
     return (
         <div className={classes.buttonWrapper}>
-            <button className={cls.join(' ')}>
+            <button type='submit' className={cls.join(' ')}>
                 { props.text }
             </button>
         </div>
