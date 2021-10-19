@@ -34,7 +34,7 @@ class Server {
 
     public start = (port: number) => {
         return new Promise((resolve, reject) => {
-            this.app.listen(port, () => {
+            this.app.listen(port, '0.0.0.0', () => {
                 resolve(port);
             }).on('error', (err: Object) => reject(err));
         });

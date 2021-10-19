@@ -7,7 +7,7 @@ class App extends Component {
     render() {
         return (
             <Layout>
-                <FirstPage type='Registration'/>
+                <FirstPage type='Registration' />
             </Layout>
         );
     }
