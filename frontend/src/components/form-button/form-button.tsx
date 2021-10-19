@@ -9,8 +9,12 @@ export const FormButton: FC<ButtonProps> = props => {
     ];
 
     function authorize() {
-        fetch('/insert', {
-            method: 'POST', body: JSON.stringify({
+        fetch('http://localhost:3000/users/insert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
                 email: 'dashav1605@mail.ru', password: '12345'
             })
         })

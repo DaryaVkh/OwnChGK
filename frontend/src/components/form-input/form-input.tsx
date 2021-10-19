@@ -12,7 +12,8 @@ export class FormInput extends Component<InputProps> {
                    id={this.props.id}
                    name={this.props.name}
                    placeholder={this.props.placeholder}
-                   required={true} />
+                   onBlur={this.props.onBlur}
+                   required={true}/>
         );
     }
 }

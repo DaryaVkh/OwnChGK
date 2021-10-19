@@ -3,11 +3,7 @@ import classes from './auth.module.scss';
 import Header from '../../components/header/header';
 import Authorization from '../../components/authorization/authorization';
 import Registration from '../../components/registration/registration';
-
-interface FirstPageProps {
-    type: 'Authorization' | 'Registration';
-    isAdmin?: boolean;
-}
+import {FirstPageProps} from "../../entities/auth/auth.interfaces";
 
 class Auth extends Component<FirstPageProps> {
     render() {

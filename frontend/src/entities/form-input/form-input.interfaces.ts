@@ -3,4 +3,5 @@ export interface InputProps {
     id: string;
     name: string;
     placeholder: string;
+    onBlur?: () => void;
 }
