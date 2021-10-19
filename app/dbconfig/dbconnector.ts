@@ -5,7 +5,7 @@ abstract class DataBase {
         max: 20,
         connectionString: process.env.DATABASE_URL,
         idleTimeoutMillis: 30000,
-        //ssl: { rejectUnauthorized: false } // нужно для heroku
+        ssl: { rejectUnauthorized: false } // нужно для heroku
     });
 
     public static connect() {

@@ -4,10 +4,28 @@ import {Input} from '../../UI/Input/Input';
 import {Button} from '../../UI/FirstPageButton/FirstPageButton';
 
 class Registration extends Component {
+    validateForm(e: React.SyntheticEvent) {
+        e.preventDefault();
+        const password1 = document.getElementById('password');
+        const password2 = document.getElementById('repeatPassword');
+        console.log(password1);
+        // @ts-ignore
+        if (password1.value !== password2.value) {
+            // @ts-ignore
+            password2.style.borderColor = 'darkred';
+            return false;
+        } else {
+            // @ts-ignore
+            password2.style.borderColor = '#3282B8';
+        }
+    }
+
     render() {
         return (
             <React.Fragment>
-                <form action='' method=''>
+                <form
+                    onSubmit={this.validateForm}
+                    action='' method=''>
                     <Input type='email' id='email' name='email' placeholder='E-mail'/>
                     <Input type='password' id='password' name='password' placeholder='Пароль'/>
                     <Input type='password' id='repeatPassword' name='repeatPassword' placeholder='Повторите пароль'/>
