@@ -43,11 +43,11 @@ abstract class DataBase {
         }
     }
 
-    public static async insertUser(email: string, password: string, name: string, isAdmin: boolean = false) {
+    public static async insertUser(email: string, password: string, isAdmin: boolean = false) {
         try {
             const client = await this.pool.connect();
-            const sql = "INSERT INTO users (email, password, name, is_admin) VALUES ($1, $2, $3, $4)";
-            const params = [email, password, name, isAdmin];
+            const sql = "INSERT INTO users (email, password, is_admin) VALUES ($1, $2, $3)";
+            const params = [email, password, isAdmin];
             await client.query(sql, params);
 
             client.release();

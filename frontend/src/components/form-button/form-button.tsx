@@ -8,20 +8,19 @@ export const FormButton: FC<ButtonProps> = props => {
         classes[props.type]
     ];
 
-    // function authorize() {
-    //     fetch('/insert', {
-    //         method: 'POST', body: JSON.stringify({
-    //             email: 'dashav1605@mail.ru', password: '12345'
-    //         })
-    //     })
-    //         .then((res) => res.json())
-    //         .then((res) => {console.log(res)})
-    // }
+    function authorize() {
+        fetch('/insert', {
+            method: 'POST', body: JSON.stringify({
+                email: 'dashav1605@mail.ru', password: '12345'
+            })
+        })
+            .then((res) => res.json())
+            .then((res) => {console.log(res)})
+    }
 
     return (
         <div className={classes.buttonWrapper}>
-            <button type='submit' className={cls.join(' ')}>
-                {/*onClick={authorize}>*/}
+            <button type='submit' className={cls.join(' ')} onClick={authorize}>
                 { props.text }
             </button>
         </div>
