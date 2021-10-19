@@ -10,10 +10,6 @@ const usersController = new UsersController();
 router.get('/getAll', roleMiddleware(false), usersController.getAll);
 router.post('/login', usersController.login);
 
-router.post('/insert', [
-        check("email", "Имя не пустое").notEmpty(),
-        check("password", "Пароль - 4-254 символов").isLength({min: 4, max: 254})
-    ],
-    (req:Request, res:Response) => usersController.insert(req, res));
+router.post('/insert', (req: Request, res: Response) => usersController.insert(req, res));
 
 export default router;

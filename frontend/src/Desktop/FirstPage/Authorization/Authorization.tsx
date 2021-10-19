@@ -7,7 +7,7 @@ class Authorization extends Component<{ isAdmin: boolean }> {
     render() {
         return (
             <React.Fragment>
-                <form action='' method=''>
+                <form action='users/login' method='post'>
                     <Input type='email' id='email' name='email' placeholder='E-mail' />
                     <Input type='password' id='password' name='password' placeholder='Пароль' />
 

@@ -25,7 +25,7 @@ class Registration extends Component {
             <React.Fragment>
                 <form
                     onSubmit={this.validateForm}
-                    action='' method=''>
+                    action='users/insert' method='post'>
                     <Input type='email' id='email' name='email' placeholder='E-mail'/>
                     <Input type='password' id='password' name='password' placeholder='Пароль'/>
                     <Input type='password' id='repeatPassword' name='repeatPassword' placeholder='Повторите пароль'/>

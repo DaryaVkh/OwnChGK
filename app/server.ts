@@ -5,7 +5,6 @@ import mainRouter from "./routers/mainRouter";
 import DataBase from "./dbconfig/dbconnector";
 import cookieParser from "cookie-parser";
 import path from "path";
-const cors = require("cors");
 
 class Server {
     private app;
@@ -18,10 +17,9 @@ class Server {
     }
 
     private config() {
+        this.app.use(bodyParser.json()); // 100kb default
         this.app.use(bodyParser.urlencoded({extended: true}));
         this.app.use(express.static(path.resolve('./build/app/build/frontend')));
-        this.app.use(bodyParser.json({limit: '1mb'})); // 100kb default
-        this.app.use(cors());
     }
 
     private dbConnect() {
