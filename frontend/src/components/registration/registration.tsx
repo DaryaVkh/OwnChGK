@@ -1,19 +1,26 @@
 import React, {Component} from 'react';
-import classes from './Registration.module.scss';
-import {Input} from '../../UI/Input/Input';
-import {Button} from '../../UI/FirstPageButton/FirstPageButton';
+import classes from './registration.module.scss';
+import {FormInput} from '../form-input/form-input';
+import {FormButton} from '../form-button/form-button';
 
 class Registration extends Component {
     validateForm(e: React.SyntheticEvent) {
-        e.preventDefault();
         const password1 = document.getElementById('password');
         const password2 = document.getElementById('repeatPassword');
-        console.log(password1);
+        // @ts-ignore
+        if (password1.value !== password2.value) {
+            e.preventDefault();
+            return false;
+        }
+    }
+
+    checkRepeatedPassword() {
+        const password1 = document.getElementById('password');
+        const password2 = document.getElementById('repeatPassword');
         // @ts-ignore
         if (password1.value !== password2.value) {
             // @ts-ignore
             password2.style.borderColor = 'darkred';
-            return false;
         } else {
             // @ts-ignore
             password2.style.borderColor = '#3282B8';
@@ -26,11 +33,11 @@ class Registration extends Component {
                 <form
                     onSubmit={this.validateForm}
                     action='users/insert' method='post'>
-                    <Input type='email' id='email' name='email' placeholder='E-mail'/>
-                    <Input type='password' id='password' name='password' placeholder='Пароль'/>
-                    <Input type='password' id='repeatPassword' name='repeatPassword' placeholder='Повторите пароль'/>
+                    <FormInput type='email' id='email' name='email' placeholder='E-mail'/>
+                    <FormInput type='password' id='password' name='password' placeholder='Пароль'/>
+                    <FormInput type='password' id='repeatPassword' name='repeatPassword' placeholder='Повторите пароль' onBlur={this.checkRepeatedPassword}/>
 
-                    <Button type='signUpButton' text='Зарегистрироваться'/>
+                    <FormButton type='signUpButton' text='Зарегистрироваться'/>
                 </form>
 
                 <div className={classes.signInLinkWrapper}>

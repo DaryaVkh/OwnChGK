@@ -1,15 +1,11 @@
 import React, {Component} from 'react';
-import classes from './FirstPage.module.scss';
-import Header from '../UI/Header/Header';
-import Authorization from './Authorization/Authorization';
-import Registration from './Registration/Registration';
+import classes from './auth.module.scss';
+import Header from '../../components/header/header';
+import Authorization from '../../components/authorization/authorization';
+import Registration from '../../components/registration/registration';
+import {FirstPageProps} from "../../entities/auth/auth.interfaces";
 
-type FirstPageProps = {
-    type: 'Authorization' | 'Registration';
-    isAdmin?: boolean;
-};
-
-class FirstPage extends Component<FirstPageProps> {
+class Auth extends Component<FirstPageProps> {
     render() {
         return (
             <div className={classes.FirstPage}>
@@ -29,4 +25,4 @@ class FirstPage extends Component<FirstPageProps> {
     }
 }
 
-export default FirstPage;
+export default Auth;

@@ -9,7 +9,7 @@ export function roleMiddleware(roles:boolean) {
             next()
         }
         try {
-            const token = req.cookies['Authorization'];
+            const token = req.cookies['authorization'];
             if (!token) {
                 return res.status(403).json({message: "Пользователь не авторизован"});
             }

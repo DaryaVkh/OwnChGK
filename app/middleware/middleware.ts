@@ -8,7 +8,7 @@ export function middleware(req:Request, res:Response, next: NextFunction) {
     }
 
     try {
-        const token = req.cookies['Authorization'];
+        const token = req.cookies['authorization'];
         if (!token) {
             return res.status(403).json({message: "Пользователь не авторизован"});
         }

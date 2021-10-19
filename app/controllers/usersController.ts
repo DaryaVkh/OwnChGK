@@ -29,20 +29,15 @@ class UsersController {
         try {
             const email = req.body.email;
             const password = req.body.password;
-            console.log('1')
             const user = await DataBase.getUser(email);
-            console.log('2')
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                console.log('3');
                 const token = generateAccessToken(user.email, user.is_admin);
-                console.log('4');
-                res.cookie('Authorization', token, {
+                res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     httpOnly: true,
                     secure: true
                 });
-                console.log('5');
                 res.status(200).json({token});
             } else {
                 res.status(400).json({message: "Not your password"});
@@ -59,9 +54,8 @@ class UsersController {
                 return res.status(400).json({message: "Ошибка", errors})
             }
 
-            const body = req.body;
-            const email = body.email;
-            const password = body.password;
+            const email = req.body.email;
+            const password = req.body.password;
             const hashedPassword = await hash(password, 10);
             await DataBase.insertUser(email, hashedPassword, isAdmin);
             res.send('Done');
