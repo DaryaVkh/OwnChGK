@@ -33,7 +33,7 @@ class UsersController {
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
                 const token = generateAccessToken(user.email, user.is_admin);
-                res.cookie('Authorization', token, {
+                res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     httpOnly: true,
                     secure: true
