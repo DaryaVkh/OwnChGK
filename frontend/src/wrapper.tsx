@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import classes from './Layout.module.scss';
+import classes from './wrapper.module.scss';
 
-class Layout extends Component {
+class Wrapper extends Component {
     render() {
         return (
             <div className={classes.Layout}>
@@ -13,4 +13,4 @@ class Layout extends Component {
     }
 }
 
-export default Layout;
+export default Wrapper;

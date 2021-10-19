@@ -1,17 +1,17 @@
 import React, {Component} from 'react';
-import classes from './Authorization.module.scss';
-import {Input} from '../../UI/Input/Input';
-import {Button} from '../../UI/FirstPageButton/FirstPageButton'
+import classes from './authorization.module.scss';
+import {FormInput} from '../form-input/form-input';
+import {FormButton} from '../form-button/form-button'
 
 class Authorization extends Component<{ isAdmin: boolean }> {
     render() {
         return (
             <React.Fragment>
                 <form action='' method=''>
-                    <Input type='email' id='email' name='email' placeholder='E-mail' />
-                    <Input type='password' id='password' name='password' placeholder='Пароль' />
+                    <FormInput type='email' id='email' name='email' placeholder='E-mail' />
+                    <FormInput type='password' id='password' name='password' placeholder='Пароль' />
 
-                    <Button type='signInButton' text='Войти' />
+                    <FormButton type='signInButton' text='Войти' />
                 </form>
 
                 <div className={classes.restoreLinkWrapper}>

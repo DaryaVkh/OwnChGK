@@ -1,14 +1,8 @@
 import React, {Component} from 'react';
-import classes from './Input.module.scss';
+import classes from './form-input.module.scss';
+import {InputProps} from "../../entities/form-input/form-input.interfaces";
 
-type InputPropsType = {
-    type: string;
-    id: string;
-    name: string;
-    placeholder: string;
-};
-
-export class Input extends Component<InputPropsType> {
+export class FormInput extends Component<InputProps> {
     public cls = [classes.Input];
 
     render() {

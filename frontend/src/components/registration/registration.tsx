@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import classes from './Registration.module.scss';
-import {Input} from '../../UI/Input/Input';
-import {Button} from '../../UI/FirstPageButton/FirstPageButton';
+import classes from './registration.module.scss';
+import {FormInput} from '../form-input/form-input';
+import {FormButton} from '../form-button/form-button';
 
 class Registration extends Component {
     validateForm(e: React.SyntheticEvent) {
@@ -26,11 +26,11 @@ class Registration extends Component {
                 <form
                     onSubmit={this.validateForm}
                     action='' method=''>
-                    <Input type='email' id='email' name='email' placeholder='E-mail'/>
-                    <Input type='password' id='password' name='password' placeholder='Пароль'/>
-                    <Input type='password' id='repeatPassword' name='repeatPassword' placeholder='Повторите пароль'/>
+                    <FormInput type='email' id='email' name='email' placeholder='E-mail'/>
+                    <FormInput type='password' id='password' name='password' placeholder='Пароль'/>
+                    <FormInput type='password' id='repeatPassword' name='repeatPassword' placeholder='Повторите пароль'/>
 
-                    <Button type='signUpButton' text='Зарегистрироваться'/>
+                    <FormButton type='signUpButton' text='Зарегистрироваться'/>
                 </form>
 
                 <div className={classes.signInLinkWrapper}>
