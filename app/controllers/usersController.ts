@@ -57,7 +57,7 @@ class UsersController {
             const email = req.body.email;
             const password = req.body.password;
             const hashedPassword = await hash(password, 10);
-            await DataBase.insertUser(email, hashedPassword, isAdmin);
+            await DataBase.insertUser(email, hashedPassword);
             res.send('Done');
         } catch (error:any) {
             res.status(400).json({'message': error.message});

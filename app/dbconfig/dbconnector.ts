@@ -201,7 +201,7 @@ abstract class DataBase {
     public static async changeTeamParticipants(idOrName: number | string, newParticipants: string[]) {
         let sql: string;
         if (typeof idOrName === 'string') {
-            sql = "UPDATE teams SET participants = $1 WHERE email = $2 RETURNING participants";
+            sql = "UPDATE teams SET participants = $1 WHERE name = $2 RETURNING participants";
         } else {
             sql = "UPDATE teams SET participants = $1 WHERE team_id = $2 RETURNING participants";
         }
@@ -215,7 +215,7 @@ abstract class DataBase {
     public static async changeTeamName(idOrName: number | string, newName: string) {
         let sql: string;
         if (typeof idOrName === 'string') {
-            sql = "UPDATE teams SET name = $1 WHERE email = $2 RETURNING name";
+            sql = "UPDATE teams SET name = $1 WHERE name = $2 RETURNING name";
         } else {
             sql = "UPDATE teams SET name = $1 WHERE team_id = $2 RETURNING name";
         }
@@ -229,7 +229,7 @@ abstract class DataBase {
     public static async changeTeamCaptainId(idOrName: number | string, newCaptainId: string) {
         let sql: string;
         if (typeof idOrName === 'string') {
-            sql = "UPDATE teams SET captain_id = $1 WHERE email = $2 RETURNING captain_id";
+            sql = "UPDATE teams SET captain_id = $1 WHERE name = $2 RETURNING captain_id";
         } else {
             sql = "UPDATE teams SET captain_id = $1 WHERE team_id = $2 RETURNING captain_id";
         }
