@@ -5,6 +5,7 @@ import mainRouter from "./routers/mainRouter";
 import DataBase from "./dbconfig/dbconnector";
 import cookieParser from "cookie-parser";
 import path from "path";
+import teamRouter from "./routers/teamRouter";
 
 class Server {
     private app;
@@ -30,6 +31,7 @@ class Server {
         this.app.use(cookieParser());
         this.app.use('/users', usersRouter);
         this.app.use('/', mainRouter);
+        this.app.use('/teams', teamRouter);
     }
 
     public start = (port: number) => {
