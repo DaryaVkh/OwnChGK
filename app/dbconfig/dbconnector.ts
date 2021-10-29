@@ -5,7 +5,7 @@ abstract class DataBase {
         max: 20,
         connectionString: process.env.DATABASE_URL,
         idleTimeoutMillis: 30000,
-        ssl: { rejectUnauthorized: false } // нужно для heroku
+        ssl: {rejectUnauthorized: false} // нужно для heroku
     });
 
     public static connect() {
@@ -15,7 +15,7 @@ abstract class DataBase {
         });
     }
 
-    private static async query(sql, params=[]) {
+    private static async query(sql, params = []) {
         let client: any;
         try {
             client = await this.pool.connect();
@@ -161,15 +161,15 @@ abstract class DataBase {
 
     public static async getTeam(id: number);
     public static async getTeam(name: string);
-    public static async getTeam(idOrEmail: number | string) {
+    public static async getTeam(idOrName: number | string) {
         let sql: string;
-        if (typeof idOrEmail === 'string') {
+        if (typeof idOrName === 'string') {
             sql = "SELECT * FROM teams WHERE name = $1";
         } else {
             sql = "SELECT * FROM teams WHERE team_id = $1";
         }
 
-        const rows = await DataBase.query(sql, [idOrEmail]);
+        const rows = await DataBase.query(sql, [idOrName]);
         if (rows.length > 0)
             return rows[0];
 
@@ -237,6 +237,147 @@ abstract class DataBase {
         const rows = await DataBase.query(sql, [newCaptainId, idOrName]);
         return rows[0]; // возвращает captain_id измененной команды
     };
+
+    public static async getAllGames() {
+        const sql = "SELECT * FROM games";
+        return await DataBase.query(sql);
+    }
+
+    public static async getGame(id: number);
+    public static async getGame(name: string);
+    public static async getGame(idOrName: number | string) {
+        let sql: string;
+        if (typeof idOrName === 'string') {
+            sql = "SELECT * FROM games WHERE name = $1";
+        } else {
+            sql = "SELECT * FROM games WHERE game_id = $1";
+        }
+
+        const rows = await DataBase.query(sql, [idOrName]);
+        if (rows.length > 0)
+            return rows[0];
+
+        throw new Error("Игра не найдена");
+    }
+
+    public static async insertGame(name: string, adminId: number) {
+        const sql = "INSERT INTO games (name, admin_id) VALUES ($1, $2) RETURNING admin_id";
+        const rows = await DataBase.query(sql, [name, adminId]);
+        return rows[0]; // возвращает назначенный игре id
+    }
+
+    public static async deleteGame(id: number);
+    public static async deleteGame(name: string);
+    public static async deleteGame(idOrName: number | string) {
+        let sql: string;
+        if (typeof idOrName === 'string') {
+            sql = "DELETE FROM games WHERE name = $1 RETURNING game_id";
+        } else {
+            sql = "DELETE FROM games WHERE game_id = $1 RETURNING game_id";
+        }
+
+        const rows = await DataBase.query(sql, [idOrName]);
+        return rows[0]; // возвращает id удаленной игры
+    }
+
+    public static async changeGameName(id: number, newName: string);
+    public static async changeGameName(name: string, newName: string);
+    public static async changeGameName(idOrName: number | string, newName: string) {
+        let sql: string;
+        if (typeof idOrName === 'string') {
+            sql = "UPDATE games SET name = $1 WHERE name = $2 RETURNING name";
+        } else {
+            sql = "UPDATE games SET name = $1 WHERE game_id = $2 RETURNING name";
+        }
+
+        const rows = await DataBase.query(sql, [newName, idOrName]);
+        return rows[0]; // возвращает name измененной игры
+    };
+
+    public static async changeGameAdminId(id: number, newAdminId: string);
+    public static async changeGameAdminId(name: string, newAdminId: string);
+    public static async changeGameAdminId(idOrName: number | string, newAdminId: string) {
+        let sql: string;
+        if (typeof idOrName === 'string') {
+            sql = "UPDATE admins SET admin_id = $1 WHERE name = $2 RETURNING admin_id";
+        } else {
+            sql = "UPDATE admins SET admin_id = $1 WHERE admin_id = $2 RETURNING admin_id";
+        }
+
+        const rows = await DataBase.query(sql, [newAdminId, idOrName]);
+        return rows[0]; // возвращает admin_id измененной игры
+    };
+
+    public static async changeGameStatus(id: number, newStatus: string);
+    public static async changeGameStatus(name: string, newStatus: string);
+    public static async changeGameStatus(idOrName: number | string, newStatus: string = 'not_started') {
+        let sql: string;
+        if (typeof idOrName === 'string') {
+            sql = "UPDATE games SET status = $1 WHERE name = $2 RETURNING status";
+        } else {
+            sql = "UPDATE games SET status = $1 WHERE game_id = $2 RETURNING status";
+        }
+
+        const rows = await DataBase.query(sql, [newStatus, idOrName]);
+        return rows[0]; // возвращает status измененной игры
+    };
+
+    public static async getRounds(gameId: number) {
+        const sql = "SELECT * FROM rounds WHERE game_id = $1";
+        return await DataBase.query(sql, [gameId]);
+    }
+
+    public static async insertRound(number: number, gameId: number,
+                                    questionsNumber: number,
+                                    questionsCost: number,
+                                    questionTime: number) {
+        const sql = "INSERT INTO rounds (number, game_id, questions_number, questions_cost, questions_time) " +
+            "VALUES ($1, $2, $3, $4, $5) RETURNING round_id";
+        const rows = await DataBase.query(sql, [number, gameId, questionsNumber, questionsCost, questionTime]);
+        return rows[0]; // возвращает назначенный раунду Id;
+    }
+
+    public static async changeRoundSettings(gameId: number, number: number,
+                                            newNumber: number,
+                                            newQuestionsNumber: number,
+                                            newQuestionsCost: number,
+                                            newQuestionTime: number) {
+        const sql = "UPDATE rounds SET number = $1, questions_number = $2, questions_cost = $3, questions_time = $4 " +
+            "WHERE game_id = $5 AND number = $6 RETURNING round_id";
+        const rows = await DataBase.query(sql,
+            [newNumber, newQuestionsNumber, newQuestionsCost, newQuestionTime, gameId, number]);
+        return rows[0]; // возвращает round_id измененного раунда;
+    };
+
+    public static async deleteRound(gameId: number, number: number) {
+        const sql = "DELETE FROM round WHERE game_id = $1 AND number = $2 RETURNING round_id";
+        const rows = await DataBase.query(sql, [gameId, number]);
+        return rows[0]; // возвращает удаленный round_id;
+    }
+
+    public static async insertTeamToGame(teamId: number, gameId: number) {
+        const sql = "INSERT INTO game_team_links (team_id, game_id) VALUES ($1, $2) RETURNING team_id";
+        const rows = await DataBase.query(sql, [teamId, gameId]);
+        return rows[0]; // возвращает team_id добавленной к игре команды
+    }
+
+    public static async getGameTeams(gameId: number) {
+        const sql = "SELECT team_id FROM game_team_links WHERE game_id = $1";
+        const rows = await DataBase.query(sql, [gameId]);
+        const args = rows.map(team => team.team_id);
+        const newSql = "SELECT name FROM teams WHERE team_id = ANY($1::integer[])";
+        const answer = await DataBase.query(newSql, [args]);
+        return answer.map(team => team.name); // возвращает массив названий команд
+    }
+
+    public static async getTeamGames(teamId: number) {
+        const sql = "SELECT game_id FROM game_team_links WHERE team_id = $1";
+        const rows = await DataBase.query(sql, [teamId]);
+        const args = rows.map(game => game.game_id);
+        const newSql = "SELECT name FROM games WHERE game_id = ANY($1::integer[])";
+        const answer = await DataBase.query(newSql, [args]);
+        return answer.map(game => game.name); // возвращает массив названий команд
+    }
 }
 
 export default DataBase;
