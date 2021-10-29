@@ -43,20 +43,12 @@ CREATE TABLE rounds
 (
 	round_id SERIAL PRIMARY KEY,
 	number INT NOT NULL,
+	game_id INT NOT NULL REFERENCES games
+	    ON DELETE CASCADE
+	    ON UPDATE CASCADE,
 	questions_number INT NOT NULL,
 	questions_cost INT NOT NULL,
 	questions_time INT NOT NULL
-);
-
-CREATE TABLE game_round_links
-(
-	game_id INT NOT NULL REFERENCES games
-		ON DELETE CASCADE
-		ON UPDATE CASCADE,
-	round_id INT NOT NULL REFERENCES rounds
-		ON DELETE CASCADE
-		ON UPDATE CASCADE,
-	PRIMARY KEY (game_id, round_id)
 );
 
 CREATE TABLE game_team_links
