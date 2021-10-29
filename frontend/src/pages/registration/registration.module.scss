@@ -1,0 +1,33 @@
+.contentWrapper {
+  height: 100%;
+  width: 26%;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  width: 48%;
+  height: 14%;
+  margin-top: 18vh;
+  margin-bottom: 8vh;
+  transform: translateX(50%);
+  user-select: none;
+}
+
+.toAuthorizationParagraph {
+  color: #E5E5E5;
+  display: inline-block;
+}
+
+.toAuthorizationLink {
+  text-decoration: none;
+  color: var(--foreground-color);
+}
+
+.toAuthorizationWrapper {
+  width: 100%;
+  font-size: 1vw;
+  text-align: center;
+  margin-top: 10vh;
+  user-select: none;
+}

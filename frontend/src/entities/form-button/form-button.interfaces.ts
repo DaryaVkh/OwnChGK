@@ -1,4 +1,5 @@
 export interface ButtonProps {
-    type: string;
+    type?: string;
+    style?: object;
     text: string;
 }

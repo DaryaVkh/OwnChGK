@@ -1,11 +1,15 @@
 $regular-weight: 400;
 $medium-weight: 500;
 $bold-weight: 900;
+$background-color: #1B262C;
+$foreground-color: #3282B8;
 
 :root {
   --regular-weight: #{$regular-weight};
   --medium-weight: #{$medium-weight};
   --bold-weight: #{$bold-weight};
+  --background-color: #{$background-color};
+  --foreground-color: #{$foreground-color};
 }
 
 * {
@@ -38,4 +42,14 @@ body {
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number]{
+  -moz-appearance: textfield;
 }

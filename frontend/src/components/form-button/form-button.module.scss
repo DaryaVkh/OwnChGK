@@ -8,7 +8,7 @@
     height: 6vh;
     font-size: 1.3vw;
     font-weight: var(--bold-weight);
-    border: 2px solid #3282B8;
+    border: 2px solid var(--foreground-color);
     border-radius: 7px;
     margin-top: 4vh;
     margin-bottom: 2.5vh;
@@ -19,7 +19,7 @@
 
     &:hover {
         cursor: pointer;
-        box-shadow: 0 0 2vh 2px #3282B8;
+        box-shadow: 0 0 2vh 2px var(--foreground-color);
     }
 
     &:active {

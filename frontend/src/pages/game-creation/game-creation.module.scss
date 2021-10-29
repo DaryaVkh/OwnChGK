@@ -1,0 +1,108 @@
+.gameCreationForm {
+  width: 60%;
+  height: 91%;
+  align-self: flex-end;
+}
+
+.pageTitle {
+  font-size: 5.5vh;
+  color: white;
+  display: flex;
+  text-align: center;
+  font-weight: 300;
+  position: fixed;
+  bottom: 10%;
+}
+
+.contentWrapper {
+  height: 70%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  justify-content: space-evenly;
+  margin-bottom: 5vh;
+}
+
+.gameParametersWrapper,
+.commandsWrapper {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 40%;
+  height: 80%;
+  align-self: flex-end;
+}
+
+.commandsWrapper {
+  border: 2px solid var(--foreground-color);
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.commandsDiv {
+  margin: 1.5vw;
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.gameNameInput,
+.toursCountInput,
+.questionsCountInput {
+  border: 2px solid var(--foreground-color);
+  height: 6.5vh;
+  border-radius: 8px;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+  font-size: 1.5vw;
+  box-sizing: border-box;
+  font-weight: var(--regular-weight);
+}
+
+.toursCountInput,
+.questionsCountInput {
+  width: 3.5vw;
+  margin: 0;
+  text-align: center;
+}
+
+.gameNameInput {
+  width: 100%;
+  padding: 4% 6%;
+  margin-bottom: 2vh;
+}
+
+.questionsCountWrapper,
+.toursCountWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2vh;
+}
+
+.toursCountLabel,
+.questionsCountLabel {
+  color: #F6F7FF;
+  padding: 1.5vh 5vh;
+  font-weight: 700;
+  font-size: 1.4vw;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.commandsLabel {
+  background-color: var(--background-color);
+  color: white;
+  position: absolute;
+  top: -1vw;
+  left: 1vw;
+  width: 35%;
+  font-weight: 700;
+  font-size: 1.4vw;
+  text-align: center;
+  user-select: none;
+}

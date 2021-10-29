@@ -1,16 +1,38 @@
-import React, {Component} from 'react';
-import classes from './app.module.scss';
+import React, {FC} from 'react';
 import Wrapper from './wrapper';
-import Auth from './pages/auth/auth'
+import Authorization from './pages/authorization/authorization';
+import Registration from './pages/registration/registration';
+import {Redirect, Route, Switch} from 'react-router-dom';
+import AdminStartScreen from "./pages/admin-start-screen/admin-start-screen";
+import GameCreator from "./pages/game-creation/game-creation";
+import TeamCreator from "./pages/team-creation/team-creation";
 
-class App extends Component {
-    render() {
-        return (
-            <Wrapper>
-                <Auth type='Registration' />
-            </Wrapper>
-        );
-    }
+const App: FC = () => {
+    return (
+        <Wrapper>
+            <Switch>
+                <Route path={['/', '/auth']} component={Authorization} exact={true} />
+                <Route path={'/auth/admin'} >
+                    <Authorization isAdmin={true} />
+                </Route>
+                <Route path="/registration" component={Registration} exact={true} />
+                <Route path="/start-screen" component={AdminStartScreen} exact={true} />
+                <Route path="/game-creation" exact={true}>
+                    <GameCreator mode="creation" />
+                </Route>
+                <Route path="/game-creation/edit" >
+                    <GameCreator mode="edit" />
+                </Route>
+                <Route path="/team-creation" exact={true}>
+                    <TeamCreator mode="creation" />
+                </Route>
+                <Route path="/team-creation/edit">
+                    <TeamCreator mode="edit" />
+                </Route>
+                <Redirect from='*' to='/'/>
+            </Switch>
+        </Wrapper>
+    );
 }
 
 export default App;

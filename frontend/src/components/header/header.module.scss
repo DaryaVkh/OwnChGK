@@ -3,8 +3,11 @@
     height: 9%;
     position: fixed;
     top: 0;
-    background-color: #1B262C;
+    background-color: var(--background-color);
     filter: drop-shadow(0 1vh 1vh rgba(50, 130, 184, 0.25));
+    display: flex;
+    justify-content: center;
+    user-select: none;
 }
 
 .logo {
@@ -13,4 +16,28 @@
     left: 9.6%;
     top: 20%;
     user-select: none;
+}
+
+.Profile {
+    height: 45%;
+    position: fixed;
+    right: 15.6%;
+    top: 30%;
+    user-select: none;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.LogOut {
+    height: 45%;
+    position: fixed;
+    right: 10.6%;
+    top: 30%;
+    user-select: none;
+
+    &:hover {
+        cursor: pointer;
+    }
 }

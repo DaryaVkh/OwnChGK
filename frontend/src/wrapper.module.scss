@@ -1,11 +1,12 @@
-.Layout {
+.Wrapper {
     height: 100vh;
     display: flex;
     flex-direction: column;
-}
+    overflow: hidden;
 
-.Layout main {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
+    main {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
 }

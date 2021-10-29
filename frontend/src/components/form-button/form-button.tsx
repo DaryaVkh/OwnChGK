@@ -5,7 +5,7 @@ import {ButtonProps} from "../../entities/form-button/form-button.interfaces";
 export const FormButton: FC<ButtonProps> = props => {
     const cls = [
         classes.Button,
-        classes[props.type]
+        props.type ? classes[props.type] : null
     ];
 
     /*function authorize() {
@@ -25,7 +25,7 @@ export const FormButton: FC<ButtonProps> = props => {
 
     return (
         <div className={classes.buttonWrapper}>
-            <button type='submit' className={cls.join(' ')}>
+            <button type='submit' className={cls.join(' ')} style={props.style}>
                 {/*onClick={authorize}*/}
                 { props.text }
             </button>
