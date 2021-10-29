@@ -8,10 +8,11 @@ const teamsController = new TeamsController();
 
 router.get('/', middleware, teamsController.getAll);
 router.get('/team', teamsController.getTeam);
+router.get('/games', teamsController.getAllGames);
 router.patch('/teamName', teamsController.editTeam);
 router.patch('/teamCaptain', teamsController.editTeamCaptain);
 router.delete('/team', teamsController.deleteTeam);
 
-router.post('/insert', (req: Request, res: Response) => teamsController.insertTeam(req, res));
+router.post('/', (req: Request, res: Response) => teamsController.insertTeam(req, res));
 
 export default router;

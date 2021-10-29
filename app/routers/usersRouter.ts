@@ -10,6 +10,6 @@ const usersController = new UsersController();
 router.get('/', roleMiddleware(false), usersController.getAll);
 router.post('/login', usersController.login);
 
-router.post('/insert', (req: Request, res: Response) => usersController.insert(req, res));
+router.post('/register', (req: Request, res: Response) => usersController.insert(req, res));
 
 export default router;
