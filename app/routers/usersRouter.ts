@@ -7,7 +7,7 @@ import {roleMiddleware} from "../middleware/roleMiddleware";
 const router = Router();
 const usersController = new UsersController();
 
-router.get('/getAll', roleMiddleware(false), usersController.getAll);
+router.get('/', roleMiddleware(false), usersController.getAll);
 router.post('/login', usersController.login);
 
 router.post('/insert', (req: Request, res: Response) => usersController.insert(req, res));

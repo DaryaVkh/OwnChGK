@@ -50,9 +50,6 @@ class TeamsController {
             }
             const name = req.body.name;
             const newName = req.body.newName;
-            console.log(name);
-            console.log(newName);
-            console.log(req.body);
             await DataBase.changeTeamName(name, newName);
             res.send('Done');
         } catch (error:any) {
