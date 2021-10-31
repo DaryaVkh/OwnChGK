@@ -1,20 +1,8 @@
 import DataBase from '../dbconfig/dbconnector';
 import {compare, hash} from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
-
-const secret = process.env.SECRET_KEY ?? 'SECRET_KEY';
-
-const generateAccessToken = (id: number, email: string, roles: boolean) => {
-    const payload = {
-        id,
-        email,
-        roles
-    };
-
-    return jwt.sign(payload, secret, {expiresIn: '24h'});
-}
+import {generateAccessToken} from "../jwtToken";
 
 class AdminsController {
     public async getAll(req: Request, res: Response) {
@@ -33,7 +21,7 @@ class AdminsController {
             const user = await DataBase.getAdmin(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.admin_id, user.email, user.is_admin);
+                const token = generateAccessToken(user.admin_id, user.email, true);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     httpOnly: true,
