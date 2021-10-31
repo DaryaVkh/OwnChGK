@@ -4,12 +4,12 @@ import {roleMiddleware} from '../middleware/roleMiddleware';
 import {middleware} from '../middleware/middleware';
 
 const router = Router();
-const roundController = new RoundsController();
+const roundsController = new RoundsController();
 
-router.get('/', middleware, roundController.getAll);
-router.patch('/settings', roundController.editRound);
-router.delete('/team', roundController.deleteRound);
+router.get('/', middleware, roundsController.getAll);
+router.patch('/settings', roundsController.editRound);
+router.delete('/team', roundsController.deleteRound);
 
-router.post('/', (req: Request, res: Response) => roundController.insertRound(req, res));
+router.post('/', (req: Request, res: Response) => roundsController.insertRound(req, res));
 
 export default router;

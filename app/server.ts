@@ -36,7 +36,7 @@ class Server {
         this.app.use('/admins', adminsRouter);
         this.app.use('/teams', teamsRouter);
         this.app.use('/games', gamesRouter);
-        this.app.user('/rounds', roundsRouter);
+        this.app.use('/rounds', roundsRouter);
         this.app.use('/', mainRouter);
         this.app.use(cookieParser());
     }
