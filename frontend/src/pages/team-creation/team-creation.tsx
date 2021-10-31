@@ -41,7 +41,7 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
                 }
             </Header>
 
-            <form className={classes.teamCreationForm} action="" method="">
+            <form className={classes.teamCreationForm} action="teams/" method="post">
                 <div className={classes.contentWrapper}>
                     <FormInput type='text' id='team-name' name='team-name' placeholder='Название' />
 

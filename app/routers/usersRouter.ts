@@ -9,6 +9,6 @@ const usersController = new UsersController();
 
 router.get('/', roleMiddleware(false), usersController.getAll);
 router.post('/login', usersController.login);
-router.post('/register', usersController.insert);
+router.post('/insert', usersController.insert);
 
 export default router;
