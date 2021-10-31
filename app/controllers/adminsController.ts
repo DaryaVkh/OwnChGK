@@ -6,8 +6,9 @@ import {Request, Response} from 'express';
 
 const secret = process.env.SECRET_KEY ?? 'SECRET_KEY';
 
-const generateAccessToken = (email: string, roles: boolean) => {
+const generateAccessToken = (id: number, email: string, roles: boolean) => {
     const payload = {
+        id,
         email,
         roles
     };
@@ -32,13 +33,13 @@ class AdminsController {
             const user = await DataBase.getAdmin(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.email, user.is_admin);
+                const token = generateAccessToken(user.admin_id, user.email, user.is_admin);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     httpOnly: true,
                     secure: true
                 });
-                res.status(200).json({token});
+                res.status(200).redirect('../start-screen');
             } else {
                 res.status(400).json({message: 'Not your password'});
             }

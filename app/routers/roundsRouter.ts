@@ -7,8 +7,8 @@ const router = Router();
 const roundsController = new RoundsController();
 
 router.get('/', middleware, roundsController.getAll);
-router.patch('/settings', roundsController.editRound);
-router.delete('/team', roundsController.deleteRound);
+router.patch('/settings', roleMiddleware(true), roundsController.editRound);
+router.delete('/team', roleMiddleware(true), roundsController.deleteRound);
 
 router.post('/', (req: Request, res: Response) => roundsController.insertRound(req, res));
 

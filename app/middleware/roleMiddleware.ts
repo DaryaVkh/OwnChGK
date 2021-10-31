@@ -1,7 +1,7 @@
 import jwt, {JwtPayload} from 'jsonwebtoken';
 import {Request, Response, NextFunction} from 'express';
 
-const secret = process.env.SECRET_KEY ?? '';
+const secret = process.env.SECRET_KEY ?? 'SECRET_KEY';
 
 export function roleMiddleware(roles: boolean) {
     return function (req: Request, res: Response, next: NextFunction) {
@@ -30,7 +30,6 @@ export function roleMiddleware(roles: boolean) {
 
             next();
         } catch (exception) {
-            console.log(exception);
             return res.status(403).json({message: 'Пользователь не авторизован'});
         }
     };

@@ -43,9 +43,11 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
 
             <form className={classes.teamCreationForm} action="teams/" method="post">
                 <div className={classes.contentWrapper}>
-                    <FormInput type='text' id='team-name' name='team-name' placeholder='Название' />
+                    <FormInput type='text' id='teamName' name='teamName' placeholder='Название' />
 
                     <Select
+                        id='captain'
+                        name='captain'
                         fullWidth
                         displayEmpty
                         value={captain}

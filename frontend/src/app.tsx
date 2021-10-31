@@ -12,7 +12,7 @@ const App: FC = () => {
         <Wrapper>
             <Switch>
                 <Route path={['/', '/auth']} component={Authorization} exact={true} />
-                <Route path={'/auth/admin'} >
+                <Route path={'/admin'} >
                     <Authorization isAdmin={true} />
                 </Route>
                 <Route path="/registration" component={Registration} exact={true} />
