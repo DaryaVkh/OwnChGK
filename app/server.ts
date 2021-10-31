@@ -1,11 +1,14 @@
 import express, {Application, Router} from 'express';
 import bodyParser from 'body-parser';
 import usersRouter from './routers/usersRouter';
-import mainRouter from "./routers/mainRouter";
-import DataBase from "./dbconfig/dbconnector";
-import cookieParser from "cookie-parser";
-import path from "path";
-import teamRouter from "./routers/teamRouter";
+import adminsRouter from './routers/adminsRouter';
+import teamsRouter from './routers/teamsRouter';
+import gamesRouter from './routers/gamesRouter';
+import roundsRouter from './routers/roundsRouter';
+import mainRouter from './routers/mainRouter';
+import DataBase from './dbconfig/dbconnector';
+import cookieParser from 'cookie-parser';
+import path from 'path';
 
 class Server {
     private app;
@@ -30,9 +33,12 @@ class Server {
     private routerConfig() {
         this.app.use(cookieParser());
         this.app.use('/users', usersRouter);
+        this.app.use('/admins', adminsRouter);
+        this.app.use('/teams', teamsRouter);
+        this.app.use('/games', gamesRouter);
+        this.app.user('/rounds', roundsRouter);
         this.app.use('/', mainRouter);
         this.app.use(cookieParser());
-        this.app.use('/teams', teamRouter);
     }
 
     public start = (port: number) => {

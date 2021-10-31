@@ -1,7 +1,7 @@
 import express, {Request, Response, Router} from 'express';
-import {roleMiddleware} from "../middleware/roleMiddleware";
-import {middleware} from "../middleware/middleware";
-import GamesController from "../controllers/gamesController";
+import {roleMiddleware} from '../middleware/roleMiddleware';
+import {middleware} from '../middleware/middleware';
+import GamesController from '../controllers/gamesController';
 
 const router = Router();
 const gamesController = new GamesController();

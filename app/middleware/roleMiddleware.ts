@@ -1,17 +1,18 @@
-import jwt, {JwtPayload} from "jsonwebtoken";
-import {Request, Response, NextFunction} from "express";
-const secret = process.env.SECRET_KEY ?? "";
+import jwt, {JwtPayload} from 'jsonwebtoken';
+import {Request, Response, NextFunction} from 'express';
 
-export function roleMiddleware(roles:boolean) {
-    return function (req:Request, res:Response, next:NextFunction) {
+const secret = process.env.SECRET_KEY ?? '';
 
-        if (req.method === "OPTIONS") {
+export function roleMiddleware(roles: boolean) {
+    return function (req: Request, res: Response, next: NextFunction) {
+
+        if (req.method === 'OPTIONS') {
             next()
         }
         try {
             const token = req.cookies['authorization'];
             if (!token) {
-                return res.status(403).json({message: "Пользователь не авторизован"});
+                return res.status(403).json({message: 'Пользователь не авторизован'});
             }
 
             // @ts-ignore
@@ -21,16 +22,16 @@ export function roleMiddleware(roles:boolean) {
             let hasRole = false
             if (roles.toString() === userRoles.toString()) {
                 hasRole = true;
-                }
+            }
 
             if (!hasRole) {
-                return res.status(403).json({message: "Пользователя нет прав"});
+                return res.status(403).json({message: 'Пользователя нет прав'});
             }
 
             next();
         } catch (exception) {
             console.log(exception);
-            return res.status(403).json({message: "Пользователь не авторизован"});
+            return res.status(403).json({message: 'Пользователь не авторизован'});
         }
     };
 }

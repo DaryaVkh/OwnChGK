@@ -1,12 +1,12 @@
 import express, {Request, Response, Router} from 'express';
-import RoundController from '../controllers/roundController';
-import {roleMiddleware} from "../middleware/roleMiddleware";
-import {middleware} from "../middleware/middleware";
+import RoundsController from '../controllers/roundsController';
+import {roleMiddleware} from '../middleware/roleMiddleware';
+import {middleware} from '../middleware/middleware';
 
 const router = Router();
-const roundController = new RoundController();
+const roundController = new RoundsController();
 
-router.get('/', middleware, roundController.getAll);;
+router.get('/', middleware, roundController.getAll);
 router.patch('/settings', roundController.editRound);
 router.delete('/team', roundController.deleteRound);
 

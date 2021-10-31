@@ -1,7 +1,7 @@
 import express, {Request, Response, Router} from 'express';
 import TeamsController from '../controllers/teamsController';
-import {roleMiddleware} from "../middleware/roleMiddleware";
-import {middleware} from "../middleware/middleware";
+import {roleMiddleware} from '../middleware/roleMiddleware';
+import {middleware} from '../middleware/middleware';
 
 const router = Router();
 const teamsController = new TeamsController();
