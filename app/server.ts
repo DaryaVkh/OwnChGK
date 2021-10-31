@@ -20,7 +20,7 @@ class Server {
     private config() {
         this.app.use(bodyParser.json()); // 100kb default
         this.app.use(bodyParser.urlencoded({extended: true}));
-        this.app.use(express.static(path.resolve('./build/app/build/frontend')));
+        this.app.use(express.static(path.resolve('./build/frontend')));
     }
 
     private dbConnect() {
