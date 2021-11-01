@@ -1,6 +1,8 @@
 import DataBase from '../dbconfig/dbconnector';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
+import jwt from "jsonwebtoken";
+import {secret} from "../jwtToken";
 
 
 class GamesController {
@@ -28,10 +30,27 @@ class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const name = req.body.name;
-            const admin = req.body.admin;
-            await DataBase.insertGame(name, admin);
-            res.send('Done');
+            const name = req.body.gameName;
+            const roundsNumber = req.body.roundsNumber;
+            const questionsNumber = req.body.questionsNumber;
+            const token = req.cookies['authorization'];
+            const teamNames = [];
+            const payLoad = jwt.verify(token, secret);
+            if (typeof payLoad !== "string") {
+                const admin = payLoad.id;
+                const gameId = await DataBase.insertGame(name, admin);
+                for (let i=1; i<=roundsNumber; i++) {
+                    await DataBase.insertRound(i, gameId, questionsNumber, 1, 60);
+                }
+                for (const team of teamNames) {
+                    const t = await DataBase.getTeam(team);
+                    await DataBase.insertTeamToGame(t.team_id, gameId);
+                }
+                res.send('Done');
+            }
+            else {
+                res.send("You are not admin");
+            }
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }

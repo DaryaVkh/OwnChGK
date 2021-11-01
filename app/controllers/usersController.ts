@@ -1,19 +1,8 @@
 import DataBase from '../dbconfig/dbconnector';
 import {compare, hash} from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
-
-const secret = process.env.SECRET_KEY ?? 'SECRET_KEY';
-
-const generateAccessToken = (email: string, roles: boolean) => {
-    const payload = {
-        email,
-        roles
-    };
-
-    return jwt.sign(payload, secret, {expiresIn: '24h'});
-}
+import {generateAccessToken} from "../jwtToken";
 
 class UsersController {
     public async getAll(req: Request, res: Response) {
@@ -32,7 +21,7 @@ class UsersController {
             const user = await DataBase.getUser(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.email, user.is_admin);
+                const token = generateAccessToken(user.user_id, user.email, false);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     httpOnly: true,
@@ -57,8 +46,14 @@ class UsersController {
             const email = req.body.email;
             const password = req.body.password;
             const hashedPassword = await hash(password, 10);
-            await DataBase.insertUser(email, hashedPassword);
-            res.send('Done');
+            const userId = await DataBase.insertUser(email, hashedPassword);
+            const token = generateAccessToken(userId, email, false);
+            res.cookie('authorization', token, {
+                maxAge: 86400 * 1000,
+                httpOnly: true,
+                secure: true
+            });
+            res.status(200).redirect('/team-creation');
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }

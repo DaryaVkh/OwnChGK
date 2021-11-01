@@ -46,7 +46,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                 }
             </Header>
 
-            <form className={classes.gameCreationForm} action="" method="">
+            <form className={classes.gameCreationForm} action="/games/" method="post">
                 <div className={classes.contentWrapper}>
                     <div className={classes.gameParametersWrapper}>
                         <CustomInput type="text" id="gameName"

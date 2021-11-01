@@ -28,9 +28,10 @@ class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const name = req.body.name;
-            const captain = req.body.captain;
-            await DataBase.insertTeam(name, captain);
+            const name = req.body.teamName;
+            const captain = req.body.playerName;
+            const user = await DataBase.getUser(captain);
+            await DataBase.insertTeam(name, user.user_id);
             res.send('Done');
         } catch (error: any) {
             res.status(400).json({'message': error.message});

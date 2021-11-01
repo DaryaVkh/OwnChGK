@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import {Request, Response, NextFunction} from 'express';
-
-const secret = process.env.SECRET_KEY ?? '';
+import {secret} from "../jwtToken";
 
 export function middleware(req: Request, res: Response, next: NextFunction) {
     if (req.method === 'OPTIONS') {
