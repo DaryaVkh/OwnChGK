@@ -16,6 +16,10 @@
     left: 9.6%;
     top: 20%;
     user-select: none;
+
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 .Profile {
@@ -40,4 +44,8 @@
     &:hover {
         cursor: pointer;
     }
+}
+
+@media only screen and (min-width: 1400px) {
+
 }

@@ -6,4 +6,5 @@ export interface InputProps {
     isInvalid?: boolean,
     onBlur?: () => void;
     style?: object;
+    defaultValue?: string;
 }

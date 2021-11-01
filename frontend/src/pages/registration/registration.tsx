@@ -1,10 +1,10 @@
 import React, {FC, useState} from 'react';
 import classes from './registration.module.scss';
 import Header from '../../components/header/header';
-import {FormInput} from "../../components/form-input/form-input";
 import {FormButton} from "../../components/form-button/form-button";
 import {Link} from "react-router-dom";
 import PageWrapper from "../../components/page-wrapper/page-wrapper";
+import {CustomInput} from "../../components/custom-input/custom-input";
 
 const Registration: FC = () => {
     const [isRepeatedPasswordInvalid, setIsRepeatedPasswordInvalid] = useState(false);
@@ -28,18 +28,18 @@ const Registration: FC = () => {
 
     return (
         <PageWrapper>
-            <Header isAdmin={false}/>
+            <Header isAuthorized={false} isAdmin={false}/>
 
             <div className={classes.contentWrapper}>
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt='logo'/>
 
                 <form action="users/insert" method='post' onSubmit={validateForm}>
-                    <FormInput type='email' id='email' name='email' placeholder='E-mail' />
-                    <FormInput type='password' id='password' name='password' placeholder='Пароль'
-                               isInvalid={isRepeatedPasswordInvalid}/>
-                    <FormInput type='password' id='repeatPassword' name='repeatPassword' placeholder='Повторите пароль'
-                               onBlur={checkRepeatedPassword}
-                               isInvalid={isRepeatedPasswordInvalid}/>
+                    <CustomInput type='email' id='email' name='email' placeholder='E-mail' />
+                    <CustomInput type='password' id='password' name='password' placeholder='Пароль'
+                                 isInvalid={isRepeatedPasswordInvalid}/>
+                    <CustomInput type='password' id='repeatPassword' name='repeatPassword' placeholder='Повторите пароль'
+                                 onBlur={checkRepeatedPassword}
+                                 isInvalid={isRepeatedPasswordInvalid}/>
 
                     <FormButton type="signUpButton" text="Зарегистрироваться" />
                 </form>

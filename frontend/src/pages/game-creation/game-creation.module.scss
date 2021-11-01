@@ -52,7 +52,6 @@
   height: 100%;
 }
 
-.gameNameInput,
 .toursCountInput,
 .questionsCountInput {
   border: 2px solid var(--foreground-color);
@@ -69,19 +68,14 @@
   width: 3.5vw;
   margin: 0;
   text-align: center;
-}
-
-.gameNameInput {
-  width: 100%;
-  padding: 4% 6%;
-  margin-bottom: 2vh;
+  min-height: 26px;
 }
 
 .questionsCountWrapper,
 .toursCountWrapper {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 2vh;
+  margin-bottom: 3%;
 }
 
 .toursCountLabel,

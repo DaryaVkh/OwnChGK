@@ -1,23 +1,23 @@
 import React, {FC} from 'react';
 import classes from './authorization.module.scss';
 import Header from '../../components/header/header';
-import {FormInput} from "../../components/form-input/form-input";
 import {FormButton} from "../../components/form-button/form-button";
 import {Link} from 'react-router-dom';
 import {AuthorizationProps} from "../../entities/authorization/authorization.interfaces";
 import PageWrapper from "../../components/page-wrapper/page-wrapper";
+import {CustomInput} from "../../components/custom-input/custom-input";
 
 const Authorization: FC<AuthorizationProps> = props => {
     return (
         <PageWrapper>
-            <Header />
+            <Header isAuthorized={false} />
 
             <div className={classes.contentWrapper}>
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt='logo'/>
 
                 <form action={props.isAdmin ? "admins/login" : "users/login"} method='post'>
-                    <FormInput type='email' id='email' name='email' placeholder='E-mail' />
-                    <FormInput type='password' id='password' name='password' placeholder='Пароль' />
+                    <CustomInput type='email' id='email' name='email' placeholder='E-mail' />
+                    <CustomInput type='password' id='password' name='password' placeholder='Пароль' />
 
                     <FormButton type="signInButton" text="Войти" />
                 </form>

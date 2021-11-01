@@ -4,36 +4,26 @@ import Header from "../../components/header/header";
 import {FormButton} from "../../components/form-button/form-button";
 import {CommandCreatorProps} from "../../entities/command-creation/command-creation.interfaces";
 import PageWrapper from "../../components/page-wrapper/page-wrapper";
-import {FormInput} from "../../components/form-input/form-input";
-import {IconButton, MenuItem, OutlinedInput, Select, SelectChangeEvent} from "@mui/material";
+import {Autocomplete, TextField} from "@mui/material";
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
-import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
+import {CustomInput} from "../../components/custom-input/custom-input";
 
 const CommandCreator: FC<CommandCreatorProps> = props => {
-    const [captain, setCaptain] = React.useState('');
-
-    const handleChange = (event: SelectChangeEvent) => {
-        setCaptain(event.target.value);
-    };
+    let teamName: string = '';
+    let captain: string = '';
 
     // получаем чет из бд (имейлы и/или имена всех зареганых пользователей (потенциальных капитанов) без команды)
     let names = ["Даша", "Коля", "Саша", "Оля"];
 
-    const renderCaptains = () => {
-        return names.map((name) => (
-            <MenuItem key={name} value={name}>
-                {name}
-            </MenuItem>
-        ));
-    }
-
-    const handleAddPlayerClick = () => {
-
+    if (props.mode === 'edit') {
+        // получаем из бд имя команды и капитана, выбранные ранее
+        teamName = 'Сахара опять не будет';
+        captain = 'Коля';
     }
 
     return (
         <PageWrapper>
-            <Header isAdmin={true}>
+            <Header isAuthorized={true} isAdmin={true}>
                 {
                     props.mode === 'creation'
                         ? <div className={classes.pageTitle}>Создание команды</div>
@@ -43,56 +33,47 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
 
             <form className={classes.teamCreationForm} action="teams/" method="post">
                 <div className={classes.contentWrapper}>
-                    <FormInput type='text' id='team-name' name='team-name' placeholder='Название' />
+                    <CustomInput type='text' id='teamName' name='teamName' placeholder='Название' defaultValue={teamName} />
 
-                    <Select
+                    <Autocomplete
+                        disablePortal
                         fullWidth
-                        displayEmpty
-                        value={captain}
-                        onChange={handleChange}
-                        input={<OutlinedInput />}
-                        renderValue={(selected) => {
-                            if (selected.length === 0) {
-                                return <p style={{color: '#7B7C80'}}>Капитан</p>;
-                            }
-                            return selected;
-                        }}
-                        inputProps={{ 'aria-label': 'Without label' }}
-                        IconComponent={ExpandMoreRoundedIcon}
+                        id="captain"
+                        options={names}
+                        defaultValue={captain}
+                        popupIcon={<ExpandMoreRoundedIcon fontSize={'medium'}
+                            sx={{fontSize: "2.2vw",
+                                color: 'var(--foreground-color)'}}
+                        />}
                         sx={{
-                            '& .MuiSvgIcon-root': {
-                                fontSize: "2.2vw",
-                                color: 'var(--foreground-color)'
-                            },
                             border: 'none',
                             fontSize: '1.5vw',
-                            height: '7vh',
+                            minHeight: '26px',
+                            height: '7vh !important',
                             borderRadius: '8px',
                             backgroundColor: 'white',
                             boxShadow: "inset 0 4px 10px rgba(0, 0, 0, 0.5)",
                             marginBottom: '3%',
-                            '& .MuiSelect-select': {
-                                padding: '0 1.7vw',
+                            '& .MuiOutlinedInput-input': {
+                                padding: '0 0 0 1.5vw !important',
                                 border: 'none',
                                 fontFamily: 'Roboto, sans-serif',
-                                color: 'black'
+                                color: 'black',
+                                fontSize: '1.5vw',
+                            },
+                            '& .MuiOutlinedInput-root': {
+                                height: '7vh !important',
+                                minHeight: '26px',
+                                padding: '0'
                             },
                             '& .MuiOutlinedInput-notchedOutline': {
                                 border: '2px solid var(--foreground-color) !important',
-                                borderRadius: '8px'
+                                borderRadius: '8px',
+                                minHeight: '26px',
                             }
                         }}
-                    >
-                        {renderCaptains()}
-                    </Select>
-
-                    <div className={classes.playerAdding}>
-                        <FormInput type='text' id='playerName' name='playerName' placeholder='Участник' style={{width: '85%'}} />
-
-                        <IconButton sx={{marginLeft: '0.5vw', marginBottom: '0.3vh'}} onClick={handleAddPlayerClick}>
-                            <PersonAddAltOutlinedIcon sx={{color: 'var(--foreground-color)', fontSize: '2.2vw'}} />
-                        </IconButton>
-                    </div>
+                        renderInput={(params) => <TextField {...params} placeholder="Капитан" />}
+                    />
                 </div>
 
                 <FormButton text={props.mode === 'creation' ? "Создать" : "Сохранить"}

@@ -8,7 +8,7 @@ import PageWrapper from "../../components/page-wrapper/page-wrapper";
 const AdminStartScreen: FC = () => {
     return (
         <PageWrapper>
-            <Header isAdmin={true}>
+            <Header isAuthorized={true} isAdmin={true}>
                 <NavBar />
             </Header>
 

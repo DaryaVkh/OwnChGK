@@ -6,6 +6,7 @@ import CustomCheckbox from "../../components/custom-checkbox/custom-checkbox";
 import {Scrollbars} from 'rc-scrollbars';
 import {GameCreatorProps} from "../../entities/game-creator/game-creator.interfaces";
 import PageWrapper from "../../components/page-wrapper/page-wrapper";
+import {CustomInput} from "../../components/custom-input/custom-input";
 
 const GameCreator: FC<GameCreatorProps> = props => {
     let gameName: string = '';
@@ -37,7 +38,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
 
     return (
         <PageWrapper>
-            <Header isAdmin={true}>
+            <Header isAuthorized={true} isAdmin={true}>
                 {
                     props.mode === 'creation'
                         ? <div className={classes.pageTitle}>Создание игры</div>
@@ -48,12 +49,10 @@ const GameCreator: FC<GameCreatorProps> = props => {
             <form className={classes.gameCreationForm} action="" method="">
                 <div className={classes.contentWrapper}>
                     <div className={classes.gameParametersWrapper}>
-                        <input className={classes.gameNameInput}
-                               type="text"
-                               id="gameName"
-                               placeholder="Название игры"
-                               defaultValue={gameName}
-                               required={true}/>
+                        <CustomInput type="text" id="gameName"
+                                     name='gameName'
+                                     placeholder="Название игры"
+                                     defaultValue={gameName} />
 
                         <div className={classes.toursCountWrapper}>
                             <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество туров</label>
@@ -62,7 +61,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                    id="toursCount"
                                    name="toursCount"
                                    defaultValue={toursCount || ''}
-                                   required={true}/>
+                                   required={true} />
                         </div>
 
                         <div className={classes.questionsCountWrapper}>
@@ -72,7 +71,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                    id="questionsCount"
                                    name="questionsCount"
                                    defaultValue={questionsCount || ''}
-                                   required={true}/>
+                                   required={true} />
                         </div>
                     </div>
 
