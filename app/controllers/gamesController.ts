@@ -9,7 +9,9 @@ class GamesController {
     public async getAll(req: Request, res: Response) {
         try {
             const games = await DataBase.getAllGames();
-            res.send(games);
+            res.status(200).json({
+                'games': games.map(value => value.name)
+            });
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);
         }
@@ -30,19 +32,16 @@ class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const name = req.body.gameName;
-            const roundsNumber = req.body.roundsNumber;
-            const questionsNumber = req.body.questionsNumber;
+            const {gameName, toursCount, questionsCount, teams} = req.body;
             const token = req.cookies['authorization'];
-            const teamNames = [];
             const payLoad = jwt.verify(token, secret);
             if (typeof payLoad !== "string") {
-                const admin = payLoad.id;
-                const gameId = await DataBase.insertGame(name, admin);
-                for (let i=1; i<=roundsNumber; i++) {
-                    await DataBase.insertRound(i, gameId, questionsNumber, 1, 60);
+                const adminId = payLoad.id;
+                const {game_id: gameId} = await DataBase.insertGame(gameName, adminId);
+                for (let i=1; i<=toursCount; i++) {
+                    await DataBase.insertRound(i, gameId, questionsCount, 1, 60);
                 }
-                for (const team of teamNames) {
+                for (const team of teams) {
                     const t = await DataBase.getTeam(team);
                     await DataBase.insertTeamToGame(t.team_id, gameId);
                 }

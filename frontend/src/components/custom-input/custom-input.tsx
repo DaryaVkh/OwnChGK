@@ -36,6 +36,7 @@ export const CustomInput: FC<InputProps> = props => {
                        placeholder={props.placeholder}
                        defaultValue={props.defaultValue}
                        onBlur={props.onBlur}
+                       onChange={props.onChange}
                        style={props.style}
                        required={true}
                        sx={styles}

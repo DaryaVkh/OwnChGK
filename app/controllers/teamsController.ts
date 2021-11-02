@@ -7,7 +7,9 @@ class TeamsController {
     public async getAll(req: Request, res: Response) {
         try {
             const teams = await DataBase.getAllTeams();
-            res.send(teams);
+            res.status(200).json({
+                teams: teams.map(value => value.name)
+            });
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);
         }
@@ -28,10 +30,9 @@ class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const name = req.body.teamName;
-            const captain = req.body.playerName;
+            const {teamName, captain} = req.body;
             const user = await DataBase.getUser(captain);
-            await DataBase.insertTeam(name, user.user_id);
+            await DataBase.insertTeam(teamName, user.user_id);
             res.send('Done');
         } catch (error: any) {
             res.status(400).json({'message': error.message});

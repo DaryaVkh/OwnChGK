@@ -13,6 +13,6 @@ router.patch('/teamName', middleware, teamsController.editTeam);
 router.patch('/teamCaptain', middleware, teamsController.editTeamCaptain);
 router.delete('/team', middleware, teamsController.deleteTeam);
 
-router.post('/', middleware, (req: Request, res: Response) => teamsController.insertTeam(req, res));
+router.post('/', middleware, teamsController.insertTeam);
 
 export default router;
