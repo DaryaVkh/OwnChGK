@@ -10,7 +10,6 @@
 .nav-item {
   color: white;
   font-size: 2vh;
-  width: calc(100% / 3);
   text-decoration: none;
   transition: 0.3s;
   z-index: 1;
@@ -18,6 +17,14 @@
   position: relative;
   text-align: center;
   padding-top: 5vh;
+}
+
+.nav-item-admin {
+  width: calc(100% / 3);
+}
+
+.nav-item-user {
+  width: calc(100% / 2);
 }
 
 .nav-item:not(.is-active):hover {

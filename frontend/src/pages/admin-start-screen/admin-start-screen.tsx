@@ -9,7 +9,7 @@ const AdminStartScreen: FC = () => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <NavBar />
+                <NavBar isAdmin={true} />
             </Header>
 
             <div className={classes.contentWrapper}>
