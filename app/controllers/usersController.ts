@@ -8,7 +8,9 @@ class UsersController {
     public async getAll(req: Request, res: Response) {
         try {
             const users = await DataBase.getAllUsers();
-            res.send(users);
+            res.status(200).json({
+                users: users.map(value => value.email)
+            });
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);
         }
@@ -16,8 +18,7 @@ class UsersController {
 
     public async login(req: Request, res: Response) {
         try {
-            const email = req.body.email;
-            const password = req.body.password;
+            const {email, password} = req.body;
             const user = await DataBase.getUser(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
@@ -43,8 +44,7 @@ class UsersController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
 
-            const email = req.body.email;
-            const password = req.body.password;
+            const {email, password} = req.body;
             const hashedPassword = await hash(password, 10);
             const userId = await DataBase.insertUser(email, hashedPassword);
             const token = generateAccessToken(userId, email, false);
@@ -53,7 +53,7 @@ class UsersController {
                 httpOnly: true,
                 secure: true
             });
-            res.status(200).redirect('/team-creation');
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }

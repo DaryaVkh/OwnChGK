@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, useState} from 'react';
 import classes from './team-creation.module.scss';
 import Header from "../../components/header/header";
 import {FormButton} from "../../components/form-button/form-button";
@@ -7,18 +7,56 @@ import PageWrapper from "../../components/page-wrapper/page-wrapper";
 import {Autocomplete, TextField} from "@mui/material";
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import {CustomInput} from "../../components/custom-input/custom-input";
+import {getAll} from '../../server-api/server-api';
 
 const CommandCreator: FC<CommandCreatorProps> = props => {
+    const [usersFromDB, setUsersFromDB] = useState([]);
+    const [isUsersFound, setIsUsersFound] = useState(true);
     let teamName: string = '';
     let captain: string = '';
 
+    if (!usersFromDB || usersFromDB.length < 1) {
+        if (isUsersFound) {
+            getAll('/users/').then(data => {
+                if (data['users'].length > 0) {
+                    setUsersFromDB(data['users']);
+                } else {
+                    setIsUsersFound(false);
+                }
+            });
+        }
+    }
+
     // получаем чет из бд (имейлы и/или имена всех зареганых пользователей (потенциальных капитанов) без команды)
-    let names = ["Даша", "Коля", "Саша", "Оля"];
+    /*let usersFromDB = ["Даша", "Коля", "Саша", "Оля"];*/
 
     if (props.mode === 'edit') {
         // получаем из бд имя команды и капитана, выбранные ранее
         teamName = 'Сахара опять не будет';
         captain = 'Коля';
+    }
+
+    const handleAutocompleteChange = (event: React.SyntheticEvent, value: string | null) => {
+        captain = value as string;
+    }
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        teamName = event.target.value;
+    }
+
+    const handleSubmit = async (event: React.SyntheticEvent) => {
+        event.preventDefault();
+        const request = await fetch('/teams/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                teamName,
+                captain
+            })
+        });
     }
 
     return (
@@ -31,16 +69,18 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
                 }
             </Header>
 
-            <form className={classes.teamCreationForm} action="teams/" method="post">
+            <form className={classes.teamCreationForm} onSubmit={handleSubmit}>
                 <div className={classes.contentWrapper}>
-                    <CustomInput type='text' id='teamName' name='teamName' placeholder='Название' defaultValue={teamName} />
+                    <CustomInput type='text' id='teamName' name='teamName' placeholder='Название' defaultValue={teamName}
+                                 onChange={handleInputChange}/>
 
                     <Autocomplete
                         disablePortal
                         fullWidth
                         id="captain"
-                        options={names}
+                        options={usersFromDB}
                         defaultValue={captain}
+                        onChange={handleAutocompleteChange}
                         popupIcon={<ExpandMoreRoundedIcon fontSize={'medium'}
                             sx={{fontSize: "2.2vw",
                                 color: 'var(--foreground-color)'}}
@@ -80,7 +120,7 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
                             style={{
                                 padding: "0 2vw", fontSize: "1.5vw", height: "7vh", marginBottom: "2.5vh",
                                 filter: "drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))"
-                            }} />
+                            }}/>
             </form>
         </PageWrapper>
     );

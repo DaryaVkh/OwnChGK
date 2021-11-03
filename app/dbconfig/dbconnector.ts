@@ -5,7 +5,7 @@ abstract class DataBase {
         max: 20,
         connectionString: process.env.DATABASE_URL,
         idleTimeoutMillis: 30000,
-        ssl: {rejectUnauthorized: false} // нужно для heroku
+        //ssl: {rejectUnauthorized: false} // нужно для heroku
     });
 
     public static connect() {
@@ -261,7 +261,7 @@ abstract class DataBase {
     }
 
     public static async insertGame(name: string, adminId: number) {
-        const sql = 'INSERT INTO games (name, admin_id) VALUES ($1, $2) RETURNING admin_id';
+        const sql = 'INSERT INTO games (name, admin_id) VALUES ($1, $2) RETURNING game_id';
         const rows = await DataBase.query(sql, [name, adminId]);
         return rows[0]; // возвращает назначенный игре id
     }

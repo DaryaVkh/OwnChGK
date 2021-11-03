@@ -1,3 +1,5 @@
+import React from 'react';
+
 export interface InputProps {
     type: string;
     id: string;
@@ -5,6 +7,7 @@ export interface InputProps {
     placeholder: string;
     isInvalid?: boolean,
     onBlur?: () => void;
+    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
     style?: object;
     defaultValue?: string;
 }

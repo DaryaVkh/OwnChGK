@@ -1,4 +1,4 @@
-import jwt, {JwtPayload} from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import {Request, Response, NextFunction} from 'express';
 import {secret} from "../jwtToken";
 
@@ -14,9 +14,7 @@ export function roleMiddleware(roles: boolean) {
                 return res.status(403).json({message: 'Пользователь не авторизован'});
             }
 
-            // @ts-ignore
-            //TODO: тип
-            const {roles: userRoles} = jwt.verify(token, secret);
+            const {roles: userRoles} = jwt.verify(token, secret) as jwt.JwtPayload;
 
             let hasRole = false
             if (roles.toString() === userRoles.toString()) {

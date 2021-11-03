@@ -16,8 +16,7 @@ class AdminsController {
 
     public async login(req: Request, res: Response) {
         try {
-            const email = req.body.email;
-            const password = req.body.password;
+            const {email, password} = req.body;
             const user = await DataBase.getAdmin(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
@@ -27,7 +26,7 @@ class AdminsController {
                     httpOnly: true,
                     secure: true
                 });
-                res.status(200).redirect('../start-screen');
+                res.status(200).json({});
             } else {
                 res.status(400).json({message: 'Not your password'});
             }

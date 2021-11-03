@@ -12,6 +12,8 @@ const CustomCheckbox: FC<CustomCheckboxProps> = props => {
             </div>
 
             <Checkbox
+                name={props.name}
+                onChange={props.onChange}
                 sx={{
                     color: "#3282B8",
                     fontSize: "1vw",
