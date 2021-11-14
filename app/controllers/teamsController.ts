@@ -33,7 +33,7 @@ class TeamsController {
             const {teamName, captain} = req.body;
             const user = await DataBase.getUser(captain);
             await DataBase.insertTeam(teamName, user.user_id);
-            res.send('Done');
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -47,7 +47,7 @@ class TeamsController {
             }
             const name = req.body.name;
             await DataBase.deleteTeam(name);
-            res.send('Done');
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -62,7 +62,7 @@ class TeamsController {
             const name = req.body.name;
             const newName = req.body.newName;
             await DataBase.changeTeamName(name, newName);
-            res.send('Done');
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -77,7 +77,7 @@ class TeamsController {
             const name = req.body.name;
             const captain = req.body.captainId;
             await DataBase.changeTeamCaptainId(name, captain);
-            res.send('Done');
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }

@@ -49,11 +49,11 @@ class UsersController {
             const userId = await DataBase.insertUser(email, hashedPassword);
             const token = generateAccessToken(userId, email, false);
             res.cookie('authorization', token, {
-                maxAge: 86400 * 1000,
+                maxAge: 24*60*60*1000,
                 httpOnly: true,
                 secure: true
             });
-            res.status(200).json({});
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -70,10 +70,27 @@ class UsersController {
             const newPassword = req.body.password;
             const hashedPassword = await hash(newPassword, 10);
             await DataBase.changeUserPassword(email, hashedPassword);
-            res.send('Done');
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
+    }
+
+    public async logout(req:Request, res:Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+        res.cookie('authorization', "", {
+            maxAge: -1,
+            httpOnly: true,
+            secure: true
+        });
+            res.status(200).redirect('/');
+    } catch (error: any) {
+        res.status(400).json({'message': error.message});
+    }
     }
 }
 

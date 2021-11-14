@@ -25,7 +25,7 @@ class RoundsController {
             const questionCost = req.body.questionCost;
             const questionTime = req.body.questionTime;
             await DataBase.insertRound(number, gameId, questionNumber, questionCost, questionTime);
-            res.send('Done');
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -40,7 +40,7 @@ class RoundsController {
             const gameId = req.body.gameId;
             const number = req.body.number;
             await DataBase.deleteRound(gameId, number);
-            res.send('Done');
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -59,7 +59,7 @@ class RoundsController {
             const newQuestionCost = req.body.newQuestionCost;
             const newQuestionTime = req.body.newQuestionTime;
             await DataBase.changeRoundSettings(gameId, number, newNumber, newQuestionNumber, newQuestionCost, newQuestionTime);
-            res.send('Done');
+            res.status(200);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
