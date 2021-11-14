@@ -23,7 +23,7 @@ class AdminsController {
                 const token = generateAccessToken(user.admin_id, user.email, true);
                 res.cookie('authorization', token, {
                     maxAge: 24*60*60*1000,
-                    httpOnly: true,
+                    //httpOnly: true,
                     secure: true
                 });
                 res.status(200).json({});
@@ -76,7 +76,7 @@ class AdminsController {
             }
             res.cookie('authorization', "", {
                 maxAge: -1,
-                httpOnly: true,
+                //httpOnly: true,
                 secure: true
             });
             res.status(200);

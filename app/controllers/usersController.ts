@@ -25,7 +25,7 @@ class UsersController {
                 const token = generateAccessToken(user.user_id, user.email, false);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
-                    httpOnly: true,
+                    //httpOnly: true,
                     secure: true
                 });
                 res.status(200).redirect('/team-creation');
@@ -50,7 +50,7 @@ class UsersController {
             const token = generateAccessToken(userId, email, false);
             res.cookie('authorization', token, {
                 maxAge: 24*60*60*1000,
-                httpOnly: true,
+                //httpOnly: true,
                 secure: true
             });
             res.status(200);
@@ -84,7 +84,7 @@ class UsersController {
             }
         res.cookie('authorization', "", {
             maxAge: -1,
-            httpOnly: true,
+            //httpOnly: true,
             secure: true
         });
             res.status(200).redirect('/');
