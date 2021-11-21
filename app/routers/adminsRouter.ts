@@ -1,13 +1,21 @@
-import express, {Request, Response, Router} from 'express';
-import AdminsController from '../controllers/adminsController';
+import {Router} from 'express';
+import {AdminsController} from '../controllers/adminsController';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 
-const router = Router();
-const adminsController = new AdminsController();
+export class AdminsRouter {
+    public readonly router: Router;
 
-router.get('/', roleMiddleware(true), adminsController.getAll);
-router.post('/login', adminsController.login);
-router.post('/add', adminsController.insert);
-router.post('/logout', adminsController.logout);
+    constructor() {
+        this.router = Router();
+        this.config();
+    }
 
-export default router;
+    private config() {
+        const adminsController = new AdminsController();
+
+        this.router.get('/', roleMiddleware(true), adminsController.getAll);
+        this.router.post('/login', adminsController.login);
+        this.router.post('/add', adminsController.insert);
+        this.router.post('/logout', adminsController.logout);
+    }
+}

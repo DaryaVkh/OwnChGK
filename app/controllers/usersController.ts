@@ -5,7 +5,7 @@ import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken} from '../jwtToken';
 
-class UsersController { // TODO: дописать смену имени пользователя, удаление
+export class UsersController { // TODO: дописать смену имени пользователя, удаление
     private readonly userRepository = getCustomRepository(UserRepository);
 
     public async getAll(req: Request, res: Response) {
@@ -42,6 +42,7 @@ class UsersController { // TODO: дописать смену имени поль
 
     public async insert(req: Request, res: Response) {
         try {
+            console.log(this); // TODO: Почему-то здесь this === undefined;
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
@@ -96,5 +97,3 @@ class UsersController { // TODO: дописать смену имени поль
         }
     }
 }
-
-export default UsersController;

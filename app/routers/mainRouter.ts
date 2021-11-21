@@ -1,10 +1,17 @@
-import express, {Router} from 'express';
+import {Router} from 'express';
 import {resolve} from 'path';
 
-const router = Router();
+export class MainRouter {
+    public readonly router: Router;
 
-router.get('/*', (req, res) => {
-    res.sendFile(resolve('./build/frontend/index.html'));
-});
+    constructor() {
+        this.router = Router();
+        this.config();
+    }
 
-export default router;
+    private config() {
+        this.router.get('/*', (req, res) => {
+            res.sendFile(resolve('./build/frontend/index.html'));
+        });
+    }
+}

@@ -1,15 +1,23 @@
-import express, {Request, Response, Router} from 'express';
-import RoundsController from '../controllers/roundsController';
+import {Router} from 'express';
+import {RoundsController} from '../controllers/roundsController';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 import {middleware} from '../middleware/middleware';
 
-const router = Router();
-const roundsController = new RoundsController();
+export class RoundsRouter {
+    public readonly router: Router;
 
-router.get('/', middleware, roundsController.getAll);
-router.patch('/settings', roleMiddleware(true), roundsController.editRound);
-router.delete('/team', roleMiddleware(true), roundsController.deleteRound);
+    constructor() {
+        this.router = Router();
+        this.config();
+    }
 
-router.post('/', (req: Request, res: Response) => roundsController.insertRound(req, res));
+    private config() {
+        const roundsController = new RoundsController();
 
-export default router;
+        this.router.get('/', middleware, roundsController.getAll);
+        this.router.patch('/settings', roleMiddleware(true), roundsController.editRound);
+        this.router.delete('/team', roleMiddleware(true), roundsController.deleteRound);
+
+        this.router.post('/', () => roundsController.insertRound);
+    }
+}

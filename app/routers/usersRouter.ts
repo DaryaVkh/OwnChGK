@@ -1,15 +1,21 @@
 import {Router} from 'express';
-import {check} from 'express-validator';
-import UsersController from '../controllers/usersController';
+import {UsersController} from '../controllers/usersController';
 import {middleware} from '../middleware/middleware';
-import {roleMiddleware} from '../middleware/roleMiddleware';
 
-const router = Router();
-const usersController = new UsersController();
+export class UsersRouter {
+    public readonly router: Router;
 
-router.get('/', middleware, usersController.getAll);
-router.post('/login', usersController.login);
-router.post('/insert', usersController.insert);
-router.post('/logout', usersController.logout);
+    constructor() {
+        this.router = Router();
+        this.config();
+    }
 
-export default router;
+    private config() {
+        const usersController = new UsersController();
+
+        this.router.get('/', middleware, usersController.getAll);
+        this.router.post('/login', usersController.login);
+        this.router.post('/insert', usersController.insert);
+        this.router.post('/logout', usersController.logout);
+    }
+}

@@ -1,18 +1,25 @@
-import express, {Request, Response, Router} from 'express';
-import TeamsController from '../controllers/teamsController';
-import {roleMiddleware} from '../middleware/roleMiddleware';
+import {Router} from 'express';
+import {TeamsController} from '../controllers/teamsController';
 import {middleware} from '../middleware/middleware';
 
-const router = Router();
-const teamsController = new TeamsController();
+export class TeamsRouter {
+    public readonly router: Router;
 
-router.get('/', middleware, teamsController.getAll);
-router.get('/team', middleware, teamsController.getTeam);
-router.get('/games', middleware, teamsController.getAllGames);
-router.patch('/teamName', middleware, teamsController.editTeam);
-router.patch('/teamCaptain', middleware, teamsController.editTeamCaptain);
-router.delete('/team', middleware, teamsController.deleteTeam);
+    constructor() {
+        this.router = Router();
+        this.config();
+    }
 
-router.post('/', middleware, teamsController.insertTeam);
+    private config() {
+        const teamsController = new TeamsController();
 
-export default router;
+        this.router.get('/', middleware, teamsController.getAll);
+        this.router.get('/team', middleware, teamsController.getTeam);
+        this.router.get('/games', middleware, teamsController.getAllGames);
+        this.router.patch('/teamName', middleware, teamsController.editTeam);
+        this.router.patch('/teamCaptain', middleware, teamsController.editTeamCaptain);
+        this.router.delete('/team', middleware, teamsController.deleteTeam);
+
+        this.router.post('/', middleware, teamsController.insertTeam);
+    }
+}

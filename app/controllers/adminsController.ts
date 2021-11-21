@@ -5,7 +5,7 @@ import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken} from '../jwtToken';
 
-class AdminsController {
+export class AdminsController {
     private readonly adminRepository = getCustomRepository(AdminRepository);
 
     public async getAll(req: Request, res: Response) {
@@ -90,5 +90,3 @@ class AdminsController {
         }
     }
 }
-
-export default AdminsController;

@@ -12,17 +12,17 @@ export class Round extends BaseEntity {
     @Column({
         name: 'questions_number'
     })
-    questionsNumber: number
+    questionCount: number
 
     @Column({
         name: 'questions_cost'
     })
-    questionsCost: number
+    questionCost: number
 
     @Column({
         name: 'questions_time'
     })
-    questionsTime: number
+    questionTime: number
 
     @ManyToOne(() => Game, {
         nullable: false,
