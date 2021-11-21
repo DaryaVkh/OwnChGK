@@ -9,23 +9,6 @@ import {CustomInput} from '../../components/custom-input/custom-input';
 
 const Authorization: FC<AuthorizationProps> = props => {
     const [loggedIn, setLoggedIn] = useState(false);
-
-    let userName;
-    try {
-        const conn = new WebSocket("ws://localhost:80/");
-        conn.onopen =  () => {
-            conn.send("hello from me client!")
-        };
-
-        conn.onmessage = (data) => {
-            console.log(data);
-        };
-    }
-    catch (e) {
-        console.log(e);
-    }
-
-
     let email = '';
     let password = '';
     const handleSubmit = async (event: React.SyntheticEvent) => {

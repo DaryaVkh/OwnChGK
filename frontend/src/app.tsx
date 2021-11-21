@@ -6,6 +6,7 @@ import {Redirect, Route, Switch} from 'react-router-dom';
 import AdminStartScreen from "./pages/admin-start-screen/admin-start-screen";
 import GameCreator from "./pages/game-creation/game-creation";
 import TeamCreator from "./pages/team-creation/team-creation";
+import Socket from "./pages/socket";
 
 const App: FC = () => {
     return (
@@ -15,6 +16,7 @@ const App: FC = () => {
                 <Route path={'/admin'} >
                     <Authorization isAdmin={true} />
                 </Route>
+                <Route path='/answer' component={Socket} exact={true}/>
                 <Route path="/registration" component={Registration} exact={true} />
                 <Route path="/start-screen" component={AdminStartScreen} exact={true} />
                 <Route path="/game-creation" exact={true}>
