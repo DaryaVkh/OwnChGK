@@ -1,3 +1,4 @@
+/*
 import {Pool} from 'pg';
 
 abstract class DataBase {
@@ -380,4 +381,4 @@ abstract class DataBase {
     }
 }
 
-export default DataBase;
+export default DataBase;*/

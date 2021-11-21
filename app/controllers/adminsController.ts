@@ -1,14 +1,19 @@
-import DataBase from '../dbconfig/dbconnector';
+import {getCustomRepository} from 'typeorm';
+import {AdminRepository} from '../db/repositories/adminRepository';
 import {compare, hash} from 'bcrypt';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
-import {generateAccessToken} from "../jwtToken";
+import {generateAccessToken} from '../jwtToken';
 
 class AdminsController {
+    private readonly adminRepository = getCustomRepository(AdminRepository);
+
     public async getAll(req: Request, res: Response) {
         try {
-            const users = await DataBase.getAllAdmins();
-            res.send(users);
+            const admins = await this.adminRepository.find();
+            res.status(200).json({
+                admins: admins.map(value => value.email)
+            });
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);
         }
@@ -17,12 +22,12 @@ class AdminsController {
     public async login(req: Request, res: Response) {
         try {
             const {email, password} = req.body;
-            const user = await DataBase.getAdmin(email);
-            const isPasswordMatching = await compare(password, user.password);
+            const admin = await this.adminRepository.findByEmail(email);
+            const isPasswordMatching = await compare(password, admin.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.admin_id, user.email, true);
+                const token = generateAccessToken(admin.id, admin.email, true);
                 res.cookie('authorization', token, {
-                    maxAge: 24*60*60*1000,
+                    maxAge: 24 * 60 * 60 * 1000,
                     //httpOnly: true,
                     secure: true
                 });
@@ -44,37 +49,37 @@ class AdminsController {
             const email = req.body.email;
             const password = req.body.password;
             const hashedPassword = await hash(password, 10);
-            await DataBase.insertAdmin(email, hashedPassword);
+
+            await this.adminRepository.insertByEmailAndPassword(email, hashedPassword);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
     }
 
-    public async changePassword(req: Request, res: Response, isAdmin = false) {
+    public async changePassword(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
 
-            const email = req.body.email;
-            const newPassword = req.body.password;
-            const hashedPassword = await hash(newPassword, 10);
-            await DataBase.changeAdminPassword(email, hashedPassword);
+            const {email, password} = req.body;
+            const hashedPassword = await hash(password, 10);
+            await this.adminRepository.updateByEmailAndPassword(email, hashedPassword);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
     }
 
-    public async logout(req:Request, res:Response) {
+    public async logout(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            res.cookie('authorization', "", {
+            res.cookie('authorization', '', {
                 maxAge: -1,
                 //httpOnly: true,
                 secure: true

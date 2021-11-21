@@ -9,6 +9,12 @@ import mainRouter from './routers/mainRouter';
 import DataBase from './dbconfig/dbconnector';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import {createConnection} from 'typeorm';
+import {User} from './db/entities/User';
+import {Admin} from './db/entities/Admin';
+import {Team} from './db/entities/Team';
+import {Game} from './db/entities/Game';
+import {Round} from './db/entities/Round';
 
 class Server {
     private app;
@@ -17,7 +23,12 @@ class Server {
         this.app = express();
         this.config();
         this.routerConfig();
-        this.dbConnect();
+        try {
+            this.dbConnect().then(() => console.log("Connected to Postgres"));
+        } catch (error) {
+            console.error(error);
+            throw new Error('Unable to connect to db');
+        }
     }
 
     private config() {
@@ -26,8 +37,14 @@ class Server {
         this.app.use(express.static(path.resolve('./build/frontend')));
     }
 
-    private dbConnect() {
-        DataBase.connect();
+    private async dbConnect() {
+        await createConnection({
+            type: 'postgres',
+            url: process.env.DATABASE_URL,
+            entities: [User, Admin, Team, Game, Round],
+            synchronize: true // Не оч безопасно
+        });
+        /*DataBase.connect();*/
     }
 
     private routerConfig() {

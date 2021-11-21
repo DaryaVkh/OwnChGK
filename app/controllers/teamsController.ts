@@ -1,12 +1,16 @@
-import DataBase from '../dbconfig/dbconnector';
+/*import DataBase from '../dbconfig/dbconnector';*/
 import {validationResult} from 'express-validator';
+import {getCustomRepository} from 'typeorm';
+import {TeamRepository} from '../db/repositories/teamRepository';
 import {Request, Response} from 'express';
 
 
 class TeamsController {
+    private readonly teamRepository = getCustomRepository(TeamRepository);
+
     public async getAll(req: Request, res: Response) {
         try {
-            const teams = await DataBase.getAllTeams();
+            const teams = await this.teamRepository.find()
             res.status(200).json({
                 teams: teams.map(value => value.name)
             });
