@@ -28,7 +28,7 @@ class UsersController {
                     //httpOnly: true,
                     secure: true
                 });
-                res.status(200).redirect('/team-creation');
+                res.status(200).redirect('/team-creation'); // TODO: редирект убрать во фронт
             } else {
                 res.status(400).json({message: 'Not your password'});
             }
@@ -53,7 +53,7 @@ class UsersController {
                 //httpOnly: true,
                 secure: true
             });
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -70,7 +70,7 @@ class UsersController {
             const newPassword = req.body.password;
             const hashedPassword = await hash(newPassword, 10);
             await DataBase.changeUserPassword(email, hashedPassword);
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -87,7 +87,7 @@ class UsersController {
             //httpOnly: true,
             secure: true
         });
-            res.status(200).redirect('/');
+            res.status(200).redirect('/'); // TODO: редирект убрать во фронт
     } catch (error: any) {
         res.status(400).json({'message': error.message});
     }

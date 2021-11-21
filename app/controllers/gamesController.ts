@@ -45,7 +45,7 @@ class GamesController {
                     const t = await DataBase.getTeam(team);
                     await DataBase.insertTeamToGame(t.team_id, gameId);
                 }
-                res.status(200);
+                res.status(200).json({});
             }
             else {
                 res.send("You are not admin");
@@ -63,7 +63,7 @@ class GamesController {
             }
             const name = req.body.name;
             await DataBase.deleteGame(name);
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -78,7 +78,7 @@ class GamesController {
             const name = req.body.name;
             const newName = req.body.newName;
             await DataBase.changeGameName(name, newName);
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -93,7 +93,7 @@ class GamesController {
             const name = req.body.name;
             const admin = req.body.admin;
             await DataBase.changeTeamCaptainId(name, admin);
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -121,7 +121,7 @@ class GamesController {
             const name = req.body.name;
             const status = req.body.status;
             await DataBase.changeGameStatus(name, status);
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }

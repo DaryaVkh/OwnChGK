@@ -45,7 +45,7 @@ class AdminsController {
             const password = req.body.password;
             const hashedPassword = await hash(password, 10);
             await DataBase.insertAdmin(email, hashedPassword);
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -62,7 +62,7 @@ class AdminsController {
             const newPassword = req.body.password;
             const hashedPassword = await hash(newPassword, 10);
             await DataBase.changeAdminPassword(email, hashedPassword);
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -79,7 +79,7 @@ class AdminsController {
                 //httpOnly: true,
                 secure: true
             });
-            res.status(200);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
