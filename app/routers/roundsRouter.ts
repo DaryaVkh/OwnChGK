@@ -1,15 +1,18 @@
-import express, {Request, Response, Router} from 'express';
-import RoundsController from '../controllers/roundsController';
+import {Router} from 'express';
+import {RoundsController} from '../controllers/roundsController';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 import {middleware} from '../middleware/middleware';
 
-const router = Router();
-const roundsController = new RoundsController();
+export const roundsRouter = () => {
+    const router = Router();
 
-router.get('/', middleware, roundsController.getAll);
-router.patch('/settings', roleMiddleware(true), roundsController.editRound);
-router.delete('/team', roleMiddleware(true), roundsController.deleteRound);
+    const roundsController = new RoundsController();
 
-router.post('/', (req: Request, res: Response) => roundsController.insertRound(req, res));
+    router.get('/', middleware, roundsController.getAll);
+    router.patch('/settings', roleMiddleware(true), roundsController.editRound);
+    router.delete('/team', roleMiddleware(true), roundsController.deleteRound);
 
-export default router;
+    router.post('/', () => roundsController.insertRound);
+
+    return router;
+}

@@ -1,4 +1,4 @@
-import server from './server';
+import {Server} from './server';
 import * as WebSocket from 'ws';
 import jwt from "jsonwebtoken";
 import {secret} from "./jwtToken";
@@ -47,7 +47,8 @@ wss.on('connection', (ws: WebSocket) => {
     });
 });
 
-const starter = new server().start(port)
+
+const starter = new Server().start(port)
     .then(port => console.log(`Running on port ${port}`))
     .catch(error => console.log(error));
 
