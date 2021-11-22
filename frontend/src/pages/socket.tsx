@@ -2,17 +2,22 @@ import React, {FC} from 'react';
 import {CustomInput} from "../components/custom-input/custom-input";
 import {FormButton} from "../components/form-button/form-button";
 import {Button} from "@mui/material";
+import {cookie} from "express-validator";
 
 const Socket: FC = props => {
     let answer:string;
     const conn = new WebSocket("ws://localhost:80/");
-    conn.onopen =  () => {
-        conn.send("hello from me client!")
-    };
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
-        conn.send(answer);
+        conn.send(getCookie("authorization") + "\n" + answer);
+    }
+
+    const getCookie = (name: string) => {
+        let matches = document.cookie.match(new RegExp(
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        ));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
     }
 
     const handleSocket = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,7 +25,7 @@ const Socket: FC = props => {
     }
 
     const handleStart = async () => {
-        conn.send("Start");
+        conn.send(getCookie("authorization") + "\n" + "Start");
     }
 
     return (

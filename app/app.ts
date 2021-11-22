@@ -1,5 +1,7 @@
 import server from './server';
 import * as WebSocket from 'ws';
+import jwt from "jsonwebtoken";
+import {secret} from "./jwtToken";
 
 const port = parseInt(process.env.PORT || '3000');
 let timeout;
@@ -10,28 +12,39 @@ const extraSeconds = 10000;
 
 wss.on('connection', (ws: WebSocket) => {
     ws.on('message', (message: string) => {
-        if (isOpen) {
-            console.log('received: %s', message);
+        message += ""; // преобразовали в строку
+        const words = message.split('\n');
+        if (words.length != 2) {
+            console.log("не авторизован");
         }
-        if (message == "+10sec") {
-            //тут проверочку навернуть, что это админ отправил
-            const pastDelay = Math.ceil(process.uptime() * 1000 - timeout._idleStart);
-            const initialDelay = timeout._idleTimeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                console.log("added time end")
-            }, initialDelay - pastDelay + extraSeconds); // может быть косяк с очисткой таймаута, но хз. пока не косячило
-        } else if (message == "Start") {
-            //и тут тоже
-            console.log("startuem")
-            isOpen = true;
-            timeout = setTimeout(() => {
-                isOpen = false;
-                console.log("stopim")
-            }, secondPerQuestion);
+        else {
+            const {roles: userRoles} = jwt.verify(words[0], secret) as jwt.JwtPayload;
+            if (true == userRoles) {
+                //если админ
+                if (words[1] == "+10sec") {
+                    const pastDelay = Math.ceil(process.uptime() * 1000 - timeout._idleStart);
+                    const initialDelay = timeout._idleTimeout;
+                    clearTimeout(timeout);
+                    isOpen = true;
+                    timeout = setTimeout(() => {
+                        console.log("added time end")
+                        isOpen = false;
+                    }, initialDelay - pastDelay + extraSeconds); // может быть косяк с очисткой таймаута, но хз. пока не косячило
+                } else if (words[1] == "Start") {
+                    console.log("startuem")//надо ли запрещать стартовать, если таймер уже работает
+                    isOpen = true;
+                    timeout = setTimeout(() => {
+                        isOpen = false;
+                        console.log("stopim")
+                    }, secondPerQuestion);
+                }
+            }
+            //не админ
+            else if (isOpen) {
+                console.log('received: %s', words[1]);
+            }
         }
     });
-    ws.send('Hi there, I am a WebSocket server');
 });
 
 const starter = new server().start(port)
