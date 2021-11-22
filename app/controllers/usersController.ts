@@ -6,11 +6,9 @@ import {Request, Response} from 'express';
 import {generateAccessToken} from '../jwtToken';
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
-    private readonly userRepository = getCustomRepository(UserRepository);
-
     public async getAll(req: Request, res: Response) {
         try {
-            const users = await this.userRepository.find();
+            const users = await getCustomRepository(UserRepository).find();
             res.status(200).json({
                 users: users.map(value => value.email)
             });
@@ -22,7 +20,7 @@ export class UsersController { // TODO: дописать смену имени �
     public async login(req: Request, res: Response) {
         try {
             const {email, password} = req.body;
-            const user = await this.userRepository.findByEmail(email);
+            const user = await getCustomRepository(UserRepository).findByEmail(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
                 const token = generateAccessToken(user.id, user.email, false);
@@ -50,7 +48,7 @@ export class UsersController { // TODO: дописать смену имени �
 
             const {email, password} = req.body;
             const hashedPassword = await hash(password, 10);
-            const insertResult = await this.userRepository.insertByEmailAndPassword(email, hashedPassword);
+            const insertResult = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
             const userId = insertResult.identifiers[0].id;
             const token = generateAccessToken(userId, email, false);
             res.cookie('authorization', token, {
@@ -73,7 +71,7 @@ export class UsersController { // TODO: дописать смену имени �
 
             const {email, password} = req.body;
             const hashedPassword = await hash(password, 10);
-            await this.userRepository.updateByEmailAndPassword(email, hashedPassword);
+            await getCustomRepository(UserRepository).updateByEmailAndPassword(email, hashedPassword);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});

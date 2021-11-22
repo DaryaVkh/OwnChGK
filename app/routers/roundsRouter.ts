@@ -3,21 +3,16 @@ import {RoundsController} from '../controllers/roundsController';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 import {middleware} from '../middleware/middleware';
 
-export class RoundsRouter {
-    public readonly router: Router;
+export const roundsRouter = () => {
+    const router = Router();
 
-    constructor() {
-        this.router = Router();
-        this.config();
-    }
+    const roundsController = new RoundsController();
 
-    private config() {
-        const roundsController = new RoundsController();
+    router.get('/', middleware, roundsController.getAll);
+    router.patch('/settings', roleMiddleware(true), roundsController.editRound);
+    router.delete('/team', roleMiddleware(true), roundsController.deleteRound);
 
-        this.router.get('/', middleware, roundsController.getAll);
-        this.router.patch('/settings', roleMiddleware(true), roundsController.editRound);
-        this.router.delete('/team', roleMiddleware(true), roundsController.deleteRound);
+    router.post('/', () => roundsController.insertRound);
 
-        this.router.post('/', () => roundsController.insertRound);
-    }
+    return router;
 }

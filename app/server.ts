@@ -1,11 +1,11 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import {UsersRouter} from './routers/usersRouter';
-import {AdminsRouter} from './routers/adminsRouter';
-import {TeamsRouter} from './routers/teamsRouter';
-import {GamesRouter} from './routers/gamesRouter';
-import {RoundsRouter} from './routers/roundsRouter';
-import {MainRouter} from './routers/mainRouter';
+import {usersRouter} from './routers/usersRouter';
+import {adminsRouter} from './routers/adminsRouter';
+import {teamsRouter} from './routers/teamsRouter';
+import {gamesRouter} from './routers/gamesRouter';
+import {roundsRouter} from './routers/roundsRouter';
+import {mainRouter} from './routers/mainRouter';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import {createConnection} from 'typeorm';
@@ -46,12 +46,12 @@ export class Server {
 
     private routerConfig() {
         this.app.use(cookieParser());
-        this.app.use('/users', new UsersRouter().router);
-        this.app.use('/admins', new AdminsRouter().router);
-        this.app.use('/teams', new TeamsRouter().router);
-        this.app.use('/games', new GamesRouter().router);
-        this.app.use('/rounds', new RoundsRouter().router);
-        this.app.use('/', new MainRouter().router);
+        this.app.use('/users', usersRouter());
+        this.app.use('/admins', adminsRouter());
+        this.app.use('/teams', teamsRouter());
+        this.app.use('/games', gamesRouter());
+        this.app.use('/rounds', roundsRouter());
+        this.app.use('/', mainRouter());
     }
 
     public start = (port: number) => {

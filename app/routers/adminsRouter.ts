@@ -2,20 +2,15 @@ import {Router} from 'express';
 import {AdminsController} from '../controllers/adminsController';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 
-export class AdminsRouter {
-    public readonly router: Router;
+export const adminsRouter = () => {
+    const router = Router();
 
-    constructor() {
-        this.router = Router();
-        this.config();
-    }
+    const adminsController = new AdminsController();
 
-    private config() {
-        const adminsController = new AdminsController();
+    router.get('/', roleMiddleware(true), adminsController.getAll);
+    router.post('/login', adminsController.login);
+    router.post('/add', adminsController.insert);
+    router.post('/logout', adminsController.logout);
 
-        this.router.get('/', roleMiddleware(true), adminsController.getAll);
-        this.router.post('/login', adminsController.login);
-        this.router.post('/add', adminsController.insert);
-        this.router.post('/logout', adminsController.logout);
-    }
+    return router;
 }

@@ -6,11 +6,9 @@ import {Request, Response} from 'express';
 import {generateAccessToken} from '../jwtToken';
 
 export class AdminsController {
-    private readonly adminRepository = getCustomRepository(AdminRepository);
-
     public async getAll(req: Request, res: Response) {
         try {
-            const admins = await this.adminRepository.find();
+            const admins = await getCustomRepository(AdminRepository).find();
             res.status(200).json({
                 admins: admins.map(value => value.email)
             });
@@ -22,7 +20,7 @@ export class AdminsController {
     public async login(req: Request, res: Response) {
         try {
             const {email, password} = req.body;
-            const admin = await this.adminRepository.findByEmail(email);
+            const admin = await getCustomRepository(AdminRepository).findByEmail(email);
             const isPasswordMatching = await compare(password, admin.password);
             if (isPasswordMatching) {
                 const token = generateAccessToken(admin.id, admin.email, true);
@@ -50,7 +48,7 @@ export class AdminsController {
             const password = req.body.password;
             const hashedPassword = await hash(password, 10);
 
-            await this.adminRepository.insertByEmailAndPassword(email, hashedPassword);
+            await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -66,7 +64,7 @@ export class AdminsController {
 
             const {email, password} = req.body;
             const hashedPassword = await hash(password, 10);
-            await this.adminRepository.updateByEmailAndPassword(email, hashedPassword);
+            await getCustomRepository(AdminRepository).updateByEmailAndPassword(email, hashedPassword);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});

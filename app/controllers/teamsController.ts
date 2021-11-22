@@ -5,11 +5,9 @@ import {Request, Response} from 'express';
 
 
 export class TeamsController {
-    private readonly teamRepository = getCustomRepository(TeamRepository);
-
     public async getAll(req: Request, res: Response) {
         try {
-            const teams = await this.teamRepository.find()
+            const teams = await getCustomRepository(TeamRepository).find()
             res.status(200).json({
                 teams: teams.map(value => value.name)
             });
@@ -21,7 +19,7 @@ export class TeamsController {
     public async getAllGames(req: Request, res: Response) {
         try {
             const {teamName} = req.body;
-            const team = await this.teamRepository.findByName(teamName);
+            const team = await getCustomRepository(TeamRepository).findByName(teamName);
             res.status(200).json(team.games.map(game => game.name));
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);
@@ -35,7 +33,7 @@ export class TeamsController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {teamName, captain} = req.body;
-            await this.teamRepository.insertByNameAndUserEmail(teamName, captain);
+            await getCustomRepository(TeamRepository).insertByNameAndUserEmail(teamName, captain);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -49,7 +47,7 @@ export class TeamsController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const name = req.body.name;
-            await this.teamRepository.deleteByName(name);
+            await getCustomRepository(TeamRepository).deleteByName(name);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -64,7 +62,7 @@ export class TeamsController {
             }
             const name = req.body.name;
             const newName = req.body.newName;
-            await this.teamRepository.updateByNames(name, newName)
+            await getCustomRepository(TeamRepository).updateByNames(name, newName)
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -78,7 +76,7 @@ export class TeamsController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {name, captain} = req.body;
-            await this.teamRepository.updateByNameAndNewUserEmail(name, captain);
+            await getCustomRepository(TeamRepository).updateByNameAndNewUserEmail(name, captain);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -92,7 +90,7 @@ export class TeamsController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {name} = req.body;
-            const team = await this.teamRepository.findOne({name});
+            const team = await getCustomRepository(TeamRepository).findOne({name});
             res.status(200).json(team);
         } catch (error: any) {
             res.status(400).json({'message': error.message});

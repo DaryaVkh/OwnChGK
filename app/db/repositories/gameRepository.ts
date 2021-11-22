@@ -3,7 +3,6 @@ import {Game} from '../entities/Game';
 import {RoundRepository} from './roundRepository';
 import {Team} from '../entities/Team';
 import {Admin} from '../entities/Admin';
-import {User} from '../entities/User';
 
 @EntityRepository(Game)
 export class GameRepository extends Repository<Game> {
@@ -20,13 +19,13 @@ export class GameRepository extends Repository<Game> {
                    teams: string[]) {
         return this.manager.transaction(manager => manager.findOne(Admin, {'email': adminEmail})
             .then(admin => manager.find(Team, {'name': In(teams)})
-                .then(teams => manager.insert(Game, {name, admin, teams})
-                    .then(() => {
-                        const roundRepository = getCustomRepository(RoundRepository);
-                        for (let i = 1; i <= questionCount; i++) {
-                            roundRepository.insertByParams(i, name, questionCount, questionCost, questionTime);
-                        }
-                    }))));
+                .then(teams => manager.create(Game, {name, admin, teams}).save())
+                .then(() => {
+                    const roundRepository = getCustomRepository(RoundRepository);
+                    for (let i = 1; i <= questionCount; i++) {
+                        roundRepository.insertByParams(i, name, questionCount, questionCost, questionTime).then(() => {});
+                    }
+                })));
     }
 
     deleteByName(name: string) {
