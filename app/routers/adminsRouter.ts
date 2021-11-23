@@ -8,5 +8,6 @@ const adminsController = new AdminsController();
 router.get('/', roleMiddleware(true), adminsController.getAll);
 router.post('/login', adminsController.login);
 router.post('/add', adminsController.insert);
+router.post('/logout', adminsController.logout);
 
 export default router;
