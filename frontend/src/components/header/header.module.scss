@@ -11,10 +11,9 @@
 }
 
 .logo {
-    height: 60%;
+    height: 6vmin;
     position: fixed;
-    left: 9.6%;
-    top: 20%;
+    left: 15vmin;
     user-select: none;
 
     &:hover {
@@ -22,11 +21,18 @@
     }
 }
 
+.logoLink {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
 .Profile {
-    height: 45%;
+    height: 4vmin;
     position: fixed;
-    right: 15.6%;
-    top: 30%;
+    right: 24vmin;
+    align-self: center;
     user-select: none;
 
     &:hover {
@@ -35,10 +41,10 @@
 }
 
 .LogOut {
-    height: 45%;
+    height: 4vmin;
     position: fixed;
-    right: 10.6%;
-    top: 30%;
+    right: 15vmin;
+    align-self: center;
     user-select: none;
 
     &:hover {

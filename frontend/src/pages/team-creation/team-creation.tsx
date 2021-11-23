@@ -2,16 +2,19 @@ import React, {FC, useState} from 'react';
 import classes from './team-creation.module.scss';
 import Header from "../../components/header/header";
 import {FormButton} from "../../components/form-button/form-button";
-import {CommandCreatorProps} from "../../entities/command-creation/command-creation.interfaces";
+import {TeamCreatorProps} from "../../entities/team-creation/team-creation.interfaces";
 import PageWrapper from "../../components/page-wrapper/page-wrapper";
-import {Autocomplete, TextField} from "@mui/material";
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
+import {Alert, Autocomplete, TextField} from "@mui/material";
 import {CustomInput} from "../../components/custom-input/custom-input";
 import {getAll} from '../../server-api/server-api';
+import {useLocation, Redirect} from "react-router-dom";
 
-const CommandCreator: FC<CommandCreatorProps> = props => {
+const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState([]);
     const [isUsersFound, setIsUsersFound] = useState(true);
+    const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
+    const [isNameInvalid, setIsNameInvalid] = useState(false);
+    const location = useLocation<{name: string}>();
     let teamName: string = '';
     let captain: string = '';
 
@@ -27,13 +30,10 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
         }
     }
 
-    // получаем чет из бд (имейлы и/или имена всех зареганых пользователей (потенциальных капитанов) без команды)
-    /*let usersFromDB = ["Даша", "Коля", "Саша", "Оля"];*/
-
     if (props.mode === 'edit') {
-        // получаем из бд имя команды и капитана, выбранные ранее
-        teamName = 'Сахара опять не будет';
-        captain = 'Коля';
+        //TODO получаем из бд имя капитана, выбранное ранее
+        teamName = location.state.name;
+        // captain = 'Коля';
     }
 
     const handleAutocompleteChange = (event: React.SyntheticEvent, value: string | null) => {
@@ -46,7 +46,7 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
-        const request = await fetch('/teams/', {
+        await fetch('/teams/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8',
@@ -57,9 +57,13 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
                 captain
             })
         });
+        //TODO если тут ошибка, меняем isNameInvalid на true и делаем return false, иначе все ок, устанавливаем isCreatedSuccessfully в true и редиректимся
     }
 
-    return (
+    return isCreatedSuccessfully
+        ? <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'} />
+        :
+        (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
                 {
@@ -71,8 +75,17 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
 
             <form className={classes.teamCreationForm} onSubmit={handleSubmit}>
                 <div className={classes.contentWrapper}>
+                    {isNameInvalid ? <Alert severity='error' sx={{
+                        width: '90%',
+                        color: 'white',
+                        backgroundColor: '#F44336',
+                        marginBottom: '2vh',
+                        '& .MuiAlert-icon': {
+                            color: 'white'
+                        }
+                    }}>Такая команда уже существует</Alert> : null}
                     <CustomInput type='text' id='teamName' name='teamName' placeholder='Название' defaultValue={teamName}
-                                 onChange={handleInputChange}/>
+                                 onChange={handleInputChange} isInvalid={isNameInvalid} />
 
                     <Autocomplete
                         disablePortal
@@ -81,10 +94,6 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
                         options={usersFromDB}
                         defaultValue={captain}
                         onChange={handleAutocompleteChange}
-                        popupIcon={<ExpandMoreRoundedIcon fontSize={'medium'}
-                            sx={{fontSize: "2.2vw",
-                                color: 'var(--foreground-color)'}}
-                        />}
                         sx={{
                             border: 'none',
                             fontSize: '1.5vw',
@@ -110,6 +119,9 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
                                 border: '2px solid var(--foreground-color) !important',
                                 borderRadius: '8px',
                                 minHeight: '26px',
+                            },
+                            '& .MuiSvgIcon-root': {
+                                color: 'var(--background-color)'
                             }
                         }}
                         renderInput={(params) => <TextField {...params} placeholder="Капитан" />}
@@ -126,4 +138,4 @@ const CommandCreator: FC<CommandCreatorProps> = props => {
     );
 };
 
-export default CommandCreator;
+export default TeamCreator;

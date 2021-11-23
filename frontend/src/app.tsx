@@ -7,6 +7,8 @@ import AdminStartScreen from "./pages/admin-start-screen/admin-start-screen";
 import GameCreator from "./pages/game-creation/game-creation";
 import TeamCreator from "./pages/team-creation/team-creation";
 import UserStartScreen from "./pages/user-start-screen/user-start-screen";
+import RestoringPassword from "./pages/restoring-password/restoring-password";
+import Profile from "./pages/profile/profile";
 
 const App: FC = () => {
     return (
@@ -17,20 +19,56 @@ const App: FC = () => {
                     <Authorization isAdmin={true} />
                 </Route>
                 <Route path="/registration" component={Registration} exact={true} />
-                <Route path="/admin/start-screen" component={AdminStartScreen} exact={true} />
-                <Route path="/start-screen" component={UserStartScreen} />
+
                 <Route path="/game-creation" exact={true}>
                     <GameCreator mode="creation" />
                 </Route>
-                <Route path="/game-creation/edit" >
-                    <GameCreator mode="edit" />
-                </Route>
+                <Route path="/game-creation/edit" render={(props) => <GameCreator mode='edit' {...props}/>} />
+
                 <Route path="/team-creation" exact={true}>
-                    <TeamCreator mode="creation" />
+                    <TeamCreator mode="creation" isAdmin={true} />
                 </Route>
-                <Route path="/team-creation/edit">
-                    <TeamCreator mode="edit" />
+                <Route path="/team-creation/edit" render={(props) => <TeamCreator mode='edit' isAdmin={true} {...props} />} />
+
+                <Route path='/admin/start-screen' exact={true}>
+                    <AdminStartScreen isSuperAdmin={true} />
                 </Route>
+                <Route path='/start-screen' exact={true} component={UserStartScreen} />
+
+                <Route path='/restore-password' exact={true}>
+                    <RestoringPassword isAdmin={false} />
+                </Route>
+                <Route path='/admin/restore-password' exact={true}>
+                    <RestoringPassword isAdmin={true} />
+                </Route>
+
+                <Route path='/admin/profile'>
+                    <Profile isAdmin={true} />
+                </Route>
+                <Route path='/profile'>
+                    <Profile isAdmin={false} />
+                </Route>
+
+                {/*<Route path="/admin/start-screen" exact={true}>*/}
+                {/*    <AdminStartScreen page=''/>*/}
+                {/*</Route>*/}
+                {/*<Route path="/admin/games" exact={true}>*/}
+                {/*    <AdminStartScreen page='games' />*/}
+                {/*</Route>*/}
+                {/*<Route path='/admin/teams' exact={true}>*/}
+                {/*    <AdminStartScreen page='teams' />*/}
+                {/*</Route>*/}
+                {/*<Route path='/admins' exact={true}>*/}
+                {/*    <AdminStartScreen page='admins' />*/}
+                {/*</Route>*/}
+
+                {/*<Route path='/games' exact={true}>*/}
+                {/*    <UserStartScreen page='games' />*/}
+                {/*</Route>*/}
+                {/*<Route path='/teams' exact={true}>*/}
+                {/*    <UserStartScreen page='teams' />*/}
+                {/*</Route>*/}
+
                 <Redirect from='*' to='/'/>
             </Switch>
         </Wrapper>

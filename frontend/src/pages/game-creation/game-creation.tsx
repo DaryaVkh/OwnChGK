@@ -8,10 +8,13 @@ import {GameCreatorProps} from '../../entities/game-creator/game-creator.interfa
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {getAll} from '../../server-api/server-api';
+import {Link} from 'react-router-dom';
+import {useLocation} from "react-router-dom";
 
 const GameCreator: FC<GameCreatorProps> = props => {
     const [teamsFromDB, setTeamsFromDB] = useState([]);
     const [isTeamsFound, setIsTeamsFound] = useState(true);
+    const location = useLocation<{name: string}>();
     let gameName: string = '';
     let questionsCount: number = 0;
     let toursCount: number = 0;
@@ -39,12 +42,11 @@ const GameCreator: FC<GameCreatorProps> = props => {
         'Команда 2', 'Не грози Южному автовокзалу', 'Ума палата №6', 'ЧКГ-шки ниндзя'])*/
 
     if (props.mode === 'edit') {
-        // получаем все с бд: имя игры, которую редачим, количество туров, вопросов в туре
-        // и ранее выбранные команды
-        chosenTeamsFromDB.push(...['Команда 1', 'Сахара опять не будет']);
-        gameName = 'ЧГК на конфУРе-2021';
-        toursCount = 3;
-        questionsCount = 10;
+        gameName = location.state.name;
+        // TODO получаем все с бд: количество туров, вопросов в туре и команды для игры, которую редачим
+        // chosenTeamsFromDB.push(...['Команда 1', 'Сахара опять не будет']);
+        // toursCount = 3;
+        // questionsCount = 10;
     }
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
@@ -56,7 +58,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
         }
     }
 
-    const renderCommands = () => {
+    const renderTeams = () => {
         return teamsFromDB.map((name, index) => {
             return chosenTeamsFromDB.includes(name)
                 ? <CustomCheckbox name={name} key={index} checked={true} onChange={handleCheckboxChange}/>
@@ -66,7 +68,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
-        const request = await fetch('/games/', {
+        await fetch('/games/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8',
@@ -136,28 +138,30 @@ const GameCreator: FC<GameCreatorProps> = props => {
                         </div>
                     </div>
 
-                    <div className={classes.commandsWrapper}>
-                        <div className={classes.commandsLabel}>
+                    <div className={classes.teamsWrapper}>
+                        <div className={classes.teamsLabel}>
                             Команды
                         </div>
 
-                        <div className={classes.commandsDiv}>
-                            <Scrollbars autoHide autoHideTimeout={500} autoHideDuration={200} renderThumbVertical={() =>
+                        <div className={classes.teamsDiv}>
+                            <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500} autoHideDuration={200} renderThumbVertical={() =>
                                 <div style={{backgroundColor: 'transparent'}}/>} renderTrackVertical={() =>
                                 <div style={{backgroundColor: 'transparent'}}/>}>
 
-                                {teamsFromDB ? renderCommands() : null}
+                                {teamsFromDB ? renderTeams() : null}
 
                             </Scrollbars>
                         </div>
                     </div>
                 </div>
 
-                <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
-                            style={{
-                                padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
-                                filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
-                            }}/>
+                <Link className={classes.link} to='/admin/start-screen'>
+                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
+                                style={{
+                                    padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
+                                    filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
+                                }}/>
+                </Link>
             </form>
         </PageWrapper>
     );
