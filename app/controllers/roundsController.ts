@@ -1,13 +1,16 @@
-import DataBase from '../dbconfig/dbconnector';
+/*import DataBase from '../dbconfig/dbconnector';*/
+import {getCustomRepository} from 'typeorm';
+import {RoundRepository} from '../db/repositories/roundRepository';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 
 
-class RoundsController {
+export class RoundsController {
     public async getAll(req: Request, res: Response) {
         try {
-            const rounds = await DataBase.getRounds(req.body.gameId);
-            res.send(rounds);
+            const gameName = req.body.gameName;
+            const rounds = await getCustomRepository(RoundRepository).findByGameName(gameName);
+            res.status(200).json(rounds);
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);
         }
@@ -19,13 +22,20 @@ class RoundsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const number = req.body.number;
-            const gameId = req.body.gameId;
-            const questionNumber = req.body.questionNumber;
-            const questionCost = req.body.questionCost;
-            const questionTime = req.body.questionTime;
-            await DataBase.insertRound(number, gameId, questionNumber, questionCost, questionTime);
-            res.status(200);
+            const {
+                number,
+                gameName,
+                questionCount,
+                questionCost,
+                questionTime
+            } = req.body;
+            await getCustomRepository(RoundRepository).insertByParams(
+                number,
+                gameName,
+                questionCount,
+                questionCost,
+                questionTime);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -37,10 +47,9 @@ class RoundsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const gameId = req.body.gameId;
-            const number = req.body.number;
-            await DataBase.deleteRound(gameId, number);
-            res.status(200);
+            const {gameName, number} = req.body;
+            await getCustomRepository(RoundRepository).deleteByGameNameAndNumber(gameName, number);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -52,18 +61,17 @@ class RoundsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const gameId = req.body.gameId;
-            const number = req.body.number;
-            const newNumber = req.body.newNumber;
-            const newQuestionNumber = req.body.newQuestionNumber;
-            const newQuestionCost = req.body.newQuestionCost;
-            const newQuestionTime = req.body.newQuestionTime;
-            await DataBase.changeRoundSettings(gameId, number, newNumber, newQuestionNumber, newQuestionCost, newQuestionTime);
-            res.status(200);
+            const {
+                number,
+                gameName,
+                newQuestionCount,
+                newQuestionCost,
+                newQuestionTime
+            } = req.body;
+            await getCustomRepository(RoundRepository).updateByParams(number, gameName, newQuestionCount, newQuestionCost, newQuestionTime);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
     }
 }
-
-export default RoundsController;

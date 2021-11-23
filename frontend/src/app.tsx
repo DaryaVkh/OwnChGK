@@ -9,17 +9,19 @@ import TeamCreator from "./pages/team-creation/team-creation";
 import UserStartScreen from "./pages/user-start-screen/user-start-screen";
 import RestoringPassword from "./pages/restoring-password/restoring-password";
 import Profile from "./pages/profile/profile";
+import Socket from "./pages/socket";
 
 const App: FC = () => {
     return (
         <Wrapper>
             <Switch>
                 <Route path={['/', '/auth']} component={Authorization} exact={true} />
-                <Route path={'/admin'} exact={true} >
+                <Route path={'/admin'} >
                     <Authorization isAdmin={true} />
                 </Route>
+                <Route path='/answer' component={Socket} exact={true}/>
                 <Route path="/registration" component={Registration} exact={true} />
-
+                <Route path="/start-screen" component={AdminStartScreen} exact={true} />
                 <Route path="/game-creation" exact={true}>
                     <GameCreator mode="creation" />
                 </Route>

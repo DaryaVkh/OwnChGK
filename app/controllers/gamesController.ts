@@ -1,14 +1,15 @@
-import DataBase from '../dbconfig/dbconnector';
 import {validationResult} from 'express-validator';
+import {getCustomRepository} from 'typeorm';
+import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
 import jwt from "jsonwebtoken";
 import {secret} from "../jwtToken";
 
 
-class GamesController {
+export class GamesController {
     public async getAll(req: Request, res: Response) {
         try {
-            const games = await DataBase.getAllGames();
+            const games = await getCustomRepository(GameRepository).find();
             res.status(200).json({
                 'games': games.map(value => value.name)
             });
@@ -19,8 +20,9 @@ class GamesController {
 
     public async getAllTeams(req: Request, res: Response) {
         try {
-            const teams = await DataBase.getGameTeams(req.body.gameId);
-            res.send(teams);
+            const {gameName} = req.body;
+            const game = await getCustomRepository(GameRepository).findByName(gameName);
+            res.status(200).json(game.teams.map(team => team.name));
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);
         }
@@ -36,16 +38,9 @@ class GamesController {
             const token = req.cookies['authorization'];
             const payLoad = jwt.verify(token, secret);
             if (typeof payLoad !== "string") {
-                const adminId = payLoad.id;
-                const {game_id: gameId} = await DataBase.insertGame(gameName, adminId);
-                for (let i=1; i<=toursCount; i++) {
-                    await DataBase.insertRound(i, gameId, questionsCount, 1, 60);
-                }
-                for (const team of teams) {
-                    const t = await DataBase.getTeam(team);
-                    await DataBase.insertTeamToGame(t.team_id, gameId);
-                }
-                res.status(200);
+                await getCustomRepository(GameRepository).insertByParams(
+                    gameName, payLoad.email, toursCount, questionsCount, 1, 60, teams);
+                res.status(200).json({});
             }
             else {
                 res.send("You are not admin");
@@ -61,9 +56,9 @@ class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const name = req.body.name;
-            await DataBase.deleteGame(name);
-            res.status(200);
+            const {name} = req.body;
+            await getCustomRepository(GameRepository).deleteByName(name);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -75,10 +70,9 @@ class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const name = req.body.name;
-            const newName = req.body.newName;
-            await DataBase.changeGameName(name, newName);
-            res.status(200);
+            const {name, newName} = req.body;
+            await getCustomRepository(GameRepository).updateByNames(name, newName);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -90,10 +84,9 @@ class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const name = req.body.name;
-            const admin = req.body.admin;
-            await DataBase.changeTeamCaptainId(name, admin);
-            res.status(200);
+            const {name, admin} = req.body;
+            await getCustomRepository(GameRepository).updateByNameAndAdminEmail(name, admin);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -105,8 +98,9 @@ class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const game = await DataBase.getGame(req.body.name);
-            res.send(game);
+            const {name} = req.body;
+            const game = await getCustomRepository(GameRepository).findByName(name)
+            res.status(200).json(game);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -118,14 +112,11 @@ class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const name = req.body.name;
-            const status = req.body.status;
-            await DataBase.changeGameStatus(name, status);
-            res.status(200);
+            const {name, status} = req.body;
+            await getCustomRepository(GameRepository).updateByNameAndStatus(name, status);
+            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
     }
 }
-
-export default GamesController;
