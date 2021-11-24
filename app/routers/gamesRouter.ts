@@ -9,12 +9,13 @@ export const gamesRouter = () => {
     const gamesController = new GamesController();
 
     router.get('/', middleware, gamesController.getAll);
-    router.get('/game', middleware, gamesController.getGame);
-    router.get('/teams', middleware, gamesController.getAllTeams);
-    router.patch('/status', roleMiddleware(true), gamesController.changeGameStatus);
-    router.patch('/name', roleMiddleware(true), gamesController.editGameName);
-    router.patch('/admin', roleMiddleware(true), gamesController.editGameAdmin);
-    router.delete('/game', roleMiddleware(true), gamesController.deleteGame);
+    router.get('/:gameName', middleware, gamesController.getGame);
+    router.get('/:gameName/teams', middleware, gamesController.getAllTeams);
+    router.patch('/:gameName/change', roleMiddleware(true), gamesController.changeGame)
+    router.patch('/:gameName/changeStatus', roleMiddleware(true), gamesController.changeGameStatus);
+    router.patch('/:gameName/changeName', roleMiddleware(true), gamesController.editGameName);
+    router.patch('/:gameName/changeAdmin', roleMiddleware(true), gamesController.editGameAdmin);
+    router.delete('/:gameName', roleMiddleware(true), gamesController.deleteGame);
 
     router.post('/', roleMiddleware(true), gamesController.insertGame);
 

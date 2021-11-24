@@ -8,12 +8,16 @@ import {generateAccessToken} from '../jwtToken';
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
         try {
-            const users = await getCustomRepository(UserRepository).find();
+            const {withoutTeam} = req.query;
+            const users = withoutTeam ?
+                await getCustomRepository(UserRepository).findUsersWithoutTeam()
+                : await getCustomRepository(UserRepository).find();
             res.status(200).json({
                 users: users.map(value => value.email)
             });
         } catch (error) {
-            res.status(400).json({message: 'Error'}).send(error);
+            console.log(error);
+            res.status(400).json({message: error.message});
         }
     }
 

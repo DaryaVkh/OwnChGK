@@ -9,8 +9,8 @@ export const roundsRouter = () => {
     const roundsController = new RoundsController();
 
     router.get('/', middleware, roundsController.getAll);
-    router.patch('/settings', roleMiddleware(true), roundsController.editRound);
-    router.delete('/team', roleMiddleware(true), roundsController.deleteRound);
+    router.patch('/:gameName/:number/change', roleMiddleware(true), roundsController.editRound);
+    router.delete('/:gameName/:number', roleMiddleware(true), roundsController.deleteRound);
 
     router.post('/', () => roundsController.insertRound);
 

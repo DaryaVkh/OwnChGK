@@ -5,7 +5,7 @@ import {User} from '../entities/User';
 @EntityRepository(Team)
 export class TeamRepository extends Repository<Team> {
     findByName(name: string) {
-        return this.findOne({name});
+        return this.findOne({name}, {relations: ['captain']});
     }
 
     insertByNameAndUserEmail(name: string, userEmail: string) {
@@ -17,6 +17,18 @@ export class TeamRepository extends Repository<Team> {
 
     deleteByName(name: string) {
         return this.delete({name});
+    }
+
+    updateByParams(name: string, newName: string, captainEmail: string) {
+        return this.manager.transaction(manager => {
+            return manager.findOne(Team, {'name': name})
+                .then(team => manager.findOne(User, {'email': captainEmail})
+                    .then(user => {
+                        team.name = newName;
+                        team.captain = user === undefined ? null : user;
+                        return manager.save(Team, team);
+                    }));
+        });
     }
 
     updateByNames(name: string, newName: string) {

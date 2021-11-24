@@ -1,17 +1,17 @@
 import React, {Dispatch, FC, SetStateAction, useCallback, useEffect, useRef, useState} from 'react';
 import classes from './admin-start-screen.module.scss';
-import Header from "../../components/header/header";
-import NavBar from "../../components/nav-bar/nav-bar";
-import PageWrapper from "../../components/page-wrapper/page-wrapper";
-import {AdminStartScreenProps} from "../../entities/admin-start-screen/admin-start-screen.interfaces";
-import {IconButton, OutlinedInput, Button} from "@mui/material";
+import Header from '../../components/header/header';
+import NavBar from '../../components/nav-bar/nav-bar';
+import PageWrapper from '../../components/page-wrapper/page-wrapper';
+import {AdminStartScreenProps} from '../../entities/admin-start-screen/admin-start-screen.interfaces';
+import {IconButton, OutlinedInput, Button} from '@mui/material';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
-import {Scrollbars} from "rc-scrollbars";
+import {Scrollbars} from 'rc-scrollbars';
 import {Link} from 'react-router-dom';
-import InputWithAdornment from "../../components/input-with-adornment/input-with-adornment";
-import {getAll} from "../../server-api/server-api";
-import Modal from "../../components/modal/modal";
-import CloseIcon from "@mui/icons-material/Close";
+import InputWithAdornment from '../../components/input-with-adornment/input-with-adornment';
+import {getAll} from '../../server-api/server-api';
+import Modal from '../../components/modal/modal';
+import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 
 const inputStyles = {
@@ -51,13 +51,15 @@ const AdminComponent: FC<AdminProps> = props => {
 
     return (
         <div className={props.isSuperAdmin ? classes.superAdminInfoWrapper : classes.adminInfoWrapper}>
-            <OutlinedInput readOnly sx={inputStyles} className={`${classes.adminName} ${classes.adminInput}`} value={props.name} />
-            <OutlinedInput readOnly sx={inputStyles} className={`${classes.adminEmail} ${classes.adminInput}`} value={props.email} />
+            <OutlinedInput readOnly sx={inputStyles} className={`${classes.adminName} ${classes.adminInput}`}
+                           value={props.name}/>
+            <OutlinedInput readOnly sx={inputStyles} className={`${classes.adminEmail} ${classes.adminInput}`}
+                           value={props.email}/>
             {
                 props.isSuperAdmin
                     ? <Button className={classes.adminButton} onClick={handleDeleteClick}>
                         <CloseIcon sx={{color: 'red', fontSize: '5vmin'}}/>
-                      </Button>
+                    </Button>
                     : null
             }
         </div>
@@ -65,13 +67,15 @@ const AdminComponent: FC<AdminProps> = props => {
 }
 
 const AdminStartScreen: FC<AdminStartScreenProps> = props => {
-    const [page, setPage] = useState("games");
+    const [page, setPage] = useState('games');
     const [teams, setTeams] = useState<string[]>([]);
     const [games, setGames] = useState<string[]>([]);
-    const [isTeamsFound, setIsTeamsFound] = useState(true);
+    const [isTeamsFound, setIsTeamsFound] = useState(false);
+    const [isGamesFound, setIsGamesFound] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [deletedItemName, setDeletedItemName] = useState('');
     const [admins, setAdmins] = useState<Admin[]>([]);
+    const [isAdminsFound, setIsAdminsFound] = useState(false);
     const [newAdmin, setNewAdmin] = useState<Admin | null>(null);
     const [isEmailInvalid, setIsEmailInvalid] = useState(false);
     const scrollbars = useRef<Scrollbars>(null);
@@ -93,30 +97,58 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         }
     };
 
-    if (!teams || teams.length < 1) {
-        if (isTeamsFound) {
-            getAll('/teams/').then(data => {
-                if (data['teams'].length > 0) {
-                    setTeams(data['teams']);
-                } else {
-                    setIsTeamsFound(false);
-                }
-            });
-        }
+    if (!isTeamsFound && !isGamesFound && !isAdminsFound) {
+        getAll('/teams/').then(res => {
+            if (res.status === 200) {
+                res.json().then(({teams}) => {
+                    setIsTeamsFound(true);
+                    setTeams(teams);
+                });
+            } else {
+                // TODO: код не 200, мейби всплывашку, что что-то не так?
+            }
+        });
+
+        getAll('/games/').then(res => {
+            if (res.status === 200) {
+                res.json().then(({games}) => {
+                    setIsGamesFound(true);
+                    setGames(games);
+                });
+            } else {
+                // TODO: код не 200, мейби всплывашку, что что-то не так?
+            }
+        });
+
+        getAll('/admins/').then(res => {
+            if (res.status === 200) {
+                res.json().then(({admins}) => {
+                    setIsAdminsFound(true);
+                    setAdmins(admins);
+                });
+            } else {
+                // TODO: код не 200, мейби всплывашку, что что-то не так?
+            }
+        });
     }
 
     const renderTeams = () => {
-        return teams.map((team, index) => <InputWithAdornment name={team} key={index} type='team' openModal={setIsModalVisible} setItemForDeleteName={setDeletedItemName}/>);
+        return teams.map((team, index) => <InputWithAdornment name={team} key={index} type="team"
+                                                              openModal={setIsModalVisible}
+                                                              setItemForDeleteName={setDeletedItemName}/>);
     }
 
     const renderGames = () => {
-        return games.map((game, index) => <InputWithAdornment name={game} key={index} type='game' openModal={setIsModalVisible} setItemForDeleteName={setDeletedItemName}/>);
+        return games.map((game, index) => <InputWithAdornment name={game} key={index} type="game"
+                                                              openModal={setIsModalVisible}
+                                                              setItemForDeleteName={setDeletedItemName}/>);
     }
 
     const renderAdmins = () => {
         let adminsForRender = [];
         for (let admin of admins) {
-            adminsForRender.push(<AdminComponent key={admins.indexOf(admin)} name={admin.name} email={admin.email} deleteAdmin={setAdmins} isSuperAdmin={props.isSuperAdmin}/>);
+            adminsForRender.push(<AdminComponent key={admins.indexOf(admin)} name={admin.name} email={admin.email}
+                                                 deleteAdmin={setAdmins} isSuperAdmin={props.isSuperAdmin}/>);
         }
         return adminsForRender;
     }
@@ -154,7 +186,8 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                     <div className={classes.containerWrapper}>
                         <div className={classes.box}>
                             <div className={classes.gamesWrapper}>
-                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500} autoHideDuration={200}
+                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
+                                            autoHideDuration={200}
                                             renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
                                             renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
                                             classes={{view: classes.scrollbarView}}>
@@ -164,12 +197,12 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                             </div>
 
                             <div className={classes.addButtonWrapper}>
-                                <Link to='/game-creation'>
+                                <Link to="/game-creation">
                                     <IconButton sx={{padding: '13px'}}>
                                         <AddCircleOutlineOutlinedIcon sx={{
                                             color: 'white',
                                             fontSize: '9vmin'
-                                        }} />
+                                        }}/>
                                     </IconButton>
                                 </Link>
                             </div>
@@ -181,7 +214,8 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                     <div className={classes.containerWrapper}>
                         <div className={classes.box}>
                             <div className={classes.teamsWrapper}>
-                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500} autoHideDuration={200}
+                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
+                                            autoHideDuration={200}
                                             renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
                                             renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
                                             classes={{view: classes.scrollbarView}}>
@@ -191,12 +225,12 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                             </div>
 
                             <div className={classes.addButtonWrapper}>
-                                <Link to='/team-creation'>
+                                <Link to="/team-creation">
                                     <IconButton sx={{padding: '13px'}}>
                                         <AddCircleOutlineOutlinedIcon sx={{
                                             color: 'white',
                                             fontSize: '9vmin'
-                                        }} />
+                                        }}/>
                                     </IconButton>
                                 </Link>
                             </div>
@@ -207,8 +241,10 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                 return (
                     <div className={classes.adminsWrapper}>
                         <div className={props.isSuperAdmin ? classes.box : `${classes.box} ${classes.adminBox}`}>
-                            <div className={props.isSuperAdmin ? classes.superAdminWrapper : classes.adminsWrapperWithScrollbar}>
-                                <Scrollbars ref={scrollbars} className={classes.scrollbar} autoHide autoHideTimeout={500} autoHideDuration={200}
+                            <div
+                                className={props.isSuperAdmin ? classes.superAdminWrapper : classes.adminsWrapperWithScrollbar}>
+                                <Scrollbars ref={scrollbars} className={classes.scrollbar} autoHide
+                                            autoHideTimeout={500} autoHideDuration={200}
                                             renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
                                             renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
                                             classes={{view: classes.scrollbarView}}>
@@ -219,8 +255,12 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                                         newAdmin !== null
                                             ?
                                             <div className={classes.superAdminInfoWrapper}>
-                                                <OutlinedInput id='new-admin-name' sx={inputStyles} className={`${classes.adminName} ${classes.adminInput}`} placeholder='Имя' />
-                                                <OutlinedInput id='new-admin-email' type='email' sx={emailStyles} className={`${classes.adminEmail} ${classes.adminInput}`} placeholder='Email*' />
+                                                <OutlinedInput id="new-admin-name" sx={inputStyles}
+                                                               className={`${classes.adminName} ${classes.adminInput}`}
+                                                               placeholder="Имя"/>
+                                                <OutlinedInput id="new-admin-email" type="email" sx={emailStyles}
+                                                               className={`${classes.adminEmail} ${classes.adminInput}`}
+                                                               placeholder="Email*"/>
                                                 <Button className={classes.adminButton} onClick={handleAddNewAdmin}>
                                                     <AddIcon sx={{color: 'green', fontSize: '5vmin'}}/>
                                                 </Button>
@@ -236,7 +276,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                                     <AddCircleOutlineOutlinedIcon sx={{
                                         color: 'white',
                                         fontSize: '9vmin'
-                                    }} />
+                                    }}/>
                                 </IconButton>
                                 : null
                             }
@@ -249,10 +289,12 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <NavBar isAdmin={true} page={page} onLinkChange={setPage} />
+                <NavBar isAdmin={true} page={page} onLinkChange={setPage}/>
             </Header>
 
-            {isModalVisible ? <Modal deleteElement={page === 'teams' ? setTeams : setGames} closeModal={setIsModalVisible} itemForDeleteName={deletedItemName}/> : null}
+            {isModalVisible ?
+                <Modal deleteElement={page === 'teams' ? setTeams : setGames} closeModal={setIsModalVisible}
+                       itemForDeleteName={deletedItemName} type={page === 'teams' ? 'team' : 'game'}/> : null}
 
             {renderPage(page)}
         </PageWrapper>

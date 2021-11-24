@@ -3,11 +3,12 @@ import {Game} from '../entities/Game';
 import {RoundRepository} from './roundRepository';
 import {Team} from '../entities/Team';
 import {Admin} from '../entities/Admin';
+import {Round} from '../entities/Round';
 
 @EntityRepository(Game)
 export class GameRepository extends Repository<Game> {
     findByName(name: string) {
-        return this.findOne({name});
+        return this.findOne({name}, {relations: ['teams', 'rounds']});
     }
 
     insertByParams(name: string,
@@ -20,11 +21,32 @@ export class GameRepository extends Repository<Game> {
         return this.manager.transaction(manager => manager.findOne(Admin, {'email': adminEmail})
             .then(admin => manager.find(Team, {'name': In(teams)})
                 .then(teams => manager.create(Game, {name, admin, teams}).save())
-                .then(() => {
-                    const roundRepository = getCustomRepository(RoundRepository);
+                .then(game => {
                     for (let i = 1; i <= questionCount; i++) {
-                        roundRepository.insertByParams(i, name, questionCount, questionCost, questionTime).then(() => {});
+                        manager.insert(Round, {number: i, game, questionCount, questionCost, questionTime});
                     }
+                })));
+    }
+
+    updateByParams(name: string,
+                   newName: string,
+                   roundCount: number,
+                   questionCount: number,
+                   questionCost: number,
+                   questionTime: number,
+                   teams: string[]) {
+        return this.manager.transaction(manager => manager.find(Team, {'name': In(teams)})
+            .then(teams => manager.findOne(Game, {name})
+                .then(game => {
+                    game.teams = teams
+                    return manager.save(Game, game);
+                })
+                .then(game => {
+                    manager.delete(Round, {game}).then(() => {
+                        for (let i = 1; i <= questionCount; i++) {
+                            manager.insert(Round, {number: i, game, questionCount, questionCost, questionTime});
+                        }
+                    })
                 })));
     }
 

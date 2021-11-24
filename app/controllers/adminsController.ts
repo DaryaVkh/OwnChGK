@@ -8,9 +8,12 @@ import {generateAccessToken} from '../jwtToken';
 export class AdminsController {
     public async getAll(req: Request, res: Response) {
         try {
-            const admins = await getCustomRepository(AdminRepository).find();
+            const admins = await getCustomRepository(AdminRepository).find(); // TODO: а мейби суперадминов не надо?
             res.status(200).json({
-                admins: admins.map(value => value.email)
+                admins: admins.map(value => ({
+                    email: value.email,
+                    name: value.name
+                }))
             });
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);

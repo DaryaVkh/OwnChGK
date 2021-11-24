@@ -3,6 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import React, {FC, useCallback} from "react";
 import classes from './modal.module.scss';
 import {ModalProps} from "../../entities/modal/modal.interfaces";
+import {deleteGame, deleteTeam} from '../../server-api/server-api';
 
 const Modal: FC<ModalProps> = props => {
     const handleCloseModal = useCallback(e => {
@@ -15,7 +16,12 @@ const Modal: FC<ModalProps> = props => {
 
     const handleDelete = useCallback(e => {
         props.deleteElement(arr => arr.filter(el => el !== props.itemForDeleteName));
-        //TODO вот здесь удаляем из базы тиму или игру, если нужно, пробросим пропсу, чтобы различать
+        if (props.type === 'game') {
+            deleteGame(props.itemForDeleteName);
+        } else {
+            deleteTeam(props.itemForDeleteName);
+        }
+        //TODO а если ответ не 200?
     }, [props]);
 
     const handleDeleteClick = (e: React.SyntheticEvent) => {

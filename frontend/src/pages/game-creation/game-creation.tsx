@@ -7,30 +7,69 @@ import {Scrollbars} from 'rc-scrollbars';
 import {GameCreatorProps} from '../../entities/game-creator/game-creator.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
-import {getAll} from '../../server-api/server-api';
-import {Link} from 'react-router-dom';
-import {useLocation} from "react-router-dom";
+import {getAll, getGame, createGame, editGame} from '../../server-api/server-api';
+import {Redirect, useLocation} from 'react-router-dom';
+
+let gameName: string = '';
+let oldGameName: string = '';
+let questionsCount: number = 0;
+let toursCount: number = 0;
+const teams: string[] = [];
 
 const GameCreator: FC<GameCreatorProps> = props => {
     const [teamsFromDB, setTeamsFromDB] = useState([]);
-    const [isTeamsFound, setIsTeamsFound] = useState(true);
-    const location = useLocation<{name: string}>();
-    let gameName: string = '';
-    let questionsCount: number = 0;
-    let toursCount: number = 0;
-    const teams: string[] = [];
+    const [isTeamsFound, setIsTeamsFound] = useState(false);
+    const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
+    const location = useLocation<{ name: string }>();
+    const [editingGameParams, setEditingGameParams] = useState<{
+        toursCount: number,
+        questionsCount: number,
+        chosenTeams: string[] | undefined
+    }>({
+        toursCount: 0,
+        questionsCount: 0,
+        chosenTeams: undefined
+    });
+    const [isEditingGameParamsLoaded, setEditingGameParamsLoaded] = useState(false);
 
-    const chosenTeamsFromDB: string[] = [];
+    if (!isTeamsFound && !isEditingGameParamsLoaded) {
+        getAll('/teams/').then(res => {
+            if (res.status === 200) {
+                res.json().then(({teams}) => {
+                    setIsTeamsFound(true);
+                    setTeamsFromDB(teams);
+                });
+            } else {
+                // TODO: код не 200, мейби всплывашку, что что-то не так?
+            }
+        });
 
-    if (!teamsFromDB || teamsFromDB.length < 1) {
-        if (isTeamsFound) {
-            getAll('/teams/').then(data => {
-                if (data['teams'].length > 0) {
-                    setTeamsFromDB(data['teams']);
-                } else {
-                    setIsTeamsFound(false);
+        if (props.mode === 'edit') {
+            gameName = location.state.name;
+            oldGameName = location.state.name;
+
+            getGame(oldGameName).then(res => {
+                if (res.status === 200) {
+                    res.json().then(({
+                                         teams,
+                                         roundCount,
+                                         questionCount
+                                     }) => {
+                        toursCount = roundCount;
+                        questionsCount = questionCount;
+                        setEditingGameParamsLoaded(true);
+                        setEditingGameParams({
+                            toursCount: roundCount,
+                            questionsCount: questionCount,
+                            chosenTeams: teams
+                        });
+                    })
                 }
-            });
+            })
+            // TODO получаем все с бд: количество туров, вопросов в туре и команды для игры, которую редачим
+            // chosenTeamsFromDB.push(...['Команда 1', 'Сахара опять не будет']);
+            // toursCount = 3;
+            // questionsCount = 10;
         }
     }
     /*if (error) {
@@ -40,14 +79,6 @@ const GameCreator: FC<GameCreatorProps> = props => {
     // получаем все команды из бд
     /*teamsFromDB.push(...['Команда 1', 'Команда 1', 'Команда 1', 'Сахара опять не будет', 'hdbfkjnakslkdsdlfnjkfvjkfdnklsnckjdsnvjkfdnjkfnv',
         'Команда 2', 'Не грози Южному автовокзалу', 'Ума палата №6', 'ЧКГ-шки ниндзя'])*/
-
-    if (props.mode === 'edit') {
-        gameName = location.state.name;
-        // TODO получаем все с бд: количество туров, вопросов в туре и команды для игры, которую редачим
-        // chosenTeamsFromDB.push(...['Команда 1', 'Сахара опять не будет']);
-        // toursCount = 3;
-        // questionsCount = 10;
-    }
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         let el = event.target as HTMLInputElement;
@@ -59,8 +90,12 @@ const GameCreator: FC<GameCreatorProps> = props => {
     }
 
     const renderTeams = () => {
+        if (props.mode === 'edit' && editingGameParams.chosenTeams === undefined) {
+            return;
+        }
+
         return teamsFromDB.map((name, index) => {
-            return chosenTeamsFromDB.includes(name)
+            return editingGameParams.chosenTeams?.includes(name)
                 ? <CustomCheckbox name={name} key={index} checked={true} onChange={handleCheckboxChange}/>
                 : <CustomCheckbox name={name} key={index} onChange={handleCheckboxChange}/>;
         })
@@ -68,19 +103,21 @@ const GameCreator: FC<GameCreatorProps> = props => {
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
-        await fetch('/games/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                gameName,
-                toursCount,
-                questionsCount,
-                teams
-            })
-        });
+        if (props.mode === 'creation') {
+            await createGame(gameName, toursCount, questionsCount, teams)
+                .then(res => {
+                    if (res.status === 200) {
+                        setIsCreatedSuccessfully(true);
+                    }
+                });
+        } else {
+            await editGame(oldGameName, gameName, toursCount, questionsCount, teams)
+                .then(res => {
+                    if (res.status === 200) {
+                        setIsCreatedSuccessfully(true);
+                    }
+                });
+        }
     }
 
     const handleGameNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +132,10 @@ const GameCreator: FC<GameCreatorProps> = props => {
         questionsCount = +event.target.value;
     }
 
-    return (
+    return isCreatedSuccessfully
+        ? <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
+        :
+        (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
                 {
@@ -120,7 +160,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                    type="number"
                                    id="toursCount"
                                    name="toursCount"
-                                   defaultValue={toursCount || ''}
+                                   defaultValue={editingGameParams.toursCount || ''}
                                    required={true}
                                    onChange={handleToursCountChange}/>
                         </div>
@@ -132,7 +172,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                    type="number"
                                    id="questionsCount"
                                    name="questionsCount"
-                                   defaultValue={questionsCount || ''}
+                                   defaultValue={editingGameParams.questionsCount || ''}
                                    required={true}
                                    onChange={handleQuestionsCountChange}/>
                         </div>
@@ -144,24 +184,25 @@ const GameCreator: FC<GameCreatorProps> = props => {
                         </div>
 
                         <div className={classes.teamsDiv}>
-                            <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500} autoHideDuration={200} renderThumbVertical={() =>
+                            <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
+                                        autoHideDuration={200} renderThumbVertical={() =>
                                 <div style={{backgroundColor: 'transparent'}}/>} renderTrackVertical={() =>
                                 <div style={{backgroundColor: 'transparent'}}/>}>
 
-                                {teamsFromDB ? renderTeams() : null}
+                                {renderTeams()}
 
                             </Scrollbars>
                         </div>
                     </div>
                 </div>
 
-                <Link className={classes.link} to='/admin/start-screen'>
-                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
-                                style={{
-                                    padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
-                                    filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
-                                }}/>
-                </Link>
+                {/*<Link className={classes.link} to='/admin/start-screen'>*/}
+                <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
+                            style={{
+                                padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
+                                filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
+                            }}/>
+                {/*</Link>*/}
             </form>
         </PageWrapper>
     );

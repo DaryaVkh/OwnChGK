@@ -16,12 +16,11 @@ export class Team extends BaseEntity {
         () => User,
         user => user.team,
         {
-            nullable: false,
             onDelete: 'RESTRICT',
-            onUpdate: 'CASCADE'
+            onUpdate: 'CASCADE',
         })
     @JoinColumn({
-        name: 'captain_id',
+        name: 'captain_id'
     })
     captain: User;
 
