@@ -15,13 +15,13 @@ const App: FC = () => {
     return (
         <Wrapper>
             <Switch>
+                <Route path='/answer' component={Socket} exact={true}/>
                 <Route path={['/', '/auth']} component={Authorization} exact={true} />
-                <Route path={'/admin'} >
+                <Route path={'/admin'} exact={true} >
                     <Authorization isAdmin={true} />
                 </Route>
-                <Route path='/answer' component={Socket} exact={true}/>
                 <Route path="/registration" component={Registration} exact={true} />
-                <Route path="/start-screen" component={AdminStartScreen} exact={true} />
+
                 <Route path="/game-creation" exact={true}>
                     <GameCreator mode="creation" />
                 </Route>
