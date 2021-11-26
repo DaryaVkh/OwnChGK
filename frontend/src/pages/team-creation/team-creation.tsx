@@ -8,6 +8,7 @@ import {Alert, Autocomplete, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {createTeam, editTeam, getAll, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
 import {useLocation, Redirect} from 'react-router-dom';
+import NavBar from "../../components/nav-bar/nav-bar";
 
 let teamName: string = '';
 let oldTeamName: string = '';
@@ -89,15 +90,16 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
         (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={true}>
-                    {
-                        props.mode === 'creation'
-                            ? <div className={classes.pageTitle}>Создание команды</div>
-                            : <div className={classes.pageTitle}>Редактирование</div>
-                    }
+                    <NavBar isAdmin={props.isAdmin} page='' />
                 </Header>
 
                 <form className={classes.teamCreationForm} onSubmit={handleSubmit}>
                     <div className={classes.contentWrapper}>
+                        {
+                            props.mode === 'creation'
+                                ? <div className={classes.pageTitle}>Создание команды</div>
+                                : <div className={classes.pageTitle}>Редактирование</div>
+                        }
                         {isNameInvalid ? <Alert severity="error" sx={{
                             width: '90%',
                             color: 'white',

@@ -7,7 +7,7 @@ import {AdminStartScreenProps} from '../../entities/admin-start-screen/admin-sta
 import {IconButton, OutlinedInput, Button} from '@mui/material';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import {Scrollbars} from 'rc-scrollbars';
-import {Link} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import InputWithAdornment from '../../components/input-with-adornment/input-with-adornment';
 import {getAll} from '../../server-api/server-api';
 import Modal from '../../components/modal/modal';
@@ -79,6 +79,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     const [newAdmin, setNewAdmin] = useState<Admin | null>(null);
     const [isEmailInvalid, setIsEmailInvalid] = useState(false);
     const scrollbars = useRef<Scrollbars>(null);
+    let location = useLocation<{page: string}>();
 
     // const [teams, setTeams] = useState<string[]>(['My Best Team', 'Meow', 'Hello', 'Sweet brioches','ChGK','BestTeam', 'Meow Meow', 'Elite', 'Family']);
     // const [admins, setAdmins] = useState<Admin[]>([{name: 'Павел Булгаков', email: 'parasite@comcast.net'}, {name: 'Владислав Сергеев', email: 'olaf.greenholt@larkin.com'}, {name: 'Василиса Суворова', email: 'cebileprei@yopmail.com'}, {name: 'Ульяна Королева', email: 'jeuquoutren@yopmail.com'}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}]);
@@ -96,6 +97,12 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
             color: 'black',
         }
     };
+    
+    useEffect(() => {
+        if (location.state !== undefined) {
+            setPage(location.state.page);
+        }
+    }, [location]);
 
     if (!isTeamsFound && !isGamesFound && !isAdminsFound) {
         getAll('/teams/').then(res => {

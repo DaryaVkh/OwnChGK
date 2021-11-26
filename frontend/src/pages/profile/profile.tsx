@@ -79,9 +79,9 @@ const Profile: FC<ProfileProps> = props => {
                         <div className={classes.changePasswordWrapper}>
                             <p className={classes.changePasswordParagraph}>Изменение пароля</p>
 
-                            <CustomInput type='password' id='old-password' name='old-password' placeholder='Введите старый пароль' style={{marginBottom: '3.5vh'}} isInvalid={isOldPasswordInvalid} />
-                            <CustomInput type='password' id='new-password' name='new-password' placeholder='Введите новый пароль' isInvalid={isRepeatedPasswordInvalid} />
-                            <CustomInput type='password' id='repeat-new-password' name='repeat-new-password' placeholder='Повторите новый пароль' isInvalid={isRepeatedPasswordInvalid} onBlur={checkRepeatedPassword} />
+                            <CustomInput type='password' id='old-password' name='old-password' placeholder='Введите старый пароль' style={{marginBottom: '3.5vh'}} isInvalid={isOldPasswordInvalid} required={false} />
+                            <CustomInput type='password' id='new-password' name='new-password' placeholder='Введите новый пароль' isInvalid={isRepeatedPasswordInvalid} required={false}/>
+                            <CustomInput type='password' id='repeat-new-password' name='repeat-new-password' placeholder='Повторите новый пароль' isInvalid={isRepeatedPasswordInvalid} onBlur={checkRepeatedPassword} required={false} />
 
                             {isOldPasswordInvalid ? <Alert severity='error' sx={{
                                 color: 'white',

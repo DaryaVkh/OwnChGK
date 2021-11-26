@@ -9,6 +9,7 @@ import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {getAll, getGame, createGame, editGame} from '../../server-api/server-api';
 import {Redirect, useLocation} from 'react-router-dom';
+import NavBar from "../../components/nav-bar/nav-bar";
 
 let gameName: string = '';
 let oldGameName: string = '';
@@ -138,72 +139,73 @@ const GameCreator: FC<GameCreatorProps> = props => {
         (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                {
-                    props.mode === 'creation'
-                        ? <div className={classes.pageTitle}>Создание игры</div>
-                        : <div className={classes.pageTitle}>Редактирование</div>
-                }
+                <NavBar isAdmin={props.isAdmin} page='' />
             </Header>
 
-            <form className={classes.gameCreationForm} onSubmit={handleSubmit}>
-                <div className={classes.contentWrapper}>
-                    <div className={classes.gameParametersWrapper}>
-                        <CustomInput type="text" id="gameName"
-                                     name="gameName"
-                                     placeholder="Название игры"
-                                     defaultValue={gameName}
-                                     onChange={handleGameNameChange}/>
+            <div className={classes.pageWrapper}>
+                {
+                    props.mode === 'creation'
+                        ? <p className={classes.pageTitle}>Создание игры</p>
+                        : <p className={classes.pageTitle}>Редактирование</p>
+                }
+                <form className={classes.gameCreationForm} onSubmit={handleSubmit}>
+                    <div className={classes.contentWrapper}>
+                        <div className={classes.gameParametersWrapper}>
+                            <CustomInput type="text" id="gameName"
+                                         name="gameName"
+                                         placeholder="Название игры"
+                                         defaultValue={gameName}
+                                         onChange={handleGameNameChange}/>
 
-                        <div className={classes.toursCountWrapper}>
-                            <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество туров</label>
-                            <input className={classes.toursCountInput}
-                                   type="number"
-                                   id="toursCount"
-                                   name="toursCount"
-                                   defaultValue={editingGameParams.toursCount || ''}
-                                   required={true}
-                                   onChange={handleToursCountChange}/>
+                            <div className={classes.toursCountWrapper}>
+                                <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество туров</label>
+                                <input className={classes.toursCountInput}
+                                       type="number"
+                                       id="toursCount"
+                                       name="toursCount"
+                                       defaultValue={editingGameParams.toursCount || ''}
+                                       required={true}
+                                       onChange={handleToursCountChange}/>
+                            </div>
+
+                            <div className={classes.questionsCountWrapper}>
+                                <label htmlFor="questionsCount" className={classes.questionsCountLabel}>Вопросов в
+                                    туре</label>
+                                <input className={classes.questionsCountInput}
+                                       type="number"
+                                       id="questionsCount"
+                                       name="questionsCount"
+                                       defaultValue={editingGameParams.questionsCount || ''}
+                                       required={true}
+                                       onChange={handleQuestionsCountChange}/>
+                            </div>
                         </div>
 
-                        <div className={classes.questionsCountWrapper}>
-                            <label htmlFor="questionsCount" className={classes.questionsCountLabel}>Вопросов в
-                                туре</label>
-                            <input className={classes.questionsCountInput}
-                                   type="number"
-                                   id="questionsCount"
-                                   name="questionsCount"
-                                   defaultValue={editingGameParams.questionsCount || ''}
-                                   required={true}
-                                   onChange={handleQuestionsCountChange}/>
+                        <div className={classes.teamsWrapper}>
+                            <div className={classes.teamsLabel}>
+                                Команды
+                            </div>
+
+                            <div className={classes.teamsDiv}>
+                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
+                                            autoHideDuration={200} renderThumbVertical={() =>
+                                    <div style={{backgroundColor: 'transparent'}}/>} renderTrackVertical={() =>
+                                    <div style={{backgroundColor: 'transparent'}}/>}>
+
+                                    {renderTeams()}
+
+                                </Scrollbars>
+                            </div>
                         </div>
                     </div>
 
-                    <div className={classes.teamsWrapper}>
-                        <div className={classes.teamsLabel}>
-                            Команды
-                        </div>
-
-                        <div className={classes.teamsDiv}>
-                            <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
-                                        autoHideDuration={200} renderThumbVertical={() =>
-                                <div style={{backgroundColor: 'transparent'}}/>} renderTrackVertical={() =>
-                                <div style={{backgroundColor: 'transparent'}}/>}>
-
-                                {renderTeams()}
-
-                            </Scrollbars>
-                        </div>
-                    </div>
-                </div>
-
-                {/*<Link className={classes.link} to='/admin/start-screen'>*/}
-                <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
-                            style={{
-                                padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
-                                filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
-                            }}/>
-                {/*</Link>*/}
-            </form>
+                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
+                                style={{
+                                    padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
+                                    filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
+                                }}/>
+                </form>
+            </div>
         </PageWrapper>
     );
 }

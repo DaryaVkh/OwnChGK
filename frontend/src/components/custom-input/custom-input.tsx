@@ -9,6 +9,7 @@ export const CustomInput: FC<InputProps> = props => {
         password: '',
         showPassword: false
     });
+
     let required: boolean;
     if (props.required !== undefined) {
         required = props.required;
@@ -58,6 +59,7 @@ export const CustomInput: FC<InputProps> = props => {
                        onChange={props.onChange}
                        style={props.style}
                        required={required}
+                       onFocus={props.onFocus}
                        sx={styles}
                        endAdornment={
                            props.type === 'password'

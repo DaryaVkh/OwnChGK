@@ -31,7 +31,7 @@ export class Server {
                 url: process.env.DATABASE_URL,
                 entities: [User, Admin, Team, Game, Round],
                 synchronize: true, // Не оч безопасно,
-                //ssl: {rejectUnauthorized:false} для хероку
+                ssl: {rejectUnauthorized:false} //для хероку
             }).then(() => {
                 console.log('Connected to Postgres')
                 this.app.use(bodyParser.json()); // 100kb default

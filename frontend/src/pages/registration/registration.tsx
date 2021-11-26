@@ -54,7 +54,7 @@ const Registration: FC = () => {
     }
 
     return loggedIn ? (
-        <Redirect to="/team-creation"/>
+        <Redirect to="/start-screen"/>
     ) : (<PageWrapper>
         <Header isAuthorized={false} isAdmin={false}/>
 

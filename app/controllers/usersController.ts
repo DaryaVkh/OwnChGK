@@ -44,7 +44,6 @@ export class UsersController { // TODO: дописать смену имени �
 
     public async insert(req: Request, res: Response) {
         try {
-            console.log(this); // TODO: Почему-то здесь this === undefined;
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})

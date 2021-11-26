@@ -11,4 +11,5 @@ export interface InputProps {
     style?: object;
     defaultValue?: string;
     required?: boolean;
+    onFocus?: () => void;
 }

@@ -1,16 +1,24 @@
-.gameCreationForm {
+.pageWrapper {
   width: 60%;
   height: 91%;
+  flex-direction: column;
+  justify-content: center;
+  align-self: flex-end;
+}
+
+.gameCreationForm {
+  width: 100%;
+  height: 90%;
   align-self: flex-end;
 }
 
 .pageTitle {
   font-size: 4vmin;
   color: white;
-  display: flex;
   text-align: center;
-  align-self: center;
   font-weight: 300;
+  margin-top: 5vh;
+  margin-bottom: -3vh;
 }
 
 .contentWrapper {

@@ -8,11 +8,12 @@ import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {Alert} from "@mui/material";
 
+let email = '';
+let password = '';
+
 const Authorization: FC<AuthorizationProps> = props => {
     const [loggedIn, setLoggedIn] = useState(false);
     const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState(false);
-    let email = '';
-    let password = '';
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
         await fetch(props.isAdmin ? 'admins/login' : 'users/login', {
@@ -42,8 +43,14 @@ const Authorization: FC<AuthorizationProps> = props => {
         password = event.target.value;
     }
 
+    const handleErrorFixes = () => {
+        if (wrongEmailOrPassword) {
+            setWrongEmailOrPassword(false);
+        }
+    }
+
     return loggedIn ? (
-        <Redirect to={props.isAdmin ? '/admin/start-screen' : '/games'}/>
+        <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
     ) : (
         <PageWrapper>
             <Header isAuthorized={false}/>
@@ -62,9 +69,9 @@ const Authorization: FC<AuthorizationProps> = props => {
                         }
                     }}>Неверный логин или пароль</Alert> : null}
                     <CustomInput type="email" id="email" name="email" placeholder="E-mail"
-                                 onChange={handleEmailChange} isInvalid={wrongEmailOrPassword}/>
+                                 onChange={handleEmailChange} isInvalid={wrongEmailOrPassword} onFocus={handleErrorFixes}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль"
-                                 onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword}/>
+                                 onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword} onFocus={handleErrorFixes}/>
 
                     <FormButton type="signInButton" text="Войти"/>
                 </form>

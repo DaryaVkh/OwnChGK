@@ -42,7 +42,7 @@ const NavBar: FC<NavBarProps> = props => {
     }
 
     const handleLinkChange = useCallback(e => {
-        props.onLinkChange((e.target as HTMLElement).id)
+        props.onLinkChange?.((e.target as HTMLElement).id);
     }, [props])
 
 
@@ -55,7 +55,9 @@ const NavBar: FC<NavBarProps> = props => {
     }, []);
 
     useEffect(() => {
-        activateIndicator();
+        if (props.page !== '') {
+            activateIndicator();
+        }
     }, [props]);
 
     return (
@@ -64,14 +66,14 @@ const NavBar: FC<NavBarProps> = props => {
                 props.isAdmin
                     ?
                     <Fragment>
-                        <Link to='/admin/start-screen' id='games' className={`${classes['nav-item']} ${classes['nav-item-admin']} ${props.page === 'games' ? classes['is-active'] : null}`} onClick={handleIndicator}>Игры</Link>
-                        <Link to='/admin/start-screen' id='teams' className={`${classes['nav-item']} ${classes['nav-item-admin']} ${props.page === 'teams' ? classes['is-active'] : null}`} onClick={handleIndicator}>Команды</Link>
-                        <Link to='/admin/start-screen' id='admins' className={`${classes['nav-item']} ${classes['nav-item-admin']}  ${props.page === 'admins' ? classes['is-active'] : null}`} onClick={handleIndicator}>Админы</Link>
+                        <Link to={{pathname: '/admin/start-screen', state: {page: 'games'}}} id='games' className={`${classes['nav-item']} ${classes['nav-item-admin']} ${props.page === 'games' ? classes['is-active'] : null}`} onClick={handleIndicator}>Игры</Link>
+                        <Link to={{pathname: '/admin/start-screen', state: {page: 'teams'}}} id='teams' className={`${classes['nav-item']} ${classes['nav-item-admin']} ${props.page === 'teams' ? classes['is-active'] : null}`} onClick={handleIndicator}>Команды</Link>
+                        <Link to={{pathname: '/admin/start-screen', state: {page: 'admins'}}} id='admins' className={`${classes['nav-item']} ${classes['nav-item-admin']}  ${props.page === 'admins' ? classes['is-active'] : null}`} onClick={handleIndicator}>Админы</Link>
                     </Fragment>
                     :
                     <Fragment>
-                        <Link to='/start-screen' id='teams' className={`${classes['nav-item']} ${classes['nav-item-user']} ${props.page === 'teams' ? classes['is-active'] : null}`} onClick={handleIndicator}>Команды</Link>
-                        <Link to='/start-screen' id='games' className={`${classes['nav-item']} ${classes['nav-item-user']} ${props.page === 'games' ? classes['is-active'] : null}`} onClick={handleIndicator}>Игры</Link>
+                        <Link to={{pathname: '/start-screen', state: {page: 'teams'}}} id='teams' className={`${classes['nav-item']} ${classes['nav-item-user']} ${props.page === 'teams' ? classes['is-active'] : null}`} onClick={handleIndicator}>Команды</Link>
+                        <Link to={{pathname: '/start-screen', state: {page: 'games'}}} id='games' className={`${classes['nav-item']} ${classes['nav-item-user']} ${props.page === 'games' ? classes['is-active'] : null}`} onClick={handleIndicator}>Игры</Link>
                     </Fragment>
             }
             <span className={`${classes['nav-indicator']}`} id='indicator'/>
