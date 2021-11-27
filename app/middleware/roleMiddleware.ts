@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import {Request, Response, NextFunction} from 'express';
 import {secret} from "../jwtToken";
 
-export function roleMiddleware(roles: boolean) {
+export function roleMiddleware(roles: Set<string>) {
     return function (req: Request, res: Response, next: NextFunction) {
 
         if (req.method === 'OPTIONS') {
@@ -15,13 +15,7 @@ export function roleMiddleware(roles: boolean) {
             }
 
             const {roles: userRoles} = jwt.verify(token, secret) as jwt.JwtPayload;
-
-            let hasRole = false
-            if (roles.toString() === userRoles.toString()) {
-                hasRole = true;
-            }
-
-            if (!hasRole) {
+            if (!roles.has(userRoles)) {
                 return res.status(403).json({message: 'Пользователя нет прав'});
             }
 

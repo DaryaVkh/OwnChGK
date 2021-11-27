@@ -2,6 +2,7 @@ import {Router} from 'express';
 import {TeamsController} from '../controllers/teamsController';
 import {middleware} from '../middleware/middleware';
 import {roleMiddleware} from '../middleware/roleMiddleware';
+import {adminAccess} from "./mainRouter";
 
 export const teamsRouter = () => {
     const router = Router();
@@ -12,8 +13,8 @@ export const teamsRouter = () => {
     router.get('/:teamName', middleware, teamsController.getTeam);
     router.get('/:teamName/games', middleware, teamsController.getAllGames);
     router.patch('/:teamName/change', middleware, teamsController.editTeam);
-    router.patch('/:teamName/changeCaptain', roleMiddleware(true), teamsController.editTeamCaptain);
-    router.delete('/:teamName', roleMiddleware(true), teamsController.deleteTeam);
+    router.patch('/:teamName/changeCaptain', roleMiddleware(adminAccess), teamsController.editTeamCaptain);
+    router.delete('/:teamName', roleMiddleware(adminAccess), teamsController.deleteTeam);
 
     router.post('/', middleware, teamsController.insertTeam);
 
