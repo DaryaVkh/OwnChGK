@@ -18,8 +18,8 @@ wss.on('connection', (ws: WebSocket) => {
             console.log("не авторизован");
         }
         else {
-            const {roles: userRoles} = jwt.verify(words[0], secret) as jwt.JwtPayload;
-            if (true == userRoles) {
+            const {roles: userRoles, teamId: teamId} = jwt.verify(words[0], secret) as jwt.JwtPayload;
+            if (userRoles == "admin" || userRoles == "superadmin") {
                 //если админ
                 if (words[1] == "+10sec") {
                     const pastDelay = Math.ceil(process.uptime() * 1000 - timeout._idleStart);
@@ -41,7 +41,7 @@ wss.on('connection', (ws: WebSocket) => {
             }
             //не админ
             else if (isOpen) {
-                console.log('received: %s', words[1]);
+                console.log('received: %s', words[1], teamId);
             }
         }
     });

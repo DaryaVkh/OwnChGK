@@ -20,7 +20,7 @@ export class GamesController {
 
     public async getAllTeams(req: Request, res: Response) {
         try {
-            const {gameName} = req.body;
+            const {gameName} = req.params;
             const game = await getCustomRepository(GameRepository).findByName(gameName);
             res.status(200).json(game.teams.map(team => team.name));
         } catch (error) {
@@ -34,12 +34,12 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {gameName, toursCount, questionsCount, teams} = req.body;
+            const {gameName, roundCount, questionCount, teams} = req.body;
             const token = req.cookies['authorization'];
             const payLoad = jwt.verify(token, secret);
             if (typeof payLoad !== "string") {
                 await getCustomRepository(GameRepository).insertByParams(
-                    gameName, payLoad.email, toursCount, questionsCount, 1, 60, teams);
+                    gameName, payLoad.email, roundCount, questionCount, 1, 60, teams);
                 res.status(200).json({});
             }
             else {
@@ -56,8 +56,8 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {name} = req.body;
-            await getCustomRepository(GameRepository).deleteByName(name);
+            const {gameName} = req.params;
+            await getCustomRepository(GameRepository).deleteByName(gameName);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -70,8 +70,9 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {name, newName} = req.body;
-            await getCustomRepository(GameRepository).updateByNames(name, newName);
+            const {gameName} = req.params;
+            const {newGameName} = req.body;
+            await getCustomRepository(GameRepository).updateByNames(gameName, newGameName);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -84,8 +85,9 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {name, admin} = req.body;
-            await getCustomRepository(GameRepository).updateByNameAndAdminEmail(name, admin);
+            const {gameName} = req.params;
+            const {admin} = req.body;
+            await getCustomRepository(GameRepository).updateByNameAndAdminEmail(gameName, admin);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -98,9 +100,39 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {name} = req.body;
-            const game = await getCustomRepository(GameRepository).findByName(name)
-            res.status(200).json(game);
+            const {gameName} = req.params;
+            const game = await getCustomRepository(GameRepository).findByName(gameName);
+            const answer = {
+                name: game.name,
+                teams: game.teams.map(value => value.name),
+                roundCount: game.rounds.length,
+                questionCount: game.rounds.length !== 0 ? game.rounds[0].questionCount : 0
+            };
+            res.status(200).json(answer);
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async changeGame(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {gameName} = req.params;
+            const {newGameName, roundCount, questionCount, teams} = req.body;
+            const token = req.cookies['authorization'];
+            const payLoad = jwt.verify(token, secret);
+            if (typeof payLoad !== "string") {
+                await getCustomRepository(GameRepository).updateByParams(
+                    gameName, newGameName, roundCount, questionCount, 1, 60, teams
+                );
+                res.status(200).json({});
+            }
+            else {
+                res.send("You are not admin");
+            }
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -112,8 +144,9 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {name, status} = req.body;
-            await getCustomRepository(GameRepository).updateByNameAndStatus(name, status);
+            const {gameName} = req.params;
+            const {status} = req.body;
+            await getCustomRepository(GameRepository).updateByNameAndStatus(gameName, status);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});

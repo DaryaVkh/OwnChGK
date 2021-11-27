@@ -1,0 +1,97 @@
+.pageTitle {
+  font-size: 2.5vmax;
+  color: white;
+  display: flex;
+  text-align: center;
+  align-self: center;
+  font-weight: 300;
+}
+
+.box {
+  width: 60%;
+  height: 91%;
+  display: flex;
+  align-self: flex-end;
+  flex-direction: column;
+}
+
+.contentWrapper {
+  width: 100%;
+  height: 70%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.infoWrapper {
+  width: 50%;
+  height: 50%;
+}
+
+.changePasswordWrapper {
+  width: 40%;
+  height: 50%;
+}
+
+.infoCategoryWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 300;
+  font-size: 1.5vw;
+  margin-top: 1.5vh;
+
+  .category {
+    width: 25%;
+    color: white;
+    text-align: end;
+  }
+
+  .userData {
+    width: 65%;
+    color: var(--foreground-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 400;
+  }
+}
+
+.changePasswordParagraph {
+  font-weight: 400;
+  color: white;
+  font-size: 1.7vw;
+  margin-bottom: 2vh;
+}
+
+.buttonWrapper {
+  width: 23%;
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.saveButton {
+  height: 7vh;
+  font-size: 1.5vw;
+  width: 100%;
+  margin-top: 7vh;
+  font-weight: 700;
+  border: 2px solid var(--foreground-color);
+  border-radius: 7px;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25));
+  overflow: hidden;
+  user-select: none;
+  font-family: Roboto, sans-serif;
+  min-height: 26px;
+
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0 0 2vh 2px var(--foreground-color);
+  }
+
+  &:active {
+    box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+  }
+}

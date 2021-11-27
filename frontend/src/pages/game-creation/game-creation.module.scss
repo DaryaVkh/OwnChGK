@@ -1,17 +1,24 @@
-.gameCreationForm {
+.pageWrapper {
   width: 60%;
   height: 91%;
+  flex-direction: column;
+  justify-content: center;
+  align-self: flex-end;
+}
+
+.gameCreationForm {
+  width: 100%;
+  height: 90%;
   align-self: flex-end;
 }
 
 .pageTitle {
-  font-size: 5.5vh;
+  font-size: 4vmin;
   color: white;
-  display: flex;
   text-align: center;
   font-weight: 300;
-  position: fixed;
-  bottom: 10%;
+  margin-top: 5vh;
+  margin-bottom: -3vh;
 }
 
 .contentWrapper {
@@ -26,7 +33,7 @@
 }
 
 .gameParametersWrapper,
-.commandsWrapper {
+.teamsWrapper {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -35,7 +42,7 @@
   align-self: flex-end;
 }
 
-.commandsWrapper {
+.teamsWrapper {
   border: 2px solid var(--foreground-color);
   border-radius: 8px;
   position: relative;
@@ -44,7 +51,7 @@
   align-items: center;
 }
 
-.commandsDiv {
+.teamsDiv {
   margin: 1.5vw;
   box-sizing: border-box;
   display: flex;
@@ -61,10 +68,6 @@
   font-size: 1.5vw;
   box-sizing: border-box;
   font-weight: var(--regular-weight);
-}
-
-.toursCountInput,
-.questionsCountInput {
   width: 3.5vw;
   margin: 0;
   text-align: center;
@@ -88,7 +91,7 @@
   user-select: none;
 }
 
-.commandsLabel {
+.teamsLabel {
   background-color: var(--background-color);
   color: white;
   position: absolute;
@@ -99,4 +102,14 @@
   font-size: 1.4vw;
   text-align: center;
   user-select: none;
+}
+
+.scrollbar {
+  :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.link {
+  text-decoration: none;
 }

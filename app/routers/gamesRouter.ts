@@ -2,6 +2,7 @@ import {Router} from 'express';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 import {middleware} from '../middleware/middleware';
 import {GamesController} from '../controllers/gamesController';
+import {adminAccess} from "./mainRouter";
 
 export const gamesRouter = () => {
     const router = Router();
@@ -9,14 +10,15 @@ export const gamesRouter = () => {
     const gamesController = new GamesController();
 
     router.get('/', middleware, gamesController.getAll);
-    router.get('/game', middleware, gamesController.getGame);
-    router.get('/teams', middleware, gamesController.getAllTeams);
-    router.patch('/status', roleMiddleware(true), gamesController.changeGameStatus);
-    router.patch('/name', roleMiddleware(true), gamesController.editGameName);
-    router.patch('/admin', roleMiddleware(true), gamesController.editGameAdmin);
-    router.delete('/game', roleMiddleware(true), gamesController.deleteGame);
+    router.get('/:gameName', middleware, gamesController.getGame);
+    router.get('/:gameName/teams', middleware, gamesController.getAllTeams);
+    router.patch('/:gameName/change', roleMiddleware(adminAccess), gamesController.changeGame)
+    router.patch('/:gameName/changeStatus', roleMiddleware(adminAccess), gamesController.changeGameStatus);
+    router.patch('/:gameName/changeName', roleMiddleware(adminAccess), gamesController.editGameName);
+    router.patch('/:gameName/changeAdmin', roleMiddleware(adminAccess), gamesController.editGameAdmin);
+    router.delete('/:gameName', roleMiddleware(adminAccess), gamesController.deleteGame);
 
-    router.post('/', roleMiddleware(true), gamesController.insertGame);
+    router.post('/', roleMiddleware(adminAccess), gamesController.insertGame);
 
     return router;
 }

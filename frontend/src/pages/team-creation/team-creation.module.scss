@@ -5,13 +5,13 @@
 }
 
 .pageTitle {
-  font-size: 5.5vh;
+  font-size: 4vmin;
   color: white;
   display: flex;
   text-align: center;
+  align-self: center;
   font-weight: 300;
-  position: fixed;
-  bottom: 10%;
+  margin: 5vh 0 10vh;
 }
 
 .contentWrapper {
@@ -20,8 +20,11 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  box-sizing: border-box;
   flex-direction: column;
-  justify-content: center;
   margin-bottom: 5vh;
+  box-sizing: content-box;
+}
+
+.link {
+  text-decoration: none;
 }

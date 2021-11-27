@@ -7,6 +7,7 @@ import {gamesRouter} from './routers/gamesRouter';
 import {roundsRouter} from './routers/roundsRouter';
 import {mainRouter} from './routers/mainRouter';
 import cookieParser from 'cookie-parser';
+import boolParser from 'express-query-boolean';
 import path from 'path';
 import {createConnection} from 'typeorm';
 import {User} from './db/entities/User';
@@ -29,11 +30,13 @@ export class Server {
                 type: 'postgres',
                 url: process.env.DATABASE_URL,
                 entities: [User, Admin, Team, Game, Round],
-                synchronize: true // Не оч безопасно
+                synchronize: true, // Не оч безопасно,
+                ssl: {rejectUnauthorized:false} //для хероку
             }).then(() => {
                 console.log('Connected to Postgres')
                 this.app.use(bodyParser.json()); // 100kb default
                 this.app.use(bodyParser.urlencoded({extended: true}));
+                this.app.use(boolParser());
                 this.app.use(express.static(path.resolve('./build/frontend')));
 
                 this.routerConfig();

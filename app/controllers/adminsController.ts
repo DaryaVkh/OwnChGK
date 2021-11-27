@@ -8,9 +8,12 @@ import {generateAccessToken} from '../jwtToken';
 export class AdminsController {
     public async getAll(req: Request, res: Response) {
         try {
-            const admins = await getCustomRepository(AdminRepository).find();
+            const admins = await getCustomRepository(AdminRepository).find(); // TODO: а мейби суперадминов не надо?
             res.status(200).json({
-                admins: admins.map(value => value.email)
+                admins: admins.map(value => ({
+                    email: value.email,
+                    name: value.name
+                }))
             });
         } catch (error) {
             res.status(400).json({message: 'Error'}).send(error);
@@ -23,7 +26,7 @@ export class AdminsController {
             const admin = await getCustomRepository(AdminRepository).findByEmail(email);
             const isPasswordMatching = await compare(password, admin.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(admin.id, admin.email, true);
+                const token = generateAccessToken(admin.id, admin.email, admin.role, null);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
                     //httpOnly: true,
@@ -86,5 +89,9 @@ export class AdminsController {
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
+    }
+
+    public async delete(req: Request, res: Response) {
+        //todo: makeMethod
     }
 }

@@ -6,14 +6,17 @@ import {Link, Redirect} from 'react-router-dom';
 import {AuthorizationProps} from '../../entities/authorization/authorization.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
+import {Alert} from "@mui/material";
+
+let email = '';
+let password = '';
 
 const Authorization: FC<AuthorizationProps> = props => {
     const [loggedIn, setLoggedIn] = useState(false);
-    let email = '';
-    let password = '';
+    const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState(false);
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
-        const request = await fetch(props.isAdmin ? 'admins/login' : 'users/login', {
+        await fetch(props.isAdmin ? 'admins/login' : 'users/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8',
@@ -26,6 +29,8 @@ const Authorization: FC<AuthorizationProps> = props => {
         }).then(response => {
             if (response.status === 200) {
                 setLoggedIn(true);
+            } else {
+                setWrongEmailOrPassword(true);
             }
         });
     }
@@ -38,8 +43,14 @@ const Authorization: FC<AuthorizationProps> = props => {
         password = event.target.value;
     }
 
+    const handleErrorFixes = () => {
+        if (wrongEmailOrPassword) {
+            setWrongEmailOrPassword(false);
+        }
+    }
+
     return loggedIn ? (
-        <Redirect to={props.isAdmin ? '/start-screen' : '/team-creation'}/>
+        <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
     ) : (
         <PageWrapper>
             <Header isAuthorized={false}/>
@@ -48,16 +59,27 @@ const Authorization: FC<AuthorizationProps> = props => {
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
                 <form onSubmit={handleSubmit}>
+                    {wrongEmailOrPassword ? <Alert severity='error' sx={{
+                        color: 'white',
+                        backgroundColor: '#F44336',
+                        marginBottom: '2vh',
+                        marginTop: '-3vh',
+                        '& .MuiAlert-icon': {
+                            color: 'white'
+                        }
+                    }}>Неверный логин или пароль</Alert> : null}
                     <CustomInput type="email" id="email" name="email" placeholder="E-mail"
-                                 onChange={handleEmailChange}/>
+                                 onChange={handleEmailChange} isInvalid={wrongEmailOrPassword} onFocus={handleErrorFixes}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль"
-                                 onChange={handlePasswordChange}/>
+                                 onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword} onFocus={handleErrorFixes}/>
 
                     <FormButton type="signInButton" text="Войти"/>
                 </form>
 
                 <div className={classes.restoreLinkWrapper}>
-                    <Link className={classes.restorePasswordLink} to="" id="restore">Восстановить пароль</Link>
+                    <Link className={classes.restorePasswordLink}
+                          to={props.isAdmin ? "/admin/restore-password" : '/restore-password'}
+                          id="restore">Восстановить пароль</Link>
                 </div>
 
                 {

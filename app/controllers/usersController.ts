@@ -3,17 +3,22 @@ import {getCustomRepository} from 'typeorm';
 import {UserRepository} from '../db/repositories/userRepository';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
-import {generateAccessToken} from '../jwtToken';
+import {generateAccessToken, secret} from '../jwtToken';
+import jwt from "jsonwebtoken";
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
         try {
-            const users = await getCustomRepository(UserRepository).find();
+            const {withoutTeam} = req.query;
+            const users = withoutTeam ?
+                await getCustomRepository(UserRepository).findUsersWithoutTeam()
+                : await getCustomRepository(UserRepository).find();
             res.status(200).json({
                 users: users.map(value => value.email)
             });
         } catch (error) {
-            res.status(400).json({message: 'Error'}).send(error);
+            console.log(error);
+            res.status(400).json({message: error.message});
         }
     }
 
@@ -23,7 +28,7 @@ export class UsersController { // TODO: дописать смену имени �
             const user = await getCustomRepository(UserRepository).findByEmail(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.id, user.email, false);
+                const token = generateAccessToken(user.id, user.email,"user", null);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     //httpOnly: true,
@@ -40,7 +45,6 @@ export class UsersController { // TODO: дописать смену имени �
 
     public async insert(req: Request, res: Response) {
         try {
-            console.log(this); // TODO: Почему-то здесь this === undefined;
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
@@ -50,7 +54,29 @@ export class UsersController { // TODO: дописать смену имени �
             const hashedPassword = await hash(password, 10);
             const insertResult = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
             const userId = insertResult.identifiers[0].id;
-            const token = generateAccessToken(userId, email, false);
+            const token = generateAccessToken(userId, email, "user", null);
+            res.cookie('authorization', token, {
+                maxAge: 24 * 60 * 60 * 1000,
+                //httpOnly: true,
+                secure: true
+            });
+            res.status(200).json({});
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async getTeamId(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+//запрос к бд за командой
+            const teamId = Math.floor(Math.random()*3);
+            const oldToken = req.cookies['authorization'];
+            const {userId: userId, email:email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            const token = generateAccessToken(userId, email, userRoles, teamId);
             res.cookie('authorization', token, {
                 maxAge: 24 * 60 * 60 * 1000,
                 //httpOnly: true,
