@@ -32,5 +32,4 @@
     "@testing-library/user-event": "^12.1.10",
     "@types/jest": "^27.0.1"
   }
-  }
 }

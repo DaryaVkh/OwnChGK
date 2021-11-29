@@ -26,7 +26,7 @@ export class AdminsController {
             const admin = await getCustomRepository(AdminRepository).findByEmail(email);
             const isPasswordMatching = await compare(password, admin.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(admin.id, admin.email, admin.role, null);
+                const token = generateAccessToken(admin.id, admin.email, admin.role, null, null);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
                     //httpOnly: true,

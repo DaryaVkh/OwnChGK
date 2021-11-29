@@ -11,7 +11,7 @@ export const usersRouter = () => {
     router.post('/login', usersController.login);
     router.post('/insert', usersController.insert);
     router.post('/logout', usersController.logout);
-    router.get('/teamId', usersController.getTeamId);
+    router.get('/teamId', usersController.changeTokenWhenGoIntoGame);
 
     return router;
 }

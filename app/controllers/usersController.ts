@@ -5,6 +5,7 @@ import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken, secret} from '../jwtToken';
 import jwt from "jsonwebtoken";
+import {getGame} from "../../frontend/src/server-api/server-api";
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
@@ -28,7 +29,7 @@ export class UsersController { // TODO: дописать смену имени �
             const user = await getCustomRepository(UserRepository).findByEmail(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.id, user.email,"user", null);
+                const token = generateAccessToken(user.id, user.email,"user", null, null);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     //httpOnly: true,
@@ -54,7 +55,7 @@ export class UsersController { // TODO: дописать смену имени �
             const hashedPassword = await hash(password, 10);
             const insertResult = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
             const userId = insertResult.identifiers[0].id;
-            const token = generateAccessToken(userId, email, "user", null);
+            const token = generateAccessToken(userId, email, "user", null, null);
             res.cookie('authorization', token, {
                 maxAge: 24 * 60 * 60 * 1000,
                 //httpOnly: true,
@@ -66,17 +67,18 @@ export class UsersController { // TODO: дописать смену имени �
         }
     }
 
-    public async getTeamId(req: Request, res: Response) {
+    public async changeTokenWhenGoIntoGame(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-//запрос к бд за командой
-            const teamId = Math.floor(Math.random()*3);
+//todo:запрос к бд за командой
+            const teamId = Math.floor(Math.random()*2)+1;
+            const gameId = req.params.gameId;
             const oldToken = req.cookies['authorization'];
             const {userId: userId, email:email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
-            const token = generateAccessToken(userId, email, userRoles, teamId);
+            const token = generateAccessToken(userId, email, userRoles, teamId, Number(gameId));
             res.cookie('authorization', token, {
                 maxAge: 24 * 60 * 60 * 1000,
                 //httpOnly: true,

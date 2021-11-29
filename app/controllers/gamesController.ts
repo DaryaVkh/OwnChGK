@@ -4,6 +4,9 @@ import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
 import jwt from "jsonwebtoken";
 import {secret} from "../jwtToken";
+import {games} from "../app";
+import {Game, Round} from "../logic/Game";
+import {Team} from "../logic/Team";
 
 
 export class GamesController {
@@ -108,6 +111,33 @@ export class GamesController {
                 roundCount: game.rounds.length,
                 questionCount: game.rounds.length !== 0 ? game.rounds[0].questionCount : 0
             };
+            res.status(200).json(answer);
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async startGame(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {gameName} = req.params;
+            const game = await getCustomRepository(GameRepository).findByName(gameName);
+            const answer = {
+                name: game.name,
+                teams: game.teams.map(value => value.name),
+                roundCount: game.rounds.length,
+                questionCount: game.rounds.length !== 0 ? game.rounds[0].questionCount : 0
+            };
+            games[game.id] = new Game(gameName);
+            for (let i=0; i<game.rounds.length; i++) {
+                games[game.id].addRound(new Round(i+1, answer.questionCount, 60, 1));
+            }
+            for (const team of game.teams) {
+                games[game.id].addTeam(new Team(team.name, team.id));
+            }
             res.status(200).json(answer);
         } catch (error: any) {
             res.status(400).json({'message': error.message});

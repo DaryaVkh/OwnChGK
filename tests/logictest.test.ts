@@ -1,7 +1,7 @@
-import {Team} from "../private/Team";
-import {Question} from "../private/Question";
-import {Status} from "../private/AnswerAndAppeal"
-import {Game, Round} from "../private/logic";
+import {Team} from "../app/logic/Team";
+import {Question} from "../app/logic/Question";
+import {Status} from "../app/logic/AnswerAndAppeal"
+import {Game, Round} from "../app/logic/Game";
 
 test('Should_set_right_answer', () => {
     const team = new Team("cool");

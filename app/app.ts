@@ -3,8 +3,9 @@ import * as WebSocket from 'ws';
 import jwt from "jsonwebtoken";
 import {secret} from "./jwtToken";
 
+export const games = {};
+export const timers = {};
 const port = parseInt(process.env.PORT || '3000');
-let timeout;
 const wss = new WebSocket.Server({port: 80});
 let isOpen = false;
 const secondPerQuestion = 70000;
@@ -18,22 +19,30 @@ wss.on('connection', (ws: WebSocket) => {
             console.log("не авторизован");
         }
         else {
-            const {roles: userRoles, teamId: teamId} = jwt.verify(words[0], secret) as jwt.JwtPayload;
+            const {roles: userRoles, teamId: teamId, gameId: gameId} = jwt.verify(words[0], secret) as jwt.JwtPayload;
             if (userRoles == "admin" || userRoles == "superadmin") {
                 //если админ
                 if (words[1] == "+10sec") {
-                    const pastDelay = Math.ceil(process.uptime() * 1000 - timeout._idleStart);
-                    const initialDelay = timeout._idleTimeout;
-                    clearTimeout(timeout);
+                    const pastDelay = Math.ceil(process.uptime() * 1000 - timers[gameId]._idleStart);
+                    const initialDelay = timers[gameId]._idleTimeout;
+                    clearTimeout(timers[gameId]);
                     isOpen = true;
-                    timeout = setTimeout(() => {
+                    timers[gameId] = setTimeout(() => {
                         console.log("added time end")
                         isOpen = false;
+                        try {
+                            for (let i=1; i<=3; i++){
+                                console.log(games[gameId].teams[i].getAnswer(1, 1));
+                        }
+                        }
+                        catch (e) {
+                            console.log(e);
+                        }
                     }, initialDelay - pastDelay + extraSeconds); // может быть косяк с очисткой таймаута, но хз. пока не косячило
                 } else if (words[1] == "Start") {
                     console.log("startuem")//надо ли запрещать стартовать, если таймер уже работает
                     isOpen = true;
-                    timeout = setTimeout(() => {
+                    timers[gameId] = setTimeout(() => {
                         isOpen = false;
                         console.log("stopim")
                     }, secondPerQuestion);
@@ -42,6 +51,7 @@ wss.on('connection', (ws: WebSocket) => {
             //не админ
             else if (isOpen) {
                 console.log('received: %s', words[1], teamId);
+                games[gameId].rounds[0].questions[0].giveAnswer(games[gameId].teams[teamId], words[1]);
             }
         }
     });
