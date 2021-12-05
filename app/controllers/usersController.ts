@@ -5,7 +5,6 @@ import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken, secret} from '../jwtToken';
 import jwt from "jsonwebtoken";
-import {getGame} from "../../frontend/src/server-api/server-api";
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
