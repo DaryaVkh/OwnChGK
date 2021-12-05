@@ -6,7 +6,7 @@ import {TeamCreatorProps} from '../../entities/team-creation/team-creation.inter
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Alert, Autocomplete, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
-import {createTeam, editTeam, getAll, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
+import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
 import {useLocation, Redirect} from 'react-router-dom';
 import NavBar from "../../components/nav-bar/nav-bar";
 
@@ -85,7 +85,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     }
 
     return isCreatedSuccessfully
-        ? <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
+        ? <Redirect to={{pathname: props.isAdmin ? '/admin/start-screen' : '/start-screen', state: {page: 'teams'}}}/>
         :
         (
             <PageWrapper>

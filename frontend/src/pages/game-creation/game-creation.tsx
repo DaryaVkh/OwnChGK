@@ -134,7 +134,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
     }
 
     return isCreatedSuccessfully
-        ? <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
+        ? <Redirect to={{pathname: props.isAdmin ? '/admin/start-screen' : '/start-screen', state: {page: 'games'}}}/>
         :
         (
         <PageWrapper>

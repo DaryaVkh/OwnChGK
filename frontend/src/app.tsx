@@ -10,6 +10,7 @@ import UserStartScreen from './pages/user-start-screen/user-start-screen';
 import RestoringPassword from './pages/restoring-password/restoring-password';
 import Profile from './pages/profile/profile';
 import Socket from './pages/socket';
+import UserGame from "./pages/user-game/user-game";
 
 const App: FC = () => {
     return (
@@ -53,25 +54,9 @@ const App: FC = () => {
                     <Profile isAdmin={false}/>
                 </Route>
 
-                {/*<Route path="/admin/start-screen" exact={true}>*/}
-                {/*    <AdminStartScreen page=''/>*/}
-                {/*</Route>*/}
-                {/*<Route path="/admin/games" exact={true}>*/}
-                {/*    <AdminStartScreen page='games' />*/}
-                {/*</Route>*/}
-                {/*<Route path='/admin/teams' exact={true}>*/}
-                {/*    <AdminStartScreen page='teams' />*/}
-                {/*</Route>*/}
-                {/*<Route path='/admins' exact={true}>*/}
-                {/*    <AdminStartScreen page='admins' />*/}
-                {/*</Route>*/}
-
-                {/*<Route path='/games' exact={true}>*/}
-                {/*    <UserStartScreen page='games' />*/}
-                {/*</Route>*/}
-                {/*<Route path='/teams' exact={true}>*/}
-                {/*    <UserStartScreen page='teams' />*/}
-                {/*</Route>*/}
+                <Route path="/game">
+                    <UserGame />
+                </Route>
 
                 <Redirect from="*" to="/"/>
             </Switch>
