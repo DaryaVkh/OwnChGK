@@ -9,7 +9,7 @@ const Socket: FC = props => {
     let answer:string;
     const conn = new WebSocket("ws://localhost:80/");
 
-    getAll("/users/teamId").then(r => r.status);
+    getAll("/users/getTeam").then(r => r.status);
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();

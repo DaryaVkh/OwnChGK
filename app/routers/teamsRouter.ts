@@ -13,7 +13,7 @@ export const teamsRouter = () => {
     router.get('/:teamName', middleware, teamsController.getTeam);
     router.get('/:teamName/games', middleware, teamsController.getAllGames);
     router.patch('/:teamName/change', middleware, teamsController.editTeam);
-    router.patch('/:teamName/changeCaptain', roleMiddleware(adminAccess), teamsController.editTeamCaptain);
+    router.patch('/:teamName/changeCaptain', middleware, teamsController.editTeamCaptainByCurrentUser);
     router.delete('/:teamName', roleMiddleware(adminAccess), teamsController.deleteTeam);
 
     router.post('/', middleware, teamsController.insertTeam);

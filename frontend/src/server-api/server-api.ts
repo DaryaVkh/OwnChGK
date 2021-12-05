@@ -85,3 +85,21 @@ export const editTeam = async (teamName: string, newTeamName: string, captain: s
         })
     });
 }
+
+export const editTeamCaptainByCurrentUser = async (teamName: string) => {
+    return await fetch(`/teams/${teamName}/changeCaptain`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+}
+
+export const getTeamByCurrentUser = async () => {
+    return await fetch('/users/getTeam');
+}
+
+export const getTeamsWithoutUser = async () => {
+    return await fetch(`/teams/?withoutUser=true`);
+}

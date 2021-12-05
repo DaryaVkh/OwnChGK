@@ -70,12 +70,9 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     const [page, setPage] = useState('games');
     const [teams, setTeams] = useState<string[]>([]);
     const [games, setGames] = useState<string[]>([]);
-    const [isTeamsFound, setIsTeamsFound] = useState(false);
-    const [isGamesFound, setIsGamesFound] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [deletedItemName, setDeletedItemName] = useState('');
     const [admins, setAdmins] = useState<Admin[]>([]);
-    const [isAdminsFound, setIsAdminsFound] = useState(false);
     const [newAdmin, setNewAdmin] = useState<Admin | null>(null);
     const [isEmailInvalid, setIsEmailInvalid] = useState(false);
     const scrollbars = useRef<Scrollbars>(null);
@@ -104,11 +101,10 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         }
     }, [location]);
 
-    if (!isTeamsFound && !isGamesFound && !isAdminsFound) {
+    useEffect(() => {
         getAll('/teams/').then(res => {
             if (res.status === 200) {
                 res.json().then(({teams}) => {
-                    setIsTeamsFound(true);
                     setTeams(teams);
                 });
             } else {
@@ -119,7 +115,6 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         getAll('/games/').then(res => {
             if (res.status === 200) {
                 res.json().then(({games}) => {
-                    setIsGamesFound(true);
                     setGames(games);
                 });
             } else {
@@ -130,14 +125,13 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         getAll('/admins/').then(res => {
             if (res.status === 200) {
                 res.json().then(({admins}) => {
-                    setIsAdminsFound(true);
                     setAdmins(admins);
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
             }
         });
-    }
+    }, []);
 
     const renderTeams = () => {
         return teams.map((team, index) => <InputWithAdornment name={team} key={index} type="team"

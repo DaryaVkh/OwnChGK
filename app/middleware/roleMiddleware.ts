@@ -16,7 +16,7 @@ export function roleMiddleware(roles: Set<string>) {
 
             const {roles: userRoles} = jwt.verify(token, secret) as jwt.JwtPayload;
             if (!roles.has(userRoles)) {
-                return res.status(403).json({message: 'Пользователя нет прав'});
+                return res.status(403).json({message: 'У пользователя нет прав'});
             }
 
             next();

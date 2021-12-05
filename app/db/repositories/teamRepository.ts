@@ -8,6 +8,11 @@ export class TeamRepository extends Repository<Team> {
         return this.findOne({name}, {relations: ['captain']});
     }
 
+    findTeamsWithoutUser() {
+        return this.find({relations: ['captain']})
+            .then(teams => teams.filter(team => team.captain === null))
+    }
+
     insertByNameAndUserEmail(name: string, userEmail: string) {
         return this.manager.transaction(manager => {
             return manager.findOne(User, {'email': userEmail})
@@ -40,5 +45,23 @@ export class TeamRepository extends Repository<Team> {
             return manager.findOne(User, {'email': newUserEmail})
                 .then(user => manager.update(Team, {name}, {'captain': user}));
         });
+    }
+
+    updateEmptyTeamByNameAndUserEmail(name: string, userId: string) {
+        return this.manager.transaction(manager =>
+            manager.findOne(Team, {name}, {relations: ['captain']})
+                .then(team => {
+                        if (team.captain !== null) {
+                            throw new Error('Команда уже с капитаном');
+                        }
+
+                        return manager.findOne(User, userId)
+                            .then(user => {
+                                team.captain = user;
+                                return manager.save(Team, team);
+                            })
+                    }
+                )
+        );
     }
 }
