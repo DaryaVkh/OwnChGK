@@ -3,7 +3,8 @@ import {getCustomRepository} from 'typeorm';
 import {UserRepository} from '../db/repositories/userRepository';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
-import {generateAccessToken} from '../jwtToken';
+import {generateAccessToken, secret} from '../jwtToken';
+import jwt from 'jsonwebtoken';
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
@@ -27,7 +28,7 @@ export class UsersController { // TODO: дописать смену имени �
             const user = await getCustomRepository(UserRepository).findByEmail(email);
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.id, user.email, false);
+                const token = generateAccessToken(user.id, user.email, 'user', null);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     //httpOnly: true,
@@ -53,13 +54,44 @@ export class UsersController { // TODO: дописать смену имени �
             const hashedPassword = await hash(password, 10);
             const insertResult = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
             const userId = insertResult.identifiers[0].id;
-            const token = generateAccessToken(userId, email, false);
+            const token = generateAccessToken(userId, email, 'user', null);
             res.cookie('authorization', token, {
                 maxAge: 24 * 60 * 60 * 1000,
                 //httpOnly: true,
                 secure: true
             });
             res.status(200).json({});
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async getTeam(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const oldToken = req.cookies['authorization'];
+            const {id: userId, email: email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            const user = await getCustomRepository(UserRepository).findOne(userId, {relations:['team']});
+            const token = generateAccessToken(userId, email, userRoles, user.team !== null ? user.team.id : null);
+            res.cookie('authorization', token, {
+                maxAge: 24 * 60 * 60 * 1000,
+                //httpOnly: true,
+                secure: true
+            });
+
+            if (user.team !== null) {
+                res.status(200).json({
+                    name: user.team.name,
+                    id: user.team.id,
+                    captainId: user.id,
+                    captainEmail: user.email,
+                });
+            } else {
+                res.status(200).json({});
+            }
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }

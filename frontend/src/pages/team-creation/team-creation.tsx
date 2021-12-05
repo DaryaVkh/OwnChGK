@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useState, useEffect} from 'react';
 import classes from './team-creation.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
@@ -8,7 +8,7 @@ import {Alert, Autocomplete, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
 import {useLocation, Redirect} from 'react-router-dom';
-import NavBar from "../../components/nav-bar/nav-bar";
+import NavBar from '../../components/nav-bar/nav-bar';
 
 let teamName: string = '';
 let oldTeamName: string = '';
@@ -16,43 +16,40 @@ let captain: string = '';
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>([]);
-    const [isUsersFound, setIsUsersFound] = useState(false);
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
     const [isNameInvalid, setIsNameInvalid] = useState(false);
     const [oldCaptain, setOldCaptain] = useState<string | undefined>(undefined);
-    const [isOldCaptainFound, setOldCaptainFound] = useState(false);
     const location = useLocation<{ name: string }>();
 
-    if (!isUsersFound && !isOldCaptainFound) {
-        if (props.mode === 'edit') {
-            teamName = location.state.name;
-        }
+    if (props.mode === 'edit') {
+        teamName = location.state.name;
+    }
 
+    useEffect(() => {
         getUsersWithoutTeam().then(res => {
             if (res.status === 200) {
-                res.json()
-                    .then(({users}) => {
-                        setIsUsersFound(true);
-                        setUsersFromDB([...users]);
-                        if (props.mode === 'edit') {
-                            oldTeamName = location.state.name;
-                            getTeam(teamName).then(res => {
-                                if (res.status === 200) {
-                                    res.json().then(data => {
-                                        captain = data.captain;
-                                        setOldCaptainFound(true);
-                                        setOldCaptain(captain);
+                res.json().then(({users}) => {
+                    setUsersFromDB([...users]);
+                    if (props.mode === 'edit') {
+                        oldTeamName = location.state.name;
+                        getTeam(teamName).then(res => {
+                            if (res.status === 200) {
+                                res.json().then(data => {
+                                    captain = data.captain;
+                                    setOldCaptain(captain);
+                                    if (captain) {
                                         setUsersFromDB([...users, captain]);
-                                    })
-                                }
-                            })
-                        }
-                    });
+                                    }
+                                })
+                            }
+                        })
+                    }
+                });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
             }
         });
-    }
+    }, []);
 
     const handleAutocompleteChange = (event: React.SyntheticEvent, value: string | null) => {
         captain = value as string;
@@ -90,7 +87,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
         (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={true}>
-                    <NavBar isAdmin={props.isAdmin} page='' />
+                    <NavBar isAdmin={props.isAdmin} page=""/>
                 </Header>
 
                 <form className={classes.teamCreationForm} onSubmit={handleSubmit}>

@@ -3,10 +3,13 @@ import {CustomInput} from "../components/custom-input/custom-input";
 import {FormButton} from "../components/form-button/form-button";
 import {Button} from "@mui/material";
 import {cookie} from "express-validator";
+import {getAll} from "../server-api/server-api";
 
 const Socket: FC = props => {
     let answer:string;
     const conn = new WebSocket("ws://localhost:80/");
+
+    getAll("/users/getTeam").then(r => r.status);
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();

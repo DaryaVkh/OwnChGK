@@ -2,12 +2,17 @@ import {validationResult} from 'express-validator';
 import {getCustomRepository} from 'typeorm';
 import {TeamRepository} from '../db/repositories/teamRepository';
 import {Request, Response} from 'express';
+import jwt from 'jsonwebtoken';
+import {secret} from '../jwtToken';
 
 
 export class TeamsController {
     public async getAll(req: Request, res: Response) {
         try {
-            const teams = await getCustomRepository(TeamRepository).find();
+            const {withoutUser} = req.query;
+            const teams = withoutUser ?
+                await getCustomRepository(TeamRepository).findTeamsWithoutUser()
+                : await getCustomRepository(TeamRepository).find();
             res.status(200).json({
                 teams: teams.map(value => value.name)
             });
@@ -69,15 +74,16 @@ export class TeamsController {
         }
     }
 
-    public async editTeamCaptain(req: Request, res: Response) {
+    public async editTeamCaptainByCurrentUser(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {teamName} = req.params;
-            const {captain} = req.body;
-            await getCustomRepository(TeamRepository).updateByNameAndNewUserEmail(teamName, captain);
+            const token = req.cookies['authorization'];
+            const {id: userId} = jwt.verify(token, secret) as jwt.JwtPayload;
+            await getCustomRepository(TeamRepository).updateEmptyTeamByNameAndUserEmail(teamName, userId);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});

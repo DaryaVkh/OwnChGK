@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useState, useEffect} from 'react';
 import classes from './game-creation.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
@@ -19,7 +19,6 @@ const teams: string[] = [];
 
 const GameCreator: FC<GameCreatorProps> = props => {
     const [teamsFromDB, setTeamsFromDB] = useState([]);
-    const [isTeamsFound, setIsTeamsFound] = useState(false);
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
     const location = useLocation<{ name: string }>();
     const [editingGameParams, setEditingGameParams] = useState<{
@@ -31,13 +30,16 @@ const GameCreator: FC<GameCreatorProps> = props => {
         questionsCount: 0,
         chosenTeams: undefined
     });
-    const [isEditingGameParamsLoaded, setEditingGameParamsLoaded] = useState(false);
 
-    if (!isTeamsFound && !isEditingGameParamsLoaded) {
+    if (props.mode === 'edit') {
+        gameName = location.state.name;
+        oldGameName = location.state.name;
+    }
+
+    useEffect(() => {
         getAll('/teams/').then(res => {
             if (res.status === 200) {
                 res.json().then(({teams}) => {
-                    setIsTeamsFound(true);
                     setTeamsFromDB(teams);
                 });
             } else {
@@ -46,9 +48,6 @@ const GameCreator: FC<GameCreatorProps> = props => {
         });
 
         if (props.mode === 'edit') {
-            gameName = location.state.name;
-            oldGameName = location.state.name;
-
             getGame(oldGameName).then(res => {
                 if (res.status === 200) {
                     res.json().then(({
@@ -58,7 +57,6 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                      }) => {
                         toursCount = roundCount;
                         questionsCount = questionCount;
-                        setEditingGameParamsLoaded(true);
                         setEditingGameParams({
                             toursCount: roundCount,
                             questionsCount: questionCount,
@@ -67,19 +65,8 @@ const GameCreator: FC<GameCreatorProps> = props => {
                     })
                 }
             })
-            // TODO получаем все с бд: количество туров, вопросов в туре и команды для игры, которую редачим
-            // chosenTeamsFromDB.push(...['Команда 1', 'Сахара опять не будет']);
-            // toursCount = 3;
-            // questionsCount = 10;
         }
-    }
-    /*if (error) {
-        error.message
-    }*/ // TODO
-
-    // получаем все команды из бд
-    /*teamsFromDB.push(...['Команда 1', 'Команда 1', 'Команда 1', 'Сахара опять не будет', 'hdbfkjnakslkdsdlfnjkfvjkfdnklsnckjdsnvjkfdnjkfnv',
-        'Команда 2', 'Не грози Южному автовокзалу', 'Ума палата №6', 'ЧКГ-шки ниндзя'])*/
+    }, []);
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         let el = event.target as HTMLInputElement;
@@ -137,77 +124,77 @@ const GameCreator: FC<GameCreatorProps> = props => {
         ? <Redirect to={{pathname: props.isAdmin ? '/admin/start-screen' : '/start-screen', state: {page: 'games'}}}/>
         :
         (
-        <PageWrapper>
-            <Header isAuthorized={true} isAdmin={true}>
-                <NavBar isAdmin={props.isAdmin} page='' />
-            </Header>
+            <PageWrapper>
+                <Header isAuthorized={true} isAdmin={true}>
+                    <NavBar isAdmin={props.isAdmin} page='' />
+                </Header>
 
-            <div className={classes.pageWrapper}>
-                {
-                    props.mode === 'creation'
-                        ? <p className={classes.pageTitle}>Создание игры</p>
-                        : <p className={classes.pageTitle}>Редактирование</p>
-                }
-                <form className={classes.gameCreationForm} onSubmit={handleSubmit}>
-                    <div className={classes.contentWrapper}>
-                        <div className={classes.gameParametersWrapper}>
-                            <CustomInput type="text" id="gameName"
-                                         name="gameName"
-                                         placeholder="Название игры"
-                                         defaultValue={gameName}
-                                         onChange={handleGameNameChange}/>
+                <div className={classes.pageWrapper}>
+                    {
+                        props.mode === 'creation'
+                            ? <p className={classes.pageTitle}>Создание игры</p>
+                            : <p className={classes.pageTitle}>Редактирование</p>
+                    }
+                    <form className={classes.gameCreationForm} onSubmit={handleSubmit}>
+                        <div className={classes.contentWrapper}>
+                            <div className={classes.gameParametersWrapper}>
+                                <CustomInput type="text" id="gameName"
+                                             name="gameName"
+                                             placeholder="Название игры"
+                                             defaultValue={gameName}
+                                             onChange={handleGameNameChange}/>
 
-                            <div className={classes.toursCountWrapper}>
-                                <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество туров</label>
-                                <input className={classes.toursCountInput}
-                                       type="number"
-                                       id="toursCount"
-                                       name="toursCount"
-                                       defaultValue={editingGameParams.toursCount || ''}
-                                       required={true}
-                                       onChange={handleToursCountChange}/>
+                                <div className={classes.toursCountWrapper}>
+                                    <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество туров</label>
+                                    <input className={classes.toursCountInput}
+                                           type="number"
+                                           id="toursCount"
+                                           name="toursCount"
+                                           defaultValue={editingGameParams.toursCount || ''}
+                                           required={true}
+                                           onChange={handleToursCountChange}/>
+                                </div>
+
+                                <div className={classes.questionsCountWrapper}>
+                                    <label htmlFor="questionsCount" className={classes.questionsCountLabel}>Вопросов в
+                                        туре</label>
+                                    <input className={classes.questionsCountInput}
+                                           type="number"
+                                           id="questionsCount"
+                                           name="questionsCount"
+                                           defaultValue={editingGameParams.questionsCount || ''}
+                                           required={true}
+                                           onChange={handleQuestionsCountChange}/>
+                                </div>
                             </div>
 
-                            <div className={classes.questionsCountWrapper}>
-                                <label htmlFor="questionsCount" className={classes.questionsCountLabel}>Вопросов в
-                                    туре</label>
-                                <input className={classes.questionsCountInput}
-                                       type="number"
-                                       id="questionsCount"
-                                       name="questionsCount"
-                                       defaultValue={editingGameParams.questionsCount || ''}
-                                       required={true}
-                                       onChange={handleQuestionsCountChange}/>
+                            <div className={classes.teamsWrapper}>
+                                <div className={classes.teamsLabel}>
+                                    Команды
+                                </div>
+
+                                <div className={classes.teamsDiv}>
+                                    <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
+                                                autoHideDuration={200} renderThumbVertical={() =>
+                                        <div style={{backgroundColor: 'transparent'}}/>} renderTrackVertical={() =>
+                                        <div style={{backgroundColor: 'transparent'}}/>}>
+
+                                        {renderTeams()}
+
+                                    </Scrollbars>
+                                </div>
                             </div>
                         </div>
 
-                        <div className={classes.teamsWrapper}>
-                            <div className={classes.teamsLabel}>
-                                Команды
-                            </div>
-
-                            <div className={classes.teamsDiv}>
-                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
-                                            autoHideDuration={200} renderThumbVertical={() =>
-                                    <div style={{backgroundColor: 'transparent'}}/>} renderTrackVertical={() =>
-                                    <div style={{backgroundColor: 'transparent'}}/>}>
-
-                                    {renderTeams()}
-
-                                </Scrollbars>
-                            </div>
-                        </div>
-                    </div>
-
-                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
-                                style={{
-                                    padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
-                                    filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
-                                }}/>
-                </form>
-            </div>
-        </PageWrapper>
-    );
+                        <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
+                                    style={{
+                                        padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
+                                        filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
+                                    }}/>
+                    </form>
+                </div>
+            </PageWrapper>
+        );
 }
 
 export default GameCreator;
