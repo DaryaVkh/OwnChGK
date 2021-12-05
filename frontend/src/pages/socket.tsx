@@ -2,14 +2,18 @@ import React, {FC} from 'react';
 import {CustomInput} from "../components/custom-input/custom-input";
 import {FormButton} from "../components/form-button/form-button";
 import {Button} from "@mui/material";
-import {cookie} from "express-validator";
-import {getAll} from "../server-api/server-api";
 
 const Socket: FC = props => {
     let answer:string;
     const conn = new WebSocket("ws://localhost:80/");
 
-    getAll("/users/teamId").then(r => r.status);
+    fetch(`/users/1/changeToken`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
@@ -37,7 +41,7 @@ const Socket: FC = props => {
                          onChange={handleSocket}/>
 
             <FormButton type="sendButton" text="Отправить"/>
-            <Button onClick={() => { handleStart() }}> "Старт"</Button>
+            <Button onClick={handleStart}> "Старт"</Button>
         </form>
     );
 }

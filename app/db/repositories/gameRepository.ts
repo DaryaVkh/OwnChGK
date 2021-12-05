@@ -1,6 +1,5 @@
-import {EntityRepository, In, Repository, getCustomRepository} from 'typeorm';
+import {EntityRepository, In, Repository} from 'typeorm';
 import {Game} from '../entities/Game';
-import {RoundRepository} from './roundRepository';
 import {Team} from '../entities/Team';
 import {Admin} from '../entities/Admin';
 import {Round} from '../entities/Round';

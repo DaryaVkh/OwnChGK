@@ -67,18 +67,18 @@ export class UsersController { // TODO: дописать смену имени �
         }
     }
 
+    // вызывается только если знаем, что у юзера текущего точно есть команда
     public async changeTokenWhenGoIntoGame(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-//todo:запрос к бд за командой
-            const teamId = Math.floor(Math.random()*2)+1;
-            const gameId = req.params.gameId;
+            const {gameId} = req.params;
             const oldToken = req.cookies['authorization'];
-            const {userId: userId, email:email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
-            const token = generateAccessToken(userId, email, userRoles, teamId, Number(gameId));
+            const {id: userId, email: email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            const user = await getCustomRepository(UserRepository).findOne(userId, {relations:['team']});
+            const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId);
             res.cookie('authorization', token, {
                 maxAge: 24 * 60 * 60 * 1000,
                 //httpOnly: true,

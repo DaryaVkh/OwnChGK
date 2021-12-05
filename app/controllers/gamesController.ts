@@ -2,11 +2,11 @@ import {validationResult} from 'express-validator';
 import {getCustomRepository} from 'typeorm';
 import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
-import jwt from "jsonwebtoken";
-import {secret} from "../jwtToken";
-import {games} from "../app";
-import {Game, Round} from "../logic/Game";
-import {Team} from "../logic/Team";
+import jwt from 'jsonwebtoken';
+import {secret} from '../jwtToken';
+import {games} from '../app';
+import {Game, Round} from '../logic/Game';
+import {Team} from '../logic/Team';
 
 
 export class GamesController {
@@ -40,13 +40,12 @@ export class GamesController {
             const {gameName, roundCount, questionCount, teams} = req.body;
             const token = req.cookies['authorization'];
             const payLoad = jwt.verify(token, secret);
-            if (typeof payLoad !== "string") {
+            if (typeof payLoad !== 'string') {
                 await getCustomRepository(GameRepository).insertByParams(
                     gameName, payLoad.email, roundCount, questionCount, 1, 60, teams);
                 res.status(200).json({});
-            }
-            else {
-                res.send("You are not admin");
+            } else {
+                res.send('You are not admin');
             }
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -119,6 +118,7 @@ export class GamesController {
 
     public async startGame(req: Request, res: Response) {
         try {
+            console.log(1);
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
@@ -132,8 +132,8 @@ export class GamesController {
                 questionCount: game.rounds.length !== 0 ? game.rounds[0].questionCount : 0
             };
             games[game.id] = new Game(gameName);
-            for (let i=0; i<game.rounds.length; i++) {
-                games[game.id].addRound(new Round(i+1, answer.questionCount, 60, 1));
+            for (let i = 0; i < game.rounds.length; i++) {
+                games[game.id].addRound(new Round(i + 1, answer.questionCount, 60, 1));
             }
             for (const team of game.teams) {
                 games[game.id].addTeam(new Team(team.name, team.id));
@@ -154,14 +154,13 @@ export class GamesController {
             const {newGameName, roundCount, questionCount, teams} = req.body;
             const token = req.cookies['authorization'];
             const payLoad = jwt.verify(token, secret);
-            if (typeof payLoad !== "string") {
+            if (typeof payLoad !== 'string') {
                 await getCustomRepository(GameRepository).updateByParams(
                     gameName, newGameName, roundCount, questionCount, 1, 60, teams
                 );
                 res.status(200).json({});
-            }
-            else {
-                res.send("You are not admin");
+            } else {
+                res.send('You are not admin');
             }
         } catch (error: any) {
             res.status(400).json({'message': error.message});
