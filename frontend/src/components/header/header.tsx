@@ -20,7 +20,9 @@ const Header: FC<HeaderProps> = props => {
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt='logo'/>
             </Link>
 
-            { props.children }
+            <div className={classes.childrenWrapper}>
+                { props.children }
+            </div>
 
             {
                 props.isAuthorized

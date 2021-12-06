@@ -13,7 +13,8 @@
 .logo {
     height: 6vmin;
     position: fixed;
-    left: 15vmin;
+    //left: 15vmin;
+    left: 10%;
     user-select: none;
 
     &:hover {
@@ -50,6 +51,14 @@
     &:hover {
         cursor: pointer;
     }
+}
+
+.childrenWrapper {
+    display: flex;
+    align-self: center;
+    position: relative;
+    width: 60%;
+    height: 100%;
 }
 
 @media only screen and (min-width: 1400px) {

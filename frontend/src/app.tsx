@@ -54,9 +54,7 @@ const App: FC = () => {
                     <Profile isAdmin={false}/>
                 </Route>
 
-                <Route path="/game">
-                    <UserGame />
-                </Route>
+                <Route path="/game" component={UserGame} />
 
                 <Redirect from="*" to="/"/>
             </Switch>

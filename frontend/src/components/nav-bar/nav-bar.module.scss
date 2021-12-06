@@ -5,19 +5,20 @@
   height: 100%;
   width: 40%;
   justify-content: space-evenly;
+  margin: auto;
 }
 
 .nav-admin {
-  width: 40%;
+  width: 65%;
 }
 
 .nav-user {
-  width: 30%;
+  width: 50%;
 }
 
 .nav-item {
   color: white;
-  font-size: 2vh;
+  font-size: 2vmin;
   text-decoration: none;
   transition: 0.3s;
   z-index: 1;
