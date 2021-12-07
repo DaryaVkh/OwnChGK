@@ -11,6 +11,7 @@ import RestoringPassword from './pages/restoring-password/restoring-password';
 import Profile from './pages/profile/profile';
 import Socket from './pages/socket';
 import UserGame from "./pages/user-game/user-game";
+import AdminGame from "./pages/admin-game/admin-game";
 
 const App: FC = () => {
     return (
@@ -55,6 +56,8 @@ const App: FC = () => {
                 </Route>
 
                 <Route path="/game" component={UserGame} />
+
+                <Route path="/admin/game" component={AdminGame} />
 
                 <Redirect from="*" to="/"/>
             </Switch>
