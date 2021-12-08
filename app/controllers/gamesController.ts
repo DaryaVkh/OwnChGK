@@ -118,7 +118,6 @@ export class GamesController {
 
     public async startGame(req: Request, res: Response) {
         try {
-            console.log(1);
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})

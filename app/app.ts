@@ -2,9 +2,12 @@ import {Server} from './server';
 import * as WebSocket from 'ws';
 import jwt from "jsonwebtoken";
 import {secret} from "./jwtToken";
+import {Team} from "./logic/Team";
+import { Game } from './logic/Game';
 
-export const games = {};
-export const timers = {};
+export const games:{ [id: string] : Game;} = {};
+export const gamesCurrentAnswer:{ [id: string] : [number, number];} = {};
+export const timers: { [id: string] : any; }= {};
 const port = parseInt(process.env.PORT || '3000');
 const wss = new WebSocket.Server({port: 80});
 let isOpen = false;
@@ -13,16 +16,19 @@ const extraSeconds = 10000;
 
 wss.on('connection', (ws: WebSocket) => {
     ws.on('message', (message: string) => {
-        message += ""; // преобразовали в строку
-        const words = message.split('\n');
-        if (words.length != 2) {
+        console.log(message);
+        message += "";
+        const jsonMessage = JSON.parse(message);
+        console.log(jsonMessage);
+        if (jsonMessage.cookie === null) {
             console.log("не авторизован");
         }
         else {
-            const {roles: userRoles, teamId: teamId, gameId: gameId} = jwt.verify(words[0], secret) as jwt.JwtPayload;
+            const {roles: userRoles, teamId: teamId, gameId: gameId} =
+                jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload;
             if (userRoles == "admin" || userRoles == "superadmin") {
                 //если админ
-                if (words[1] == "+10sec") {
+                if (jsonMessage.action == "+10sec") {
                     const pastDelay = Math.ceil(process.uptime() * 1000 - timers[gameId]._idleStart);
                     const initialDelay = timers[gameId]._idleTimeout;
                     clearTimeout(timers[gameId]);
@@ -30,17 +36,17 @@ wss.on('connection', (ws: WebSocket) => {
                     timers[gameId] = setTimeout(() => {
                         console.log("added time end")
                         isOpen = false;
-                        try {
-                            for (let i=1; i<=3; i++){
-                                console.log(games[gameId].teams[i].getAnswer(1, 1));
-                        }
-                        }
-                        catch (e) {
-                            console.log(e);
-                        }
+                            for (let [key, value] of Object.entries(games[gameId].teams)) {
+                                try {
+                                    console.log(value.getAnswer(1, 1));
+                                }
+                                catch (e) {
+                                    console.log("no answer for team" + games[gameId].teams[key].name);
+                                }
+                            }
                     }, initialDelay - pastDelay + extraSeconds); // может быть косяк с очисткой таймаута, но хз. пока не косячило
-                } else if (words[1] == "Start") {
-                    console.log("startuem")//надо ли запрещать стартовать, если таймер уже работает
+                } else if (jsonMessage.action == "Start") {
+                    console.log("startuem")
                     isOpen = true;
                     timers[gameId] = setTimeout(() => {
                         isOpen = false;
@@ -50,8 +56,8 @@ wss.on('connection', (ws: WebSocket) => {
             }
             //не админ
             else if (isOpen) {
-                console.log('received: %s', words[1], teamId);
-                games[gameId].rounds[0].questions[0].giveAnswer(games[gameId].teams[teamId], words[1]);
+                console.log('received: %s', jsonMessage.answer, teamId);
+                games[gameId].rounds[0].questions[0].giveAnswer(games[gameId].teams[teamId], jsonMessage.answer);
             }
         }
     });

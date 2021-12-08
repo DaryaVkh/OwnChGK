@@ -4,7 +4,7 @@ import {FormButton} from "../components/form-button/form-button";
 import {Button} from "@mui/material";
 
 const Socket: FC = props => {
-    let answer:string;
+    let answer: string;
     const conn = new WebSocket("ws://localhost:80/");
 
     fetch(`/users/1/changeToken`, {
@@ -17,7 +17,11 @@ const Socket: FC = props => {
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
-        conn.send(getCookie("authorization") + "\n" + answer);
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'Answer',
+            'answer': answer
+        }));
     }
 
     const getCookie = (name: string) => {
@@ -32,7 +36,17 @@ const Socket: FC = props => {
     }
 
     const handleStart = async () => {
-        conn.send(getCookie("authorization") + "\n" + "Start");
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': "Start"
+        }));
+    }
+
+    const handleTimerMore = async () => {
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': "+10sec"
+        }));
     }
 
     return (
@@ -42,6 +56,7 @@ const Socket: FC = props => {
 
             <FormButton type="sendButton" text="Отправить"/>
             <Button onClick={handleStart}> "Старт"</Button>
+            <Button onClick={handleTimerMore}> "+10sec"</Button>
         </form>
     );
 }
