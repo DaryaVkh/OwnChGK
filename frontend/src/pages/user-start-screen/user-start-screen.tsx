@@ -9,11 +9,12 @@ import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import {Link} from "react-router-dom";
 import {IconButton} from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import {editTeamCaptainByCurrentUser, getAll, getTeamByCurrentUser, getTeamsWithoutUser} from '../../server-api/server-api';
 
 const UserStartScreen: FC<UserStartScreenProps> = () => {
     const [page, setPage] = useState('teams');
-    const gamesFromDB: string[] = [];
-    const teamsFromDB: string[] = [];
+    const [gamesFromDB, setGamesFromDB] = useState<string[]>([]);
+    const [teamsFromDB, setTeamsFromDB] = useState<string[]>([]);
     const [userTeam, setUserTeam] = useState('');
     const scrollbars = useRef<Scrollbars>(null);
 
@@ -21,9 +22,46 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     // gamesFromDB.push(...['Чгк на КонфУРе-2021', 'shjbdnklsd;dllknsjbckjsdlv;skdkvjbsjkla;sckmdashdbksldkvlkndfkjvbefj', 'Игра 1', 'Игра 2', 'Игра 3', 'Игра 4', 'Игра 5', 'Игра 6', 'Игра 7', 'Игра 8','Игра 9','Игра 10']);
     // teamsFromDB.push(...['My Best Team', 'Meow', 'Hello', 'Sweet brioches','ChGK','BestTeam', 'Meow Meow', 'Elite', 'Family']);
 
+    useEffect(() => {
+        getTeamByCurrentUser().then(res => {
+            if (res.status === 200) {
+                res.json().then(({name}) => {
+                    getTeamsWithoutUser().then(res => {
+                        if (res.status === 200) {
+                            res.json().then(({teams}) => {
+                                setTeamsFromDB(teams);
+                            });
+                        } else {
+                            // TODO: код не 200, мейби всплывашку, что что-то не так?
+                        }
+                    })
+
+                    if (name !== undefined) {
+                        setUserTeam(name);
+                        setTeamsFromDB([name, ...teamsFromDB]);
+                    }
+                })
+            }
+        })
+
+        getAll('/games/').then(res => {
+            if (res.status === 200) {
+                res.json().then(({games}) => {
+                    setGamesFromDB(games);
+                });
+            } else {
+                // TODO: код не 200, мейби всплывашку, что что-то не так?
+            }
+        });
+    }, []);
+
     const handleChooseTeam = (e: React.SyntheticEvent) => {
         if (userTeam === '') {
             setUserTeam((e.currentTarget as HTMLDivElement).innerText);
+            editTeamCaptainByCurrentUser((e.currentTarget as HTMLDivElement).innerText)
+                .then(res => {
+                    // TODO: код не 200, что делать?
+                });
             //TODO установили, отрисовали и отправляем в бд, что этот юзер теперь капитан этой команды
         }
     }

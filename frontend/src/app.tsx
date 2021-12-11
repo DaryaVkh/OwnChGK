@@ -10,14 +10,14 @@ import UserStartScreen from './pages/user-start-screen/user-start-screen';
 import RestoringPassword from './pages/restoring-password/restoring-password';
 import Profile from './pages/profile/profile';
 import Socket from './pages/socket';
-import Game from './pages/game';
+import UserGame from "./pages/user-game/user-game";
+import AdminGame from "./pages/admin-game/admin-game";
 
 const App: FC = () => {
     return (
         <Wrapper>
             <Switch>
                 <Route path="/answer" component={Socket} exact={true}/>
-                <Route path="/game" component={Game} exact={true}/>
                 <Route path={['/', '/auth']} component={Authorization} exact={true}/>
                 <Route path={'/admin'} exact={true}>
                     <Authorization isAdmin={true}/>
@@ -55,25 +55,9 @@ const App: FC = () => {
                     <Profile isAdmin={false}/>
                 </Route>
 
-                {/*<Route path="/admin/start-screen" exact={true}>*/}
-                {/*    <AdminStartScreen page=''/>*/}
-                {/*</Route>*/}
-                {/*<Route path="/admin/games" exact={true}>*/}
-                {/*    <AdminStartScreen page='games' />*/}
-                {/*</Route>*/}
-                {/*<Route path='/admin/teams' exact={true}>*/}
-                {/*    <AdminStartScreen page='teams' />*/}
-                {/*</Route>*/}
-                {/*<Route path='/admins' exact={true}>*/}
-                {/*    <AdminStartScreen page='admins' />*/}
-                {/*</Route>*/}
+                <Route path="/game" component={UserGame} />
 
-                {/*<Route path='/games' exact={true}>*/}
-                {/*    <UserStartScreen page='games' />*/}
-                {/*</Route>*/}
-                {/*<Route path='/teams' exact={true}>*/}
-                {/*    <UserStartScreen page='teams' />*/}
-                {/*</Route>*/}
+                <Route path="/admin/game" component={AdminGame} />
 
                 <Redirect from="*" to="/"/>
             </Switch>

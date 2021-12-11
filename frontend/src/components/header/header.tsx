@@ -5,7 +5,6 @@ import {Link} from 'react-router-dom';
 
 const Header: FC<HeaderProps> = props => {
     const handleLogout = async (event: React.SyntheticEvent) => {
-        event.preventDefault();
         const request = await fetch('/users/logout', {
             method: 'POST',
             headers: {
@@ -21,7 +20,9 @@ const Header: FC<HeaderProps> = props => {
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt='logo'/>
             </Link>
 
-            { props.children }
+            <div className={classes.childrenWrapper}>
+                { props.children }
+            </div>
 
             {
                 props.isAuthorized
@@ -30,7 +31,9 @@ const Header: FC<HeaderProps> = props => {
                         <Link className={classes.Profile} to={props.isAdmin ? '/admin/profile' : '/profile'}>
                             <img className={classes.Profile} src={require('../../images/Profile.svg').default} alt='Profile' />
                         </Link>
-                        <img className={classes.LogOut} src={require('../../images/LogOut.svg').default} alt='LogOut' onClick={handleLogout} />
+                        <Link className={classes.LogOut} to={props.isAdmin ? '/admin' : '/auth'}>
+                            <img className={classes.LogOut} src={require('../../images/LogOut.svg').default} alt='LogOut' onClick={handleLogout} />
+                        </Link>
                     </Fragment>
                     : null
             }

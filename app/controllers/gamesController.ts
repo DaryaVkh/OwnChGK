@@ -172,6 +172,7 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameName} = req.params;
             const {status} = req.body;
             await getCustomRepository(GameRepository).updateByNameAndStatus(gameName, status);

@@ -4,7 +4,7 @@ import {UserRepository} from '../db/repositories/userRepository';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken, secret} from '../jwtToken';
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
@@ -83,7 +83,17 @@ export class UsersController { // TODO: дописать смену имени �
                 //httpOnly: true,
                 secure: true
             });
-            res.status(200).json({});
+
+            if (user.team !== null) {
+                res.status(200).json({
+                    name: user.team.name,
+                    id: user.team.id,
+                    captainId: user.id,
+                    captainEmail: user.email,
+                });
+            } else {
+                res.status(200).json({});
+            }
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
