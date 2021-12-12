@@ -12,13 +12,10 @@ export class Team {
     }
 
     addAnswer(answer: Answer): void {
-        console.log(answer.roundNumber + " roundNumber");
-        console.log(this.answers.length + " length of list");
         if (this.answers.length === answer.roundNumber) {
             this.answers.push([new Answer(this.id, 0, 0, "")]);
             //todo: заглушка
         }
-        console.log(answer.questionNumber + " qustion number");
         if (this.answers[answer.roundNumber].length === answer.questionNumber)
             //todo: ставить бы размер массива сразу, и будет без этого ифа
         {

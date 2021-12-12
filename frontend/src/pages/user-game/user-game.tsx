@@ -8,6 +8,16 @@ import {Alert, Snackbar} from "@mui/material";
 import {UserGameProps} from "../../entities/user-game/user-game.interfaces";
 
 const UserGame: FC<UserGameProps> = props => {
+    const conn = new WebSocket("ws://localhost:80/");
+    let answer: string;
+    fetch(`/users/1/changeToken`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const [timeForAnswer, setTimeForAnswer] = useState(60);
 
@@ -59,8 +69,24 @@ const UserGame: FC<UserGameProps> = props => {
         setIsSnackbarOpen(false);
     };
 
-    const handleSendButtonClick = (event: React.SyntheticEvent) => {
+    const getCookie = (name: string) => {
+        let matches = document.cookie.match(new RegExp(
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        ));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
+    }
+
+    const handleAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
+        answer = event.target.value;
+    }
+
+    const handleSendButtonClick = () => {
         setIsSnackbarOpen(true);
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'Answer',
+            'answer': answer
+        }));
         // TODO тут сохраняем где нить ответ (или куда-то его там отправляем)
     }
 
@@ -87,8 +113,8 @@ const UserGame: FC<UserGameProps> = props => {
                         <p className={classes.answerNumber}>Вопрос 1</p> {/* TODO как менять динамически номер вопроса?*/}
 
                         <div className={classes.answerInputWrapper}>
-                            <CustomInput type='text' id='answer' name='answer' placeholder='Ответ' style={{width: '79%'}} />
-                            <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить</button>
+                            <CustomInput type='text' id='answer' name='answer' placeholder='Ответ' style={{width: '79%'}} onChange={handleAnswer}/>
+                            <button className={classes.sendAnswerButton} onClick={handleSendButtonClick} >Отправить</button>
                         </div>
                     </div>
                 </div>
