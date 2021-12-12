@@ -22,7 +22,7 @@ export class GameRepository extends Repository<Game> {
             .then(admin => manager.find(Team, {'name': In(teams)})
                 .then(teams => manager.create(Game, {name, admin, teams}).save())
                 .then(game => {
-                    for (let i = 1; i <= questionCount; i++) {
+                    for (let i = 1; i <= roundCount; i++) {
                         manager.insert(Round, {number: i, game, questionCount, questionCost, questionTime});
                     }
                 })));
@@ -38,12 +38,13 @@ export class GameRepository extends Repository<Game> {
         return this.manager.transaction(manager => manager.find(Team, {'name': In(teams)})
             .then(teams => manager.findOne(Game, {name})
                 .then(game => {
-                    game.teams = teams
+                    game.teams = teams;
+                    game.name = newName;
                     return manager.save(Game, game);
                 })
                 .then(game => {
                     manager.delete(Round, {game}).then(() => {
-                        for (let i = 1; i <= questionCount; i++) {
+                        for (let i = 1; i <= roundCount; i++) {
                             manager.insert(Round, {number: i, game, questionCount, questionCost, questionTime});
                         }
                     })

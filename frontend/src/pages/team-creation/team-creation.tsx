@@ -10,20 +10,15 @@ import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-a
 import {useLocation, Redirect} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
 
-let teamName: string = '';
-let oldTeamName: string = '';
-let captain: string = '';
-
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>([]);
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
     const [isNameInvalid, setIsNameInvalid] = useState(false);
     const [oldCaptain, setOldCaptain] = useState<string | undefined>(undefined);
     const location = useLocation<{ name: string }>();
-
-    if (props.mode === 'edit') {
-        teamName = location.state.name;
-    }
+    const oldTeamName = props.mode === 'edit' ? location.state.name : '';
+    const [teamName, setTeamName] = useState(props.mode === 'edit' ? location.state.name : '');
+    const [captain, setCaptain] = useState('');
 
     useEffect(() => {
         getUsersWithoutTeam().then(res => {
@@ -31,14 +26,13 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                 res.json().then(({users}) => {
                     setUsersFromDB([...users]);
                     if (props.mode === 'edit') {
-                        oldTeamName = location.state.name;
                         getTeam(teamName).then(res => {
                             if (res.status === 200) {
                                 res.json().then(data => {
-                                    captain = data.captain;
-                                    setOldCaptain(captain);
-                                    if (captain) {
-                                        setUsersFromDB([...users, captain]);
+                                    setCaptain(data.captain);
+                                    setOldCaptain(data.captain);
+                                    if (data.captain) {
+                                        setUsersFromDB([...users, data.captain]);
                                     }
                                 })
                             }
@@ -52,11 +46,11 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     }, []);
 
     const handleAutocompleteChange = (event: React.SyntheticEvent, value: string | null) => {
-        captain = value as string;
+        setCaptain(value as string);
     }
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        teamName = event.target.value;
+        setTeamName(event.target.value);
     }
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
@@ -107,6 +101,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                             }
                         }}>Такая команда уже существует</Alert> : null}
                         <CustomInput type="text" id="teamName" name="teamName" placeholder="Название"
+                                     value={teamName}
                                      defaultValue={teamName}
                                      onChange={handleInputChange} isInvalid={isNameInvalid}/>
 

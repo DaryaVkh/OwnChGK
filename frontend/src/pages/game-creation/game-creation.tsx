@@ -9,38 +9,23 @@ import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {getAll, getGame, createGame, editGame} from '../../server-api/server-api';
 import {Redirect, useLocation} from 'react-router-dom';
-import NavBar from "../../components/nav-bar/nav-bar";
-
-let gameName: string = '';
-let oldGameName: string = '';
-let questionsCount: number = 0;
-let toursCount: number = 0;
-const teams: string[] = [];
+import NavBar from '../../components/nav-bar/nav-bar';
 
 const GameCreator: FC<GameCreatorProps> = props => {
     const [teamsFromDB, setTeamsFromDB] = useState([]);
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
     const location = useLocation<{ name: string }>();
-    const [editingGameParams, setEditingGameParams] = useState<{
-        toursCount: number,
-        questionsCount: number,
-        chosenTeams: string[] | undefined
-    }>({
-        toursCount: 0,
-        questionsCount: 0,
-        chosenTeams: undefined
-    });
-
-    if (props.mode === 'edit') {
-        gameName = location.state.name;
-        oldGameName = location.state.name;
-    }
+    const oldGameName = props.mode === 'edit' ? location.state.name : '';
+    const [gameName, setGameName] = useState(props.mode === 'edit' ? location.state.name : '');
+    const [questionsCount, setQuestionsCount] = useState(0);
+    const [toursCount, setToursCount] = useState(0);
+    const [chosenTeams, setChosenTeams] = useState<string[] | undefined>(undefined);
 
     useEffect(() => {
         getAll('/teams/').then(res => {
             if (res.status === 200) {
-                res.json().then(({teams}) => {
-                    setTeamsFromDB(teams);
+                res.json().then(({teams: t}) => {
+                    setTeamsFromDB(t);
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -55,13 +40,9 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                          roundCount,
                                          questionCount
                                      }) => {
-                        toursCount = roundCount;
-                        questionsCount = questionCount;
-                        setEditingGameParams({
-                            toursCount: roundCount,
-                            questionsCount: questionCount,
-                            chosenTeams: teams
-                        });
+                        setToursCount(roundCount);
+                        setQuestionsCount(questionCount);
+                        setChosenTeams(teams);
                     })
                 }
             })
@@ -70,36 +51,37 @@ const GameCreator: FC<GameCreatorProps> = props => {
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         let el = event.target as HTMLInputElement;
-        if (el.checked) {
-            teams.push(el.name);
-        } else if (teams.includes(el.name)) {
-            teams.splice(teams.indexOf(el.name), 1);
+        if (chosenTeams) {
+            if (el.checked) {
+                chosenTeams.push(el.name);
+            } else if (chosenTeams.includes(el.name)) {
+                chosenTeams.splice(chosenTeams.indexOf(el.name), 1);
+            }
         }
     }
 
     const renderTeams = () => {
-        if (props.mode === 'edit' && editingGameParams.chosenTeams === undefined) {
+        if (props.mode === 'edit' && chosenTeams === undefined) {
             return;
         }
 
         return teamsFromDB.map((name, index) => {
-            return editingGameParams.chosenTeams?.includes(name)
+            return chosenTeams?.includes(name)
                 ? <CustomCheckbox name={name} key={index} checked={true} onChange={handleCheckboxChange}/>
                 : <CustomCheckbox name={name} key={index} onChange={handleCheckboxChange}/>;
         })
     };
-
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
         if (props.mode === 'creation') {
-            await createGame(gameName, toursCount, questionsCount, teams)
+            await createGame(gameName, toursCount, questionsCount, chosenTeams ?? [])
                 .then(res => {
                     if (res.status === 200) {
                         setIsCreatedSuccessfully(true);
                     }
                 });
         } else {
-            await editGame(oldGameName, gameName, toursCount, questionsCount, teams)
+            await editGame(oldGameName, gameName, toursCount, questionsCount, chosenTeams ?? [])
                 .then(res => {
                     if (res.status === 200) {
                         setIsCreatedSuccessfully(true);
@@ -109,15 +91,15 @@ const GameCreator: FC<GameCreatorProps> = props => {
     }
 
     const handleGameNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        gameName = event.target.value;
+        setGameName(event.target.value);
     }
 
     const handleToursCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        toursCount = +event.target.value;
+        setToursCount(+event.target.value);
     }
 
     const handleQuestionsCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        questionsCount = +event.target.value;
+        setQuestionsCount(+event.target.value);
     }
 
     return isCreatedSuccessfully
@@ -126,7 +108,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
         (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={true}>
-                    <NavBar isAdmin={props.isAdmin} page='' />
+                    <NavBar isAdmin={props.isAdmin} page=""/>
                 </Header>
 
                 <div className={classes.pageWrapper}>
@@ -141,16 +123,19 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                 <CustomInput type="text" id="gameName"
                                              name="gameName"
                                              placeholder="Название игры"
+                                             value={gameName}
                                              defaultValue={gameName}
                                              onChange={handleGameNameChange}/>
 
                                 <div className={classes.toursCountWrapper}>
-                                    <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество туров</label>
+                                    <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество
+                                        туров</label>
                                     <input className={classes.toursCountInput}
                                            type="number"
                                            id="toursCount"
                                            name="toursCount"
-                                           defaultValue={editingGameParams.toursCount || ''}
+                                           value={toursCount || ''}
+                                           defaultValue={toursCount || ''}
                                            required={true}
                                            onChange={handleToursCountChange}/>
                                 </div>
@@ -162,7 +147,8 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                            type="number"
                                            id="questionsCount"
                                            name="questionsCount"
-                                           defaultValue={editingGameParams.questionsCount || ''}
+                                           value={questionsCount || ''}
+                                           defaultValue={questionsCount || ''}
                                            required={true}
                                            onChange={handleQuestionsCountChange}/>
                                 </div>
@@ -172,7 +158,6 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                 <div className={classes.teamsLabel}>
                                     Команды
                                 </div>
-
                                 <div className={classes.teamsDiv}>
                                     <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
                                                 autoHideDuration={200} renderThumbVertical={() =>

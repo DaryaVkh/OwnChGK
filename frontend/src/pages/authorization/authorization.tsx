@@ -8,12 +8,11 @@ import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {Alert} from "@mui/material";
 
-let email = '';
-let password = '';
-
 const Authorization: FC<AuthorizationProps> = props => {
     const [loggedIn, setLoggedIn] = useState(false);
     const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
         await fetch(props.isAdmin ? 'admins/login' : 'users/login', {
@@ -36,11 +35,11 @@ const Authorization: FC<AuthorizationProps> = props => {
     }
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        email = event.target.value;
+        setEmail(event.target.value);
     }
 
     const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        password = event.target.value;
+        setPassword(event.target.value);
     }
 
     const handleErrorFixes = () => {
@@ -68,9 +67,9 @@ const Authorization: FC<AuthorizationProps> = props => {
                             color: 'white'
                         }
                     }}>Неверный логин или пароль</Alert> : null}
-                    <CustomInput type="email" id="email" name="email" placeholder="E-mail"
+                    <CustomInput type="email" id="email" name="email" placeholder="E-mail" value={email}
                                  onChange={handleEmailChange} isInvalid={wrongEmailOrPassword} onFocus={handleErrorFixes}/>
-                    <CustomInput type="password" id="password" name="password" placeholder="Пароль"
+                    <CustomInput type="password" id="password" name="password" placeholder="Пароль" value={password}
                                  onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword} onFocus={handleErrorFixes}/>
 
                     <FormButton type="signInButton" text="Войти"/>

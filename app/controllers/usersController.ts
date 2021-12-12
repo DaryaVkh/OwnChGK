@@ -34,7 +34,11 @@ export class UsersController { // TODO: дописать смену имени �
                     //httpOnly: true,
                     secure: true
                 });
-                res.status(200).redirect('/team-creation'); // TODO: редирект убрать во фронт
+                res.status(200).json({
+                    id: user.id,
+                    email: user.email,
+                    role: "user"
+                });
             } else {
                 res.status(400).json({message: 'Not your password'});
             }

@@ -32,7 +32,11 @@ export class AdminsController {
                     //httpOnly: true,
                     secure: true
                 });
-                res.status(200).json({});
+                res.status(200).json({
+                    id: admin.id,
+                    email: admin.email,
+                    role: admin.role
+                });
             } else {
                 res.status(400).json({message: 'Not your password'});
             }
