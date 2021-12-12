@@ -84,7 +84,7 @@ export class UsersController { // TODO: дописать смену имени �
                 secure: true
             });
 
-            if (user.team !== null) {
+            if (user.team !== null) { //todo: проверку поправить
                 res.status(200).json({
                     name: user.team.name,
                     id: user.team.id,

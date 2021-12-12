@@ -18,6 +18,15 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
+
+    fetch(`/users/1/changeToken`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+
     const conn = new WebSocket("ws://localhost:80/");
     const getCookie = (name: string) => {
         let matches = document.cookie.match(new RegExp(
@@ -45,7 +54,9 @@ const AdminGame: FC<AdminGameProps> = props => {
         if (playOrPause === 'play') {
             conn.send(JSON.stringify({
                 'cookie': getCookie("authorization"),
-                'action': "Start"
+                'action': "Start",
+                'round': classes.activeTour,
+                'question': classes.activeQuestion
             }));
             setPlayOrPause('pause');
         } else {

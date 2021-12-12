@@ -4,7 +4,7 @@ import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
-import {games} from '../app';
+import {gameAdmins, games} from '../app';
 import {Game, Round} from '../logic/Game';
 import {Team} from '../logic/Team';
 
@@ -130,6 +130,7 @@ export class GamesController {
                 roundCount: game.rounds.length,
                 questionCount: game.rounds.length !== 0 ? game.rounds[0].questionCount : 0
             };
+            gameAdmins[game.id] = new Set();
             games[game.id] = new Game(gameName);
             for (let i = 0; i < game.rounds.length; i++) {
                 games[game.id].addRound(new Round(i + 1, answer.questionCount, 60, 1));

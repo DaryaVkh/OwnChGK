@@ -37,6 +37,14 @@ export class Question {
         }
     }
 
+    rejectAnswers(wrongAnswer: string): void {
+        for (let answer of this.answers) {
+            if (answer.text === wrongAnswer) {
+                answer.reject();
+            }
+        }
+    }
+
     acceptAppeal(team: Team, comment: string = ""): void {
         const appeal = this.appeals.find((value, index, obj) =>
             value.teamNumber === team.id);
@@ -50,6 +58,15 @@ export class Question {
 
         if (answer !== undefined) {
             this.acceptAnswers(answer.text);
+        }
+    }
+
+    rejectAppeal(team: Team, comment: string = ""): void {
+        const appeal = this.appeals.find((value, index, obj) =>
+            value.teamNumber === team.id);
+
+        if (appeal !== undefined) {
+            appeal.reject(comment);
         }
     }
 }

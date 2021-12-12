@@ -13,12 +13,13 @@ export class Team {
 
     addAnswer(answer: Answer): void {
         if (this.answers.length === answer.roundNumber) {
-            this.answers.push([new Answer(this.id, 0, 0, "")]);
-            //todo: заглушка
+            this.answers.push([]);
         }
-        if (this.answers[answer.roundNumber].length === answer.questionNumber)
-            //todo: ставить бы размер массива сразу, и будет без этого ифа
-        {
+        if (this.answers[answer.roundNumber].length < answer.questionNumber) {
+            this.answers[answer.roundNumber].push(new Answer(this.id, answer.roundNumber, answer.questionNumber, ""));
+            //заглушка (для 0 элементов или если не ответили на вопрос)
+        }
+        if (this.answers[answer.roundNumber].length === answer.questionNumber){
             this.answers[answer.roundNumber].push(answer);
         }
         else this.answers[answer.roundNumber][answer.questionNumber] = answer;
