@@ -19,6 +19,22 @@ const AdminGame: FC<AdminGameProps> = props => {
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
 
+    fetch(`/users/1/changeToken`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+
+    const conn = new WebSocket("ws://localhost:80/");
+    const getCookie = (name: string) => {
+        let matches = document.cookie.match(new RegExp(
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        ));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
+    }
+
     const handleTourClick = (event: React.SyntheticEvent) => {
         const activeTour = document.querySelector(`.${classes.activeTour}`) as HTMLDivElement;
         const clickedTour = event.target as HTMLDivElement;
@@ -33,13 +49,37 @@ const AdminGame: FC<AdminGameProps> = props => {
         clickedQuestion.classList.add(classes.activeQuestion);
     }
 
-    const handlePlayClick = (event: React.SyntheticEvent) => {
+    const handlePlayClick = () => {
         //TODO тут стопим или запускаем таймер текущего вопроса
         if (playOrPause === 'play') {
+            conn.send(JSON.stringify({
+                'cookie': getCookie("authorization"),
+                'action': "Start",
+                'round': classes.activeTour,
+                'question': classes.activeQuestion
+            }));
             setPlayOrPause('pause');
         } else {
+            conn.send(JSON.stringify({
+                'cookie': getCookie("authorization"),
+                'action': "Pause"
+            }));
             setPlayOrPause('play');
         }
+    }
+
+    const handleStopClick = () => {
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': "Stop"
+        }));
+    }
+
+    const handleAddedTimeClick = () => {
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': "+10sec"
+        }));
     }
 
     const renderTours = () => {
@@ -83,11 +123,11 @@ const AdminGame: FC<AdminGameProps> = props => {
                         }
                     </button>
 
-                    <button className={`${classes.button} ${classes.stopButton}`}>
+                    <button className={`${classes.button} ${classes.stopButton}`} onClick={handleStopClick}>
                         <StopIcon sx={{fontSize: '2.5vw', color: 'black'}} />
                     </button>
 
-                    <button className={`${classes.button} ${classes.tenSecondsButton}`}>+ 10 сек.</button>
+                    <button className={`${classes.button} ${classes.tenSecondsButton}`} onClick={handleAddedTimeClick}>+ 10 сек.</button>
 
                     <div className={classes.answerTime}>1:10</div>
                 </div>

@@ -11,6 +11,7 @@ export const gamesRouter = () => {
 
     router.get('/', middleware, gamesController.getAll);
     router.get('/:gameName', middleware, gamesController.getGame);
+    router.get('/:gameName/start', roleMiddleware(adminAccess), gamesController.startGame);
     router.get('/:gameName/teams', middleware, gamesController.getAllTeams);
     router.patch('/:gameName/change', roleMiddleware(adminAccess), gamesController.changeGame)
     router.patch('/:gameName/changeStatus', roleMiddleware(adminAccess), gamesController.changeGameStatus);
