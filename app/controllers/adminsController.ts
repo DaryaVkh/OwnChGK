@@ -51,8 +51,7 @@ export class AdminsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const email = req.body.email;
-            const password = req.body.password;
+            const {email, password} = req.body;
             const hashedPassword = await hash(password, 10);
 
             await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword);

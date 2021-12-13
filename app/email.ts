@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 
-export function CreateTransporter(user:string, password:string) {
+export function CreateTransporter(user: string, password: string) {
     return nodemailer.createTransport({
         service: 'Gmail',
         auth: {

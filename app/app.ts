@@ -6,15 +6,19 @@ import {Game} from './logic/Game';
 import {CreateTransporter} from "./email";
 
 export const games: { [id: string]: Game; } = {};
-export const transporter = CreateTransporter("ownchgk@gmail.com", "6ownchgkgoogle");
 export const gamesCurrentAnswer: { [id: string]: [number, number]; } = {};
-export const timers: { [id: string]: any; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
+export const gameIsTimerStart: { [id: string]: boolean; } = {};
+
+export const transporter = CreateTransporter("ownchgk@gmail.com", "6ownchgkgoogle");
+
+export const timers: { [id: string]: any; } = {};
 export const timesWhenPauseClick: { [id: string]: number; } = {};
 export const timesIsOnPause: { [id: string]: boolean; } = {};
+
 const port = parseInt(process.env.PORT || '3000');
+
 const wss = new WebSocket.Server({port: 80});
-let isOpen = false;
 const seconds70PerQuestion = 70000;
 const extra10Seconds = 10000;
 
@@ -26,14 +30,14 @@ function GiveAddedTime(gameId: number) {
     const pastDelay = Math.ceil(process.uptime() * 1000 - timers[gameId]._idleStart);
     const initialDelay = timers[gameId]._idleTimeout;
     clearTimeout(timers[gameId]);
-    isOpen = true;
+    gameIsTimerStart[gameId] = true;
     let t;
     if (initialDelay - pastDelay < 0) {
         t = extra10Seconds;
     } else t = initialDelay - pastDelay + extra10Seconds;
     timers[gameId] = setTimeout(() => {
         console.log("added time end")
-        isOpen = false;
+        gameIsTimerStart[gameId] = false;
 
         for (let [key, value] of Object.entries(games[gameId].teams)) {
             try {
@@ -49,19 +53,19 @@ function GiveAddedTime(gameId: number) {
 function StartTimer(gameId: number) {
     if (!timesIsOnPause[gameId]) {
         console.log("start")
-        isOpen = true;
+        gameIsTimerStart[gameId] = true;
         timers[gameId] = setTimeout(() => {
-            isOpen = false;
+            gameIsTimerStart[gameId] = false;
             console.log("stop")
         }, seconds70PerQuestion);
     } else {
         console.log("startFromPause")
-        isOpen = true;
+        gameIsTimerStart[gameId] = true;
         timesIsOnPause[gameId] = false;
         const t = seconds70PerQuestion - timesWhenPauseClick[gameId];
         timesWhenPauseClick[gameId] = 0;
         timers[gameId] = setTimeout(() => {
-            isOpen = false;
+            gameIsTimerStart[gameId] = false;
             console.log("stop after pause")
         }, t);
     }
@@ -69,16 +73,16 @@ function StartTimer(gameId: number) {
 
 function StopTimer(gameId: number) {
     console.log("stop")
-    isOpen = false;
+    gameIsTimerStart[gameId] = false;
     clearTimeout(timers[gameId]);
     timesIsOnPause[gameId] = false;
     timesWhenPauseClick[gameId] = 0;
 }
 
 function PauseTimer(gameId: number) {
-    if (isOpen) {
+    if (gameIsTimerStart[gameId]) {
         console.log("pause")
-        isOpen = false;
+        gameIsTimerStart[gameId] = false;
         timesIsOnPause[gameId] = true;
         timesWhenPauseClick[gameId] = Math.ceil(process.uptime() * 1000 - timers[gameId]._idleStart);
         clearTimeout(timers[gameId]);
@@ -167,7 +171,7 @@ wss.on('connection', (ws: WebSocket) => {
                     RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.teamName, jsonMessage.answers);
                 }
             } else {
-                if (isOpen && jsonMessage.action == "Answer") {
+                if (gameIsTimerStart[gameId] && jsonMessage.action == "Answer") {
                     gamesCurrentAnswer[gameId] = [0, 0];
                     GetAnswer(jsonMessage.answer, teamId, gameId);
                 } else if (jsonMessage.action == "Appeal") {
