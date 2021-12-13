@@ -3,8 +3,10 @@ import * as WebSocket from 'ws';
 import jwt from "jsonwebtoken";
 import {secret} from "./jwtToken";
 import {Game} from './logic/Game';
+import {CreateTransporter} from "./email";
 
 export const games: { [id: string]: Game; } = {};
+export const transporter = CreateTransporter("ownchgk@gmail.com", "6ownchgkgoogle");
 export const gamesCurrentAnswer: { [id: string]: [number, number]; } = {};
 export const timers: { [id: string]: any; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
@@ -63,7 +65,6 @@ function StartTimer(gameId: number) {
             console.log("stop after pause")
         }, t);
     }
-
 }
 
 function StopTimer(gameId: number) {

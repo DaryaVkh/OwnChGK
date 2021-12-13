@@ -5,6 +5,8 @@ import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken, secret} from '../jwtToken';
 import jwt from 'jsonwebtoken';
+import {SendMailWithTemporaryPassword} from "../email";
+import {transporter} from "../app";
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
@@ -105,7 +107,6 @@ export class UsersController { // TODO: дописать смену имени �
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-
             const {email, password} = req.body;
             const hashedPassword = await hash(password, 10);
             await getCustomRepository(UserRepository).updateByEmailAndPassword(email, hashedPassword);
@@ -113,6 +114,20 @@ export class UsersController { // TODO: дописать смену имени �
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
+    }
+
+    public async SendPasswordWithTemporaryPassword(req: Request, res: Response) {
+        const {email} = req.params;
+        const code = Math.round(100 - 0.5 + Math.random() * (1000 - 100 + 1)).toString(); //случайное число от 100 до 1000
+        SendMailWithTemporaryPassword(transporter, email, code);
+        //todo: обращение к бд
+        res.status(200).json({});
+    }
+
+    public async ConfirmTemporaryPassword(req: Request, res: Response) {
+        const {email, code} = req.params;
+        //todo: обращение к бд на проверку этого временного пароля
+        res.status(200).json({});
     }
 
     public async logout(req: Request, res: Response) {
