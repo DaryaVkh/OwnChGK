@@ -7,7 +7,7 @@ export class Team {
 
     constructor(name: string, id: number) {
         this.name = name
-        this.id = id; //todo: здесь скорее в базу запрос
+        this.id = id;
         this.answers = [[]];
     }
 
