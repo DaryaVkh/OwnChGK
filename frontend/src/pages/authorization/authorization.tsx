@@ -3,16 +3,25 @@ import classes from './authorization.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
 import {Link, Redirect} from 'react-router-dom';
-import {AuthorizationProps} from '../../entities/authorization/authorization.interfaces';
+import {
+    AuthorizationDispatchProps,
+    AuthorizationProps,
+    AuthorizationStateProps
+} from '../../entities/authorization/authorization.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {Alert} from "@mui/material";
+import {connect} from "react-redux";
+import {AppAction} from "../../redux/reducers/app-reducer/app-reducer.interfaces";
+import {Dispatch} from "redux";
+import {authorizeUserWithRole} from "../../redux/actions/app-actions/app-actions";
+import {AppState} from "../../entities/app/app.interfaces";
 
 const Authorization: FC<AuthorizationProps> = props => {
-    const [loggedIn, setLoggedIn] = useState(false);
     const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
         await fetch(props.isAdmin ? 'admins/login' : 'users/login', {
@@ -27,7 +36,11 @@ const Authorization: FC<AuthorizationProps> = props => {
             })
         }).then(response => {
             if (response.status === 200) {
-                setLoggedIn(true);
+                response.json().then(({role}) => {
+                    props.onAuthorizeUserWithRole(role);
+                });
+                // setTimeout(() => setLoggedIn(true), 1000);
+                // setLoggedIn(true);
             } else {
                 setWrongEmailOrPassword(true);
             }
@@ -48,7 +61,7 @@ const Authorization: FC<AuthorizationProps> = props => {
         }
     }
 
-    return loggedIn ? (
+    return props.isLoggedIn ? (
         <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
     ) : (
         <PageWrapper>
@@ -96,4 +109,16 @@ const Authorization: FC<AuthorizationProps> = props => {
     );
 }
 
-export default Authorization;
+function mapStateToProps(state: AppState): AuthorizationStateProps {
+    return {
+        isLoggedIn: state.appReducer.isLoggedIn
+    }
+}
+
+function mapDispatchToProps(dispatch: Dispatch<AppAction>): AuthorizationDispatchProps {
+    return {
+        onAuthorizeUserWithRole: (role: string) => dispatch(authorizeUserWithRole(role))
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Authorization);

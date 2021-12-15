@@ -8,7 +8,7 @@ import {Redirect} from "react-router-dom";
 
 const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
     const [isRedirectedToEdit, setIsRedirectedToEdit] = useState(false);
-    const pathToEdit = props.type === 'game' ? '/game-creation/edit' : '/team-creation/edit';
+    const pathToEdit = props.type === 'game' ? '/admin/game-creation/edit' : '/admin/team-creation/edit';
 
     const inputStyle = {
         '& .MuiOutlinedInput-notchedOutline': {

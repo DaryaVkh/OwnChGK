@@ -1,7 +1,12 @@
 import React, {FC, Fragment} from 'react';
 import classes from './header.module.scss';
-import {HeaderProps} from "../../entities/header/header.interfaces";
+import {HeaderDispatchProps, HeaderProps, HeaderStateProps} from "../../entities/header/header.interfaces";
 import {Link} from 'react-router-dom';
+import {connect} from "react-redux";
+import {AppState} from "../../entities/app/app.interfaces";
+import {Dispatch} from "redux";
+import {AppAction} from "../../redux/reducers/app-reducer/app-reducer.interfaces";
+import {logOut} from "../../redux/actions/app-actions/app-actions";
 
 const Header: FC<HeaderProps> = props => {
     const handleLogout = async (event: React.SyntheticEvent) => {
@@ -12,6 +17,7 @@ const Header: FC<HeaderProps> = props => {
                 'Accept': 'application/json'
             }
         });
+        props.onLogOut();
     }
 
     return (
@@ -31,9 +37,7 @@ const Header: FC<HeaderProps> = props => {
                         <Link className={classes.Profile} to={props.isAdmin ? '/admin/profile' : '/profile'}>
                             <img className={classes.Profile} src={require('../../images/Profile.svg').default} alt='Profile' />
                         </Link>
-                        <Link className={classes.LogOut} to={props.isAdmin ? '/admin' : '/auth'}>
-                            <img className={classes.LogOut} src={require('../../images/LogOut.svg').default} alt='LogOut' onClick={handleLogout} />
-                        </Link>
+                        <img className={classes.LogOut} src={require('../../images/LogOut.svg').default} alt='LogOut' onClick={handleLogout} />
                     </Fragment>
                     : null
             }
@@ -41,4 +45,17 @@ const Header: FC<HeaderProps> = props => {
     );
 }
 
-export default Header;
+function mapStateToProps(state: AppState): HeaderStateProps {
+    return {
+        user: state.appReducer.user,
+        isLoggedIn: state.appReducer.isLoggedIn
+    }
+}
+
+function mapDispatchToProps(dispatch: Dispatch<AppAction>): HeaderDispatchProps {
+    return {
+        onLogOut: () => dispatch(logOut())
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);

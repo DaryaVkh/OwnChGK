@@ -1,18 +1,16 @@
-import React, {FC} from "react";
-import {Route, Redirect} from 'react-router-dom';
-import {PrivateRouteProps} from "../../entities/private-route/private-route.interfaces";
+import React from "react";
+import {Route, Redirect, RouteProps} from 'react-router-dom';
+import {store} from "../../index";
 
-const PrivateRoute: FC<PrivateRouteProps> = props => {
-    return (
-        <Route
-            {...props.rest}
-            render={() =>
-                props.isAuthorized ? (
-                    props.children
-                ) : (
-                    <Redirect to="/"/>
-                )
-            }
-        />
-    );
-}
+export type ProtectedRouteProps = {
+    neededRole: string[];
+    redirectPath: string;
+} & RouteProps;
+
+export default function ProtectedRoute({neededRole, redirectPath, ...routeProps}: ProtectedRouteProps) {
+    if (neededRole.includes(store.getState().appReducer.user.role)) {
+        return <Route {...routeProps} />;
+    } else {
+        return <Redirect to={{ pathname: redirectPath }} />;
+    }
+};

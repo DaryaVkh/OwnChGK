@@ -19,6 +19,28 @@
   font-weight: 300;
 }
 
+.button {
+  height: 7vh;
+  font-size: 1.4vw;
+  font-weight: 500;
+  border: 2px solid var(--foreground-color);
+  border-radius: 4px;
+  filter: drop-shadow(0px 4px 4px rgba(255, 255, 255, 0.25));
+  overflow: hidden;
+  user-select: none;
+  font-family: Roboto, sans-serif;
+  min-height: 26px;
+
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0 0 2vh 2px var(--foreground-color);
+  }
+
+  &:active {
+    box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+  }
+}
+
 .contentWrapper {
   display: flex;
   height: 91%;
@@ -31,28 +53,6 @@
     width: 100%;
     justify-content: space-between;
     margin-top: 7vh;
-
-    .button {
-      height: 7vh;
-      font-size: 1.4vw;
-      font-weight: 500;
-      border: 2px solid var(--foreground-color);
-      border-radius: 4px;
-      filter: drop-shadow(0px 4px 4px rgba(255, 255, 255, 0.25));
-      overflow: hidden;
-      user-select: none;
-      font-family: Roboto, sans-serif;
-      min-height: 26px;
-
-      &:hover {
-        cursor: pointer;
-        box-shadow: 0 0 2vh 2px var(--foreground-color);
-      }
-
-      &:active {
-        box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
-      }
-    }
 
     .breakButton {
       width: 35%;
@@ -101,7 +101,7 @@
 
     .tour,
     .question {
-      height: 6vh;
+      height: 7vh;
       border: 2px solid var(--foreground-color);
       background-color: white;
       font-size: 1.4vw;
@@ -114,6 +114,7 @@
       width: 100%;
       margin-bottom: 2vh;
       cursor: pointer;
+      box-sizing: border-box;
     }
 
     .toursWrapper {
@@ -131,16 +132,33 @@
 
     .questionsWrapper {
       width: 62%;
-      padding: 4vh 5vw;
+      padding: 4vh 2vw;
 
-      .question {
-        filter: drop-shadow(0px 4px 4px rgba(255, 255, 255, 0.25));
-        color: black;
-        position: relative;
-      }
+      .questionWrapper {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
 
-      .activeQuestion {
-        color: white;
+        .question {
+          filter: drop-shadow(0px 4px 4px rgba(255, 255, 255, 0.25));
+          color: black;
+          position: relative;
+          width: 70%;
+        }
+
+        .answersButton {
+          width: 25%;
+          border-radius: 8px;
+          font-weight: 400;
+          position: relative;
+          overflow: visible;
+          height: 7vh;
+          font-size: 1.4vw;
+        }
+
+        .activeQuestion {
+          color: white;
+        }
       }
     }
 
@@ -164,8 +182,8 @@
 
 .opposition {
   position: absolute;
-  right: 1.3vw;
-  top: -1.7vh;
+  right: 0.6vw;
+  top: -0.8vw;
   user-select: none;
   pointer-events: none;
 }

@@ -1,0 +1,87 @@
+.toGameLink {
+  text-decoration: none;
+  color: white;
+  position: absolute;
+  top: 35%;
+  font-weight: 300;
+  font-size: 2.5vmin;
+  left: 0;
+}
+
+.tourNumber,
+.questionNumber {
+  text-decoration: none;
+  color: white;
+  position: absolute;
+  display: flex;
+  text-align: center;
+  align-self: center;
+  font-weight: 200;
+  font-size: 4vmin;
+}
+
+.tourNumber {
+  left: 15%;
+}
+
+.questionNumber {
+  left: 30%;
+}
+
+.nav {
+  position: absolute;
+  right: 0;
+  display: inline-flex;
+  overflow: hidden;
+  background-color: transparent;
+  height: 100%;
+  justify-content: space-evenly;
+  width: 45%;
+}
+
+.nav-item {
+  color: white;
+  font-size: 2vmin;
+  text-decoration: none;
+  transition: 0.3s;
+  z-index: 1;
+  font-weight: 300;
+  position: relative;
+  text-align: center;
+  padding-top: 5vh;
+  width: calc(100% / 2);
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 30%;
+  bottom: 0;
+  transition: 0.4s;
+  height: 1px;
+  z-index: 1;
+}
+
+.opposition {
+  color: red;
+}
+
+.sectionWrapper {
+  height: 91%;
+  width: 100%;
+  align-self: flex-end;
+  display: flex;
+
+  .answersPageWrapper {
+    height: 100%;
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+
+    .answerTypesWrapper {
+      width: 50%;
+      display: flex;
+      justify-content: space-around;
+      align-self: center;
+    }
+  }
+}

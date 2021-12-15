@@ -198,7 +198,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                             </div>
 
                             <div className={classes.addButtonWrapper}>
-                                <Link to="/game-creation">
+                                <Link to="/admin/game-creation">
                                     <IconButton sx={{padding: '13px'}}>
                                         <AddCircleOutlineOutlinedIcon sx={{
                                             color: 'white',
@@ -226,7 +226,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                             </div>
 
                             <div className={classes.addButtonWrapper}>
-                                <Link to="/team-creation">
+                                <Link to="/admin/team-creation">
                                     <IconButton sx={{padding: '13px'}}>
                                         <AddCircleOutlineOutlinedIcon sx={{
                                             color: 'white',

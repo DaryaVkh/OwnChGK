@@ -50,17 +50,25 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const renderQuestions = () => {
         return Array.from(Array(questionsCount).keys()).map(i => {
-            return <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} onClick={handleQuestionClick} key={i}>
-                Вопрос {i + 1}
-                {
-                    isOpposition
-                        ?
-                        <div className={classes.opposition}>
-                            <CircleOutlinedIcon sx={{fill: 'red', fontSize: '1.2vw', color: 'darkred', userSelect: 'none', pointerEvents: 'none'}} />
-                        </div>
-                        : null
-                }
-            </div>;
+            return (
+                <div className={classes.questionWrapper}>
+                    <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} onClick={handleQuestionClick} key={i}>
+                        Вопрос {i + 1}
+                    </div>
+
+                    <button className={`${classes.button} ${classes.answersButton}`} key={i}>
+                        Ответы
+                        {
+                            isOpposition
+                                ?
+                                <div className={classes.opposition}>
+                                    <CircleOutlinedIcon sx={{fill: 'red', fontSize: '1.2vw', color: 'darkred', userSelect: 'none', pointerEvents: 'none'}} />
+                                </div>
+                                : null
+                        }
+                    </button>
+                </div>
+            );
         });
     }
 
