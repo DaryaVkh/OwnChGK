@@ -26,7 +26,7 @@ export class AdminsController {
             const admin = await getCustomRepository(AdminRepository).findByEmail(email);
             const isPasswordMatching = await compare(password, admin.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(admin.id, admin.email, admin.role, null);
+                const token = generateAccessToken(admin.id, admin.email, admin.role, null, null);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
                     //httpOnly: true,
@@ -51,8 +51,7 @@ export class AdminsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const email = req.body.email;
-            const password = req.body.password;
+            const {email, password} = req.body;
             const hashedPassword = await hash(password, 10);
 
             await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword);

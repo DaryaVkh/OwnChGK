@@ -1,4 +1,4 @@
-import React, {FC, Fragment} from 'react';
+import React, {FC} from 'react';
 import Wrapper from './wrapper';
 import Authorization from './pages/authorization/authorization';
 import Registration from './pages/registration/registration';
@@ -9,22 +9,18 @@ import TeamCreator from './pages/team-creation/team-creation';
 import UserStartScreen from './pages/user-start-screen/user-start-screen';
 import RestoringPassword from './pages/restoring-password/restoring-password';
 import Profile from './pages/profile/profile';
-import Socket from './pages/socket';
 import UserGame from "./pages/user-game/user-game";
 import AdminGame from "./pages/admin-game/admin-game";
 import AnswersPage from "./pages/answers/answers";
 import {connect} from "react-redux";
 import {AppProps, AppState, AppStateProps} from "./entities/app/app.interfaces";
 import ProtectedRoute from "./components/private-route/private-route";
+import Game from "./pages/game";
 
 const App: FC<AppProps> = props => {
     return (
         <Wrapper>
             <Switch>
-                {/*??????Шо це??????*/}
-                <Route path="/answer" component={Socket} exact/>
-                {/*??????Шо це??????*/}
-
                 <Route path={['/', '/auth']} exact>
                     <Authorization isAdmin={false} />
                 </Route>
@@ -100,6 +96,8 @@ const App: FC<AppProps> = props => {
                 <ProtectedRoute path='/team-creation' exact neededRole={['user']} redirectPath='/auth'>
                     <TeamCreator mode="creation" isAdmin={false}/>
                 </ProtectedRoute>
+
+                <Route path="/gameStart" component={Game} />
 
                 <ProtectedRoute path='/team-creation/edit' exact neededRole={['user']} redirectPath='/auth'>
                     <TeamCreator mode="edit" isAdmin={false}/>
