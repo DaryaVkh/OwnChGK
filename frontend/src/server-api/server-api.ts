@@ -103,3 +103,7 @@ export const getTeamByCurrentUser = async () => {
 export const getTeamsWithoutUser = async () => {
     return await fetch(`/teams/?withoutUser=true`);
 }
+
+export const checkToken = async () => {
+    return await fetch('/users/current');
+}

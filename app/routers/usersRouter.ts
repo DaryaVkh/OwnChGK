@@ -8,6 +8,7 @@ export const usersRouter = () => {
     const usersController = new UsersController();
 
     router.get('/', middleware, usersController.getAll);
+    router.get('/current', usersController.get);
     router.post('/login', usersController.login);
     router.post('/insert', usersController.insert);
     router.post('/logout', usersController.logout);

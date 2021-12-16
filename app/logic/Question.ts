@@ -45,25 +45,25 @@ export class Question {
         }
     }
 
-    acceptAppeal(team: Team, comment: string = ""): void {
+    acceptAppeal(teamId: number, comment: string = ""): void {
         const appeal = this.appeals.find((value, index, obj) =>
-            value.teamNumber === team.id);
+            value.teamNumber === teamId);
 
         if (appeal !== undefined) {
             appeal.accept(comment);
         }
 
         const answer = this.answers.find((value, index, obj) =>
-            value.teamNumber === team.id);
+            value.teamNumber === teamId);
 
         if (answer !== undefined) {
             this.acceptAnswers(answer.text);
         }
     }
 
-    rejectAppeal(team: Team, comment: string = ""): void {
+    rejectAppeal(teamId: number, comment: string = ""): void {
         const appeal = this.appeals.find((value, index, obj) =>
-            value.teamNumber === team.id);
+            value.teamNumber === teamId);
 
         if (appeal !== undefined) {
             appeal.reject(comment);

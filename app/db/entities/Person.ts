@@ -14,4 +14,9 @@ export abstract class Person extends BaseEntity {
         nullable: true
     })
     name: string;
+
+    @Column({
+        nullable: true
+    })
+    temporaryCode: string;
 }
