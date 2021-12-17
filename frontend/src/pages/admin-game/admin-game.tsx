@@ -16,6 +16,7 @@ let isOpposition = false;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
+    const [activeTour, setActiveTour] = useState<number>(1);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
 
@@ -40,6 +41,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         const clickedTour = event.target as HTMLDivElement;
         activeTour.classList.remove(classes.activeTour);
         clickedTour.classList.add(classes.activeTour);
+        setActiveTour(+clickedTour.id);
     }
 
     const handleQuestionClick = (event: React.SyntheticEvent) => {
@@ -84,29 +86,31 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const renderTours = () => {
         return Array.from(Array(toursCount).keys()).map(i => {
-            return <div className={`${classes.tour} ${i === 0 ? classes.activeTour : ''}`} onClick={handleTourClick} key={i}>Тур {i + 1}</div>;
+            return <div className={`${classes.tour} ${i === 0 ? classes.activeTour : ''}`} id={`${i + 1}`} onClick={handleTourClick} key={`tour_${i + 1}`}>Тур {i + 1}</div>;
         });
     }
 
     const renderQuestions = () => {
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
-                <div className={classes.questionWrapper}>
-                    <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} onClick={handleQuestionClick} key={i}>
+                <div className={classes.questionWrapper} key={`tour_${activeTour}_question_${i + 1}`}>
+                    <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} onClick={handleQuestionClick}>
                         Вопрос {i + 1}
                     </div>
 
-                    <button className={`${classes.button} ${classes.answersButton}`} key={i}>
-                        Ответы
-                        {
-                            isOpposition
-                                ?
-                                <div className={classes.opposition}>
-                                    <CircleOutlinedIcon sx={{fill: 'red', fontSize: '1.2vw', color: 'darkred', userSelect: 'none', pointerEvents: 'none'}} />
-                                </div>
-                                : null
-                        }
-                    </button>
+                    <Link className={classes.answersButtonLink} to={`/answers/${activeTour}/${i + 1}`}>
+                        <button className={`${classes.button} ${classes.answersButton}`}>
+                            Ответы
+                            {
+                                isOpposition
+                                    ?
+                                    <div className={classes.opposition}>
+                                        <CircleOutlinedIcon sx={{fill: 'red', fontSize: '1.2vw', color: 'darkred', userSelect: 'none', pointerEvents: 'none'}} />
+                                    </div>
+                                    : null
+                            }
+                        </button>
+                    </Link>
                 </div>
             );
         });
