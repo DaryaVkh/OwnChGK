@@ -109,29 +109,15 @@ function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: numbe
     }
 }
 
-function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: number, teamName: string, answers: string[]) {
+function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: number, teamId: number, answers: string[]) {
     for (const answer in answers) {
-        let team;
-        //todo: тут либо запрос к бд, либо идем по всем командам, ищем по названию
-        for (let [key, value] of Object.entries(games[gameId].teams)) {
-            if (value.name == teamName) {
-                team = value;
-                games[gameId].rounds[roundNumber].questions[questionNumber].acceptAppeal(team, answer);
-            }
-        }
+        games[gameId].rounds[roundNumber].questions[questionNumber].acceptAppeal(teamId, answer);
     }
 }
 
-function RejectAppeal(gameId: number, roundNumber: number, questionNumber: number, teamName: string, answers: string[]) {
+function RejectAppeal(gameId: number, roundNumber: number, questionNumber: number, teamId: number, answers: string[]) {
     for (const answer in answers) {
-        let team;
-        //todo: тут либо запрос к бд, либо идем по всем командам, ищем по названию
-        for (let [key, value] of Object.entries(games[gameId].teams)) {
-            if (value.name == teamName) {
-                team = value;
-                games[gameId].rounds[roundNumber].questions[questionNumber].rejectAppeal(team, answer);
-            }
-        }
+        games[gameId].rounds[roundNumber].questions[questionNumber].rejectAppeal(teamId, answer);
     }
 }
 
@@ -164,11 +150,11 @@ wss.on('connection', (ws: WebSocket) => {
                 } else if (jsonMessage.action == "AcceptAnswer") {
                     AcceptAnswer(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == "AcceptAppeal") {
-                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.teamName, jsonMessage.answers);
+                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, teamId, jsonMessage.answers);
                 } else if (jsonMessage.action == "RejectAnswer") {
                     RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == "RejectAppeal") {
-                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.teamName, jsonMessage.answers);
+                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, teamId, jsonMessage.answers);
                 }
             } else {
                 if (gameIsTimerStart[gameId] && jsonMessage.action == "Answer") {

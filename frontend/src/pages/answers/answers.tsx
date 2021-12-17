@@ -223,4 +223,3 @@ const AnswersPage: FC = () => {
 }
 
 export default AnswersPage;
-

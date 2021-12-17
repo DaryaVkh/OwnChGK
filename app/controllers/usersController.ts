@@ -83,14 +83,14 @@ export class UsersController { // TODO: дописать смену имени �
             const oldToken = req.cookies['authorization'];
             const {id: userId, email: email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
             const user = await getCustomRepository(UserRepository).findOne(userId, {relations:['team']});
-            const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId);
-            res.cookie('authorization', token, {
-                maxAge: 24 * 60 * 60 * 1000,
-                //httpOnly: true,
-                secure: true
-            });
 
-            if (user.team !== undefined) { //todo: проверку поправить, если команды нет, то что из бд вернтеся в этом случае?
+            if (user.team !== null) {
+                const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId);
+                res.cookie('authorization', token, {
+                    maxAge: 24 * 60 * 60 * 1000,
+                    //httpOnly: true,
+                    secure: true
+                });
                 res.status(200).json({
                     name: user.team.name,
                     id: user.team.id,
@@ -121,17 +121,54 @@ export class UsersController { // TODO: дописать смену имени �
     }
 
     public async SendPasswordWithTemporaryPassword(req: Request, res: Response) {
-        const {email} = req.params;
-        const code = Math.round(100 - 0.5 + Math.random() * (1000 - 100 + 1)).toString(); //случайное число от 100 до 1000
-        SendMailWithTemporaryPassword(transporter, email, code);
-        //todo: обращение к бд
-        res.status(200).json({});
+        try {
+            const {email} = req.params;
+            const code = Math.round(100 - 0.5 + Math.random() * (1000 - 100 + 1)).toString(); //случайное число от 100 до 1000
+            SendMailWithTemporaryPassword(transporter, email, code);
+            let user = await getCustomRepository(UserRepository).findByEmail(email);
+            user.temporaryCode = code;
+            await user.save();
+            res.status(200).json({});
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
     }
 
     public async ConfirmTemporaryPassword(req: Request, res: Response) {
-        const {email, code} = req.params;
-        //todo: обращение к бд на проверку этого временного пароля
-        res.status(200).json({});
+        try {
+            const {email, code} = req.params;
+            let user = await getCustomRepository(UserRepository).findByEmail(email);
+            if (user.temporaryCode === code) {
+                res.status(200).json({});
+            } else {
+                res.status(403).json({});
+            }
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async get(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const oldToken = req.cookies['authorization'];
+            const {id: userId, email: email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+
+            if (userId !== undefined && email !== undefined && userRoles !== undefined) {
+                res.status(200).json({
+                    id: userId,
+                    email,
+                    role: userRoles
+                })
+            } else {
+                res.status(404).json({});
+            }
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
     }
 
     public async logout(req: Request, res: Response) {
