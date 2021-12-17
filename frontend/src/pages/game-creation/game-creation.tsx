@@ -50,12 +50,12 @@ const GameCreator: FC<GameCreatorProps> = props => {
     }, []);
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
-        let el = event.target as HTMLInputElement;
+        const element = event.target as HTMLInputElement;
         if (chosenTeams) {
-            if (el.checked) {
-                chosenTeams.push(el.name);
-            } else if (chosenTeams.includes(el.name)) {
-                chosenTeams.splice(chosenTeams.indexOf(el.name), 1);
+            if (element.checked) {
+                chosenTeams.push(element.name);
+            } else if (chosenTeams.includes(element.name)) {
+                chosenTeams.splice(chosenTeams.indexOf(element.name), 1);
             }
         }
     }

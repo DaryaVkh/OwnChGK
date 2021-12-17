@@ -82,7 +82,7 @@ const App: FC<AppProps> = props => {
                 <ProtectedRoute path="/answers/:tour/:question" exact
                                 neededRole={['admin', 'superadmin']}
                                 redirectPath='/admin'>
-                    <AnswersPage/>
+                    <AnswersPage />
                 </ProtectedRoute>
 
                 <ProtectedRoute path='/start-screen' exact neededRole={['user']} redirectPath='/auth'>

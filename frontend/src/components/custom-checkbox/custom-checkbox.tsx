@@ -6,7 +6,7 @@ import {CustomCheckboxProps} from "../../entities/custom-checkbox/custom-checkbo
 
 const CustomCheckbox: FC<CustomCheckboxProps> = props => {
     return (
-        <div className={classes.CustomCheckbox}>
+        <div className={classes.CustomCheckbox} style={props.style}>
             <div className={classes.labelWrapper}>
                 {props.name}
             </div>
