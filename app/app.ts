@@ -146,7 +146,6 @@ wss.on('connection', (ws: WebSocket) => {
                 } else if (jsonMessage.action == "Start") {
                     StartTimer(gameId);
                     gamesCurrentAnswer[gameId] = jsonMessage.question;
-                    console.log(jsonMessage.question);
                 } else if (jsonMessage.action == "Pause") {
                     PauseTimer(gameId);
                 } else if (jsonMessage.action == "Stop") {

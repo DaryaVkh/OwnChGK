@@ -50,7 +50,6 @@ const AdminGame: FC<AdminGameProps> = props => {
         const clickedQuestion = event.target as HTMLDivElement;
         activeQuestion.classList.remove(classes.activeQuestion);
         clickedQuestion.classList.add(classes.activeQuestion);
-        console.log(+clickedQuestion.id);
         setActiveQuestion(+clickedQuestion.id);
     }
 
