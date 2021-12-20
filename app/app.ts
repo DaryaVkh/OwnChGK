@@ -22,6 +22,17 @@ const wss = new WebSocket.Server({port: 80});
 const seconds70PerQuestion = 70000;
 const extra10Seconds = 10000;
 
+function testFunction(gameId:number) {
+    for (let [key, value] of Object.entries(games[gameId].teams)) {
+        try {
+            console.log(value.getAnswer(1, 1));
+            console.log(games[gameId].teams[key].name);
+        } catch (e) {
+            console.log("no answer for team" + games[gameId].teams[key].name);
+        }
+    }
+}
+
 function GiveAddedTime(gameId: number) {
     if (timesIsOnPause[gameId]) {
         timesWhenPauseClick[gameId] -= extra10Seconds;
@@ -38,15 +49,6 @@ function GiveAddedTime(gameId: number) {
     timers[gameId] = setTimeout(() => {
         console.log("added time end")
         gameIsTimerStart[gameId] = false;
-
-        for (let [key, value] of Object.entries(games[gameId].teams)) {
-            try {
-                console.log(value.getAnswer(1, 1));
-                console.log(games[gameId].teams[key].name);
-            } catch (e) {
-                console.log("no answer for team" + games[gameId].teams[key].name);
-            }
-        }
     }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
 }
 
@@ -91,8 +93,8 @@ function PauseTimer(gameId: number) {
 
 function GetAnswer(answer: string, teamId: number, gameId: number) {
     console.log('received: %s', answer, teamId);
-    const roundNumber = gamesCurrentAnswer[gameId][0];
-    const questionNumber = gamesCurrentAnswer[gameId][1];
+    const roundNumber = gamesCurrentAnswer[gameId][0] - 1;
+    const questionNumber = gamesCurrentAnswer[gameId][1] - 1;
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);
 }
 
@@ -143,6 +145,8 @@ wss.on('connection', (ws: WebSocket) => {
                     GiveAddedTime(gameId);
                 } else if (jsonMessage.action == "Start") {
                     StartTimer(gameId);
+                    gamesCurrentAnswer[gameId] = jsonMessage.question;
+                    console.log(jsonMessage.question);
                 } else if (jsonMessage.action == "Pause") {
                     PauseTimer(gameId);
                 } else if (jsonMessage.action == "Stop") {
@@ -158,7 +162,6 @@ wss.on('connection', (ws: WebSocket) => {
                 }
             } else {
                 if (gameIsTimerStart[gameId] && jsonMessage.action == "Answer") {
-                    gamesCurrentAnswer[gameId] = [0, 0];
                     GetAnswer(jsonMessage.answer, teamId, gameId);
                 } else if (jsonMessage.action == "Appeal") {
                     for (let ws of gameAdmins[gameId])

@@ -71,7 +71,7 @@ const UserGame: FC<UserGameProps> = props => {
 
     const getCookie = (name: string) => {
         let matches = document.cookie.match(new RegExp(
-            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+            "(?:^|; )" + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + "=([^;]*)"
         ));
         return matches ? decodeURIComponent(matches[1]) : undefined;
     }
@@ -87,7 +87,6 @@ const UserGame: FC<UserGameProps> = props => {
             'action': 'Answer',
             'answer': answer
         }));
-        // TODO тут сохраняем где нить ответ (или куда-то его там отправляем)
     }
 
     return (

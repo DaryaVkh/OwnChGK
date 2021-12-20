@@ -17,6 +17,7 @@ let isOpposition = false;
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
     const [activeTour, setActiveTour] = useState<number>(1);
+    const [activeQuestion, setActiveQuestion] = useState<number>(1);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
 
@@ -28,10 +29,10 @@ const AdminGame: FC<AdminGameProps> = props => {
         }
     });
 
-    const conn = new WebSocket("ws://localhost:80/");
+    const conn = new WebSocket("ws://localhost:80/"); //Todo: порт указать
     const getCookie = (name: string) => {
         let matches = document.cookie.match(new RegExp(
-            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+            "(?:^|; )" + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + "=([^;]*)"
         ));
         return matches ? decodeURIComponent(matches[1]) : undefined;
     }
@@ -49,6 +50,8 @@ const AdminGame: FC<AdminGameProps> = props => {
         const clickedQuestion = event.target as HTMLDivElement;
         activeQuestion.classList.remove(classes.activeQuestion);
         clickedQuestion.classList.add(classes.activeQuestion);
+        console.log(+clickedQuestion.id);
+        setActiveQuestion(+clickedQuestion.id);
     }
 
     const handlePlayClick = () => {
@@ -57,8 +60,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             conn.send(JSON.stringify({
                 'cookie': getCookie("authorization"),
                 'action': "Start",
-                'round': classes.activeTour,
-                'question': classes.activeQuestion
+                'question': [activeTour, activeQuestion]
             }));
             setPlayOrPause('pause');
         } else {
@@ -94,7 +96,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
                 <div className={classes.questionWrapper} key={`tour_${activeTour}_question_${i + 1}`}>
-                    <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} onClick={handleQuestionClick}>
+                    <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} id={`${i + 1}`} onClick={handleQuestionClick}>
                         Вопрос {i + 1}
                     </div>
 
