@@ -6,8 +6,8 @@ export const getUsersWithoutTeam = async () => {
     return await fetch(`/users/?withoutTeam=true`);
 }
 
-export const getGame = async (gameName: string) => {
-    return await fetch(`/games/${gameName}`);
+export const getGame = async (gameId: string) => {
+    return await fetch(`/games/${gameId}`);
 }
 
 export const createGame = async (gameName: string, roundCount: number, questionCount: number, teams: string[]) => {

@@ -8,4 +8,5 @@ export interface AppAction {
 export interface AppReducerState {
     user: User;
     isLoggedIn: boolean;
+    isTokenChecked: boolean;
 }

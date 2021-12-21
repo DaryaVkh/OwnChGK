@@ -14,8 +14,8 @@ import NavBar from '../../components/nav-bar/nav-bar';
 const GameCreator: FC<GameCreatorProps> = props => {
     const [teamsFromDB, setTeamsFromDB] = useState([]);
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
-    const location = useLocation<{ name: string }>();
-    const oldGameName = props.mode === 'edit' ? location.state.name : '';
+    const location = useLocation<{ id: string, name: string }>();
+    const oldGameId = props.mode === 'edit' ? location.state.id : '';
     const [gameName, setGameName] = useState(props.mode === 'edit' ? location.state.name : '');
     const [questionsCount, setQuestionsCount] = useState(0);
     const [toursCount, setToursCount] = useState(0);
@@ -33,7 +33,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
         });
 
         if (props.mode === 'edit') {
-            getGame(oldGameName).then(res => {
+            getGame(oldGameId).then(res => {
                 if (res.status === 200) {
                     res.json().then(({
                                          teams,
@@ -81,7 +81,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                     }
                 });
         } else {
-            await editGame(oldGameName, gameName, toursCount, questionsCount, chosenTeams ?? [])
+            await editGame(oldGameId, gameName, toursCount, questionsCount, chosenTeams ?? [])
                 .then(res => {
                     if (res.status === 200) {
                         setIsCreatedSuccessfully(true);

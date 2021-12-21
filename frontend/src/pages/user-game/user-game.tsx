@@ -1,22 +1,41 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './user-game.module.scss';
 import PageWrapper from "../../components/page-wrapper/page-wrapper";
 import Header from "../../components/header/header";
-import {Link} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import {CustomInput} from "../../components/custom-input/custom-input";
 import {Alert, Snackbar} from "@mui/material";
 import {UserGameProps} from "../../entities/user-game/user-game.interfaces";
+import {getGame} from '../../server-api/server-api';
+import {store} from '../../index';
 
 const UserGame: FC<UserGameProps> = props => {
     const conn = new WebSocket("ws://localhost:80/");
-    let answer: string;
-    fetch(`/users/1/changeToken`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json;charset=utf-8',
-            'Accept': 'application/json'
-        }
-    });
+    const {gameId} = useParams<{ gameId: string }>();
+    const [answer, setAnswer] = useState('');
+    const [gameName, setGameName] = useState('');
+    const [questionNumber, setQuestionNumber] = useState(1);
+
+    useEffect(() => {
+        fetch(`/users/${gameId}/changeToken`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json'
+            }
+        });
+
+        getGame(gameId).then((res) => {
+            if (res.status === 200) {
+                res.json().then(({
+                                     name,
+                                 }) => {
+                    setGameName(name);
+                })
+            }
+        })
+
+    }, []);
 
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const [timeForAnswer, setTimeForAnswer] = useState(60);
@@ -77,7 +96,7 @@ const UserGame: FC<UserGameProps> = props => {
     }
 
     const handleAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
-        answer = event.target.value;
+        setAnswer(event.target.value);
     }
 
     const handleSendButtonClick = () => {
@@ -95,13 +114,13 @@ const UserGame: FC<UserGameProps> = props => {
                 <Link to='/game' className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
                 <Link to='/game' className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
-                <div className={classes.gameName}>{props.gameName}</div>
+                <div className={classes.gameName}>{gameName}</div>
             </Header>
 
             <div className={classes.contentWrapper}>
                 <div className={classes.teamWrapper}>
                     <div className={classes.team}>Команда</div>
-                    <div className={classes.teamName}>{props.teamName}</div>
+                    <div className={classes.teamName}>{store.getState().appReducer.user.team}</div>
                 </div>
 
                 <div className={classes.answerWrapper}>
@@ -109,10 +128,10 @@ const UserGame: FC<UserGameProps> = props => {
 
                     <div className={classes.progressBar} id='progress-bar' />
                     <div className={classes.answerBox}>
-                        <p className={classes.answerNumber}>Вопрос 1</p> {/* TODO как менять динамически номер вопроса?*/}
+                        <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
 
                         <div className={classes.answerInputWrapper}>
-                            <CustomInput type='text' id='answer' name='answer' placeholder='Ответ' style={{width: '79%'}} onChange={handleAnswer}/>
+                            <CustomInput type='text' id='answer' name='answer' placeholder='Ответ' style={{width: '79%'}} value={answer} onChange={handleAnswer}/>
                             <button className={classes.sendAnswerButton} onClick={handleSendButtonClick} >Отправить</button>
                         </div>
                     </div>

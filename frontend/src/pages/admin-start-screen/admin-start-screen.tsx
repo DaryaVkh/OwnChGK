@@ -66,10 +66,20 @@ const AdminComponent: FC<AdminProps> = props => {
     );
 }
 
+export interface Game {
+    name: string,
+    id: string
+}
+
+export interface Team {
+    name: string,
+    id: string
+}
+
 const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     const [page, setPage] = useState('games');
-    const [teams, setTeams] = useState<string[]>([]);
-    const [games, setGames] = useState<string[]>([]);
+    const [teams, setTeams] = useState<Team[]>([]);
+    const [games, setGames] = useState<Game[]>([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [deletedItemName, setDeletedItemName] = useState('');
     const [admins, setAdmins] = useState<Admin[]>([]);
@@ -134,13 +144,13 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     }, []);
 
     const renderTeams = () => {
-        return teams.map((team, index) => <InputWithAdornment name={team} key={index} type="team"
+        return teams.map((team, index) => <InputWithAdornment name={team.name} id={team.id} key={index} type="team"
                                                               openModal={setIsModalVisible}
                                                               setItemForDeleteName={setDeletedItemName}/>);
     }
 
     const renderGames = () => {
-        return games.map((game, index) => <InputWithAdornment name={game} key={index} type="game"
+        return games.map((game, index) => <InputWithAdornment name={game.name} id={game.id} key={index} type="game"
                                                               openModal={setIsModalVisible}
                                                               setItemForDeleteName={setDeletedItemName}/>);
     }

@@ -11,6 +11,7 @@ export default function ProtectedRoute({neededRole, redirectPath, ...routeProps}
     if (neededRole.includes(store.getState().appReducer.user.role)) {
         return <Route {...routeProps} />;
     } else {
+        //return null; // TODO: 404
         return <Redirect to={{ pathname: redirectPath }} />;
     }
 };

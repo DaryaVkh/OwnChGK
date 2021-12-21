@@ -93,6 +93,7 @@ function PauseTimer(gameId: number) {
 
 function GetAnswer(answer: string, teamId: number, gameId: number) {
     console.log('received: %s', answer, teamId);
+    console.log('gameId:', gameId);
     const roundNumber = gamesCurrentAnswer[gameId][0] - 1;
     const questionNumber = gamesCurrentAnswer[gameId][1] - 1;
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);

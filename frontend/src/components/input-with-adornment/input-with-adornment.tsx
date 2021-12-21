@@ -8,6 +8,7 @@ import {Redirect} from "react-router-dom";
 
 const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
     const [isRedirectedToEdit, setIsRedirectedToEdit] = useState(false);
+    const [isClicked, setIsClicked] = useState(false);
     const pathToEdit = props.type === 'game' ? '/admin/game-creation/edit' : '/admin/team-creation/edit';
 
     const inputStyle = {
@@ -32,7 +33,6 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
         props.setItemForDeleteName(props.name);
     }, [props]);
 
-
     const handleOpenModal = useCallback(e => {
         props.openModal(true);
     }, [props]);
@@ -41,10 +41,19 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
         setIsRedirectedToEdit(true);
     }
 
+    const handleClick = () => {
+        setIsClicked(true);
+    }
+
+    if (isClicked) {
+        return <Redirect to={`/admin/start-game/${props.id}`}/>
+    }
+
     return isRedirectedToEdit
-        ? <Redirect to={{pathname: pathToEdit, state: {name: props.name}}} />
+        ? <Redirect to={{pathname: pathToEdit, state: {id: props.id, name: props.name}}} />
         : <OutlinedInput className={classes.InputWithAdornment} readOnly fullWidth name={props.name}
                          value={props.name} sx={inputStyle}
+                         onClick={handleClick} /*TODO: перекрывает иконки карандашика и крестика*/
                          endAdornment={
                            <>
                                <InputAdornment position="end">

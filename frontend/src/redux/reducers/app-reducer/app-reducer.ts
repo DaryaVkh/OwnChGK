@@ -1,12 +1,14 @@
 import {Reducer} from "redux";
 import {AppAction, AppReducerState} from "./app-reducer.interfaces";
-import {AUTHORIZE_USER_WITH_ROLE, LOG_OUT} from "../../actions/app-actions/app-action-types";
+import {AUTHORIZE_USER_WITH_ROLE, LOG_OUT, CHECK_TOKEN} from "../../actions/app-actions/app-action-types";
 
 const initialState: AppReducerState = {
     user: {
-        role: ''
+        role: '',
+        team: ''
     },
-    isLoggedIn: false
+    isLoggedIn: false,
+    isTokenChecked: false
 }
 
 export const appReducer: Reducer<AppReducerState, AppAction> = (state: AppReducerState = initialState, action: AppAction): AppReducerState => {
@@ -16,18 +18,26 @@ export const appReducer: Reducer<AppReducerState, AppAction> = (state: AppReduce
                 ...state,
                 user: {
                     ...state.user,
-                    role: action.payload,
+                    role: action.payload.role,
+                    team: action.payload.team
                 },
-                isLoggedIn: true
+                isLoggedIn: true,
+                isTokenChecked: true
             }
         case LOG_OUT:
             return {
                 ...state,
                 user: {
                     ...state.user,
-                    role: ''
+                    role: '',
+                    team: ''
                 },
                 isLoggedIn: false
+            }
+        case CHECK_TOKEN:
+            return {
+                ...state,
+                isTokenChecked: true
             }
         default:
             return state;

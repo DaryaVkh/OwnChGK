@@ -39,7 +39,8 @@ export class UsersController { // TODO: дописать смену имени �
                 res.status(200).json({
                     id: user.id,
                     email: user.email,
-                    role: "user"
+                    role: "user",
+                    team: user.team?.name ?? ''
                 });
             } else {
                 res.status(400).json({message: 'Not your password'});
@@ -148,6 +149,31 @@ export class UsersController { // TODO: дописать смену имени �
         }
     }
 
+    public async getTeam(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const oldToken = req.cookies['authorization'];
+            const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            const user = await getCustomRepository(UserRepository).findOne(userId, {relations:['team']});
+
+            if (user.team !== null) {
+                res.status(200).json({
+                    name: user.team.name,
+                    id: user.team.id,
+                    captainId: user.id,
+                    captainEmail: user.email,
+                });
+            } else {
+                res.status(200).json({});
+            }
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
     public async get(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
@@ -158,10 +184,12 @@ export class UsersController { // TODO: дописать смену имени �
             const {id: userId, email: email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
 
             if (userId !== undefined && email !== undefined && userRoles !== undefined) {
+                const user = await getCustomRepository(UserRepository).findOne(+userId, {relations: ['team']})
                 res.status(200).json({
                     id: userId,
                     email,
-                    role: userRoles
+                    role: userRoles,
+                    team: user.team?.name ?? ''
                 })
             } else {
                 res.status(404).json({});

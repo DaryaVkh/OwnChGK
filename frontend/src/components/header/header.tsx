@@ -1,7 +1,7 @@
 import React, {FC, Fragment} from 'react';
 import classes from './header.module.scss';
 import {HeaderDispatchProps, HeaderProps, HeaderStateProps} from "../../entities/header/header.interfaces";
-import {Link} from 'react-router-dom';
+import {NavLink, Link} from 'react-router-dom';
 import {connect} from "react-redux";
 import {AppState} from "../../entities/app/app.interfaces";
 import {Dispatch} from "redux";
@@ -37,7 +37,9 @@ const Header: FC<HeaderProps> = props => {
                         <Link className={classes.Profile} to={props.isAdmin ? '/admin/profile' : '/profile'}>
                             <img className={classes.Profile} src={require('../../images/Profile.svg').default} alt='Profile' />
                         </Link>
-                        <img className={classes.LogOut} src={require('../../images/LogOut.svg').default} alt='LogOut' onClick={handleLogout} />
+                        <Link className={classes.LogOut} to={props.isLoggedIn ? '#' : (props.isAdmin ? '/admin' : '/auth')} onClick={handleLogout}>
+                            <img className={classes.LogOut} src={require('../../images/LogOut.svg').default} alt='LogOut'/>
+                        </Link>
                     </Fragment>
                     : null
             }
