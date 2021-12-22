@@ -49,6 +49,21 @@ const AdminGame: FC<AdminGameProps> = props => {
     }, []);
 
     const conn = new WebSocket('ws://localhost:80/'); //Todo: порт указать
+    conn.onopen = function () {
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'time'
+        }));
+    };
+
+    conn.onmessage = function (event) {
+        const jsonMessage = JSON.parse(event.data);
+        if (jsonMessage.action === 'time')
+        {
+            let time = jsonMessage.time;
+            console.log(+time);
+        }
+    };
     const getCookie = (name: string) => {
         let matches = document.cookie.match(new RegExp(
             '(?:^|; )' + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + '=([^;]*)'

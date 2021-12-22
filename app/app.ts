@@ -134,12 +134,17 @@ wss.on('connection', (ws: WebSocket) => {
     ws.on('message', (message: string) => {
         message += "";
         const jsonMessage = JSON.parse(message);
-
         if (jsonMessage.cookie === null) {
             console.log("не авторизован");
         } else {
             const {roles: userRoles, teamId: teamId, gameId: gameId} =
                 jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload;
+            if (jsonMessage.action == 'time') {
+                ws.send(JSON.stringify({
+                    'action': 'time',
+                    'time': timers[gameId]}));
+                console.log(timers[gameId]);
+            }
             if (userRoles == "admin" || userRoles == "superadmin") {
                 gameAdmins[gameId].add(ws);
                 if (jsonMessage.action == "+10sec") {

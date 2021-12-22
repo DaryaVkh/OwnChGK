@@ -16,6 +16,12 @@ const UserGame: FC<UserGameProps> = props => {
     const [gameName, setGameName] = useState('');
     const [questionNumber, setQuestionNumber] = useState(1);
 
+    conn.onopen = function () {
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+        }));
+        };
+
     useEffect(() => {
         fetch(`/users/${gameId}/changeToken`, {
             method: 'PATCH',
