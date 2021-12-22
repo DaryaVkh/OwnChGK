@@ -2,6 +2,10 @@ export const getAll = async (path: string) => {
     return await fetch(path);
 }
 
+export const getAmIParticipateGames = async () => {
+    return await fetch('/games/?amIParticipate=true');
+}
+
 export const getUsersWithoutTeam = async () => {
     return await fetch(`/users/?withoutTeam=true`);
 }

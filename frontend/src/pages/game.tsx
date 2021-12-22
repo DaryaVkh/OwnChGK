@@ -9,7 +9,17 @@ const Game: FC = props => {
         fetch(`/games/${gameId}/start`)
             .then((res) => {
                 if (res.status === 200) {
-                    setIsGameStart(true);
+                    fetch(`/users/${gameId}/changeToken`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                            'Accept': 'application/json'
+                        }
+                    }).then((res) => {
+                        if (res.status === 200) {
+                            setIsGameStart(true);
+                        }
+                    });
                 }
             });
     }

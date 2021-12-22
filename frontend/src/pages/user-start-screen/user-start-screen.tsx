@@ -9,7 +9,13 @@ import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import {Link, Redirect} from 'react-router-dom';
 import {IconButton} from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import {editTeamCaptainByCurrentUser, getAll, getTeamByCurrentUser, getTeamsWithoutUser} from '../../server-api/server-api';
+import {
+    editTeamCaptainByCurrentUser,
+    getAll,
+    getAmIParticipateGames,
+    getTeamByCurrentUser,
+    getTeamsWithoutUser
+} from '../../server-api/server-api';
 import {Game, Team} from '../admin-start-screen/admin-start-screen';
 
 const UserStartScreen: FC<UserStartScreenProps> = () => {
@@ -46,7 +52,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
             }
         })
 
-        getAll('/games/').then(res => { // TODO: игры, в которых я состою
+        getAmIParticipateGames().then(res => { // TODO: игры, в которых я состою
             if (res.status === 200) {
                 res.json().then(({games}) => {
                     setGamesFromDB(games);
@@ -69,7 +75,17 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     }
 
     const handleClick = (id: string) => {
-        setGameId(id);
+        fetch(`/users/${id}/changeToken`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json'
+            }
+        }).then((res) => {
+            if (res.status === 200) {
+                setGameId(id);
+            }
+        });
     }
 
     const renderGames = () => {

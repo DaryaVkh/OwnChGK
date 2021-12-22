@@ -4,7 +4,7 @@ import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
-import {gameAdmins, games} from '../app';
+import {gameAdmins, games, gameUsers} from '../app';
 import {Game, Round} from '../logic/Game';
 import {Team} from '../logic/Team';
 import {GameDTO} from '../dto';
@@ -12,7 +12,20 @@ import {GameDTO} from '../dto';
 export class GamesController {
     public async getAll(req: Request, res: Response) {
         try {
-            const games = await getCustomRepository(GameRepository).find();
+            const {amIParticipate} = req.query;
+            const oldToken = req.cookies['authorization'];
+            const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            let games: any;
+            if (amIParticipate) {
+                /*games = await getCustomRepository(GameRepository).find({relations: ['teams']})
+                    .then(games => games.filter(game => {
+                        console.log(game.teams);
+                        return game.teams
+                    }))*/
+            } else {
+                games = await getCustomRepository(GameRepository).find();
+            }
+            games = await getCustomRepository(GameRepository).find();
             res.status(200).json({
                 'games': games.map(value => new GameDTO(value))
             });
@@ -140,6 +153,7 @@ export class GamesController {
                 questionCount: game.rounds.length !== 0 ? game.rounds[0].questionCount : 0
             };
             gameAdmins[game.id] = new Set();
+            gameUsers[game.id] = new Set();
             games[game.id] = new Game(game.name);
             for (let i = 0; i < game.rounds.length; i++) {
                 games[game.id].addRound(new Round(i + 1, answer.questionCount, 60, 1));
@@ -147,6 +161,7 @@ export class GamesController {
             for (const team of game.teams) {
                 games[game.id].addTeam(new Team(team.name, team.id));
             }
+            console.log('GAMEADMINS:', gameAdmins);
             res.status(200).json(answer);
         } catch (error: any) {
             res.status(400).json({'message': error.message});

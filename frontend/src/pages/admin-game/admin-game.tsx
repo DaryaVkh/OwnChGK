@@ -12,6 +12,7 @@ import CircleOutlinedIcon from '@mui/icons-material/Circle';
 import {getGame} from '../../server-api/server-api';
 
 let isOpposition = false;
+let interval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
@@ -21,18 +22,12 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [questionsCount, setQuestionsCount] = useState(0);
     const [gameName, setGameName] = useState('');
     const {gameId} = useParams<{ gameId: string }>();
+    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'))
+    const [timer, setTimer] = useState(70000);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
 
     useEffect(() => {
-        fetch(`/users/${gameId}/changeToken`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Accept': 'application/json'
-            }
-        });
-
         getGame(gameId).then((res) => {
             if (res.status === 200) {
                 res.json().then(({
@@ -46,24 +41,35 @@ const AdminGame: FC<AdminGameProps> = props => {
                 })
             }
         })
+
+        conn.onopen = function () {
+            conn.send(JSON.stringify({
+                'cookie': getCookie("authorization"),
+                'action': 'time'
+            }));
+        };
+
+        conn.onmessage = function (event) {
+            const jsonMessage = JSON.parse(event.data);
+            if (jsonMessage.action === 'time')
+            {
+                setTimer(jsonMessage.time);
+                if (jsonMessage.isStarted) {
+                    setPlayOrPause('pause');
+                    interval = setInterval(() =>
+                        setTimer(t => t - 1000 > 0 ? t - 1000 : 0), 1000);
+                }
+                console.log(+jsonMessage.time);
+            }
+        };
     }, []);
 
-    const conn = new WebSocket('ws://localhost:80/'); //Todo: порт указать
-    conn.onopen = function () {
-        conn.send(JSON.stringify({
-            'cookie': getCookie("authorization"),
-            'action': 'time'
-        }));
-    };
+    const parseTimer = () => {
+        const minutes = Math.floor(timer / 1000 / 60).toString().padStart(1, '0');
+        const sec = Math.floor(timer / 1000 % 60).toString().padStart(2, '0');
+        return `${minutes}:${sec}`;
+    }
 
-    conn.onmessage = function (event) {
-        const jsonMessage = JSON.parse(event.data);
-        if (jsonMessage.action === 'time')
-        {
-            let time = jsonMessage.time;
-            console.log(+time);
-        }
-    };
     const getCookie = (name: string) => {
         let matches = document.cookie.match(new RegExp(
             '(?:^|; )' + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + '=([^;]*)'
@@ -96,7 +102,10 @@ const AdminGame: FC<AdminGameProps> = props => {
                 'question': [activeTour, activeQuestion]
             }));
             setPlayOrPause('pause');
+            interval = setInterval(() =>
+                setTimer(t => t - 1000 > 0 ? t - 1000 : 0), 1000);
         } else {
+            clearInterval(interval);
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Pause'
@@ -110,6 +119,8 @@ const AdminGame: FC<AdminGameProps> = props => {
             'cookie': getCookie('authorization'),
             'action': 'Stop'
         }));
+        clearInterval(interval);
+        setTimer(70000);
     }
 
     const handleAddedTimeClick = () => {
@@ -117,6 +128,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             'cookie': getCookie('authorization'),
             'action': '+10sec'
         }));
+        setTimer(t => t + 10000);
     }
 
     const renderTours = () => {
@@ -186,7 +198,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         10 сек.
                     </button>
 
-                    <div className={classes.answerTime}>1:10</div>
+                    <div className={classes.answerTime}>{parseTimer()}</div>
                 </div>
 
                 <div className={classes.tablesWrapper}>
