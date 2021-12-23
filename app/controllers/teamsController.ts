@@ -4,6 +4,7 @@ import {TeamRepository} from '../db/repositories/teamRepository';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
+import {TeamDTO} from '../dto';
 
 
 export class TeamsController {
@@ -14,7 +15,7 @@ export class TeamsController {
                 await getCustomRepository(TeamRepository).findTeamsWithoutUser()
                 : await getCustomRepository(TeamRepository).find();
             res.status(200).json({
-                teams: teams.map(value => value.name)
+                teams: teams.map(value => new TeamDTO(value))
             });
         } catch (error) {
             res.status(400).json({message: 'Error', errors: error});

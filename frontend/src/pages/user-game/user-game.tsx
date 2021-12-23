@@ -1,25 +1,60 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './user-game.module.scss';
-import PageWrapper from "../../components/page-wrapper/page-wrapper";
-import Header from "../../components/header/header";
-import {Link} from 'react-router-dom';
-import {CustomInput} from "../../components/custom-input/custom-input";
-import {Alert, Snackbar} from "@mui/material";
-import {UserGameProps} from "../../entities/user-game/user-game.interfaces";
+import PageWrapper from '../../components/page-wrapper/page-wrapper';
+import Header from '../../components/header/header';
+import {Link, useParams} from 'react-router-dom';
+import {CustomInput} from '../../components/custom-input/custom-input';
+import {Alert, Snackbar} from '@mui/material';
+import {UserGameProps} from '../../entities/user-game/user-game.interfaces';
+import {getGame} from '../../server-api/server-api';
+import {store} from '../../index';
+
+let progressBar: any;
 
 const UserGame: FC<UserGameProps> = props => {
-    const conn = new WebSocket("ws://localhost:80/");
-    let answer: string;
-    fetch(`/users/1/changeToken`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json;charset=utf-8',
-            'Accept': 'application/json'
-        }
-    });
-
+    const {gameId} = useParams<{ gameId: string }>();
+    const [answer, setAnswer] = useState('');
+    const [gameName, setGameName] = useState('');
+    const [questionNumber, setQuestionNumber] = useState(1);
+    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-    const [timeForAnswer, setTimeForAnswer] = useState(60);
+    const [timeForAnswer, setTimeForAnswer] = useState(70);
+
+    useEffect(() => {
+        // TODO: Проверить, что игра началась (остальное продолжить только когда началась)
+        getGame(gameId).then((res) => {
+            if (res.status === 200) {
+                res.json().then(({
+                                     name,
+                                 }) => {
+                    setGameName(name);
+                })
+            }
+        })
+
+        conn.onopen = function () {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'time'
+            }));
+        };
+
+        conn.onmessage = function (event) {
+            const jsonMessage = JSON.parse(event.data);
+            if (jsonMessage.action === 'time') {
+                setTimeForAnswer(jsonMessage.time / 1000);
+                if (jsonMessage.isStarted) {
+                    progressBar = moveProgressBar(jsonMessage.time);
+                }
+                console.log(+jsonMessage.time);
+            } else if (jsonMessage.action === 'start') {
+                setTimeForAnswer(jsonMessage.time / 1000);
+                progressBar = moveProgressBar(jsonMessage.time);
+            } else if (jsonMessage.action === 'pause' || jsonMessage.action === 'stop') {
+                clearInterval(progressBar);
+            }
+        };
+    }, []);
 
     const changeColor = (progressBar: HTMLDivElement) => {
         if (progressBar.style.width) {
@@ -44,7 +79,7 @@ const UserGame: FC<UserGameProps> = props => {
         }
     }
 
-    const moveProgressBar = () => {
+    const moveProgressBar = (time: number) => {
         const progressBar = document.querySelector('#progress-bar') as HTMLDivElement;
 
         const frame = () => {
@@ -53,13 +88,14 @@ const UserGame: FC<UserGameProps> = props => {
             } else {
                 changeColor(progressBar);
                 width--;
-                setTimeForAnswer(t => t - 0.6);
+                setTimeForAnswer(t => t - 0.7);
                 progressBar.style.width = width + '%';
             }
         }
 
-        let width = 100;
-        const id = setInterval(frame, 60000 / 100); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
+        let width = Math.floor(100 * time / 70000);
+        const id = setInterval(frame, 70000 / 100); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
+        return id;
     }
 
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -71,19 +107,19 @@ const UserGame: FC<UserGameProps> = props => {
 
     const getCookie = (name: string) => {
         let matches = document.cookie.match(new RegExp(
-            "(?:^|; )" + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + "=([^;]*)"
+            '(?:^|; )' + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + '=([^;]*)'
         ));
         return matches ? decodeURIComponent(matches[1]) : undefined;
     }
 
     const handleAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
-        answer = event.target.value;
+        setAnswer(event.target.value);
     }
 
     const handleSendButtonClick = () => {
         setIsSnackbarOpen(true);
         conn.send(JSON.stringify({
-            'cookie': getCookie("authorization"),
+            'cookie': getCookie('authorization'),
             'action': 'Answer',
             'answer': answer
         }));
@@ -92,34 +128,36 @@ const UserGame: FC<UserGameProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
-                <Link to='/game' className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                <Link to='/game' className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                <Link to="/game" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                <Link to="/game" className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
-                <div className={classes.gameName}>{props.gameName}</div>
+                <div className={classes.gameName}>{gameName}</div>
             </Header>
 
             <div className={classes.contentWrapper}>
                 <div className={classes.teamWrapper}>
                     <div className={classes.team}>Команда</div>
-                    <div className={classes.teamName}>{props.teamName}</div>
+                    <div className={classes.teamName}>{store.getState().appReducer.user.team}</div>
                 </div>
 
                 <div className={classes.answerWrapper}>
                     <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer)} сек.</div>
 
-                    <div className={classes.progressBar} id='progress-bar' />
+                    <div className={classes.progressBar} id="progress-bar"/>
                     <div className={classes.answerBox}>
-                        <p className={classes.answerNumber}>Вопрос 1</p> {/* TODO как менять динамически номер вопроса?*/}
+                        <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
 
                         <div className={classes.answerInputWrapper}>
-                            <CustomInput type='text' id='answer' name='answer' placeholder='Ответ' style={{width: '79%'}} onChange={handleAnswer}/>
-                            <button className={classes.sendAnswerButton} onClick={handleSendButtonClick} >Отправить</button>
+                            <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
+                                         style={{width: '79%'}} value={answer} onChange={handleAnswer}/>
+                            <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <Snackbar open={isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}>
-                    <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+                    <Alert onClose={handleClose} severity="success" sx={{width: '100%'}}>
                         Ответ успешно сохранен
                     </Alert>
                 </Snackbar>

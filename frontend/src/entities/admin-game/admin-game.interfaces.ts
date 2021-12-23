@@ -1,3 +1,3 @@
 export interface AdminGameProps {
-    gameName: string;
+    //gameName?: string;
 }

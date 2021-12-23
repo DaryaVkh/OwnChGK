@@ -10,12 +10,13 @@ import {CustomInput} from '../../components/custom-input/custom-input';
 import {getAll, getGame, createGame, editGame} from '../../server-api/server-api';
 import {Redirect, useLocation} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
+import {Team} from '../admin-start-screen/admin-start-screen';
 
 const GameCreator: FC<GameCreatorProps> = props => {
-    const [teamsFromDB, setTeamsFromDB] = useState([]);
+    const [teamsFromDB, setTeamsFromDB] = useState<Team[]>([]);
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
-    const location = useLocation<{ name: string }>();
-    const oldGameName = props.mode === 'edit' ? location.state.name : '';
+    const location = useLocation<{ id: string, name: string }>();
+    const oldGameId = props.mode === 'edit' ? location.state.id : '';
     const [gameName, setGameName] = useState(props.mode === 'edit' ? location.state.name : '');
     const [questionsCount, setQuestionsCount] = useState(0);
     const [toursCount, setToursCount] = useState(0);
@@ -33,7 +34,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
         });
 
         if (props.mode === 'edit') {
-            getGame(oldGameName).then(res => {
+            getGame(oldGameId).then(res => {
                 if (res.status === 200) {
                     res.json().then(({
                                          teams,
@@ -65,10 +66,10 @@ const GameCreator: FC<GameCreatorProps> = props => {
             return;
         }
 
-        return teamsFromDB.map((name, index) => {
-            return chosenTeams?.includes(name)
-                ? <CustomCheckbox name={name} key={index} checked={true} onChange={handleCheckboxChange}/>
-                : <CustomCheckbox name={name} key={index} onChange={handleCheckboxChange}/>;
+        return teamsFromDB.map((team, index) => {
+            return chosenTeams?.includes(team.name)
+                ? <CustomCheckbox name={team.name} key={index} checked={true} onChange={handleCheckboxChange}/>
+                : <CustomCheckbox name={team.name} key={index} onChange={handleCheckboxChange}/>;
         })
     };
     const handleSubmit = async (event: React.SyntheticEvent) => {
@@ -81,7 +82,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                     }
                 });
         } else {
-            await editGame(oldGameName, gameName, toursCount, questionsCount, chosenTeams ?? [])
+            await editGame(oldGameId, gameName, toursCount, questionsCount, chosenTeams ?? [])
                 .then(res => {
                     if (res.status === 200) {
                         setIsCreatedSuccessfully(true);

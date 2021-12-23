@@ -36,11 +36,9 @@ const Authorization: FC<AuthorizationProps> = props => {
             })
         }).then(response => {
             if (response.status === 200) {
-                response.json().then(({role}) => {
-                    props.onAuthorizeUserWithRole(role);
+                response.json().then(({role, team}) => {
+                    props.onAuthorizeUserWithRole(role, team);
                 });
-                // setTimeout(() => setLoggedIn(true), 1000);
-                // setLoggedIn(true);
             } else {
                 setWrongEmailOrPassword(true);
             }
@@ -62,7 +60,7 @@ const Authorization: FC<AuthorizationProps> = props => {
     }
 
     return props.isLoggedIn ? (
-        <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
+        <Redirect to={props.user.role === 'admin' || props.user.role === 'superadmin' ? '/admin/start-screen' : '/start-screen'}/>
     ) : (
         <PageWrapper>
             <Header isAuthorized={false}/>
@@ -111,13 +109,14 @@ const Authorization: FC<AuthorizationProps> = props => {
 
 function mapStateToProps(state: AppState): AuthorizationStateProps {
     return {
-        isLoggedIn: state.appReducer.isLoggedIn
+        isLoggedIn: state.appReducer.isLoggedIn,
+        user: state.appReducer.user
     }
 }
 
 function mapDispatchToProps(dispatch: Dispatch<AppAction>): AuthorizationDispatchProps {
     return {
-        onAuthorizeUserWithRole: (role: string) => dispatch(authorizeUserWithRole(role))
+        onAuthorizeUserWithRole: (role: string, team: string) => dispatch(authorizeUserWithRole(role, team))
     };
 }
 

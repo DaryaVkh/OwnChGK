@@ -1,38 +1,78 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './admin-game.module.scss';
-import PageWrapper from "../../components/page-wrapper/page-wrapper";
-import Header from "../../components/header/header";
-import {Link} from "react-router-dom";
+import PageWrapper from '../../components/page-wrapper/page-wrapper';
+import Header from '../../components/header/header';
+import {Link, useParams} from 'react-router-dom';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
-import {Scrollbars} from "rc-scrollbars";
-import {AdminGameProps} from "../../entities/admin-game/admin-game.interfaces";
+import {Scrollbars} from 'rc-scrollbars';
+import {AdminGameProps} from '../../entities/admin-game/admin-game.interfaces';
 import PauseIcon from '@mui/icons-material/Pause';
 import CircleOutlinedIcon from '@mui/icons-material/Circle';
+import {getGame} from '../../server-api/server-api';
 
-let toursCount = 3;
-let questionsCount = 10;
 let isOpposition = false;
+let interval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
     const [activeTour, setActiveTour] = useState<number>(1);
     const [activeQuestion, setActiveQuestion] = useState<number>(1);
+    const [toursCount, setToursCount] = useState(0);
+    const [questionsCount, setQuestionsCount] = useState(0);
+    const [gameName, setGameName] = useState('');
+    const {gameId} = useParams<{ gameId: string }>();
+    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'))
+    const [timer, setTimer] = useState(70000);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
 
-    fetch(`/users/1/changeToken`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json;charset=utf-8',
-            'Accept': 'application/json'
-        }
-    });
+    useEffect(() => {
+        getGame(gameId).then((res) => {
+            if (res.status === 200) {
+                res.json().then(({
+                                     name,
+                                     roundCount,
+                                     questionCount
+                                 }) => {
+                    setGameName(name);
+                    setToursCount(roundCount);
+                    setQuestionsCount(questionCount);
+                })
+            }
+        })
 
-    const conn = new WebSocket("ws://localhost:80/"); //Todo: порт указать
+        conn.onopen = function () {
+            conn.send(JSON.stringify({
+                'cookie': getCookie("authorization"),
+                'action': 'time'
+            }));
+        };
+
+        conn.onmessage = function (event) {
+            const jsonMessage = JSON.parse(event.data);
+            if (jsonMessage.action === 'time')
+            {
+                setTimer(jsonMessage.time);
+                if (jsonMessage.isStarted) {
+                    setPlayOrPause('pause');
+                    interval = setInterval(() =>
+                        setTimer(t => t - 1000 > 0 ? t - 1000 : 0), 1000);
+                }
+                console.log(+jsonMessage.time);
+            }
+        };
+    }, []);
+
+    const parseTimer = () => {
+        const minutes = Math.floor(timer / 1000 / 60).toString().padStart(1, '0');
+        const sec = Math.floor(timer / 1000 % 60).toString().padStart(2, '0');
+        return `${minutes}:${sec}`;
+    }
+
     const getCookie = (name: string) => {
         let matches = document.cookie.match(new RegExp(
-            "(?:^|; )" + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + "=([^;]*)"
+            '(?:^|; )' + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + '=([^;]*)'
         ));
         return matches ? decodeURIComponent(matches[1]) : undefined;
     }
@@ -57,15 +97,18 @@ const AdminGame: FC<AdminGameProps> = props => {
         //TODO тут стопим или запускаем таймер текущего вопроса
         if (playOrPause === 'play') {
             conn.send(JSON.stringify({
-                'cookie': getCookie("authorization"),
-                'action': "Start",
+                'cookie': getCookie('authorization'),
+                'action': 'Start',
                 'question': [activeTour, activeQuestion]
             }));
             setPlayOrPause('pause');
+            interval = setInterval(() =>
+                setTimer(t => t - 1000 > 0 ? t - 1000 : 0), 1000);
         } else {
+            clearInterval(interval);
             conn.send(JSON.stringify({
-                'cookie': getCookie("authorization"),
-                'action': "Pause"
+                'cookie': getCookie('authorization'),
+                'action': 'Pause'
             }));
             setPlayOrPause('play');
         }
@@ -73,21 +116,25 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const handleStopClick = () => {
         conn.send(JSON.stringify({
-            'cookie': getCookie("authorization"),
-            'action': "Stop"
+            'cookie': getCookie('authorization'),
+            'action': 'Stop'
         }));
+        clearInterval(interval);
+        setTimer(70000);
     }
 
     const handleAddedTimeClick = () => {
         conn.send(JSON.stringify({
-            'cookie': getCookie("authorization"),
-            'action': "+10sec"
+            'cookie': getCookie('authorization'),
+            'action': '+10sec'
         }));
+        setTimer(t => t + 10000);
     }
 
     const renderTours = () => {
         return Array.from(Array(toursCount).keys()).map(i => {
-            return <div className={`${classes.tour} ${i === 0 ? classes.activeTour : ''}`} id={`${i + 1}`} onClick={handleTourClick} key={`tour_${i + 1}`}>Тур {i + 1}</div>;
+            return <div className={`${classes.tour} ${i === 0 ? classes.activeTour : ''}`} id={`${i + 1}`}
+                        onClick={handleTourClick} key={`tour_${i + 1}`}>Тур {i + 1}</div>;
         });
     }
 
@@ -95,7 +142,8 @@ const AdminGame: FC<AdminGameProps> = props => {
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
                 <div className={classes.questionWrapper} key={`tour_${activeTour}_question_${i + 1}`}>
-                    <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} id={`${i + 1}`} onClick={handleQuestionClick}>
+                    <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} id={`${i + 1}`}
+                         onClick={handleQuestionClick}>
                         Вопрос {i + 1}
                     </div>
 
@@ -106,7 +154,13 @@ const AdminGame: FC<AdminGameProps> = props => {
                                 isOpposition
                                     ?
                                     <div className={classes.opposition}>
-                                        <CircleOutlinedIcon sx={{fill: 'red', fontSize: '1.2vw', color: 'darkred', userSelect: 'none', pointerEvents: 'none'}} />
+                                        <CircleOutlinedIcon sx={{
+                                            fill: 'red',
+                                            fontSize: '1.2vw',
+                                            color: 'darkred',
+                                            userSelect: 'none',
+                                            pointerEvents: 'none'
+                                        }}/>
                                     </div>
                                     : null
                             }
@@ -120,9 +174,9 @@ const AdminGame: FC<AdminGameProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <Link to='/admin/game' className={classes.menuLink}>Рейтинг</Link>
+                <Link to="/admin/game" className={classes.menuLink}>Рейтинг</Link>
 
-                <div className={classes.gameName}>{props.gameName}</div>
+                <div className={classes.gameName}>{gameName}</div>
             </Header>
 
             <div className={classes.contentWrapper}>
@@ -131,18 +185,20 @@ const AdminGame: FC<AdminGameProps> = props => {
 
                     <button className={`${classes.button} ${classes.playButton}`} onClick={handlePlayClick}>
                         {playOrPause === 'play'
-                            ? <PlayArrowIcon sx={{fontSize: '2.5vw', color: 'black'}} />
-                            : <PauseIcon sx={{fontSize: '2.5vw', color: 'black'}} />
+                            ? <PlayArrowIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
+                            : <PauseIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
                         }
                     </button>
 
                     <button className={`${classes.button} ${classes.stopButton}`} onClick={handleStopClick}>
-                        <StopIcon sx={{fontSize: '2.5vw', color: 'black'}} />
+                        <StopIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
                     </button>
 
-                    <button className={`${classes.button} ${classes.tenSecondsButton}`} onClick={handleAddedTimeClick}>+ 10 сек.</button>
+                    <button className={`${classes.button} ${classes.tenSecondsButton}`} onClick={handleAddedTimeClick}>+
+                        10 сек.
+                    </button>
 
-                    <div className={classes.answerTime}>1:10</div>
+                    <div className={classes.answerTime}>{parseTimer()}</div>
                 </div>
 
                 <div className={classes.tablesWrapper}>

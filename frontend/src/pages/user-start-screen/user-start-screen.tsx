@@ -6,17 +6,25 @@ import Header from "../../components/header/header";
 import {Scrollbars} from 'rc-scrollbars';
 import {UserStartScreenProps} from "../../entities/user-start-screen/user-start-screen.interfaces";
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import {Link} from "react-router-dom";
+import {Link, Redirect} from 'react-router-dom';
 import {IconButton} from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import {editTeamCaptainByCurrentUser, getAll, getTeamByCurrentUser, getTeamsWithoutUser} from '../../server-api/server-api';
+import {
+    editTeamCaptainByCurrentUser,
+    getAll,
+    getAmIParticipateGames,
+    getTeamByCurrentUser,
+    getTeamsWithoutUser
+} from '../../server-api/server-api';
+import {Game, Team} from '../admin-start-screen/admin-start-screen';
 
 const UserStartScreen: FC<UserStartScreenProps> = () => {
     const [page, setPage] = useState('teams');
-    const [gamesFromDB, setGamesFromDB] = useState<string[]>([]);
-    const [teamsFromDB, setTeamsFromDB] = useState<string[]>([]);
+    const [gamesFromDB, setGamesFromDB] = useState<Game[]>([]);
+    const [teamsFromDB, setTeamsFromDB] = useState<Team[]>([]);
     const [userTeam, setUserTeam] = useState('');
     const scrollbars = useRef<Scrollbars>(null);
+    const [gameId, setGameId] = useState('');
 
     // TODO доставать команды, игры и команду юзера (если есть) из бд
     // gamesFromDB.push(...['Чгк на КонфУРе-2021', 'shjbdnklsd;dllknsjbckjsdlv;skdkvjbsjkla;sckmdashdbksldkvlkndfkjvbefj', 'Игра 1', 'Игра 2', 'Игра 3', 'Игра 4', 'Игра 5', 'Игра 6', 'Игра 7', 'Игра 8','Игра 9','Игра 10']);
@@ -25,7 +33,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     useEffect(() => {
         getTeamByCurrentUser().then(res => {
             if (res.status === 200) {
-                res.json().then(({name}) => {
+                res.json().then(({name, id}) => {
                     getTeamsWithoutUser().then(res => {
                         if (res.status === 200) {
                             res.json().then(({teams}) => {
@@ -38,13 +46,13 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
 
                     if (name !== undefined) {
                         setUserTeam(name);
-                        setTeamsFromDB([name, ...teamsFromDB]);
+                        setTeamsFromDB([{name, id}, ...teamsFromDB]);
                     }
                 })
             }
         })
 
-        getAll('/games/').then(res => {
+        getAmIParticipateGames().then(res => { // TODO: игры, в которых я состою
             if (res.status === 200) {
                 res.json().then(({games}) => {
                     setGamesFromDB(games);
@@ -66,9 +74,23 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
         }
     }
 
+    const handleClick = (id: string) => {
+        fetch(`/users/${id}/changeToken`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8',
+                'Accept': 'application/json'
+            }
+        }).then((res) => {
+            if (res.status === 200) {
+                setGameId(id);
+            }
+        });
+    }
+
     const renderGames = () => {
-        return gamesFromDB.map((name, index) =>
-            <div key={index} className={classes.gameOrTeam}>{name}</div>);
+        return gamesFromDB.map((game, index) =>
+            <div key={index} className={classes.gameOrTeam} onClick={() => handleClick(game.id)}>{game.name}</div>);
     }
 
     const scrollToTop = () => {
@@ -84,15 +106,15 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     const renderTeams = () => {
         return [userTeam !== ''
             ? (
-            <div key={teamsFromDB.indexOf(userTeam)} className={classes.gameOrTeam}>
+            <div key={userTeam} className={classes.gameOrTeam}>
                 {userTeam}
 
                 <CheckCircleOutlinedIcon color='success' sx={{fontSize: '1.5vw', cursor: 'default'}} />
             </div>)
             : null,
-            ...teamsFromDB.map((name, index) => {
-            return name !== userTeam
-                ? <div key={index} className={classes.gameOrTeam} onClick={handleChooseTeam}>{name}</div>
+            ...teamsFromDB.map((team, index) => {
+            return team.name !== userTeam
+                ? <div key={index} className={classes.gameOrTeam} onClick={handleChooseTeam}>{team.name}</div>
                 : null
         })];
     }
@@ -145,6 +167,10 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                     </div>
                 );
         }
+    }
+
+    if (gameId) {
+        return <Redirect to={`/game/${gameId}`}/>
     }
 
     return (
