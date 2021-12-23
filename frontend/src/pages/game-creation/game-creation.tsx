@@ -10,9 +10,10 @@ import {CustomInput} from '../../components/custom-input/custom-input';
 import {getAll, getGame, createGame, editGame} from '../../server-api/server-api';
 import {Redirect, useLocation} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
+import {Team} from '../admin-start-screen/admin-start-screen';
 
 const GameCreator: FC<GameCreatorProps> = props => {
-    const [teamsFromDB, setTeamsFromDB] = useState([]);
+    const [teamsFromDB, setTeamsFromDB] = useState<Team[]>([]);
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
     const location = useLocation<{ id: string, name: string }>();
     const oldGameId = props.mode === 'edit' ? location.state.id : '';
@@ -65,10 +66,10 @@ const GameCreator: FC<GameCreatorProps> = props => {
             return;
         }
 
-        return teamsFromDB.map((name, index) => {
-            return chosenTeams?.includes(name)
-                ? <CustomCheckbox name={name} key={index} checked={true} onChange={handleCheckboxChange}/>
-                : <CustomCheckbox name={name} key={index} onChange={handleCheckboxChange}/>;
+        return teamsFromDB.map((team, index) => {
+            return chosenTeams?.includes(team.name)
+                ? <CustomCheckbox name={team.name} key={index} checked={true} onChange={handleCheckboxChange}/>
+                : <CustomCheckbox name={team.name} key={index} onChange={handleCheckboxChange}/>;
         })
     };
     const handleSubmit = async (event: React.SyntheticEvent) => {
