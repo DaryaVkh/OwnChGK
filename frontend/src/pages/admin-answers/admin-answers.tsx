@@ -1,14 +1,14 @@
 import React, {FC, useEffect, useState} from 'react';
-import classes from './answers.module.scss';
+import classes from './admin-answers.module.scss';
 import PageWrapper from "../../components/page-wrapper/page-wrapper";
 import Header from "../../components/header/header";
 import {Link, useParams} from 'react-router-dom';
 import CustomCheckbox from "../../components/custom-checkbox/custom-checkbox";
 import {Scrollbars} from "rc-scrollbars";
 import _ from "lodash";
-import {AnswerType, Opposition, Page} from "../../entities/answers-page/answers-page.interfaces";
+import {AnswerType, Opposition, Page} from "../../entities/admin-answers-page/admin-answers-page.interfaces";
 
-const AnswersPage: FC = () => {
+const AdminAnswersPage: FC = () => {
     const { tour, question } = useParams<{tour: string, question: string}>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');
@@ -222,4 +222,4 @@ const AnswersPage: FC = () => {
     );
 }
 
-export default AnswersPage;
+export default AdminAnswersPage;

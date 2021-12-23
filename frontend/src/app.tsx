@@ -11,11 +11,12 @@ import RestoringPassword from './pages/restoring-password/restoring-password';
 import Profile from './pages/profile/profile';
 import UserGame from "./pages/user-game/user-game";
 import AdminGame from "./pages/admin-game/admin-game";
-import AnswersPage from "./pages/answers/answers";
+import AdminAnswersPage from "./pages/admin-answers/admin-answers";
 import {connect} from "react-redux";
 import {AppProps, AppState, AppStateProps} from "./entities/app/app.interfaces";
 import ProtectedRoute from "./components/private-route/private-route";
 import Game from "./pages/game";
+import UserAnswersPage from "./pages/user-answers/user-answers";
 
 const App: FC<AppProps> = props => {
     return (
@@ -82,7 +83,7 @@ const App: FC<AppProps> = props => {
                 <ProtectedRoute path="/answers/:tour/:question" exact
                                 neededRole={['admin', 'superadmin']}
                                 redirectPath='/admin'>
-                    <AnswersPage />
+                    <AdminAnswersPage />
                 </ProtectedRoute>
 
                 <ProtectedRoute path='/start-screen' exact neededRole={['user']} redirectPath='/auth'>
@@ -105,6 +106,10 @@ const App: FC<AppProps> = props => {
 
                 <ProtectedRoute path='/game' exact neededRole={['user']} redirectPath='/auth'>
                     <UserGame gameName='' teamName=''/>
+                </ProtectedRoute>
+
+                <ProtectedRoute path='/answers' exact neededRole={['user']} redirectPath={'/auth'}>
+                    <UserAnswersPage />
                 </ProtectedRoute>
 
                 <Redirect from="*" to="/"/>
