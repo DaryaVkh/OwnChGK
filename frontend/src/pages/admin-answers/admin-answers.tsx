@@ -7,14 +7,17 @@ import CustomCheckbox from "../../components/custom-checkbox/custom-checkbox";
 import {Scrollbars} from "rc-scrollbars";
 import _ from "lodash";
 import {AnswerType, Opposition, Page} from "../../entities/admin-answers-page/admin-answers-page.interfaces";
+import {getCookie} from "../../commonFunctions";
 
 const AdminAnswersPage: FC = () => {
+    const {gameId} = useParams<{ gameId: string }>();
+    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'))
     const { tour, question } = useParams<{tour: string, question: string}>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');
-    const [gameAnswers, setGameAnswers] = useState<string[]>(['Котик', 'Котейка', 'Котик', 'Котик', 'Котик', 'Котик', 'Котик', 'Котёнок', 'mememe']); // TODO сюда наверное они откуда то поступают, потом нужно будет синхронозироват с uncheckedAnswers, если сюда чето новое попало, чтобы туда тоже попадало
+    const [gameAnswers, setGameAnswers] = useState<string[]>([]); // TODO сюда наверное они откуда то поступают, потом нужно будет синхронозироват с uncheckedAnswers, если сюда чето новое попало, чтобы туда тоже попадало
     const [acceptedAnswers, setAcceptedAnswers] = useState<string[]>([]);
-    const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>(['Котик', 'Котейка', 'Котик', 'Котик', 'Котик', 'Котик', 'Котик', 'Котёнок', 'mememe']);
+    const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>([]);
     const [rejectedAnswers, setRejectedAnswers] = useState<string[]>([]);
     const [currentHandledAnswers, setCurrentHandledAnswers] = useState<string[]>([]);
     const [oppositions, setOppositions] = useState<Opposition[]>([{teamName: 'Сахара опять не будет', answer: 'Ответ', explanation: 'Пояснение'},
@@ -46,6 +49,22 @@ const AdminAnswersPage: FC = () => {
             window.removeEventListener('resize', handleWindowResize);
         }
     }, []);
+
+    conn.onopen = function () {
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'getAnswers',
+            'roundNumber': +tour,
+            'questionNumber': +question,
+        }));
+    };
+
+    conn.onmessage = function (event) {
+        const jsonMessage = JSON.parse(event.data);
+        if (jsonMessage.action === 'answers') {
+            setGameAnswers(jsonMessage.answers);
+        }
+    }
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         const element = event.target as HTMLInputElement;

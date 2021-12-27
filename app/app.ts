@@ -170,6 +170,14 @@ function RejectAnswer(gameId: number, roundNumber: number, questionNumber: numbe
     }
 }
 
+function GetAllAnswers(gameId: number, roundNumber: number, questionNumber: number, ws) {
+    console.log(games[gameId].rounds[roundNumber-1].questions[questionNumber-1].answers);
+    ws.send(JSON.stringify({
+        'action': 'answers',
+        'answers' : games[gameId].rounds[roundNumber-1].questions[questionNumber-1].answers
+    }));
+}
+
 wss.on('connection', (ws: WebSocket) => {
     ws.on('message', (message: string) => {
         message += "";
@@ -226,6 +234,8 @@ wss.on('connection', (ws: WebSocket) => {
                     RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == "RejectAppeal") {
                     RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, teamId, jsonMessage.answers);
+                } else if (jsonMessage.action == "getAnswers") {
+                    GetAllAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
                 }
             } else {
                 gameUsers[gameId].add(ws);

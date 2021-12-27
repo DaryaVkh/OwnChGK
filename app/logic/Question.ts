@@ -6,8 +6,8 @@ export class Question {
     public readonly number: number;
     public readonly time: number;
     public readonly roundNumber: number;
-    private readonly answers: Answer[]; // TODO: public? Сейчас непонятно, как получить ответы
-    private readonly appeals: Appeal[]; // TODO: public? Сейчас непонятно, как получить апелляции
+    public readonly answers: Answer[]; // TODO: public? Сейчас непонятно, как получить ответы
+    public readonly appeals: Appeal[]; // TODO: public? Сейчас непонятно, как получить апелляции
 
     constructor(cost: number, roundNumber: number, number: number, time: number) {
         this.cost = cost;

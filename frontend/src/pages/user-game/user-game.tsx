@@ -8,6 +8,7 @@ import {Alert, Snackbar} from '@mui/material';
 import {UserGameProps} from '../../entities/user-game/user-game.interfaces';
 import {getGame} from '../../server-api/server-api';
 import {store} from '../../index';
+import {getCookie} from "../../commonFunctions";
 
 let progressBar: any;
 
@@ -119,13 +120,6 @@ const UserGame: FC<UserGameProps> = props => {
         }
         setIsSnackbarOpen(false);
     };
-
-    const getCookie = (name: string) => {
-        let matches = document.cookie.match(new RegExp(
-            '(?:^|; )' + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + '=([^;]*)'
-        ));
-        return matches ? decodeURIComponent(matches[1]) : undefined;
-    }
 
     const handleAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAnswer(event.target.value);

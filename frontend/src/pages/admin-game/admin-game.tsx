@@ -10,6 +10,7 @@ import {AdminGameProps} from '../../entities/admin-game/admin-game.interfaces';
 import PauseIcon from '@mui/icons-material/Pause';
 import CircleOutlinedIcon from '@mui/icons-material/Circle';
 import {getGame} from '../../server-api/server-api';
+import {getCookie} from "../../commonFunctions";
 
 let isOpposition = false;
 let interval: any;
@@ -68,13 +69,6 @@ const AdminGame: FC<AdminGameProps> = props => {
         const minutes = Math.floor(timer / 1000 / 60).toString().padStart(1, '0');
         const sec = Math.floor(timer / 1000 % 60).toString().padStart(2, '0');
         return `${minutes}:${sec}`;
-    }
-
-    const getCookie = (name: string) => {
-        let matches = document.cookie.match(new RegExp(
-            '(?:^|; )' + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + '=([^;]*)'
-        ));
-        return matches ? decodeURIComponent(matches[1]) : undefined;
     }
 
     const handleTourClick = (event: React.SyntheticEvent) => {
