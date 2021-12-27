@@ -53,6 +53,15 @@ function GiveAddedTime(gameId: number) {
     }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
 }
 
+function ChangeQuestionNumber(gameId:number, questionNumber:number, roundNumber:number) {
+    for (let user of gameUsers[gameId]) {
+        user.send(JSON.stringify({
+            'action': 'changeQuestionNumber',
+            'number': games[gameId].rounds[0].questionsCount * (roundNumber - 1) + questionNumber,
+        }));
+    }
+}
+
 function StartTimer(gameId: number) {
     if (!timesIsOnPause[gameId]) {
         console.log("start")
@@ -186,6 +195,11 @@ wss.on('connection', (ws: WebSocket) => {
                         'time': result}));
                     console.log(result);
                 }
+            }
+            else if (jsonMessage.action == 'changeQuestion') {
+                console.log(jsonMessage.questionNumber + "roundNumber");
+                console.log(jsonMessage.tourNumber + "questionNumber");
+                ChangeQuestionNumber(gameId, jsonMessage.questionNumber, jsonMessage.tourNumber);
             }
             if (userRoles == "admin" || userRoles == "superadmin") {
                 console.log(jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload);

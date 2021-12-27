@@ -16,8 +16,8 @@ let interval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
-    const [activeTour, setActiveTour] = useState<number>(1);
-    const [activeQuestion, setActiveQuestion] = useState<number>(1);
+    const [activeTourNumber, setActiveTour] = useState<number>(1);
+    const [activeQuestionNumber, setActiveQuestion] = useState<number>(1);
     const [toursCount, setToursCount] = useState(0);
     const [questionsCount, setQuestionsCount] = useState(0);
     const [gameName, setGameName] = useState('');
@@ -83,6 +83,13 @@ const AdminGame: FC<AdminGameProps> = props => {
         activeTour.classList.remove(classes.activeTour);
         clickedTour.classList.add(classes.activeTour);
         setActiveTour(+clickedTour.id);
+
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'changeQuestion',
+            'questionNumber': activeQuestionNumber,
+            'tourNumber': +clickedTour.id,
+        }));
     }
 
     const handleQuestionClick = (event: React.SyntheticEvent) => {
@@ -91,6 +98,13 @@ const AdminGame: FC<AdminGameProps> = props => {
         activeQuestion.classList.remove(classes.activeQuestion);
         clickedQuestion.classList.add(classes.activeQuestion);
         setActiveQuestion(+clickedQuestion.id);
+
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'changeQuestion',
+            'questionNumber': +clickedQuestion.id,
+            'tourNumber': activeTourNumber,
+        }));
     }
 
     const handlePlayClick = () => {
@@ -99,7 +113,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Start',
-                'question': [activeTour, activeQuestion]
+                'question': [activeTourNumber, activeQuestionNumber]
             }));
             setPlayOrPause('pause');
             interval = setInterval(() =>
@@ -141,13 +155,13 @@ const AdminGame: FC<AdminGameProps> = props => {
     const renderQuestions = () => {
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
-                <div className={classes.questionWrapper} key={`tour_${activeTour}_question_${i + 1}`}>
+                <div className={classes.questionWrapper} key={`tour_${activeTourNumber}_question_${i + 1}`}>
                     <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} id={`${i + 1}`}
                          onClick={handleQuestionClick}>
                         Вопрос {i + 1}
                     </div>
 
-                    <Link className={classes.answersButtonLink} to={`/answers/${activeTour}/${i + 1}`}>
+                    <Link className={classes.answersButtonLink} to={`/answers/${activeTourNumber}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {

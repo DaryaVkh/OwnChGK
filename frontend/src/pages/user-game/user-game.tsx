@@ -53,6 +53,9 @@ const UserGame: FC<UserGameProps> = props => {
             } else if (jsonMessage.action === 'pause' || jsonMessage.action === 'stop') {
                 clearInterval(progressBar);
             }
+            else if (jsonMessage.action === 'changeQuestionNumber') {
+                setQuestionNumber(+jsonMessage.number);
+            }
         };
     }, []);
 
