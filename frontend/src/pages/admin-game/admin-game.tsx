@@ -87,7 +87,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         conn.send(JSON.stringify({
             'cookie': getCookie("authorization"),
             'action': 'changeQuestion',
-            'questionNumber': activeQuestionNumber,
+            'questionNumber': 1,
             'tourNumber': +clickedTour.id,
         }));
     }

@@ -127,7 +127,6 @@ function PauseTimer(gameId: number) {
 
 function GetAnswer(answer: string, teamId: number, gameId: number) {
     console.log('received: %s', answer, teamId);
-    console.log('gameId:', gameId);
     const roundNumber = gamesCurrentAnswer[gameId][0] - 1;
     const questionNumber = gamesCurrentAnswer[gameId][1] - 1;
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);
@@ -178,16 +177,12 @@ wss.on('connection', (ws: WebSocket) => {
                     const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
                     const initialDelay = timers[gameId]._idleTimeout;
                     let result = 0;
-                    console.log(gameIsTimerStart[gameId]);
                     if (gameIsTimerStart[gameId]) {
                         result = initialDelay - pastDelay;
-                        console.log('a');
                     } else if (timesIsOnPause[gameId]) {
                         result = timesWhenPauseClick[gameId];
-                        console.log('b');
                     } else {
                         result = seconds70PerQuestion;
-                        console.log('c');
                     }
                     ws.send(JSON.stringify({
                         'action': 'time',
@@ -197,19 +192,21 @@ wss.on('connection', (ws: WebSocket) => {
                 }
             }
             else if (jsonMessage.action == 'changeQuestion') {
-                console.log(jsonMessage.questionNumber + "roundNumber");
-                console.log(jsonMessage.tourNumber + "questionNumber");
+                gamesCurrentAnswer[gameId] = [jsonMessage.tourNumber, jsonMessage.questionNumber];
                 ChangeQuestionNumber(gameId, jsonMessage.questionNumber, jsonMessage.tourNumber);
             }
+            else if (jsonMessage.action == 'getQuestionNumber') {
+                ws.send(JSON.stringify({
+                    'action': 'changeQuestionNumber',
+                    'number': games[gameId].rounds[0].questionsCount * (gamesCurrentAnswer[gameId][0] - 1) + gamesCurrentAnswer[gameId][1],
+                }));
+            }
             if (userRoles == "admin" || userRoles == "superadmin") {
-                console.log(jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload);
-                console.log('gameId:', gameId);
                 gameAdmins[gameId].add(ws);
                 if (jsonMessage.action == "+10sec") {
                     GiveAddedTime(gameId);
                 } else if (jsonMessage.action == "Start") {
                     StartTimer(gameId);
-                    gamesCurrentAnswer[gameId] = jsonMessage.question;
                 } else if (jsonMessage.action == "Pause") {
                     PauseTimer(gameId);
                 } else if (jsonMessage.action == "Stop") {

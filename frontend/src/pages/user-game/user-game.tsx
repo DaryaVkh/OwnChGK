@@ -37,6 +37,10 @@ const UserGame: FC<UserGameProps> = props => {
                 'cookie': getCookie('authorization'),
                 'action': 'time'
             }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber'
+            }));
         };
 
         conn.onmessage = function (event) {
