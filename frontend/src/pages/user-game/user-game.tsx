@@ -54,11 +54,19 @@ const UserGame: FC<UserGameProps> = props => {
             } else if (jsonMessage.action === 'start') {
                 setTimeForAnswer(jsonMessage.time / 1000);
                 progressBar = moveProgressBar(jsonMessage.time);
-            } else if (jsonMessage.action === 'pause' || jsonMessage.action === 'stop') {
+            } else if (jsonMessage.action === 'addTime') {
+                clearInterval(progressBar);
+                setTimeForAnswer(jsonMessage.time / 1000);
+                progressBar = moveProgressBar(jsonMessage.time);
+            }
+            else if (jsonMessage.action === 'pause' || jsonMessage.action === 'stop') {
                 clearInterval(progressBar);
             }
             else if (jsonMessage.action === 'changeQuestionNumber') {
                 setQuestionNumber(+jsonMessage.number);
+                clearInterval(progressBar);
+                setTimeForAnswer(70000 / 1000);
+                progressBar = moveProgressBar(70000);
             }
         };
     }, []);

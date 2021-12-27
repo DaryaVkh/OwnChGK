@@ -51,6 +51,13 @@ function GiveAddedTime(gameId: number) {
         console.log("added time end")
         gameIsTimerStart[gameId] = false;
     }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
+
+    for (let user of gameUsers[gameId]) {
+        user.send(JSON.stringify({
+            'action': 'addTime',
+            'time': t
+        }));
+    }
 }
 
 function ChangeQuestionNumber(gameId:number, questionNumber:number, roundNumber:number) {
