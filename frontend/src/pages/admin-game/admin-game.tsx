@@ -90,6 +90,8 @@ const AdminGame: FC<AdminGameProps> = props => {
             'questionNumber': 1,
             'tourNumber': +clickedTour.id,
         }));
+
+        handleStopClick();
     }
 
     const handleQuestionClick = (event: React.SyntheticEvent) => {
@@ -105,10 +107,11 @@ const AdminGame: FC<AdminGameProps> = props => {
             'questionNumber': +clickedQuestion.id,
             'tourNumber': activeTourNumber,
         }));
+
+        handleStopClick();
     }
 
     const handlePlayClick = () => {
-        //TODO тут стопим или запускаем таймер текущего вопроса
         if (playOrPause === 'play') {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
@@ -129,6 +132,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     }
 
     const handleStopClick = () => {
+        setPlayOrPause('play');
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'Stop'
