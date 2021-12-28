@@ -36,38 +36,54 @@ const UserGame: FC<UserGameProps> = props => {
         conn.onopen = function () {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': 'time'
+                'action': 'getQuestionNumber'
             }));
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': 'getQuestionNumber'
+                'action': 'time'
             }));
         };
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'time') {
+                console.log('a');
+                console.log(jsonMessage.time);
                 setTimeForAnswer(jsonMessage.time / 1000);
                 if (jsonMessage.isStarted) {
+                    console.log('a move');
                     progressBar = moveProgressBar(jsonMessage.time);
                 }
-                console.log(+jsonMessage.time);
             } else if (jsonMessage.action === 'start') {
+                console.log('b');
+                console.log(jsonMessage.time);
                 setTimeForAnswer(jsonMessage.time / 1000);
                 progressBar = moveProgressBar(jsonMessage.time);
             } else if (jsonMessage.action === 'addTime') {
+                console.log('c');
+                console.log(jsonMessage.time);
                 clearInterval(progressBar);
-                setTimeForAnswer(jsonMessage.time / 1000);
-                progressBar = moveProgressBar(jsonMessage.time);
+                setTimeForAnswer(t => t + 10);
+                if (jsonMessage.isStarted) {
+                    console.log('c move');
+                    progressBar = moveProgressBar(jsonMessage.time);
+                }
             }
-            else if (jsonMessage.action === 'pause' || jsonMessage.action === 'stop') {
+            else if (jsonMessage.action === 'pause') {
+                console.log('d');
                 clearInterval(progressBar);
+            } else if (jsonMessage.action === 'stop') {
+                console.log('p');
+                clearInterval(progressBar);
+                setTimeForAnswer(70000 / 1000);
             }
             else if (jsonMessage.action === 'changeQuestionNumber') {
+                console.log('e');
+                console.log(jsonMessage.time);
                 setQuestionNumber(+jsonMessage.number);
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
-                progressBar = moveProgressBar(70000);
+                //todo: тут надо подвинуть прогресс бар до максимума (70000)
             }
         };
     }, []);
@@ -150,7 +166,7 @@ const UserGame: FC<UserGameProps> = props => {
                 </div>
 
                 <div className={classes.answerWrapper}>
-                    <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer)} сек.</div>
+                    <div className={classes.timeLeft}>Осталось: {Math.floor(timeForAnswer)>=0 ? Math.floor(timeForAnswer) : 0} сек.</div>
 
                     <div className={classes.progressBar} id="progress-bar"/>
                     <div className={classes.answerBox}>

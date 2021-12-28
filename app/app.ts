@@ -36,27 +36,30 @@ function testFunction(gameId:number) {
 
 function GiveAddedTime(gameId: number) {
     if (timesIsOnPause[gameId]) {
-        timesWhenPauseClick[gameId] -= extra10Seconds;
-        return;
+        timesWhenPauseClick[gameId] += extra10Seconds;
+        console.log('added time is' + timesWhenPauseClick[gameId]);
     }
-    const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
-    const initialDelay = timers[gameId]._idleTimeout;
-    clearTimeout(timers[gameId]);
-    gameIsTimerStart[gameId] = true;
-    let t;
-    if (initialDelay - pastDelay < 0) {
-        t = extra10Seconds;
-    } else t = initialDelay - pastDelay + extra10Seconds;
-    timers[gameId] = setTimeout(() => {
-        console.log("added time end")
-        gameIsTimerStart[gameId] = false;
-    }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
-
-    for (let user of gameUsers[gameId]) {
-        user.send(JSON.stringify({
-            'action': 'addTime',
-            'time': t
-        }));
+    else {
+        const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
+        const initialDelay = timers[gameId]._idleTimeout;
+        clearTimeout(timers[gameId]);
+        gameIsTimerStart[gameId] = true;
+        let t;
+        if (initialDelay - pastDelay < 0) {
+            t = extra10Seconds;
+        } else t = initialDelay - pastDelay + extra10Seconds;
+        timers[gameId] = setTimeout(() => {
+            console.log("added time end");
+            gameIsTimerStart[gameId] = false;
+        }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
+        console.log('t' + t);
+        for (let user of gameUsers[gameId]) {
+            user.send(JSON.stringify({
+                'action': 'addTime',
+                'time': t,
+                'isStarted': true,
+            }));
+        }
     }
 }
 
@@ -89,11 +92,11 @@ function StartTimer(gameId: number) {
         gameIsTimerStart[gameId] = true;
         timesIsOnPause[gameId] = false;
         const t = timesWhenPauseClick[gameId];
-        //timesWhenPauseClick[gameId] = 0;
         timers[gameId] = setTimeout(() => {
             gameIsTimerStart[gameId] = false;
             console.log("stop after pause")
         }, t);
+        console.log(t+'added time to resp');
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
