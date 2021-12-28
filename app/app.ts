@@ -92,6 +92,7 @@ function StartTimer(gameId: number) {
         gameIsTimerStart[gameId] = true;
         timesIsOnPause[gameId] = false;
         const t = timesWhenPauseClick[gameId];
+        //timesWhenPauseClick[gameId] = 70000;
         timers[gameId] = setTimeout(() => {
             gameIsTimerStart[gameId] = false;
             console.log("stop after pause")
@@ -111,7 +112,7 @@ function StopTimer(gameId: number) {
     gameIsTimerStart[gameId] = false;
     clearTimeout(timers[gameId]);
     timesIsOnPause[gameId] = false;
-    timesWhenPauseClick[gameId] = 0;
+    timesWhenPauseClick[gameId] = 70000;
     for (let user of gameUsers[gameId]) {
         user.send(JSON.stringify({
             'action': 'stop'
