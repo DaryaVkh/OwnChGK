@@ -53,7 +53,7 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
         ? <Redirect to={{pathname: pathToEdit, state: {id: props.id, name: props.name}}} />
         : <OutlinedInput className={classes.InputWithAdornment} readOnly fullWidth name={props.name}
                          value={props.name} sx={inputStyle}
-                         onClick={handleClick} /*TODO: перекрывает иконки карандашика и крестика*/
+                         //onClick={handleClick} /*TODO: перекрывает иконки карандашика и крестика*/
                          endAdornment={
                            <>
                                <InputAdornment position="end">

@@ -11,7 +11,6 @@ import {IconButton} from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import {
     editTeamCaptainByCurrentUser,
-    getAll,
     getAmIParticipateGames,
     getTeamByCurrentUser,
     getTeamsWithoutUser
@@ -34,19 +33,19 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
         getTeamByCurrentUser().then(res => {
             if (res.status === 200) {
                 res.json().then(({name, id}) => {
-                    getTeamsWithoutUser().then(res => {
-                        if (res.status === 200) {
-                            res.json().then(({teams}) => {
-                                setTeamsFromDB(teams);
-                            });
-                        } else {
-                            // TODO: код не 200, мейби всплывашку, что что-то не так?
-                        }
-                    })
-
                     if (name !== undefined) {
                         setUserTeam(name);
-                        setTeamsFromDB([{name, id}, ...teamsFromDB]);
+                        setTeamsFromDB([{name, id}]);
+                    } else {
+                        getTeamsWithoutUser().then(res => {
+                            if (res.status === 200) {
+                                res.json().then(({teams}) => {
+                                    setTeamsFromDB(teams);
+                                });
+                            } else {
+                                // TODO: код не 200, мейби всплывашку, что что-то не так?
+                            }
+                        })
                     }
                 })
             }

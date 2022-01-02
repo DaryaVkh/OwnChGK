@@ -10,6 +10,7 @@ export const gamesCurrentAnswer: { [id: string]: [number, number]; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
 export const gameUsers: { [id: string]: any; } = {};
 export const gameIsTimerStart: { [id: string]: boolean; } = {};
+const addedTime: { [id: string]: number} = {};
 
 export const transporter = CreateTransporter("ownchgk@gmail.com", "6ownchgkgoogle");
 
@@ -38,8 +39,29 @@ function GiveAddedTime(gameId: number) {
     if (timesIsOnPause[gameId]) {
         timesWhenPauseClick[gameId] += extra10Seconds;
         console.log('added time is' + timesWhenPauseClick[gameId]);
+        for (let user of gameUsers[gameId]) {
+            user.send(JSON.stringify({
+                'action': 'addTime',
+                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                'time': timesWhenPauseClick[gameId],
+                'isStarted': false,
+            }));
+        }
     }
     else {
+        if (!gameIsTimerStart[gameId]) {
+            addedTime[gameId] = addedTime[gameId] ? addedTime[gameId] + 10000 : 10000;
+            for (let user of gameUsers[gameId]) {
+                user.send(JSON.stringify({
+                    'action': 'addTime',
+                    'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                    'time': seconds70PerQuestion + addedTime[gameId],
+                    'isStarted': false,
+                }));
+            }
+            return;
+        }
+
         const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
         const initialDelay = timers[gameId]._idleTimeout;
         clearTimeout(timers[gameId]);
@@ -48,14 +70,17 @@ function GiveAddedTime(gameId: number) {
         if (initialDelay - pastDelay < 0) {
             t = extra10Seconds;
         } else t = initialDelay - pastDelay + extra10Seconds;
+        addedTime[gameId] = addedTime[gameId] ? addedTime[gameId] + 10000 : 10000;
         timers[gameId] = setTimeout(() => {
             console.log("added time end");
             gameIsTimerStart[gameId] = false;
+            addedTime[gameId] = 0;
         }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
         console.log('t' + t);
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'addTime',
+                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
                 'time': t,
                 'isStarted': true,
             }));
@@ -78,13 +103,15 @@ function StartTimer(gameId: number) {
         gameIsTimerStart[gameId] = true;
         timers[gameId] = setTimeout(() => {
             gameIsTimerStart[gameId] = false;
+            addedTime[gameId] = 0;
             console.log("stop")
-        }, seconds70PerQuestion);
+        }, seconds70PerQuestion + (addedTime[gameId] ?? 0));
 
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
-                'time': seconds70PerQuestion
+                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                'time': seconds70PerQuestion + (addedTime[gameId] ?? 0)
             }));
         }
     } else {
@@ -96,11 +123,13 @@ function StartTimer(gameId: number) {
         timers[gameId] = setTimeout(() => {
             gameIsTimerStart[gameId] = false;
             console.log("stop after pause")
+            addedTime[gameId] = 0;
         }, t);
         console.log(t+'added time to resp');
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
+                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
                 'time': t
             }));
         }
@@ -113,6 +142,7 @@ function StopTimer(gameId: number) {
     clearTimeout(timers[gameId]);
     timesIsOnPause[gameId] = false;
     timesWhenPauseClick[gameId] = 70000;
+    addedTime[gameId] = 0;
     for (let user of gameUsers[gameId]) {
         user.send(JSON.stringify({
             'action': 'stop'
@@ -125,6 +155,7 @@ function PauseTimer(gameId: number) {
         console.log("pause")
         gameIsTimerStart[gameId] = false;
         timesIsOnPause[gameId] = true;
+        //addedTime[gameId] = 0;
         timesWhenPauseClick[gameId] = (timesWhenPauseClick[gameId] ?? seconds70PerQuestion) - Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
         clearTimeout(timers[gameId]);
 
@@ -205,13 +236,21 @@ wss.on('connection', (ws: WebSocket) => {
                     } else if (timesIsOnPause[gameId]) {
                         result = timesWhenPauseClick[gameId];
                     } else {
-                        result = seconds70PerQuestion;
+                        result = seconds70PerQuestion + (addedTime[gameId] ?? 0);
                     }
                     ws.send(JSON.stringify({
                         'action': 'time',
                         'isStarted': gameIsTimerStart[gameId],
+                        'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
                         'time': result}));
                     console.log(result);
+                } else {
+                    console.log('addedTime:', addedTime[gameId]);
+                    ws.send(JSON.stringify({
+                        'action': 'time',
+                        'isStarted': gameIsTimerStart[gameId],
+                        'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                        'time': seconds70PerQuestion + (addedTime[gameId] ?? 0)}));
                 }
             }
             else if (jsonMessage.action == 'changeQuestion') {
@@ -249,10 +288,10 @@ wss.on('connection', (ws: WebSocket) => {
             } else {
                 gameUsers[gameId].add(ws);
                 if (gameIsTimerStart[gameId] && jsonMessage.action == "Answer") {
-                    GetAnswer(jsonMessage.answer, teamId, gameId);
+                    GetAnswer(jsonMessage.answer, teamId, gameId); // TODO: отправить мол приняли ответ, а в юзерке выводить плашку, иначе красную
                 } else if (jsonMessage.action == "Appeal") {
                     for (let ws of gameAdmins[gameId])
-                        ws.send("Appeal");
+                        ws.send("Appeal"); // TODO: какой вопрос, тур? Отправлять в сообщении и брать оттуда
                     GetAppeal(jsonMessage.appeal, teamId, gameId);
                 }
             }

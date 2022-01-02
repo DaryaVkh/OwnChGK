@@ -54,13 +54,19 @@ const AdminGame: FC<AdminGameProps> = props => {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'time')
             {
+                console.log(jsonMessage.time);
                 setTimer(jsonMessage.time);
                 if (jsonMessage.isStarted) {
                     setPlayOrPause('pause');
-                    interval = setInterval(() =>
-                        setTimer(t => t - 1000 > 0 ? t - 1000 : 0), 1000);
+                    interval = setInterval(() => setTimer(t => {
+                        let res = t - 1000;
+                        if (res <= 0) {
+                            clearInterval(interval);
+                            setPlayOrPause('play');
+                        }
+                        return res > 0 ? res : 0;
+                    }), 1000);
                 }
-                console.log(+jsonMessage.time);
             }
         };
     }, []);
@@ -114,7 +120,14 @@ const AdminGame: FC<AdminGameProps> = props => {
             }));
             setPlayOrPause('pause');
             interval = setInterval(() =>
-                setTimer(t => t - 1000 > 0 ? t - 1000 : 0), 1000);
+                setTimer(t => {
+                    let res = t - 1000;
+                    if (res <= 0) {
+                        clearInterval(interval);
+                        setPlayOrPause('play');
+                    }
+                    return res > 0 ? res : 0;
+                }), 1000);
         } else {
             clearInterval(interval);
             conn.send(JSON.stringify({

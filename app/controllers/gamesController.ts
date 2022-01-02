@@ -13,24 +13,28 @@ export class GamesController {
     public async getAll(req: Request, res: Response) {
         try {
             const {amIParticipate} = req.query;
-            const oldToken = req.cookies['authorization'];
-            const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
             let games: any;
             if (amIParticipate) {
-                /*games = await getCustomRepository(GameRepository).find({relations: ['teams']})
-                    .then(games => games.filter(game => {
-                        console.log(game.teams);
-                        return game.teams
-                    }))*/
+                const oldToken = req.cookies['authorization'];
+                const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+
+                console.log('111111111111111');
+                console.log(userId);
+                if (!userId) {
+                    console.log('true');
+                    res.status(400).json({message: "userId is undefined"});
+                    return;
+                }
+                games = await getCustomRepository(GameRepository).findAmIParticipate(userId); // TODO: ломается?
             } else {
                 games = await getCustomRepository(GameRepository).find();
             }
-            games = await getCustomRepository(GameRepository).find();
+            //games = await getCustomRepository(GameRepository).find();
             res.status(200).json({
                 'games': games.map(value => new GameDTO(value))
             });
         } catch (error) {
-            res.status(400).json({message: 'Error'}).send(error);
+            res.status(400).json({message: error.message});
         }
     }
 
@@ -175,13 +179,14 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {gameName} = req.params;
+            const {gameId} = req.params;
             const {newGameName, roundCount, questionCount, teams} = req.body;
             const token = req.cookies['authorization'];
             const payLoad = jwt.verify(token, secret);
             if (typeof payLoad !== 'string') {
+                console.log('ChangeGame:', teams);
                 await getCustomRepository(GameRepository).updateByParams(
-                    gameName, newGameName, roundCount, questionCount, 1, 60, teams
+                    gameId, newGameName, roundCount, questionCount, 1, 60, teams
                 );
                 res.status(200).json({});
             } else {

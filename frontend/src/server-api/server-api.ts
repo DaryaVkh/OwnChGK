@@ -30,8 +30,8 @@ export const createGame = async (gameName: string, roundCount: number, questionC
     });
 }
 
-export const editGame = async (oldGameName: string, newGameName: string, roundCount: number, questionCount: number, teams: string[]) => {
-    return await fetch(`/games/${oldGameName}/change`, {
+export const editGame = async (gameId: string, newGameName: string, roundCount: number, questionCount: number, teams: string[]) => {
+    return await fetch(`/games/${gameId}/change`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
