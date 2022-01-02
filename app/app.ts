@@ -151,8 +151,8 @@ function GetAppeal(appeal: string, teamId: number, gameId: number) {
 }
 
 function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
-    for (const answer in answers) {
-        games[gameId].rounds[roundNumber].questions[questionNumber].acceptAnswers(answer);
+    for (const answer of answers) {
+        games[gameId].rounds[roundNumber-1].questions[questionNumber-1].acceptAnswers(answer);
     }
 }
 
@@ -164,7 +164,7 @@ function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: numbe
 
 function RejectAppeal(gameId: number, roundNumber: number, questionNumber: number, teamId: number, answers: string[]) {
     for (const answer in answers) {
-        games[gameId].rounds[roundNumber].questions[questionNumber].rejectAppeal(teamId, answer);
+        games[gameId].rounds[roundNumber-1].questions[questionNumber-1].rejectAppeal(teamId, answer);
     }
 }
 
@@ -176,9 +176,13 @@ function RejectAnswer(gameId: number, roundNumber: number, questionNumber: numbe
 
 function GetAllAnswers(gameId: number, roundNumber: number, questionNumber: number, ws) {
     console.log(games[gameId].rounds[roundNumber-1].questions[questionNumber-1].answers);
+    const result = [];
+    for (let a of games[gameId].rounds[roundNumber-1].questions[questionNumber-1].answers) {
+        result.push(a.text);
+    }
     ws.send(JSON.stringify({
         'action': 'answers',
-        'answers' : games[gameId].rounds[roundNumber-1].questions[questionNumber-1].answers
+        'answers' : result
     }));
 }
 
@@ -231,13 +235,14 @@ wss.on('connection', (ws: WebSocket) => {
                 } else if (jsonMessage.action == "Stop") {
                     StopTimer(gameId);
                 } else if (jsonMessage.action == "AcceptAnswer") {
-                    AcceptAnswer(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.answers);
+                    console.log("this method");
+                    AcceptAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == "AcceptAppeal") {
-                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, teamId, jsonMessage.answers);
+                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.answers);
                 } else if (jsonMessage.action == "RejectAnswer") {
-                    RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.answers);
+                    RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == "RejectAppeal") {
-                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, teamId, jsonMessage.answers);
+                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.answers);
                 } else if (jsonMessage.action == "getAnswers") {
                     GetAllAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
                 }

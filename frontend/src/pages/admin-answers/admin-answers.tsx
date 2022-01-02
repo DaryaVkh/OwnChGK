@@ -63,6 +63,8 @@ const AdminAnswersPage: FC = () => {
         const jsonMessage = JSON.parse(event.data);
         if (jsonMessage.action === 'answers') {
             setGameAnswers(jsonMessage.answers);
+            setUncheckedAnswers(jsonMessage.answers);
+            //todo а в чем разница для фронта
         }
     }
 
@@ -130,15 +132,39 @@ const AdminAnswersPage: FC = () => {
     const handleSaveButtonClick = () => {
         switch (answersType) {
             case "accepted":
+                console.log(currentHandledAnswers + "accepted");
+                conn.send(JSON.stringify({
+                    'cookie': getCookie("authorization"),
+                    'action': 'RejectAnswer',
+                    'roundNumber': tour,
+                    'questionNumber': question,
+                    'answers': currentHandledAnswers
+                }));
                 setRejectedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setAcceptedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
                 break;
             case "unchecked":
+                console.log(currentHandledAnswers + "unchecked");
+                conn.send(JSON.stringify({
+                    'cookie': getCookie("authorization"),
+                    'action': 'AcceptAnswer',
+                    'roundNumber': tour,
+                    'questionNumber': question,
+                    'answers': currentHandledAnswers
+                }));
                 setAcceptedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setRejectedAnswers(prev => [...prev, ...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]);
                 setUncheckedAnswers([]);
                 break;
             case "rejected":
+                console.log(currentHandledAnswers + "rejected");
+                conn.send(JSON.stringify({
+                    'cookie': getCookie("authorization"),
+                    'action': 'AcceptAnswer',
+                    'roundNumber': tour,
+                    'questionNumber': question,
+                    'answers': currentHandledAnswers
+                }));
                 setAcceptedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setRejectedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
                 break;
