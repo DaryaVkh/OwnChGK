@@ -12,7 +12,7 @@
   border-radius: 10px;
   box-shadow: 0 0 3vh 1vh rgba(50, 130, 184, 0.25);
   width: 100%;
-  padding: 5vh 2vw;
+  padding: 5vh 0.5vw 5vh 2vw;
   box-sizing: border-box;
   height: 85%;
   display: flex;
@@ -39,12 +39,6 @@
 
   &:hover {
     cursor: pointer;
-  }
-}
-
-.scrollbar {
-  :last-child {
-    margin: 0;
   }
 }
 

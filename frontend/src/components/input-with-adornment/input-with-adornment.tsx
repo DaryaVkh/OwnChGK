@@ -1,4 +1,4 @@
-import React, {FC, useCallback, useState} from 'react';
+import React, {FC, useCallback, useEffect, useState} from 'react';
 import classes from "./input-with-adornment.module.scss";
 import {IconButton, InputAdornment, OutlinedInput} from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -11,6 +11,21 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
     const [isClicked, setIsClicked] = useState(false);
     const pathToEdit = props.type === 'game' ? '/admin/game-creation/edit' : '/admin/team-creation/edit';
 
+    useEffect(() => {
+        function goToGame(event: MouseEvent) {
+            const clickedElement = event.target as HTMLElement;
+            if (clickedElement.id === 'game') {
+                setIsClicked(true);
+            }
+        }
+
+        window.addEventListener('click', goToGame, true);
+
+        return () => {
+            window.removeEventListener('click', goToGame, true);
+        }
+    })
+
     const inputStyle = {
         '& .MuiOutlinedInput-notchedOutline': {
             border: 'none !important',
@@ -21,12 +36,13 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
         '& .MuiOutlinedInput-input': {
             padding: '0 0 0 1.5vw !important',
             color: 'black',
+            cursor: 'pointer'
         }
     };
 
-    const handleDeleteClick = (e: React.SyntheticEvent) => {
-        setItemName(e);
-        handleOpenModal(e);
+    const handleDeleteClick = (event: React.SyntheticEvent) => {
+        setItemName(event);
+        handleOpenModal(event);
     }
 
     const setItemName = useCallback(e => {
@@ -37,12 +53,8 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
         props.openModal(true);
     }, [props]);
 
-    const handleEditClick = () => {
+    const handleEditClick = (event: React.SyntheticEvent) => {
         setIsRedirectedToEdit(true);
-    }
-
-    const handleClick = () => {
-        setIsClicked(true);
     }
 
     if (isClicked) {
@@ -52,8 +64,7 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
     return isRedirectedToEdit
         ? <Redirect to={{pathname: pathToEdit, state: {id: props.id, name: props.name}}} />
         : <OutlinedInput className={classes.InputWithAdornment} readOnly fullWidth name={props.name}
-                         value={props.name} sx={inputStyle}
-                         onClick={handleClick} /*TODO: перекрывает иконки карандашика и крестика*/
+                         value={props.name} sx={inputStyle} id='game'
                          endAdornment={
                            <>
                                <InputAdornment position="end">
@@ -67,7 +78,7 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
                                            }
                                        }}
                                    >
-                                       <EditOutlinedIcon/>
+                                       <EditOutlinedIcon />
                                    </IconButton>
                                </InputAdornment>
 

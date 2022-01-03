@@ -57,6 +57,7 @@
   display: flex;
   width: 100%;
   height: 100%;
+  padding-right: 0.2vw;
 }
 
 .toursCountInput,
@@ -104,10 +105,9 @@
   user-select: none;
 }
 
-.scrollbar {
-  :last-child {
-    margin-bottom: 0;
-  }
+.scrollbarView {
+  overflow-x: hidden !important;
+  padding: 1vh 0.5vw 1vh 0;
 }
 
 .link {

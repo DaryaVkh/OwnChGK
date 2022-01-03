@@ -1,6 +1,6 @@
 import React, {FC, useState} from 'react';
 import classes from './user-answer.module.scss';
-import {OutlinedInput, TextareaAutosize} from "@mui/material";
+import {TextareaAutosize} from "@mui/material";
 import {UserAnswerProps} from "../../entities/user-answer/user-answer.interfaces";
 
 const UserAnswer: FC<UserAnswerProps> = props => {

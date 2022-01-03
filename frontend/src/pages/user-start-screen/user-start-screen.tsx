@@ -1,9 +1,8 @@
-import React, {FC, useEffect, useRef, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './user-start-screen.module.scss';
 import PageWrapper from "../../components/page-wrapper/page-wrapper";
 import NavBar from "../../components/nav-bar/nav-bar";
 import Header from "../../components/header/header";
-import {Scrollbars} from 'rc-scrollbars';
 import {UserStartScreenProps} from "../../entities/user-start-screen/user-start-screen.interfaces";
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import {Link, Redirect} from 'react-router-dom';
@@ -11,24 +10,19 @@ import {IconButton} from "@mui/material";
 import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import {
     editTeamCaptainByCurrentUser,
-    getAll,
     getAmIParticipateGames,
     getTeamByCurrentUser,
     getTeamsWithoutUser
 } from '../../server-api/server-api';
 import {Game, Team} from '../admin-start-screen/admin-start-screen';
+import Scrollbar from "../../components/scrollbar/scrollbar";
 
 const UserStartScreen: FC<UserStartScreenProps> = () => {
     const [page, setPage] = useState('teams');
     const [gamesFromDB, setGamesFromDB] = useState<Game[]>([]);
     const [teamsFromDB, setTeamsFromDB] = useState<Team[]>([]);
     const [userTeam, setUserTeam] = useState('');
-    const scrollbars = useRef<Scrollbars>(null);
     const [gameId, setGameId] = useState('');
-
-    // TODO доставать команды, игры и команду юзера (если есть) из бд
-    // gamesFromDB.push(...['Чгк на КонфУРе-2021', 'shjbdnklsd;dllknsjbckjsdlv;skdkvjbsjkla;sckmdashdbksldkvlkndfkjvbefj', 'Игра 1', 'Игра 2', 'Игра 3', 'Игра 4', 'Игра 5', 'Игра 6', 'Игра 7', 'Игра 8','Игра 9','Игра 10']);
-    // teamsFromDB.push(...['My Best Team', 'Meow', 'Hello', 'Sweet brioches','ChGK','BestTeam', 'Meow Meow', 'Elite', 'Family']);
 
     useEffect(() => {
         getTeamByCurrentUser().then(res => {
@@ -63,10 +57,10 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
         });
     }, []);
 
-    const handleChooseTeam = (e: React.SyntheticEvent) => {
+    const handleChooseTeam = (event: React.SyntheticEvent) => {
         if (userTeam === '') {
-            setUserTeam((e.currentTarget as HTMLDivElement).innerText);
-            editTeamCaptainByCurrentUser((e.currentTarget as HTMLDivElement).innerText)
+            setUserTeam((event.currentTarget as HTMLDivElement).innerText);
+            editTeamCaptainByCurrentUser((event.currentTarget as HTMLDivElement).innerText)
                 .then(res => {
                     // TODO: код не 200, что делать?
                 });
@@ -93,30 +87,16 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
             <div key={index} className={classes.gameOrTeam} onClick={() => handleClick(game.id)}>{game.name}</div>);
     }
 
-    const scrollToTop = () => {
-        (scrollbars.current as Scrollbars).scrollToTop();
-    }
-
-    useEffect(() => {
-        if (userTeam !== '') {
-            scrollToTop();
-        }
-    }, [userTeam]);
-
     const renderTeams = () => {
-        return [userTeam !== ''
-            ? (
+        return userTeam !== ''
+            ?
             <div key={userTeam} className={classes.gameOrTeam}>
                 {userTeam}
 
                 <CheckCircleOutlinedIcon color='success' sx={{fontSize: '1.5vw', cursor: 'default'}} />
-            </div>)
-            : null,
-            ...teamsFromDB.map((team, index) => {
-            return team.name !== userTeam
-                ? <div key={index} className={classes.gameOrTeam} onClick={handleChooseTeam}>{team.name}</div>
-                : null
-        })];
+            </div>
+            :
+            teamsFromDB.map((team, index) => <div key={index} className={classes.gameOrTeam} onClick={handleChooseTeam}>{team.name}</div>);
     }
 
     const renderPage = (page: string) => {
@@ -125,12 +105,9 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                 return (
                     <div className={classes.contentWrapper}>
                         <div className={classes.contentBox}>
-                            <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500} autoHideDuration={200} renderThumbVertical={() =>
-                                <div style={{backgroundColor: 'transparent'}}/>} renderTrackVertical={() =>
-                                <div style={{backgroundColor: 'transparent'}}/>}>
-
+                            <Scrollbar>
                                 {renderGames()}
-                            </Scrollbars>
+                            </Scrollbar>
                         </div>
                     </div>
                 );
@@ -140,14 +117,11 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                             <div className={classes.box}>
                                 <p className={classes.teamParagraph}>Выбери команду из списка или создай новую</p>
 
-                                <div className={classes.contentBox} style={{height: '92%', padding: '5vh 2vw 3vh 2vw'}}>
+                                <div className={classes.contentBox} style={{height: '92%', padding: '5vh 0.5vw 3vh 2vw'}}>
                                     <div className={classes.teamsWrapper}>
-                                        <Scrollbars ref={scrollbars} className={classes.scrollbar} autoHide autoHideTimeout={500} autoHideDuration={200} renderThumbVertical={() =>
-                                            <div style={{backgroundColor: 'transparent'}}/>} renderTrackVertical={() =>
-                                            <div style={{backgroundColor: 'transparent'}}/>}>
-
+                                        <Scrollbar>
                                             {renderTeams()}
-                                        </Scrollbars>
+                                        </Scrollbar>
                                     </div>
 
                                     <div className={classes.addButtonWrapper}>

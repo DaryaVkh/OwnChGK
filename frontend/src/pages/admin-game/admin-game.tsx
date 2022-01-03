@@ -5,11 +5,11 @@ import Header from '../../components/header/header';
 import {Link, useParams} from 'react-router-dom';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
-import {Scrollbars} from 'rc-scrollbars';
 import {AdminGameProps} from '../../entities/admin-game/admin-game.interfaces';
 import PauseIcon from '@mui/icons-material/Pause';
 import CircleOutlinedIcon from '@mui/icons-material/Circle';
 import {getGame} from '../../server-api/server-api';
+import Scrollbar from "../../components/scrollbar/scrollbar";
 
 let isOpposition = false;
 let interval: any;
@@ -18,8 +18,8 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
     const [activeTour, setActiveTour] = useState<number>(1);
     const [activeQuestion, setActiveQuestion] = useState<number>(1);
-    const [toursCount, setToursCount] = useState(0);
-    const [questionsCount, setQuestionsCount] = useState(0);
+    const [toursCount, setToursCount] = useState(10);
+    const [questionsCount, setQuestionsCount] = useState(20);
     const [gameName, setGameName] = useState('');
     const {gameId} = useParams<{ gameId: string }>();
     const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'))
@@ -203,25 +203,15 @@ const AdminGame: FC<AdminGameProps> = props => {
 
                 <div className={classes.tablesWrapper}>
                     <div className={classes.toursWrapper}>
-                        <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
-                                    autoHideDuration={200}
-                                    renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                    renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                    classes={{view: classes.scrollbarView}}>
-
+                        <Scrollbar>
                             {renderTours()}
-                        </Scrollbars>
+                        </Scrollbar>
                     </div>
 
                     <div className={classes.questionsWrapper}>
-                        <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
-                                    autoHideDuration={200}
-                                    renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                    renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                    classes={{view: classes.scrollbarView}}>
-
+                        <Scrollbar>
                             {renderQuestions()}
-                        </Scrollbars>
+                        </Scrollbar>
                     </div>
                 </div>
             </div>

@@ -1,7 +1,7 @@
 import React, {FC, Fragment} from 'react';
 import classes from './header.module.scss';
 import {HeaderDispatchProps, HeaderProps, HeaderStateProps} from "../../entities/header/header.interfaces";
-import {NavLink, Link} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import {connect} from "react-redux";
 import {AppState} from "../../entities/app/app.interfaces";
 import {Dispatch} from "redux";
@@ -9,8 +9,8 @@ import {AppAction} from "../../redux/reducers/app-reducer/app-reducer.interfaces
 import {logOut} from "../../redux/actions/app-actions/app-actions";
 
 const Header: FC<HeaderProps> = props => {
-    const handleLogout = async (event: React.SyntheticEvent) => {
-        const request = await fetch('/users/logout', {
+    const handleLogout = async () => {
+        await fetch('/users/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8',

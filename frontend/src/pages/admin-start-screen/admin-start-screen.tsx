@@ -13,6 +13,7 @@ import {getAll} from '../../server-api/server-api';
 import Modal from '../../components/modal/modal';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
+import Scrollbar from "../../components/scrollbar/scrollbar";
 
 const inputStyles = {
     '& .MuiOutlinedInput-notchedOutline': {
@@ -88,9 +89,9 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     const scrollbars = useRef<Scrollbars>(null);
     let location = useLocation<{page: string}>();
 
-    // const [teams, setTeams] = useState<string[]>(['My Best Team', 'Meow', 'Hello', 'Sweet brioches','ChGK','BestTeam', 'Meow Meow', 'Elite', 'Family']);
+    // const [teams, setTeams] = useState<Team[]>([{name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}]);
     // const [admins, setAdmins] = useState<Admin[]>([{name: 'Павел Булгаков', email: 'parasite@comcast.net'}, {name: 'Владислав Сергеев', email: 'olaf.greenholt@larkin.com'}, {name: 'Василиса Суворова', email: 'cebileprei@yopmail.com'}, {name: 'Ульяна Королева', email: 'jeuquoutren@yopmail.com'}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}]);
-    // const [games, setGames] = useState<string[]>(['Игра 1', 'Игра 2', 'Игра 3', 'Игра 4', 'Игра 5', 'Игра 6', 'Игра 7', 'Игра 8','Игра 9','Игра 10', 'Игра 11', 'Игра 12']);
+    // const [games, setGames] = useState<Game[]>([{name: 'Игра 1', id: '1'}, {name: 'Игра 2', id: '2'}, {name: 'Игра 3', id: '3'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}]);
 
     const emailStyles = {
         '& .MuiOutlinedInput-notchedOutline': {
@@ -197,14 +198,9 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                     <div className={classes.containerWrapper}>
                         <div className={classes.box}>
                             <div className={classes.gamesWrapper}>
-                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
-                                            autoHideDuration={200}
-                                            renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                            renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                            classes={{view: classes.scrollbarView}}>
-
+                                <Scrollbar>
                                     {renderGames()}
-                                </Scrollbars>
+                                </Scrollbar>
                             </div>
 
                             <div className={classes.addButtonWrapper}>
@@ -225,14 +221,9 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                     <div className={classes.containerWrapper}>
                         <div className={classes.box}>
                             <div className={classes.teamsWrapper}>
-                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
-                                            autoHideDuration={200}
-                                            renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                            renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                            classes={{view: classes.scrollbarView}}>
-
+                                <Scrollbar>
                                     {renderTeams()}
-                                </Scrollbars>
+                                </Scrollbar>
                             </div>
 
                             <div className={classes.addButtonWrapper}>
@@ -256,8 +247,8 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                                 className={props.isSuperAdmin ? classes.superAdminWrapper : classes.adminsWrapperWithScrollbar}>
                                 <Scrollbars ref={scrollbars} className={classes.scrollbar} autoHide
                                             autoHideTimeout={500} autoHideDuration={200}
-                                            renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                            renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
+                                            renderThumbVertical={() => <div style={{backgroundColor: 'white', borderRadius: '4px', cursor: 'pointer'}}/>}
+                                            renderTrackHorizontal={props => <div {...props} style={{display: 'none'}} />}
                                             classes={{view: classes.scrollbarView}}>
 
                                     {renderAdmins()}

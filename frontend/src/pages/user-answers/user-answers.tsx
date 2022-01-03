@@ -4,8 +4,8 @@ import PageWrapper from "../../components/page-wrapper/page-wrapper";
 import {Link} from "react-router-dom";
 import Header from "../../components/header/header";
 import {Answer, UserAnswersPageProps} from "../../entities/user-answers/user-answers.interfaces";
-import {Scrollbars} from "rc-scrollbars";
 import UserAnswer from "../../components/user-answer/user-answer";
+import Scrollbar from "../../components/scrollbar/scrollbar";
 
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     const [gameName, setGameName] = useState<string>('');
@@ -43,13 +43,9 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
                 </div>
 
                 <div className={classes.answersWrapper}>
-                    <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
-                                autoHideDuration={200}
-                                renderThumbVertical={() => <div style={{backgroundColor: 'var(--foreground-color)', borderRadius: '4px', cursor: 'pointer'}}/>}
-                                renderTrackHorizontal={props => <div {...props} style={{display: 'none'}} />}
-                                classes={{view: classes.scrollbarView}}>
+                    <Scrollbar>
                         {renderAnswers()}
-                    </Scrollbars>
+                    </Scrollbar>
                 </div>
             </div>
         </PageWrapper>

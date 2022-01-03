@@ -7,18 +7,19 @@ import CustomCheckbox from "../../components/custom-checkbox/custom-checkbox";
 import {Scrollbars} from "rc-scrollbars";
 import _ from "lodash";
 import {AnswerType, Opposition, Page} from "../../entities/admin-answers-page/admin-answers-page.interfaces";
+import Scrollbar from "../../components/scrollbar/scrollbar";
 
 const AdminAnswersPage: FC = () => {
     const { tour, question } = useParams<{tour: string, question: string}>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');
-    const [gameAnswers, setGameAnswers] = useState<string[]>(['Котик', 'Котейка', 'Котик', 'Котик', 'Котик', 'Котик', 'Котик', 'Котёнок', 'mememe']); // TODO сюда наверное они откуда то поступают, потом нужно будет синхронозироват с uncheckedAnswers, если сюда чето новое попало, чтобы туда тоже попадало
+    const [gameAnswers, setGameAnswers] = useState<string[]>(['Котик', 'Котейка', 'Котик', 'Котик', 'Котик', 'Котик', 'Котик', 'Котёнок', 'mememe', 'a', 'aaaa', 'aa', 'assdf', 'asfsdf', 'ajksc', 'ascmkjsdvwn']); // TODO сюда наверное они откуда то поступают, потом нужно будет синхронозироват с uncheckedAnswers, если сюда чето новое попало, чтобы туда тоже попадало
     const [acceptedAnswers, setAcceptedAnswers] = useState<string[]>([]);
-    const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>(['Котик', 'Котейка', 'Котик', 'Котик', 'Котик', 'Котик', 'Котик', 'Котёнок', 'mememe']);
+    const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>(['Котик', 'Котейка', 'Котик', 'Котик', 'Котик', 'Котик', 'Котик', 'Котёнок', 'mememe', 'a', 'aaaa', 'aa', 'assdf', 'asfsdf', 'ajksc', 'ascmkjsdvwn']);
     const [rejectedAnswers, setRejectedAnswers] = useState<string[]>([]);
     const [currentHandledAnswers, setCurrentHandledAnswers] = useState<string[]>([]);
     const [oppositions, setOppositions] = useState<Opposition[]>([{teamName: 'Сахара опять не будет', answer: 'Ответ', explanation: 'Пояснение'},
-        {teamName: 'Забаненные в гугле', answer: 'Ответ', explanation: 'Пояснение'},
+        {teamName: 'Забаненные в гугле', answer: 'Ответ', explanation: 'ПояснениеffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffПояснениеffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'},
         {teamName: 'Не грози Южному автовокзалу', answer: 'Ответ', explanation: 'Пояснение'},
         {teamName: 'ГУ ЧГК-шки-ниндзя', answer: 'Ответ', explanation: 'Пояснение'}]); // TODO тут как то получаем апелляции через сокеты или хз как, они наверное как то должны быть синхронизированы с вопросами
 
@@ -80,8 +81,8 @@ const AdminAnswersPage: FC = () => {
     };
 
     const getAnswers = (answers: string[], checked: boolean) => {
-        const counterAnswers = _.countBy(gameAnswers);
-        const answersForRender = Object.entries(counterAnswers).filter(el => answers.includes(el[0]));
+        const countedAnswers = _.countBy(gameAnswers);
+        const answersForRender = Object.entries(countedAnswers).filter(el => answers.includes(el[0]));
         return answersForRender.map(([answer, count]: [string, number]) => {
             return (
                 <div className={classes.answerWrapper} key={`${answersType}_${answer}`}>
@@ -136,8 +137,8 @@ const AdminAnswersPage: FC = () => {
                     <div className={classes.explanation}>
                         <Scrollbars autoHide autoHideTimeout={500}
                                     autoHideDuration={200}
-                                    renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                    renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
+                                    renderThumbVertical={() => <div style={{backgroundColor: 'var(--background-color)', borderRadius: '4px', cursor: 'pointer'}}/>}
+                                    renderTrackHorizontal={props => <div {...props} style={{display: 'none'}} />}
                                     classes={{view: classes.scrollbarView}}>
                             {op.explanation}
                         </Scrollbars>
@@ -164,13 +165,9 @@ const AdminAnswersPage: FC = () => {
                             </div>
 
                             <div className={classes.answersWrapper}>
-                                <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
-                                            autoHideDuration={200}
-                                            renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                            renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                            classes={{view: classes.scrollbarView}}>
+                                <Scrollbar>
                                     {renderAnswers()}
-                                </Scrollbars>
+                                </Scrollbar>
                             </div>
 
                             <div className={classes.saveButtonWrapper}>
@@ -185,8 +182,8 @@ const AdminAnswersPage: FC = () => {
                         <div className={classes.oppositionsWrapper}>
                             <Scrollbars className={classes.scrollbar} autoHide autoHideTimeout={500}
                                         autoHideDuration={200}
-                                        renderThumbVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
-                                        renderTrackVertical={() => <div style={{backgroundColor: 'transparent'}}/>}
+                                        renderThumbVertical={() => <div style={{backgroundColor: 'white', borderRadius: '4px', cursor: 'pointer'}}/>}
+                                        renderTrackHorizontal={props => <div {...props} style={{display: 'none'}} />}
                                         classes={{view: classes.oppositionsScrollbarView}}>
                                 {renderOppositions()}
                             </Scrollbars>

@@ -146,7 +146,7 @@
     flex-wrap: wrap;
 
     .oppositionWrapper {
-      width: 48%;
+      width: 45%;
       display: flex;
       flex-direction: column;
       height: 47%;
@@ -206,19 +206,15 @@
   }
 }
 
-.scrollbar {
-  :last-child {
-    margin-bottom: 0 !important;
-  }
-}
-
 .scrollbarView {
-  padding: 0 1vh 0 0;
+  overflow-x: hidden !important;
+  padding: 0 0.5vw 0 0;
 }
 
 .oppositionsScrollbarView {
   padding: 0 1vh 0 0;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: space-around;
+  overflow-x: hidden !important;
 }
