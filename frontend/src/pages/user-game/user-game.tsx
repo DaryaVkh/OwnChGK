@@ -8,6 +8,7 @@ import {Alert, Snackbar} from '@mui/material';
 import {UserGameProps} from '../../entities/user-game/user-game.interfaces';
 import {getGame} from '../../server-api/server-api';
 import {store} from '../../index';
+import {getCookie} from "../../commonFunctions";
 
 let progressBar: any;
 
@@ -35,6 +36,10 @@ const UserGame: FC<UserGameProps> = props => {
         conn.onopen = function () {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
                 'action': 'time'
             }));
         };
@@ -42,16 +47,47 @@ const UserGame: FC<UserGameProps> = props => {
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'time') {
+                console.log('a');
+                console.log(jsonMessage.time);
+                console.log('maxTime:', jsonMessage.maxTime);
                 setTimeForAnswer(jsonMessage.time / 1000);
                 if (jsonMessage.isStarted) {
-                    progressBar = moveProgressBar(jsonMessage.time);
+                    console.log('a move');
+                    progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 }
-                console.log(+jsonMessage.time);
             } else if (jsonMessage.action === 'start') {
+                console.log('b');
+                console.log(jsonMessage.time);
                 setTimeForAnswer(jsonMessage.time / 1000);
-                progressBar = moveProgressBar(jsonMessage.time);
-            } else if (jsonMessage.action === 'pause' || jsonMessage.action === 'stop') {
+                console.log('maxTime:', jsonMessage.maxTime);
+                progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
+            } else if (jsonMessage.action === 'addTime') {
+                console.log('c');
+                console.log(jsonMessage.time);
+                console.log('maxTime:', jsonMessage.maxTime);
                 clearInterval(progressBar);
+                setTimeForAnswer(t => t + 10);
+                if (jsonMessage.isStarted) {
+                    console.log('c move');
+                    progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
+                }
+            }
+            else if (jsonMessage.action === 'pause') {
+                console.log('d');
+                clearInterval(progressBar);
+            } else if (jsonMessage.action === 'stop') {
+                console.log('p');
+                clearInterval(progressBar);
+                setTimeForAnswer(70000 / 1000);
+                progressBar.style.width = '100%';
+            }
+            else if (jsonMessage.action === 'changeQuestionNumber') {
+                console.log('e');
+                console.log(jsonMessage.time);
+                setQuestionNumber(+jsonMessage.number);
+                clearInterval(progressBar);
+                setTimeForAnswer(70000 / 1000);
+                progressBar.style.width = '100%';
             }
         };
     }, []);
@@ -79,7 +115,7 @@ const UserGame: FC<UserGameProps> = props => {
         }
     }
 
-    const moveProgressBar = (time: number) => {
+    const moveProgressBar = (time: number, maxTime: number) => {
         const progressBar = document.querySelector('#progress-bar') as HTMLDivElement;
 
         const frame = () => {
@@ -87,14 +123,17 @@ const UserGame: FC<UserGameProps> = props => {
                 clearInterval(id);
             } else {
                 changeColor(progressBar);
-                width--;
-                setTimeForAnswer(t => t - 0.7);
-                progressBar.style.width = width + '%';
+                setTimeForAnswer(t => {
+                    width = Math.floor(100 * t / (maxTime / 1000));
+                    progressBar.style.width = width + '%';
+                    return t - 1
+                });
             }
         }
 
-        let width = Math.floor(100 * time / 70000);
-        const id = setInterval(frame, 70000 / 100); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
+        console.log('fromMove:', maxTime);
+        let width = Math.floor(100 * time / maxTime);
+        const id = setInterval(frame, 1000); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
         return id;
     }
 
@@ -104,13 +143,6 @@ const UserGame: FC<UserGameProps> = props => {
         }
         setIsSnackbarOpen(false);
     };
-
-    const getCookie = (name: string) => {
-        let matches = document.cookie.match(new RegExp(
-            '(?:^|; )' + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + '=([^;]*)'
-        ));
-        return matches ? decodeURIComponent(matches[1]) : undefined;
-    }
 
     const handleAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAnswer(event.target.value);
@@ -129,7 +161,7 @@ const UserGame: FC<UserGameProps> = props => {
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
                 <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                <Link to="/answers" className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                <Link to="/game-answers" className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
                 <div className={classes.gameName}>{gameName}</div>
             </Header>
@@ -141,7 +173,7 @@ const UserGame: FC<UserGameProps> = props => {
                 </div>
 
                 <div className={classes.answerWrapper}>
-                    <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer)} сек.</div>
+                    <div className={classes.timeLeft}>Осталось: {Math.floor(timeForAnswer)>=0 ? Math.floor(timeForAnswer) : 0} сек.</div>
 
                     <div className={classes.progressBar} id="progress-bar"/>
                     <div className={classes.answerBox}>

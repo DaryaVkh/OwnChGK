@@ -13,7 +13,7 @@ export const gamesRouter = () => {
     router.get('/:gameId', middleware, gamesController.getGame);
     router.get('/:gameId/start', roleMiddleware(adminAccess), gamesController.startGame);
     router.get('/:gameName/teams', middleware, gamesController.getAllTeams);
-    router.patch('/:gameName/change', roleMiddleware(adminAccess), gamesController.changeGame)
+    router.patch('/:gameId/change', roleMiddleware(adminAccess), gamesController.changeGame)
     router.patch('/:gameName/changeStatus', roleMiddleware(adminAccess), gamesController.changeGameStatus);
     router.patch('/:gameName/changeName', roleMiddleware(adminAccess), gamesController.editGameName);
     router.patch('/:gameName/changeAdmin', roleMiddleware(adminAccess), gamesController.editGameAdmin);

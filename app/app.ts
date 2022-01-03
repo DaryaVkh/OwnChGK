@@ -10,6 +10,7 @@ export const gamesCurrentAnswer: { [id: string]: [number, number]; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
 export const gameUsers: { [id: string]: any; } = {};
 export const gameIsTimerStart: { [id: string]: boolean; } = {};
+const addedTime: { [id: string]: number} = {};
 
 export const transporter = CreateTransporter("ownchgk@gmail.com", "6ownchgkgoogle");
 
@@ -36,21 +37,64 @@ function testFunction(gameId:number) {
 
 function GiveAddedTime(gameId: number) {
     if (timesIsOnPause[gameId]) {
-        timesWhenPauseClick[gameId] -= extra10Seconds;
-        return;
+        timesWhenPauseClick[gameId] += extra10Seconds;
+        console.log('added time is' + timesWhenPauseClick[gameId]);
+        for (let user of gameUsers[gameId]) {
+            user.send(JSON.stringify({
+                'action': 'addTime',
+                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                'time': timesWhenPauseClick[gameId],
+                'isStarted': false,
+            }));
+        }
     }
-    const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
-    const initialDelay = timers[gameId]._idleTimeout;
-    clearTimeout(timers[gameId]);
-    gameIsTimerStart[gameId] = true;
-    let t;
-    if (initialDelay - pastDelay < 0) {
-        t = extra10Seconds;
-    } else t = initialDelay - pastDelay + extra10Seconds;
-    timers[gameId] = setTimeout(() => {
-        console.log("added time end")
-        gameIsTimerStart[gameId] = false;
-    }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
+    else {
+        if (!gameIsTimerStart[gameId]) {
+            addedTime[gameId] = addedTime[gameId] ? addedTime[gameId] + 10000 : 10000;
+            for (let user of gameUsers[gameId]) {
+                user.send(JSON.stringify({
+                    'action': 'addTime',
+                    'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                    'time': seconds70PerQuestion + addedTime[gameId],
+                    'isStarted': false,
+                }));
+            }
+            return;
+        }
+
+        const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
+        const initialDelay = timers[gameId]._idleTimeout;
+        clearTimeout(timers[gameId]);
+        gameIsTimerStart[gameId] = true;
+        let t;
+        if (initialDelay - pastDelay < 0) {
+            t = extra10Seconds;
+        } else t = initialDelay - pastDelay + extra10Seconds;
+        addedTime[gameId] = addedTime[gameId] ? addedTime[gameId] + 10000 : 10000;
+        timers[gameId] = setTimeout(() => {
+            console.log("added time end");
+            gameIsTimerStart[gameId] = false;
+            addedTime[gameId] = 0;
+        }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
+        console.log('t' + t);
+        for (let user of gameUsers[gameId]) {
+            user.send(JSON.stringify({
+                'action': 'addTime',
+                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                'time': t,
+                'isStarted': true,
+            }));
+        }
+    }
+}
+
+function ChangeQuestionNumber(gameId:number, questionNumber:number, roundNumber:number) {
+    for (let user of gameUsers[gameId]) {
+        user.send(JSON.stringify({
+            'action': 'changeQuestionNumber',
+            'number': games[gameId].rounds[0].questionsCount * (roundNumber - 1) + questionNumber,
+        }));
+    }
 }
 
 function StartTimer(gameId: number) {
@@ -59,13 +103,15 @@ function StartTimer(gameId: number) {
         gameIsTimerStart[gameId] = true;
         timers[gameId] = setTimeout(() => {
             gameIsTimerStart[gameId] = false;
+            addedTime[gameId] = 0;
             console.log("stop")
-        }, seconds70PerQuestion);
+        }, seconds70PerQuestion + (addedTime[gameId] ?? 0));
 
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
-                'time': seconds70PerQuestion
+                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                'time': seconds70PerQuestion + (addedTime[gameId] ?? 0)
             }));
         }
     } else {
@@ -73,14 +119,17 @@ function StartTimer(gameId: number) {
         gameIsTimerStart[gameId] = true;
         timesIsOnPause[gameId] = false;
         const t = timesWhenPauseClick[gameId];
-        //timesWhenPauseClick[gameId] = 0;
+        //timesWhenPauseClick[gameId] = 70000;
         timers[gameId] = setTimeout(() => {
             gameIsTimerStart[gameId] = false;
             console.log("stop after pause")
+            addedTime[gameId] = 0;
         }, t);
+        console.log(t+'added time to resp');
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
+                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
                 'time': t
             }));
         }
@@ -92,7 +141,8 @@ function StopTimer(gameId: number) {
     gameIsTimerStart[gameId] = false;
     clearTimeout(timers[gameId]);
     timesIsOnPause[gameId] = false;
-    timesWhenPauseClick[gameId] = 0;
+    timesWhenPauseClick[gameId] = 70000;
+    addedTime[gameId] = 0;
     for (let user of gameUsers[gameId]) {
         user.send(JSON.stringify({
             'action': 'stop'
@@ -105,6 +155,7 @@ function PauseTimer(gameId: number) {
         console.log("pause")
         gameIsTimerStart[gameId] = false;
         timesIsOnPause[gameId] = true;
+        //addedTime[gameId] = 0;
         timesWhenPauseClick[gameId] = (timesWhenPauseClick[gameId] ?? seconds70PerQuestion) - Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
         clearTimeout(timers[gameId]);
 
@@ -118,7 +169,6 @@ function PauseTimer(gameId: number) {
 
 function GetAnswer(answer: string, teamId: number, gameId: number) {
     console.log('received: %s', answer, teamId);
-    console.log('gameId:', gameId);
     const roundNumber = gamesCurrentAnswer[gameId][0] - 1;
     const questionNumber = gamesCurrentAnswer[gameId][1] - 1;
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);
@@ -132,8 +182,8 @@ function GetAppeal(appeal: string, teamId: number, gameId: number) {
 }
 
 function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
-    for (const answer in answers) {
-        games[gameId].rounds[roundNumber].questions[questionNumber].acceptAnswers(answer);
+    for (const answer of answers) {
+        games[gameId].rounds[roundNumber-1].questions[questionNumber-1].acceptAnswers(answer);
     }
 }
 
@@ -145,7 +195,7 @@ function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: numbe
 
 function RejectAppeal(gameId: number, roundNumber: number, questionNumber: number, teamId: number, answers: string[]) {
     for (const answer in answers) {
-        games[gameId].rounds[roundNumber].questions[questionNumber].rejectAppeal(teamId, answer);
+        games[gameId].rounds[roundNumber-1].questions[questionNumber-1].rejectAppeal(teamId, answer);
     }
 }
 
@@ -153,6 +203,18 @@ function RejectAnswer(gameId: number, roundNumber: number, questionNumber: numbe
     for (const answer in answers) {
         games[gameId].rounds[roundNumber].questions[questionNumber].rejectAnswers(answer);
     }
+}
+
+function GetAllAnswers(gameId: number, roundNumber: number, questionNumber: number, ws) {
+    console.log(games[gameId].rounds[roundNumber-1].questions[questionNumber-1].answers);
+    const result = [];
+    for (let a of games[gameId].rounds[roundNumber-1].questions[questionNumber-1].answers) {
+        result.push(a.text);
+    }
+    ws.send(JSON.stringify({
+        'action': 'answers',
+        'answers' : result
+    }));
 }
 
 wss.on('connection', (ws: WebSocket) => {
@@ -169,53 +231,67 @@ wss.on('connection', (ws: WebSocket) => {
                     const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
                     const initialDelay = timers[gameId]._idleTimeout;
                     let result = 0;
-                    console.log(gameIsTimerStart[gameId]);
                     if (gameIsTimerStart[gameId]) {
                         result = initialDelay - pastDelay;
-                        console.log('a');
                     } else if (timesIsOnPause[gameId]) {
                         result = timesWhenPauseClick[gameId];
-                        console.log('b');
                     } else {
-                        result = seconds70PerQuestion;
-                        console.log('c');
+                        result = seconds70PerQuestion + (addedTime[gameId] ?? 0);
                     }
                     ws.send(JSON.stringify({
                         'action': 'time',
                         'isStarted': gameIsTimerStart[gameId],
+                        'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
                         'time': result}));
                     console.log(result);
+                } else {
+                    console.log('addedTime:', addedTime[gameId]);
+                    ws.send(JSON.stringify({
+                        'action': 'time',
+                        'isStarted': gameIsTimerStart[gameId],
+                        'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                        'time': seconds70PerQuestion + (addedTime[gameId] ?? 0)}));
                 }
             }
+            else if (jsonMessage.action == 'changeQuestion') {
+                gamesCurrentAnswer[gameId] = [jsonMessage.tourNumber, jsonMessage.questionNumber];
+                ChangeQuestionNumber(gameId, jsonMessage.questionNumber, jsonMessage.tourNumber);
+            }
+            else if (jsonMessage.action == 'getQuestionNumber') {
+                ws.send(JSON.stringify({
+                    'action': 'changeQuestionNumber',
+                    'number': games[gameId].rounds[0].questionsCount * (gamesCurrentAnswer[gameId][0] - 1) + gamesCurrentAnswer[gameId][1],
+                }));
+            }
             if (userRoles == "admin" || userRoles == "superadmin") {
-                console.log(jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload);
-                console.log('gameId:', gameId);
                 gameAdmins[gameId].add(ws);
                 if (jsonMessage.action == "+10sec") {
                     GiveAddedTime(gameId);
                 } else if (jsonMessage.action == "Start") {
                     StartTimer(gameId);
-                    gamesCurrentAnswer[gameId] = jsonMessage.question;
                 } else if (jsonMessage.action == "Pause") {
                     PauseTimer(gameId);
                 } else if (jsonMessage.action == "Stop") {
                     StopTimer(gameId);
                 } else if (jsonMessage.action == "AcceptAnswer") {
-                    AcceptAnswer(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.answers);
+                    console.log("this method");
+                    AcceptAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == "AcceptAppeal") {
-                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, teamId, jsonMessage.answers);
+                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.answers);
                 } else if (jsonMessage.action == "RejectAnswer") {
-                    RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, jsonMessage.answers);
+                    RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == "RejectAppeal") {
-                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.qustionNumber, teamId, jsonMessage.answers);
+                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.answers);
+                } else if (jsonMessage.action == "getAnswers") {
+                    GetAllAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
                 }
             } else {
                 gameUsers[gameId].add(ws);
                 if (gameIsTimerStart[gameId] && jsonMessage.action == "Answer") {
-                    GetAnswer(jsonMessage.answer, teamId, gameId);
+                    GetAnswer(jsonMessage.answer, teamId, gameId); // TODO: отправить мол приняли ответ, а в юзерке выводить плашку, иначе красную
                 } else if (jsonMessage.action == "Appeal") {
                     for (let ws of gameAdmins[gameId])
-                        ws.send("Appeal");
+                        ws.send("Appeal"); // TODO: какой вопрос, тур? Отправлять в сообщении и брать оттуда
                     GetAppeal(jsonMessage.appeal, teamId, gameId);
                 }
             }

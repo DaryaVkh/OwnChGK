@@ -8,14 +8,17 @@ import {Scrollbars} from "rc-scrollbars";
 import _ from "lodash";
 import {AnswerType, Opposition, Page} from "../../entities/admin-answers-page/admin-answers-page.interfaces";
 import Scrollbar from "../../components/scrollbar/scrollbar";
+import {getCookie} from "../../commonFunctions";
 
 const AdminAnswersPage: FC = () => {
-    const { tour, question } = useParams<{tour: string, question: string}>();
+    const {gameId} = useParams<{ gameId: string }>();
+    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'))
+    const {tour, question } = useParams<{tour: string, question: string}>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');
-    const [gameAnswers, setGameAnswers] = useState<string[]>(['Котик', 'Котейка', 'Котик', 'Котик', 'Котик', 'Котик', 'Котик', 'Котёнок', 'mememe', 'a', 'aaaa', 'aa', 'assdf', 'asfsdf', 'ajksc', 'ascmkjsdvwn']); // TODO сюда наверное они откуда то поступают, потом нужно будет синхронозироват с uncheckedAnswers, если сюда чето новое попало, чтобы туда тоже попадало
+    const [gameAnswers, setGameAnswers] = useState<string[]>([]); // TODO сюда наверное они откуда то поступают, потом нужно будет синхронозироват с uncheckedAnswers, если сюда чето новое попало, чтобы туда тоже попадало
     const [acceptedAnswers, setAcceptedAnswers] = useState<string[]>([]);
-    const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>(['Котик', 'Котейка', 'Котик', 'Котик', 'Котик', 'Котик', 'Котик', 'Котёнок', 'mememe', 'a', 'aaaa', 'aa', 'assdf', 'asfsdf', 'ajksc', 'ascmkjsdvwn']);
+    const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>([]);
     const [rejectedAnswers, setRejectedAnswers] = useState<string[]>([]);
     const [currentHandledAnswers, setCurrentHandledAnswers] = useState<string[]>([]);
     const [oppositions, setOppositions] = useState<Opposition[]>([{teamName: 'Сахара опять не будет', answer: 'Ответ', explanation: 'Пояснение'},
@@ -47,6 +50,24 @@ const AdminAnswersPage: FC = () => {
             window.removeEventListener('resize', handleWindowResize);
         }
     }, []);
+
+    conn.onopen = function () {
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'getAnswers',
+            'roundNumber': +tour,
+            'questionNumber': +question,
+        }));
+    };
+
+    conn.onmessage = function (event) {
+        const jsonMessage = JSON.parse(event.data);
+        if (jsonMessage.action === 'answers') {
+            setGameAnswers(jsonMessage.answers); // TODO: в чём разница их двух?
+            setUncheckedAnswers(jsonMessage.answers); // TODO: добавить accept, reject списки, из логики: 0 - accept, 1 - reject, 2 - unchecked
+            //todo а в чем разница для фронта
+        }
+    }
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         const element = event.target as HTMLInputElement;
@@ -112,15 +133,46 @@ const AdminAnswersPage: FC = () => {
     const handleSaveButtonClick = () => {
         switch (answersType) {
             case "accepted":
+                console.log(currentHandledAnswers + "accepted");
+                conn.send(JSON.stringify({
+                    'cookie': getCookie("authorization"),
+                    'action': 'RejectAnswer',
+                    'roundNumber': tour,
+                    'questionNumber': question,
+                    'answers': currentHandledAnswers // TODO: как енто работаит?
+                }));
                 setRejectedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setAcceptedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
                 break;
             case "unchecked":
+                console.log(currentHandledAnswers + "unchecked"); // Это работает
+                conn.send(JSON.stringify({
+                    'cookie': getCookie("authorization"),
+                    'action': 'AcceptAnswer',
+                    'roundNumber': tour,
+                    'questionNumber': question,
+                    'answers': currentHandledAnswers
+                }));
+                conn.send(JSON.stringify({
+                    'cookie': getCookie("authorization"),
+                    'action': 'RejectAnswer',
+                    'roundNumber': tour,
+                    'questionNumber': question,
+                    'answers': currentHandledAnswers // TODO надо передать то список, который противоположный (не Handled, возможно который unchecked)
+                }));
                 setAcceptedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setRejectedAnswers(prev => [...prev, ...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]);
                 setUncheckedAnswers([]);
                 break;
             case "rejected":
+                console.log(currentHandledAnswers + "rejected");
+                conn.send(JSON.stringify({
+                    'cookie': getCookie("authorization"),
+                    'action': 'AcceptAnswer',
+                    'roundNumber': tour,
+                    'questionNumber': question,
+                    'answers': currentHandledAnswers
+                }));
                 setAcceptedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setRejectedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
                 break;

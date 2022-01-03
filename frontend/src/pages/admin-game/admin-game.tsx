@@ -10,16 +10,17 @@ import PauseIcon from '@mui/icons-material/Pause';
 import CircleOutlinedIcon from '@mui/icons-material/Circle';
 import {getGame} from '../../server-api/server-api';
 import Scrollbar from "../../components/scrollbar/scrollbar";
+import {getCookie} from "../../commonFunctions";
 
 let isOpposition = false;
 let interval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
-    const [activeTour, setActiveTour] = useState<number>(1);
-    const [activeQuestion, setActiveQuestion] = useState<number>(1);
-    const [toursCount, setToursCount] = useState(10);
-    const [questionsCount, setQuestionsCount] = useState(20);
+    const [activeTourNumber, setActiveTour] = useState<number>(1);
+    const [activeQuestionNumber, setActiveQuestion] = useState<number>(1);
+    const [toursCount, setToursCount] = useState(0);
+    const [questionsCount, setQuestionsCount] = useState(0);
     const [gameName, setGameName] = useState('');
     const {gameId} = useParams<{ gameId: string }>();
     const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'))
@@ -53,13 +54,19 @@ const AdminGame: FC<AdminGameProps> = props => {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'time')
             {
+                console.log(jsonMessage.time);
                 setTimer(jsonMessage.time);
                 if (jsonMessage.isStarted) {
                     setPlayOrPause('pause');
-                    interval = setInterval(() =>
-                        setTimer(t => t - 1000 > 0 ? t - 1000 : 0), 1000);
+                    interval = setInterval(() => setTimer(t => {
+                        let res = t - 1000;
+                        if (res <= 0) {
+                            clearInterval(interval);
+                            setPlayOrPause('play');
+                        }
+                        return res > 0 ? res : 0;
+                    }), 1000);
                 }
-                console.log(+jsonMessage.time);
             }
         };
     }, []);
@@ -70,19 +77,21 @@ const AdminGame: FC<AdminGameProps> = props => {
         return `${minutes}:${sec}`;
     }
 
-    const getCookie = (name: string) => {
-        let matches = document.cookie.match(new RegExp(
-            '(?:^|; )' + name.replace(/([$?*|{}\[\]\\\/^])/g, '\\$1') + '=([^;]*)'
-        ));
-        return matches ? decodeURIComponent(matches[1]) : undefined;
-    }
-
     const handleTourClick = (event: React.SyntheticEvent) => {
         const activeTour = document.querySelector(`.${classes.activeTour}`) as HTMLDivElement;
         const clickedTour = event.target as HTMLDivElement;
         activeTour.classList.remove(classes.activeTour);
         clickedTour.classList.add(classes.activeTour);
         setActiveTour(+clickedTour.id);
+
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'changeQuestion',
+            'questionNumber': 1,
+            'tourNumber': +clickedTour.id,
+        }));
+
+        handleStopClick();
     }
 
     const handleQuestionClick = (event: React.SyntheticEvent) => {
@@ -91,19 +100,34 @@ const AdminGame: FC<AdminGameProps> = props => {
         activeQuestion.classList.remove(classes.activeQuestion);
         clickedQuestion.classList.add(classes.activeQuestion);
         setActiveQuestion(+clickedQuestion.id);
+
+        conn.send(JSON.stringify({
+            'cookie': getCookie("authorization"),
+            'action': 'changeQuestion',
+            'questionNumber': +clickedQuestion.id,
+            'tourNumber': activeTourNumber,
+        }));
+
+        handleStopClick();
     }
 
     const handlePlayClick = () => {
-        //TODO тут стопим или запускаем таймер текущего вопроса
         if (playOrPause === 'play') {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Start',
-                'question': [activeTour, activeQuestion]
+                'question': [activeTourNumber, activeQuestionNumber]
             }));
             setPlayOrPause('pause');
             interval = setInterval(() =>
-                setTimer(t => t - 1000 > 0 ? t - 1000 : 0), 1000);
+                setTimer(t => {
+                    let res = t - 1000;
+                    if (res <= 0) {
+                        clearInterval(interval);
+                        setPlayOrPause('play');
+                    }
+                    return res > 0 ? res : 0;
+                }), 1000);
         } else {
             clearInterval(interval);
             conn.send(JSON.stringify({
@@ -115,6 +139,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     }
 
     const handleStopClick = () => {
+        setPlayOrPause('play');
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'Stop'
@@ -141,13 +166,13 @@ const AdminGame: FC<AdminGameProps> = props => {
     const renderQuestions = () => {
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
-                <div className={classes.questionWrapper} key={`tour_${activeTour}_question_${i + 1}`}>
+                <div className={classes.questionWrapper} key={`tour_${activeTourNumber}_question_${i + 1}`}>
                     <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} id={`${i + 1}`}
                          onClick={handleQuestionClick}>
                         Вопрос {i + 1}
                     </div>
 
-                    <Link className={classes.answersButtonLink} to={`/answers/${activeTour}/${i + 1}`}>
+                    <Link className={classes.answersButtonLink} to={`/answers/${activeTourNumber}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
@@ -174,7 +199,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <Link to="/admin/game" className={classes.menuLink}>Рейтинг</Link>
+                <Link to={`admin/game/:${gameId}`} className={classes.menuLink}>Рейтинг</Link>
 
                 <div className={classes.gameName}>{gameName}</div>
             </Header>

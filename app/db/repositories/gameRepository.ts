@@ -10,6 +10,29 @@ export class GameRepository extends Repository<Game> {
         return this.findOne({name}, {relations: ['teams', 'rounds']});
     }
 
+    findAmIParticipate(userId: number) {
+        return this.createQueryBuilder("games")
+            .leftJoinAndSelect("games.teams", "teams")
+            .leftJoinAndSelect("teams.captain", "users")
+            .where('teams.captain.id = :id', {id: userId})
+            .getMany().then(ans => {
+                console.log(ans);
+                return ans;
+            })
+        /*return this.manager.transaction(manager => manager.findOne(User, userId)
+            .then(user => {
+                return manager.findOne(Team, {captain: user}, {relations: ['captain']})
+            })
+                .then(team => {
+                    console.log(team);
+                    return manager.find(Game, {relations: ['teams']})
+                        .then(games => games.filter(game => {
+                            console.log(game);
+                            let res = game.teams.some(t => t.id === team.id);
+                        console.log(res);
+                        return res;}))}));*/
+    }
+
     insertByParams(name: string,
                    adminEmail: string,
                    roundCount: number,
@@ -27,7 +50,7 @@ export class GameRepository extends Repository<Game> {
                 })));
     }
 
-    updateByParams(name: string,
+    updateByParams(gameId: string,
                    newName: string,
                    roundCount: number,
                    questionCount: number,
@@ -35,7 +58,7 @@ export class GameRepository extends Repository<Game> {
                    questionTime: number,
                    teams: string[]) {
         return this.manager.transaction(manager => manager.find(Team, {'name': In(teams)})
-            .then(teams => manager.findOne(Game, {name})
+            .then(teams => manager.findOne(Game, gameId)
                 .then(game => {
                     game.teams = teams;
                     game.name = newName;
