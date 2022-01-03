@@ -14,13 +14,13 @@ import AdminGame from "./pages/admin-game/admin-game";
 import AdminAnswersPage from "./pages/admin-answers/admin-answers";
 import {connect} from "react-redux";
 import ProtectedRoute from "./components/private-route/private-route";
-import Game from "./pages/game";
 import UserAnswersPage from "./pages/user-answers/user-answers";
 import {AppDispatchProps, AppProps, AppState, AppStateProps} from './entities/app/app.interfaces';
 import {checkToken} from './server-api/server-api';
 import {Dispatch} from 'redux';
 import {AppAction} from './redux/reducers/app-reducer/app-reducer.interfaces';
 import {authorizeUserWithRole, checkToken as testToken} from './redux/actions/app-actions/app-actions';
+import StartGame from "./pages/admin-start-game/admin-start-game";
 
 const App: FC<AppProps> = props => {
     useEffect(() => {
@@ -105,7 +105,7 @@ const App: FC<AppProps> = props => {
                 <ProtectedRoute path="/admin/start-game/:gameId" exact
                                 neededRole={['admin', 'superadmin']}
                                 redirectPath="/admin">
-                    <Game />
+                    <StartGame />
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/start-screen" exact neededRole={['user']} redirectPath="/auth">
