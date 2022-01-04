@@ -73,7 +73,7 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const parseTimer = () => {
         const minutes = Math.floor(timer / 1000 / 60).toString().padStart(1, '0');
-        const sec = Math.floor(timer / 1000 % 60).toString().padStart(2, '0');
+        const sec = Math.ceil(timer / 1000 % 60).toString().padStart(2, '0');
         return `${minutes}:${sec}`;
     }
 
@@ -172,7 +172,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         Вопрос {i + 1}
                     </div>
 
-                    <Link className={classes.answersButtonLink} to={`/answers/${activeTourNumber}/${i + 1}`}>
+                    <Link className={classes.answersButtonLink} to={`/admin/game/${gameId}/answers/${activeTourNumber}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {

@@ -13,18 +13,16 @@ import {getCookie} from "../../commonFunctions";
 const AdminAnswersPage: FC = () => {
     const {gameId} = useParams<{ gameId: string }>();
     const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'))
-    const {tour, question } = useParams<{tour: string, question: string}>();
+    const {tour, question} = useParams<{tour: string, question: string}>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');
-    const [gameAnswers, setGameAnswers] = useState<string[]>([]); // TODO сюда наверное они откуда то поступают, потом нужно будет синхронозироват с uncheckedAnswers, если сюда чето новое попало, чтобы туда тоже попадало
+    const [gameAnswers, setGameAnswers] = useState<string[]>([]); // Это accept + unchecked + rejected, нужно, чтобы считать
     const [acceptedAnswers, setAcceptedAnswers] = useState<string[]>([]);
     const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>([]);
     const [rejectedAnswers, setRejectedAnswers] = useState<string[]>([]);
     const [currentHandledAnswers, setCurrentHandledAnswers] = useState<string[]>([]);
-    const [oppositions, setOppositions] = useState<Opposition[]>([{teamName: 'Сахара опять не будет', answer: 'Ответ', explanation: 'Пояснение'},
-        {teamName: 'Забаненные в гугле', answer: 'Ответ', explanation: 'ПояснениеffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffПояснениеffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'},
-        {teamName: 'Не грози Южному автовокзалу', answer: 'Ответ', explanation: 'Пояснение'},
-        {teamName: 'ГУ ЧГК-шки-ниндзя', answer: 'Ответ', explanation: 'Пояснение'}]); // TODO тут как то получаем апелляции через сокеты или хз как, они наверное как то должны быть синхронизированы с вопросами
+    const [appeals, setAppeals] = useState<Opposition[]>([]);
+    const [currentHandledAppeals, setCurrentHandledAppeals] = useState<string[]>([]);
 
     useEffect(() => {
         function handleWindowResize() {
@@ -46,32 +44,48 @@ const AdminAnswersPage: FC = () => {
 
         window.addEventListener('resize', handleWindowResize);
 
+        conn.onopen = function () {
+            conn.send(JSON.stringify({
+                'cookie': getCookie("authorization"),
+                'action': 'getAnswers',
+                'roundNumber': +tour,
+                'questionNumber': +question,
+            }));
+
+            conn.send(JSON.stringify({
+                'cookie': getCookie("authorization"),
+                'action': 'getAppeals',
+                'roundNumber': +tour,
+                'questionNumber': +question,
+            }))
+        };
+
+        conn.onmessage = function (event) {
+            const jsonMessage = JSON.parse(event.data);
+            if (jsonMessage.action === 'answers') {
+                setAcceptedAnswers(jsonMessage.acceptedAnswers);
+                setRejectedAnswers(jsonMessage.rejectedAnswers);
+                setUncheckedAnswers(jsonMessage.uncheckedAnswers);
+                setGameAnswers([...jsonMessage.acceptedAnswers, ...jsonMessage.rejectedAnswers, ...jsonMessage.uncheckedAnswers]);
+            } else if (jsonMessage.action === 'appeals') {
+                console.log(jsonMessage.appeals)
+                setAppeals(jsonMessage.appeals);
+            }
+        }
+
         return () => {
             window.removeEventListener('resize', handleWindowResize);
         }
     }, []);
 
-    conn.onopen = function () {
-        conn.send(JSON.stringify({
-            'cookie': getCookie("authorization"),
-            'action': 'getAnswers',
-            'roundNumber': +tour,
-            'questionNumber': +question,
-        }));
-    };
-
-    conn.onmessage = function (event) {
-        const jsonMessage = JSON.parse(event.data);
-        if (jsonMessage.action === 'answers') {
-            setGameAnswers(jsonMessage.answers); // TODO: в чём разница их двух?
-            setUncheckedAnswers(jsonMessage.answers); // TODO: добавить accept, reject списки, из логики: 0 - accept, 1 - reject, 2 - unchecked
-            //todo а в чем разница для фронта
-        }
-    }
-
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         const element = event.target as HTMLInputElement;
         setCurrentHandledAnswers(prev => [...prev, element.name]);
+    };
+
+    const handleAppealCheckboxChange = (event: React.SyntheticEvent) => {
+        const element = event.target as HTMLInputElement;
+        setCurrentHandledAppeals(prev => [...prev, element.name]);
     };
 
     const handleIndicator = (event: React.SyntheticEvent) => {
@@ -139,7 +153,7 @@ const AdminAnswersPage: FC = () => {
                     'action': 'RejectAnswer',
                     'roundNumber': tour,
                     'questionNumber': question,
-                    'answers': currentHandledAnswers // TODO: как енто работаит?
+                    'answers': currentHandledAnswers // TODO: как енто работаит? Вроде ок, но проверить
                 }));
                 setRejectedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setAcceptedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
@@ -158,7 +172,7 @@ const AdminAnswersPage: FC = () => {
                     'action': 'RejectAnswer',
                     'roundNumber': tour,
                     'questionNumber': question,
-                    'answers': currentHandledAnswers // TODO надо передать то список, который противоположный (не Handled, возможно который unchecked)
+                    'answers': [...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]
                 }));
                 setAcceptedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setRejectedAnswers(prev => [...prev, ...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]);
@@ -181,18 +195,18 @@ const AdminAnswersPage: FC = () => {
     };
 
     const renderOppositions = () => {
-        return oppositions.map(op => {
+        return appeals.map(op => {
             return (
                 <div className={classes.oppositionWrapper} key={op.teamName}>
                     <p className={classes.teamName}>{op.teamName}</p>
-                    <CustomCheckbox name={op.answer} style={{ marginLeft: 0, marginBottom: 0, width: '100%' }} />
+                    <CustomCheckbox name={op.answer} style={{ marginLeft: 0, marginBottom: 0, width: '100%' }} onChange={handleAppealCheckboxChange}/>
                     <div className={classes.explanation}>
                         <Scrollbars autoHide autoHideTimeout={500}
                                     autoHideDuration={200}
                                     renderThumbVertical={() => <div style={{backgroundColor: 'var(--background-color)', borderRadius: '4px', cursor: 'pointer'}}/>}
                                     renderTrackHorizontal={props => <div {...props} style={{display: 'none'}} />}
                                     classes={{view: classes.scrollbarView}}>
-                            {op.explanation}
+                            {op.text}
                         </Scrollbars>
                     </div>
                 </div>
@@ -201,7 +215,23 @@ const AdminAnswersPage: FC = () => {
     };
 
     const handleSaveOppositionButtonClick = () => {
-        setOppositions([]);
+        setAppeals([]);
+        console.log(currentHandledAppeals)
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'AcceptAppeals',
+            'appeals': currentHandledAppeals,
+            'roundNumber': tour,
+            'questionNumber': question,
+        }));
+
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'RejectAppeals',
+            'appeals': [...appeals.map(el => el.answer).filter(el => !currentHandledAppeals.includes(el))],
+            'roundNumber': tour,
+            'questionNumber': question,
+        }));
     }
 
     const renderPage = () => {
@@ -252,7 +282,7 @@ const AdminAnswersPage: FC = () => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <Link to='/admin/game' className={classes.toGameLink}>В игру</Link>
+                <Link to={`/admin/game/${gameId}`} className={classes.toGameLink}>В игру</Link>
 
                 <div className={classes.tourNumber}>Тур {tour}</div>
                 <div className={classes.questionNumber}>Вопрос {question}</div>
@@ -260,7 +290,7 @@ const AdminAnswersPage: FC = () => {
                 <nav className={classes.nav}>
                     <Link to={{}} className={`${classes['nav-item']} ${page === 'answers' ? classes['is-active'] : null}`} onClick={changePageToAnswers}>Ответы</Link>
                     <Link to={{}} className={`${classes['nav-item']} ${page === 'oppositions' ? classes['is-active'] : null}`} onClick={changePageToOppositions}>
-                        Апелляции {oppositions.length !== 0 ? <b className={classes.opposition}>&#9679;</b> : ''}
+                        Апелляции {appeals.length !== 0 ? <b className={classes.opposition}>&#9679;</b> : ''}
                     </Link>
                     <span className={`${classes['nav-indicator']}`} id='indicator'/>
                 </nav>

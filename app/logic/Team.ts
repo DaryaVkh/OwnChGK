@@ -1,9 +1,9 @@
-import {Answer, Appeal} from "./AnswerAndAppeal";
+import {Answer, Appeal} from './AnswerAndAppeal';
 
 export class Team {
     public readonly name: string;
     public id: number;
-    private readonly answers: Answer[][];
+    public readonly answers: Answer[][]; // TODO: public?
 
     constructor(name: string, id: number) {
         this.name = name
@@ -15,14 +15,17 @@ export class Team {
         if (this.answers.length === answer.roundNumber) {
             this.answers.push([]);
         }
+
         if (this.answers[answer.roundNumber].length < answer.questionNumber) {
-            this.answers[answer.roundNumber].push(new Answer(this.id, answer.roundNumber, answer.questionNumber, ""));
+            this.answers[answer.roundNumber].push(new Answer(this.id, answer.roundNumber, answer.questionNumber, ''));
             //заглушка (для 0 элементов или если не ответили на вопрос)
         }
-        if (this.answers[answer.roundNumber].length === answer.questionNumber){
+
+        if (this.answers[answer.roundNumber].length === answer.questionNumber) {
             this.answers[answer.roundNumber].push(answer);
+        } else {
+            this.answers[answer.roundNumber][answer.questionNumber] = answer;
         }
-        else this.answers[answer.roundNumber][answer.questionNumber] = answer;
     }
 
     getTotalScore(): number {

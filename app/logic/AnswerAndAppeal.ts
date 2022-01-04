@@ -32,6 +32,10 @@ export class Answer {
         this._status = Status.Wrong;
         this._score = 0;
     }
+
+    onAppeal(): void {
+        this._status = Status.OnAppeal;
+    }
 }
 
 
@@ -49,7 +53,7 @@ export class Appeal {
         this.questionNumber = questionNumber;
         this.text = text;
         this._status = Status.UnChecked;
-        this._comment = "";
+        this._comment = '';
     }
 
     public get status() {
@@ -71,4 +75,4 @@ export class Appeal {
     }
 }
 
-export enum Status { Right, Wrong, UnChecked}
+export enum Status { Right, Wrong, UnChecked, OnAppeal}

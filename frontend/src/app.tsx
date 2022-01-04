@@ -95,7 +95,7 @@ const App: FC<AppProps> = props => {
                     <AdminGame />
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/answers/:tour/:question" exact
+                <ProtectedRoute path="/admin/game/:gameId/answers/:tour/:question" exact
                                 neededRole={['admin', 'superadmin']}
                                 redirectPath='/admin'>
                     <AdminAnswersPage />
@@ -128,7 +128,7 @@ const App: FC<AppProps> = props => {
                     <UserGame />
                 </ProtectedRoute>
 
-                <ProtectedRoute path='/game-answers' exact neededRole={['user']} redirectPath={'/auth'}>
+                <ProtectedRoute path='/game-answers/:gameId' exact neededRole={['user']} redirectPath={'/auth'}>
                     <UserAnswersPage />
                 </ProtectedRoute>
 

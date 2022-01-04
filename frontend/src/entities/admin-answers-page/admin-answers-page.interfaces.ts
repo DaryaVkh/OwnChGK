@@ -4,5 +4,5 @@ export type Page = 'answers' | 'oppositions';
 export interface Opposition {
     teamName: string;
     answer: string;
-    explanation: string;
+    text: string;
 }

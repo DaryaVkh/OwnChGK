@@ -8,7 +8,7 @@ import {Alert, Snackbar} from '@mui/material';
 import {UserGameProps} from '../../entities/user-game/user-game.interfaces';
 import {getGame} from '../../server-api/server-api';
 import {store} from '../../index';
-import {getCookie} from "../../commonFunctions";
+import {getCookie} from '../../commonFunctions';
 
 let progressBar: any;
 
@@ -18,8 +18,14 @@ const UserGame: FC<UserGameProps> = props => {
     const [gameName, setGameName] = useState('');
     const [questionNumber, setQuestionNumber] = useState(1);
     const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
-    const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
     const [timeForAnswer, setTimeForAnswer] = useState(70);
+    const [flags, setFlags] = useState<{
+        isSnackbarOpen: boolean,
+        isAnswerAccepted: boolean
+    }>({
+        isSnackbarOpen: false,
+        isAnswerAccepted: false
+    })
 
     useEffect(() => {
         // TODO: Проверить, что игра началась (остальное продолжить только когда началась)
@@ -71,8 +77,7 @@ const UserGame: FC<UserGameProps> = props => {
                     console.log('c move');
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 }
-            }
-            else if (jsonMessage.action === 'pause') {
+            } else if (jsonMessage.action === 'pause') {
                 console.log('d');
                 clearInterval(progressBar);
             } else if (jsonMessage.action === 'stop') {
@@ -80,14 +85,29 @@ const UserGame: FC<UserGameProps> = props => {
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
                 progressBar.style.width = '100%';
-            }
-            else if (jsonMessage.action === 'changeQuestionNumber') {
+            } else if (jsonMessage.action === 'changeQuestionNumber') {
                 console.log('e');
                 console.log(jsonMessage.time);
                 setQuestionNumber(+jsonMessage.number);
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
                 progressBar.style.width = '100%';
+            } else if (jsonMessage.action === 'statusAnswer') {
+                if (jsonMessage.isAccepted) {
+                    setFlags({
+                        isAnswerAccepted: true,
+                        isSnackbarOpen: true
+                    })
+                } else {
+                    setFlags({
+                        isAnswerAccepted: false,
+                        isSnackbarOpen: true
+                    })
+                }
+                setTimeout(() => setFlags({
+                    isSnackbarOpen: false,
+                    isAnswerAccepted: false
+                }), 5000);
             }
         };
     }, []);
@@ -124,7 +144,7 @@ const UserGame: FC<UserGameProps> = props => {
             } else {
                 changeColor(progressBar);
                 setTimeForAnswer(t => {
-                    width = Math.floor(100 * t / (maxTime / 1000));
+                    width = Math.ceil(100 * t / (maxTime / 1000));
                     progressBar.style.width = width + '%';
                     return t - 1
                 });
@@ -132,7 +152,7 @@ const UserGame: FC<UserGameProps> = props => {
         }
 
         console.log('fromMove:', maxTime);
-        let width = Math.floor(100 * time / maxTime);
+        let width = Math.ceil(100 * time / maxTime);
         const id = setInterval(frame, 1000); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
         return id;
     }
@@ -141,7 +161,11 @@ const UserGame: FC<UserGameProps> = props => {
         if (reason === 'clickaway') {
             return;
         }
-        setIsSnackbarOpen(false);
+
+        setFlags({
+            isSnackbarOpen: false,
+            isAnswerAccepted: false
+        });
     };
 
     const handleAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,19 +173,35 @@ const UserGame: FC<UserGameProps> = props => {
     }
 
     const handleSendButtonClick = () => {
-        setIsSnackbarOpen(true);
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'Answer',
             'answer': answer
         }));
+
+        console.log('click');
+        setTimeout(() => {
+            setFlags(flags => {
+                let result = {
+                    isSnackbarOpen: true,
+                    isAnswerAccepted: flags.isAnswerAccepted
+                };
+                console.log('из таймаута', result);
+                return result;
+            });
+
+            setTimeout(() => setFlags({
+                isSnackbarOpen: false,
+                isAnswerAccepted: false
+            }), 5000);
+        }, 2000);
     }
 
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
                 <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                <Link to="/game-answers" className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
                 <div className={classes.gameName}>{gameName}</div>
             </Header>
@@ -173,7 +213,9 @@ const UserGame: FC<UserGameProps> = props => {
                 </div>
 
                 <div className={classes.answerWrapper}>
-                    <div className={classes.timeLeft}>Осталось: {Math.floor(timeForAnswer)>=0 ? Math.floor(timeForAnswer) : 0} сек.</div>
+                    <div
+                        className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer) >= 0 ? Math.ceil(timeForAnswer) : 0} сек.
+                    </div>
 
                     <div className={classes.progressBar} id="progress-bar"/>
                     <div className={classes.answerBox}>
@@ -188,9 +230,11 @@ const UserGame: FC<UserGameProps> = props => {
                     </div>
                 </div>
 
-                <Snackbar open={isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}>
-                    <Alert onClose={handleClose} severity="success" sx={{width: '100%'}}>
-                        Ответ успешно сохранен
+                {console.log('Из снэкбара', flags)}
+                <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
+                           sx={{width: '100%'}}>
+                        {flags.isAnswerAccepted ? 'Ответ успешно сохранен' : 'Ответ не отправлен'}
                     </Alert>
                 </Snackbar>
             </div>

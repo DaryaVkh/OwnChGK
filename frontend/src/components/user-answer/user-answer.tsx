@@ -2,10 +2,12 @@ import React, {FC, useState} from 'react';
 import classes from './user-answer.module.scss';
 import {TextareaAutosize} from "@mui/material";
 import {UserAnswerProps} from "../../entities/user-answer/user-answer.interfaces";
+import {getCookie} from '../../commonFunctions';
 
 const UserAnswer: FC<UserAnswerProps> = props => {
     const [isOppositionClicked, setIsOppositionClicked] = useState<boolean>(false);
     const [opposition, setOpposition] = useState<string>('');
+    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
     const [answerStatus, setAnswerStatus] = useState<'success' | 'error' | 'opposition'>(props.status);
 
     const handleOppositionButtonClick = () => {
@@ -19,6 +21,12 @@ const UserAnswer: FC<UserAnswerProps> = props => {
     const handleSendOpposition = () => {
         if (opposition !== '') {
             setAnswerStatus('opposition');
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Appeal',
+                'number': props.order,
+                'appeal': opposition
+            }));
             // TODO тут отправляем апелляцию на сервак или куда там
         }
         setIsOppositionClicked(false);
