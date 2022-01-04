@@ -1,11 +1,11 @@
 import React, {FC, useState} from 'react';
 import classes from './profile.module.scss';
-import PageWrapper from "../../components/page-wrapper/page-wrapper";
-import {ProfileProps} from "../../entities/profile/profile.interfaces";
-import Header from "../../components/header/header";
-import {CustomInput} from "../../components/custom-input/custom-input";
+import PageWrapper from '../../components/page-wrapper/page-wrapper';
+import {ProfileProps} from '../../entities/profile/profile.interfaces';
+import Header from '../../components/header/header';
+import {CustomInput} from '../../components/custom-input/custom-input';
 import {Redirect} from 'react-router-dom';
-import {Alert} from "@mui/material";
+import {Alert} from '@mui/material';
 
 const Profile: FC<ProfileProps> = props => {
     let userName: string = '';
@@ -27,7 +27,7 @@ const Profile: FC<ProfileProps> = props => {
             userPassword = pswd.value;
             setIsRepeatedPasswordInvalid(false);
         }
-    }
+    };
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
@@ -44,7 +44,7 @@ const Profile: FC<ProfileProps> = props => {
 
         //TODO передаем изменения в бд
         setIsRedirected(true);
-    }
+    };
 
     return isRedirected
         ? <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
@@ -58,16 +58,17 @@ const Profile: FC<ProfileProps> = props => {
                 <form className={classes.box} onSubmit={handleSubmit}>
                     <div className={classes.contentWrapper}>
                         <div className={classes.infoWrapper}>
-                            <CustomInput type='text' id='name' name='name' placeholder='Имя' defaultValue={userName} required={false} style={{marginTop: 'calc(2vw + 2vh)'}} />
+                            <CustomInput type="text" id="name" name="name" placeholder="Имя" defaultValue={userName}
+                                         required={false} style={{marginTop: 'calc(2vw + 2vh)'}}/>
 
                             {
                                 !props.isAdmin
-                                ?
+                                    ?
                                     <div className={classes.infoCategoryWrapper}>
                                         <p className={classes.category}>Команда</p>
                                         <p className={classes.userData}>{userTeam}</p>
                                     </div>
-                                : null
+                                    : null
                             }
 
                             <div className={classes.infoCategoryWrapper} style={{marginTop: '3vh'}}>
@@ -79,11 +80,17 @@ const Profile: FC<ProfileProps> = props => {
                         <div className={classes.changePasswordWrapper}>
                             <p className={classes.changePasswordParagraph}>Изменение пароля</p>
 
-                            <CustomInput type='password' id='old-password' name='old-password' placeholder='Введите старый пароль' style={{marginBottom: '3.5vh'}} isInvalid={isOldPasswordInvalid} required={false} />
-                            <CustomInput type='password' id='new-password' name='new-password' placeholder='Введите новый пароль' isInvalid={isRepeatedPasswordInvalid} required={false}/>
-                            <CustomInput type='password' id='repeat-new-password' name='repeat-new-password' placeholder='Повторите новый пароль' isInvalid={isRepeatedPasswordInvalid} onBlur={checkRepeatedPassword} required={false} />
+                            <CustomInput type="password" id="old-password" name="old-password"
+                                         placeholder="Введите старый пароль" style={{marginBottom: '3.5vh'}}
+                                         isInvalid={isOldPasswordInvalid} required={false}/>
+                            <CustomInput type="password" id="new-password" name="new-password"
+                                         placeholder="Введите новый пароль" isInvalid={isRepeatedPasswordInvalid}
+                                         required={false}/>
+                            <CustomInput type="password" id="repeat-new-password" name="repeat-new-password"
+                                         placeholder="Повторите новый пароль" isInvalid={isRepeatedPasswordInvalid}
+                                         onBlur={checkRepeatedPassword} required={false}/>
 
-                            {isOldPasswordInvalid ? <Alert severity='error' sx={{
+                            {isOldPasswordInvalid ? <Alert severity="error" sx={{
                                 color: 'white',
                                 backgroundColor: '#F44336',
                                 marginTop: '1vh',
@@ -92,7 +99,7 @@ const Profile: FC<ProfileProps> = props => {
                                 }
                             }}>Неверный старый пароль</Alert> : null}
 
-                            {isRepeatedPasswordInvalid ? <Alert severity='error' sx={{
+                            {isRepeatedPasswordInvalid ? <Alert severity="error" sx={{
                                 color: 'white',
                                 backgroundColor: '#F44336',
                                 marginTop: '1vh',
@@ -104,11 +111,11 @@ const Profile: FC<ProfileProps> = props => {
                     </div>
 
                     <div className={classes.buttonWrapper}>
-                        <button className={classes.saveButton} type='submit'>Сохранить</button>
+                        <button className={classes.saveButton} type="submit">Сохранить</button>
                     </div>
                 </form>
             </PageWrapper>
         );
-}
+};
 
 export default Profile;

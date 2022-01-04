@@ -34,9 +34,9 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                     if (data.captain) {
                                         setUsersFromDB([...users, data.captain]);
                                     }
-                                })
+                                });
                             }
-                        })
+                        });
                     }
                 });
             } else {
@@ -47,11 +47,11 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
     const handleAutocompleteChange = (event: React.SyntheticEvent, value: string | null) => {
         setCaptain(value as string);
-    }
+    };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTeamName(event.target.value);
-    }
+    };
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
@@ -73,7 +73,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
             });
         }
         //TODO если тут ошибка, меняем isNameInvalid на true и делаем return false, иначе все ок, устанавливаем isCreatedSuccessfully в true и редиректимся
-    }
+    };
 
     return isCreatedSuccessfully
         ? <Redirect to={{pathname: props.isAdmin ? '/admin/start-screen' : '/start-screen', state: {page: 'teams'}}}/>

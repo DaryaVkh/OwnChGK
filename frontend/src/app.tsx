@@ -9,18 +9,18 @@ import TeamCreator from './pages/team-creation/team-creation';
 import UserStartScreen from './pages/user-start-screen/user-start-screen';
 import RestoringPassword from './pages/restoring-password/restoring-password';
 import Profile from './pages/profile/profile';
-import UserGame from "./pages/user-game/user-game";
-import AdminGame from "./pages/admin-game/admin-game";
-import AdminAnswersPage from "./pages/admin-answers/admin-answers";
-import {connect} from "react-redux";
-import ProtectedRoute from "./components/private-route/private-route";
-import UserAnswersPage from "./pages/user-answers/user-answers";
+import UserGame from './pages/user-game/user-game';
+import AdminGame from './pages/admin-game/admin-game';
+import AdminAnswersPage from './pages/admin-answers/admin-answers';
+import {connect} from 'react-redux';
+import ProtectedRoute from './components/private-route/private-route';
+import UserAnswersPage from './pages/user-answers/user-answers';
 import {AppDispatchProps, AppProps, AppState, AppStateProps} from './entities/app/app.interfaces';
 import {checkToken} from './server-api/server-api';
 import {Dispatch} from 'redux';
 import {AppAction} from './redux/reducers/app-reducer/app-reducer.interfaces';
 import {authorizeUserWithRole, checkToken as testToken} from './redux/actions/app-actions/app-actions';
-import StartGame from "./pages/admin-start-game/admin-start-game";
+import StartGame from './pages/admin-start-game/admin-start-game';
 
 const App: FC<AppProps> = props => {
     useEffect(() => {
@@ -28,11 +28,11 @@ const App: FC<AppProps> = props => {
             if (res.status === 200) {
                 res.json().then(({role, team}) => {
                     props.onAuthorizeUserWithRole(role, team);
-                })
+                });
             } else {
                 props.onCheckToken();
             }
-        })
+        });
     }, []);
 
     return props.isTokenChecked ? (
@@ -92,20 +92,20 @@ const App: FC<AppProps> = props => {
                 <ProtectedRoute path="/admin/game/:gameId" exact
                                 neededRole={['admin', 'superadmin']}
                                 redirectPath="/admin">
-                    <AdminGame />
+                    <AdminGame/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/game/:gameId/answers/:tour/:question" exact
                                 neededRole={['admin', 'superadmin']}
-                                redirectPath='/admin'>
-                    <AdminAnswersPage />
+                                redirectPath="/admin">
+                    <AdminAnswersPage/>
                 </ProtectedRoute>
 
 
                 <ProtectedRoute path="/admin/start-game/:gameId" exact
                                 neededRole={['admin', 'superadmin']}
                                 redirectPath="/admin">
-                    <StartGame />
+                    <StartGame/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/start-screen" exact neededRole={['user']} redirectPath="/auth">
@@ -125,18 +125,18 @@ const App: FC<AppProps> = props => {
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/game/:gameId" exact neededRole={['user']} redirectPath="/auth">
-                    <UserGame />
+                    <UserGame/>
                 </ProtectedRoute>
 
-                <ProtectedRoute path='/game-answers/:gameId' exact neededRole={['user']} redirectPath={'/auth'}>
-                    <UserAnswersPage />
+                <ProtectedRoute path="/game-answers/:gameId" exact neededRole={['user']} redirectPath={'/auth'}>
+                    <UserAnswersPage/>
                 </ProtectedRoute>
 
                 {/*<Redirect from="*" to="/"/>*/}
             </Switch>
         </Wrapper>
     ) : null; // TODO: загрузка
-}
+};
 
 function mapStateToProps(state: AppState): AppStateProps {
     return {

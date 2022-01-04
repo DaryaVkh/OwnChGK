@@ -44,9 +44,9 @@ const GameCreator: FC<GameCreatorProps> = props => {
                         setToursCount(roundCount);
                         setQuestionsCount(questionCount);
                         setChosenTeams(teams);
-                    })
+                    });
                 }
-            })
+            });
         }
     }, []);
 
@@ -59,7 +59,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                 if (teams) {
                     teams.push(element.name);
                 } else {
-                    teams = [element.name]
+                    teams = [element.name];
                 }
                 console.log(teams);
                 return teams;
@@ -73,7 +73,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                 return teams;
             });
         }
-    }
+    };
 
     const renderTeams = () => {
         if (props.mode === 'edit' && chosenTeams === undefined) {
@@ -84,7 +84,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
             return chosenTeams?.includes(team.name)
                 ? <CustomCheckbox name={team.name} key={index} checked={true} onChange={handleCheckboxChange}/>
                 : <CustomCheckbox name={team.name} key={index} onChange={handleCheckboxChange}/>;
-        })
+        });
     };
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
@@ -103,19 +103,19 @@ const GameCreator: FC<GameCreatorProps> = props => {
                     }
                 });
         }
-    }
+    };
 
     const handleGameNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setGameName(event.target.value);
-    }
+    };
 
     const handleToursCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setToursCount(+event.target.value);
-    }
+    };
 
     const handleQuestionsCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setQuestionsCount(+event.target.value);
-    }
+    };
 
     return isCreatedSuccessfully
         ? <Redirect to={{pathname: props.isAdmin ? '/admin/start-screen' : '/start-screen', state: {page: 'games'}}}/>
@@ -176,8 +176,13 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                 <div className={classes.teamsDiv}>
                                     <Scrollbars autoHide autoHideTimeout={500}
                                                 autoHideDuration={200}
-                                                renderThumbVertical={() => <div style={{backgroundColor: 'white', borderRadius: '4px', cursor: 'pointer'}}/>}
-                                                renderTrackHorizontal={props => <div {...props} style={{display: 'none'}} />}
+                                                renderThumbVertical={() => <div style={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer'
+                                                }}/>}
+                                                renderTrackHorizontal={props => <div {...props}
+                                                                                     style={{display: 'none'}}/>}
                                                 classes={{view: classes.scrollbarView}}>
                                         {renderTeams()}
                                     </Scrollbars>
@@ -194,6 +199,6 @@ const GameCreator: FC<GameCreatorProps> = props => {
                 </div>
             </PageWrapper>
         );
-}
+};
 
 export default GameCreator;

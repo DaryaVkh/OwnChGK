@@ -1,10 +1,10 @@
 import React, {FC, useEffect, useState} from 'react';
 import classes from './admin-start-game.module.scss';
-import PageWrapper from "../../components/page-wrapper/page-wrapper";
-import {Redirect, useParams} from "react-router-dom";
-import {getGame} from "../../server-api/server-api";
-import Header from "../../components/header/header";
-import NavBar from "../../components/nav-bar/nav-bar";
+import PageWrapper from '../../components/page-wrapper/page-wrapper';
+import {Redirect, useParams} from 'react-router-dom';
+import {getGame} from '../../server-api/server-api';
+import Header from '../../components/header/header';
+import NavBar from '../../components/nav-bar/nav-bar';
 
 const StartGame: FC = () => {
     const [gameName, setGameName] = useState('');
@@ -14,7 +14,7 @@ const StartGame: FC = () => {
     useEffect(() => {
         getGame(gameId).then((res) => {
             if (res.status === 200) {
-                res.json().then(({ name }) => {
+                res.json().then(({name}) => {
                     setGameName(name);
                 });
             }
@@ -38,7 +38,7 @@ const StartGame: FC = () => {
                     });
                 }
             });
-    }
+    };
 
     return isGameStart ? <Redirect to={`/admin/game/${gameId}`}/> : (
         <PageWrapper>
@@ -49,12 +49,12 @@ const StartGame: FC = () => {
             <div className={classes.contentWrapper}>
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                <div className={classes.gameName}>{ gameName }</div>
+                <div className={classes.gameName}>{gameName}</div>
 
                 <button className={classes.button} onClick={handleStart}>Запустить игру</button>
             </div>
         </PageWrapper>
     );
-}
+};
 
 export default StartGame;

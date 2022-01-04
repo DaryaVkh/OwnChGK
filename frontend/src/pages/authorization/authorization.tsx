@@ -10,12 +10,12 @@ import {
 } from '../../entities/authorization/authorization.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
-import {Alert} from "@mui/material";
-import {connect} from "react-redux";
-import {AppAction} from "../../redux/reducers/app-reducer/app-reducer.interfaces";
-import {Dispatch} from "redux";
-import {authorizeUserWithRole} from "../../redux/actions/app-actions/app-actions";
-import {AppState} from "../../entities/app/app.interfaces";
+import {Alert} from '@mui/material';
+import {connect} from 'react-redux';
+import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
+import {Dispatch} from 'redux';
+import {authorizeUserWithRole} from '../../redux/actions/app-actions/app-actions';
+import {AppState} from '../../entities/app/app.interfaces';
 
 const Authorization: FC<AuthorizationProps> = props => {
     const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState(false);
@@ -43,24 +43,27 @@ const Authorization: FC<AuthorizationProps> = props => {
                 setWrongEmailOrPassword(true);
             }
         });
-    }
+    };
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
-    }
+    };
 
     const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(event.target.value);
-    }
+    };
 
     const handleErrorFixes = () => {
         if (wrongEmailOrPassword) {
             setWrongEmailOrPassword(false);
         }
-    }
+    };
 
     return props.isLoggedIn ? (
-        <Redirect to={props.user.role === 'admin' || props.user.role === 'superadmin' ? '/admin/start-screen' : '/start-screen'}/>
+        <Redirect to={props.user.role ===
+        'admin' ||
+        props.user.role ===
+        'superadmin' ? '/admin/start-screen' : '/start-screen'}/>
     ) : (
         <PageWrapper>
             <Header isAuthorized={false}/>
@@ -69,7 +72,7 @@ const Authorization: FC<AuthorizationProps> = props => {
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
                 <form onSubmit={handleSubmit}>
-                    {wrongEmailOrPassword ? <Alert severity='error' sx={{
+                    {wrongEmailOrPassword ? <Alert severity="error" sx={{
                         color: 'white',
                         backgroundColor: '#F44336',
                         marginBottom: '2vh',
@@ -79,16 +82,18 @@ const Authorization: FC<AuthorizationProps> = props => {
                         }
                     }}>Неверный логин или пароль</Alert> : null}
                     <CustomInput type="email" id="email" name="email" placeholder="E-mail" value={email}
-                                 onChange={handleEmailChange} isInvalid={wrongEmailOrPassword} onFocus={handleErrorFixes}/>
+                                 onChange={handleEmailChange} isInvalid={wrongEmailOrPassword}
+                                 onFocus={handleErrorFixes}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль" value={password}
-                                 onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword} onFocus={handleErrorFixes}/>
+                                 onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword}
+                                 onFocus={handleErrorFixes}/>
 
                     <FormButton type="signInButton" text="Войти"/>
                 </form>
 
                 <div className={classes.restoreLinkWrapper}>
                     <Link className={classes.restorePasswordLink}
-                          to={props.isAdmin ? "/admin/restore-password" : '/restore-password'}
+                          to={props.isAdmin ? '/admin/restore-password' : '/restore-password'}
                           id="restore">Восстановить пароль</Link>
                 </div>
 
@@ -105,13 +110,13 @@ const Authorization: FC<AuthorizationProps> = props => {
             </div>
         </PageWrapper>
     );
-}
+};
 
 function mapStateToProps(state: AppState): AuthorizationStateProps {
     return {
         isLoggedIn: state.appReducer.isLoggedIn,
         user: state.appReducer.user
-    }
+    };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<AppAction>): AuthorizationDispatchProps {

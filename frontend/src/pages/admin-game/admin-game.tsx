@@ -9,8 +9,8 @@ import {AdminGameProps} from '../../entities/admin-game/admin-game.interfaces';
 import PauseIcon from '@mui/icons-material/Pause';
 import CircleOutlinedIcon from '@mui/icons-material/Circle';
 import {getGame} from '../../server-api/server-api';
-import Scrollbar from "../../components/scrollbar/scrollbar";
-import {getCookie} from "../../commonFunctions";
+import Scrollbar from '../../components/scrollbar/scrollbar';
+import {getCookie} from '../../commonFunctions';
 
 let isOpposition = false;
 let interval: any;
@@ -23,7 +23,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [questionsCount, setQuestionsCount] = useState(0);
     const [gameName, setGameName] = useState('');
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'))
+    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
     const [timer, setTimer] = useState(70000);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
@@ -39,21 +39,20 @@ const AdminGame: FC<AdminGameProps> = props => {
                     setGameName(name);
                     setToursCount(roundCount);
                     setQuestionsCount(questionCount);
-                })
+                });
             }
-        })
+        });
 
         conn.onopen = function () {
             conn.send(JSON.stringify({
-                'cookie': getCookie("authorization"),
+                'cookie': getCookie('authorization'),
                 'action': 'time'
             }));
         };
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
-            if (jsonMessage.action === 'time')
-            {
+            if (jsonMessage.action === 'time') {
                 console.log(jsonMessage.time);
                 setTimer(jsonMessage.time);
                 if (jsonMessage.isStarted) {
@@ -75,7 +74,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         const minutes = Math.floor(timer / 1000 / 60).toString().padStart(1, '0');
         const sec = Math.ceil(timer / 1000 % 60).toString().padStart(2, '0');
         return `${minutes}:${sec}`;
-    }
+    };
 
     const handleTourClick = (event: React.SyntheticEvent) => {
         const activeTour = document.querySelector(`.${classes.activeTour}`) as HTMLDivElement;
@@ -85,14 +84,14 @@ const AdminGame: FC<AdminGameProps> = props => {
         setActiveTour(+clickedTour.id);
 
         conn.send(JSON.stringify({
-            'cookie': getCookie("authorization"),
+            'cookie': getCookie('authorization'),
             'action': 'changeQuestion',
             'questionNumber': 1,
             'tourNumber': +clickedTour.id,
         }));
 
         handleStopClick();
-    }
+    };
 
     const handleQuestionClick = (event: React.SyntheticEvent) => {
         const activeQuestion = document.querySelector(`.${classes.activeQuestion}`) as HTMLDivElement;
@@ -102,14 +101,14 @@ const AdminGame: FC<AdminGameProps> = props => {
         setActiveQuestion(+clickedQuestion.id);
 
         conn.send(JSON.stringify({
-            'cookie': getCookie("authorization"),
+            'cookie': getCookie('authorization'),
             'action': 'changeQuestion',
             'questionNumber': +clickedQuestion.id,
             'tourNumber': activeTourNumber,
         }));
 
         handleStopClick();
-    }
+    };
 
     const handlePlayClick = () => {
         if (playOrPause === 'play') {
@@ -136,7 +135,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             }));
             setPlayOrPause('play');
         }
-    }
+    };
 
     const handleStopClick = () => {
         setPlayOrPause('play');
@@ -146,7 +145,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         }));
         clearInterval(interval);
         setTimer(70000);
-    }
+    };
 
     const handleAddedTimeClick = () => {
         conn.send(JSON.stringify({
@@ -154,14 +153,14 @@ const AdminGame: FC<AdminGameProps> = props => {
             'action': '+10sec'
         }));
         setTimer(t => t + 10000);
-    }
+    };
 
     const renderTours = () => {
         return Array.from(Array(toursCount).keys()).map(i => {
             return <div className={`${classes.tour} ${i === 0 ? classes.activeTour : ''}`} id={`${i + 1}`}
                         onClick={handleTourClick} key={`tour_${i + 1}`}>Тур {i + 1}</div>;
         });
-    }
+    };
 
     const renderQuestions = () => {
         return Array.from(Array(questionsCount).keys()).map(i => {
@@ -172,7 +171,8 @@ const AdminGame: FC<AdminGameProps> = props => {
                         Вопрос {i + 1}
                     </div>
 
-                    <Link className={classes.answersButtonLink} to={`/admin/game/${gameId}/answers/${activeTourNumber}/${i + 1}`}>
+                    <Link className={classes.answersButtonLink}
+                          to={`/admin/game/${gameId}/answers/${activeTourNumber}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
@@ -194,7 +194,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                 </div>
             );
         });
-    }
+    };
 
     return (
         <PageWrapper>
@@ -242,6 +242,6 @@ const AdminGame: FC<AdminGameProps> = props => {
             </div>
         </PageWrapper>
     );
-}
+};
 
 export default AdminGame;

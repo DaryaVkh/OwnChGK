@@ -1,4 +1,4 @@
-import {User} from "../../../entities/app/app.interfaces";
+import {User} from '../../../entities/app/app.interfaces';
 
 export interface AppAction {
     type: string;

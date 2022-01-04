@@ -1,13 +1,13 @@
 import React, {FC, useEffect, useState} from 'react';
 import classes from './user-start-screen.module.scss';
-import PageWrapper from "../../components/page-wrapper/page-wrapper";
-import NavBar from "../../components/nav-bar/nav-bar";
-import Header from "../../components/header/header";
-import {UserStartScreenProps} from "../../entities/user-start-screen/user-start-screen.interfaces";
+import PageWrapper from '../../components/page-wrapper/page-wrapper';
+import NavBar from '../../components/nav-bar/nav-bar';
+import Header from '../../components/header/header';
+import {UserStartScreenProps} from '../../entities/user-start-screen/user-start-screen.interfaces';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import {Link, Redirect} from 'react-router-dom';
-import {IconButton} from "@mui/material";
-import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import {IconButton} from '@mui/material';
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import {
     editTeamCaptainByCurrentUser,
     getAmIParticipateGames,
@@ -15,7 +15,7 @@ import {
     getTeamsWithoutUser
 } from '../../server-api/server-api';
 import {Game, Team} from '../admin-start-screen/admin-start-screen';
-import Scrollbar from "../../components/scrollbar/scrollbar";
+import Scrollbar from '../../components/scrollbar/scrollbar';
 
 const UserStartScreen: FC<UserStartScreenProps> = () => {
     const [page, setPage] = useState('teams');
@@ -40,11 +40,11 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                             } else {
                                 // TODO: код не 200, мейби всплывашку, что что-то не так?
                             }
-                        })
+                        });
                     }
-                })
+                });
             }
-        })
+        });
 
         getAmIParticipateGames().then(res => { // TODO: игры, в которых я состою
             if (res.status === 200) {
@@ -66,7 +66,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                 });
             //TODO установили, отрисовали и отправляем в бд, что этот юзер теперь капитан этой команды
         }
-    }
+    };
 
     const handleClick = (id: string) => {
         setPage('');
@@ -81,12 +81,12 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                 // setGameId(id); // TODO начинать начатую игру (setGameId(id)), ставить заглушку перед не начатой (setPage(''))
             }
         });
-    }
+    };
 
     const renderGames = () => {
         return gamesFromDB.map((game, index) =>
             <div key={index} className={classes.gameOrTeam} onClick={() => handleClick(game.id)}>{game.name}</div>);
-    }
+    };
 
     const renderTeams = () => {
         return userTeam !== ''
@@ -94,11 +94,12 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
             <div key={userTeam} className={classes.gameOrTeam}>
                 {userTeam}
 
-                <CheckCircleOutlinedIcon color='success' sx={{fontSize: '1.5vw', cursor: 'default'}} />
+                <CheckCircleOutlinedIcon color="success" sx={{fontSize: '1.5vw', cursor: 'default'}}/>
             </div>
             :
-            teamsFromDB.map((team, index) => <div key={index} className={classes.gameOrTeam} onClick={handleChooseTeam}>{team.name}</div>);
-    }
+            teamsFromDB.map((team, index) => <div key={index} className={classes.gameOrTeam}
+                                                  onClick={handleChooseTeam}>{team.name}</div>);
+    };
 
     const renderPage = (page: string) => {
         switch (page) {
@@ -115,28 +116,29 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
             case 'teams':
                 return (
                     <div className={classes.contentWrapper}>
-                            <div className={classes.box}>
-                                <p className={classes.teamParagraph}>Выбери команду из списка или создай новую</p>
+                        <div className={classes.box}>
+                            <p className={classes.teamParagraph}>Выбери команду из списка или создай новую</p>
 
-                                <div className={classes.contentBox} style={{height: '92%', padding: '5vh 0.5vw 3vh 2vw'}}>
-                                    <div className={classes.teamsWrapper}>
-                                        <Scrollbar>
-                                            {renderTeams()}
-                                        </Scrollbar>
-                                    </div>
+                            <div className={classes.contentBox} style={{height: '92%', padding: '5vh 0.5vw 3vh 2vw'}}>
+                                <div className={classes.teamsWrapper}>
+                                    <Scrollbar>
+                                        {renderTeams()}
+                                    </Scrollbar>
+                                </div>
 
-                                    <div className={classes.addButtonWrapper}>
-                                        <Link to='/team-creation' style={{ pointerEvents: userTeam !== '' ? 'none' : 'auto' }}>
-                                            <IconButton disabled={userTeam !== ''} sx={{padding: '13px'}}>
-                                                <AddCircleOutlineOutlinedIcon sx={{
-                                                    color: userTeam === '' ? 'white' : 'gray',
-                                                    fontSize: '9vmin'
-                                                }} />
-                                            </IconButton>
-                                        </Link>
-                                    </div>
+                                <div className={classes.addButtonWrapper}>
+                                    <Link to="/team-creation"
+                                          style={{pointerEvents: userTeam !== '' ? 'none' : 'auto'}}>
+                                        <IconButton disabled={userTeam !== ''} sx={{padding: '13px'}}>
+                                            <AddCircleOutlineOutlinedIcon sx={{
+                                                color: userTeam === '' ? 'white' : 'gray',
+                                                fontSize: '9vmin'
+                                            }}/>
+                                        </IconButton>
+                                    </Link>
                                 </div>
                             </div>
+                        </div>
                     </div>
                 );
             case '':
@@ -149,10 +151,10 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                     </div>
                 );
         }
-    }
+    };
 
     if (gameId) {
-        return <Redirect to={`/game/${gameId}`}/>
+        return <Redirect to={`/game/${gameId}`}/>;
     }
 
     return (
@@ -161,9 +163,9 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                 <NavBar isAdmin={false} page={page} onLinkChange={setPage}/>
             </Header>
 
-            { renderPage(page) }
+            {renderPage(page)}
         </PageWrapper>
     );
-}
+};
 
 export default UserStartScreen;

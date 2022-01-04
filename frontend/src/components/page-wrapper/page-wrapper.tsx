@@ -7,6 +7,6 @@ const PageWrapper: FC = props => {
             {props.children}
         </div>
     );
-}
+};
 
 export default PageWrapper;

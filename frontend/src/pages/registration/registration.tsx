@@ -5,7 +5,7 @@ import {FormButton} from '../../components/form-button/form-button';
 import {Link, Redirect} from 'react-router-dom';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
-import {Alert} from "@mui/material";
+import {Alert} from '@mui/material';
 
 const Registration: FC = () => {
     const [isRepeatedPasswordInvalid, setIsRepeatedPasswordInvalid] = useState(false);
@@ -22,11 +22,11 @@ const Registration: FC = () => {
             password = pswd.value;
             setIsRepeatedPasswordInvalid(false);
         }
-    }
+    };
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         email = event.target.value;
-    }
+    };
 
     const validateForm = async (event: React.SyntheticEvent) => {
         event.preventDefault();
@@ -51,7 +51,7 @@ const Registration: FC = () => {
                 setLoggedIn(true);
             }
         });
-    }
+    };
 
     return loggedIn ? (
         <Redirect to="/start-screen"/>
@@ -62,7 +62,7 @@ const Registration: FC = () => {
             <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
             <form onSubmit={validateForm}>
-                {isRepeatedPasswordInvalid ? <Alert severity='error' sx={{
+                {isRepeatedPasswordInvalid ? <Alert severity="error" sx={{
                     color: 'white',
                     backgroundColor: '#F44336',
                     marginBottom: '2vh',
@@ -72,7 +72,8 @@ const Registration: FC = () => {
                     }
                 }}>Пароли не совпадают</Alert> : null}
                 <CustomInput type="email" id="email" name="email" placeholder="E-mail" onChange={handleEmailChange}/>
-                <CustomInput type="password" id="password" name="password" placeholder="Пароль" isInvalid={isRepeatedPasswordInvalid}/>
+                <CustomInput type="password" id="password" name="password" placeholder="Пароль"
+                             isInvalid={isRepeatedPasswordInvalid}/>
                 <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите пароль"
                              onBlur={checkRepeatedPassword}
                              isInvalid={isRepeatedPasswordInvalid}/>
@@ -86,6 +87,6 @@ const Registration: FC = () => {
             </div>
         </div>
     </PageWrapper>);
-}
+};
 
 export default Registration;

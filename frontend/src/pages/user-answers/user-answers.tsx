@@ -1,18 +1,18 @@
 import React, {FC, useEffect, useState} from 'react';
 import classes from './user-answers.module.scss';
-import PageWrapper from "../../components/page-wrapper/page-wrapper";
+import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Link, useParams} from 'react-router-dom';
-import Header from "../../components/header/header";
-import {Answer, UserAnswersPageProps} from "../../entities/user-answers/user-answers.interfaces";
-import UserAnswer from "../../components/user-answer/user-answer";
-import Scrollbar from "../../components/scrollbar/scrollbar";
+import Header from '../../components/header/header';
+import {Answer, UserAnswersPageProps} from '../../entities/user-answers/user-answers.interfaces';
+import UserAnswer from '../../components/user-answer/user-answer';
+import Scrollbar from '../../components/scrollbar/scrollbar';
 import {store} from '../../index';
 import {getGame} from '../../server-api/server-api';
 import {getCookie} from '../../commonFunctions';
 
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
-    const {gameId} = useParams<{gameId: string}>();
+    const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>('');
     const [teamName, setTeamName] = useState<string>(store.getState().appReducer.user.team);
     const [answers, setAnswers] = useState<Answer[]>([]);
@@ -24,9 +24,9 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
                                      name,
                                  }) => {
                     setGameName(name);
-                })
+                });
             }
-        })
+        });
 
         conn.onopen = function () {
             conn.send(JSON.stringify({
@@ -42,7 +42,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
                     return {
                         answer: ans.answer,
                         status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition')
-                    }
+                    };
                 }));
             }
         };
@@ -51,16 +51,18 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     const renderAnswers = () => {
         return answers.map((answer, index) => {
             return (
-                <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status} order={index + 1} />
+                <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
+                            order={index + 1}/>
             );
         });
-    }
+    };
 
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
-                <Link to='#' className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В игру</Link> {/* TODO тут написать нормальный урлик, потому что я не помню, какой нормальный*/}
+                <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В
+                    игру</Link> {/* TODO тут написать нормальный урлик, потому что я не помню, какой нормальный*/}
 
                 <div className={classes.gameName}>{gameName}</div>
             </Header>
@@ -79,6 +81,6 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
             </div>
         </PageWrapper>
     );
-}
+};
 
 export default UserAnswersPage;

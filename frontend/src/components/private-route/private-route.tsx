@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 import {Route, Redirect, RouteProps} from 'react-router-dom';
-import {store} from "../../index";
+import {store} from '../../index';
 
 export type ProtectedRouteProps = {
     neededRole: string[];
@@ -12,6 +12,6 @@ export default function ProtectedRoute({neededRole, redirectPath, ...routeProps}
         return <Route {...routeProps} />;
     } else {
         //return null; // TODO: 404
-        return <Redirect to={{ pathname: redirectPath }} />;
+        return <Redirect to={{pathname: redirectPath}}/>;
     }
 };

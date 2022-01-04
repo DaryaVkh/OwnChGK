@@ -1,8 +1,8 @@
-import {IconButton} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import React, {FC, useCallback} from "react";
+import {IconButton} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import React, {FC, useCallback} from 'react';
 import classes from './modal.module.scss';
-import {ModalProps} from "../../entities/modal/modal.interfaces";
+import {ModalProps} from '../../entities/modal/modal.interfaces';
 import {deleteGame, deleteTeam} from '../../server-api/server-api';
 
 const Modal: FC<ModalProps> = props => {
@@ -12,7 +12,7 @@ const Modal: FC<ModalProps> = props => {
 
     const handleCloseModalClick = (e: React.SyntheticEvent) => {
         handleCloseModal(e);
-    }
+    };
 
     const handleDelete = useCallback(e => {
         props.deleteElement(arr => arr.filter(el => el.name !== props.itemForDeleteName));
@@ -27,7 +27,7 @@ const Modal: FC<ModalProps> = props => {
     const handleDeleteClick = (e: React.SyntheticEvent) => {
         handleDelete(e);
         handleCloseModal(e);
-    }
+    };
 
     return (
         <React.Fragment>
@@ -47,9 +47,9 @@ const Modal: FC<ModalProps> = props => {
                     <button className={classes.modalButton} onClick={handleDeleteClick}>Да</button>
                 </div>
             </div>
-            <div className={classes.overlay} />
+            <div className={classes.overlay}/>
         </React.Fragment>
     );
-}
+};
 
 export default Modal;

@@ -19,6 +19,6 @@ export interface AppDispatchProps {
 export type AppProps = AppStateProps & AppDispatchProps;
 
 export interface AppState {
-    appReducer: AppStateProps
+    appReducer: AppStateProps;
 }
 

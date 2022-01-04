@@ -1,6 +1,6 @@
-import {User} from "../app/app.interfaces";
-import {AppAction} from "../../redux/reducers/app-reducer/app-reducer.interfaces";
-import {PropsWithChildren} from "react";
+import {User} from '../app/app.interfaces';
+import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
+import {PropsWithChildren} from 'react';
 
 export interface HeaderOwnProps {
     isAdmin?: boolean;

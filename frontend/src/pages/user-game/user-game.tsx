@@ -25,7 +25,7 @@ const UserGame: FC<UserGameProps> = props => {
     }>({
         isSnackbarOpen: false,
         isAnswerAccepted: false
-    })
+    });
 
     useEffect(() => {
         // TODO: Проверить, что игра началась (остальное продолжить только когда началась)
@@ -35,9 +35,9 @@ const UserGame: FC<UserGameProps> = props => {
                                      name,
                                  }) => {
                     setGameName(name);
-                })
+                });
             }
-        })
+        });
 
         conn.onopen = function () {
             conn.send(JSON.stringify({
@@ -97,12 +97,12 @@ const UserGame: FC<UserGameProps> = props => {
                     setFlags({
                         isAnswerAccepted: true,
                         isSnackbarOpen: true
-                    })
+                    });
                 } else {
                     setFlags({
                         isAnswerAccepted: false,
                         isSnackbarOpen: true
-                    })
+                    });
                 }
                 setTimeout(() => setFlags({
                     isSnackbarOpen: false,
@@ -133,7 +133,7 @@ const UserGame: FC<UserGameProps> = props => {
                     break;
             }
         }
-    }
+    };
 
     const moveProgressBar = (time: number, maxTime: number) => {
         const progressBar = document.querySelector('#progress-bar') as HTMLDivElement;
@@ -146,16 +146,16 @@ const UserGame: FC<UserGameProps> = props => {
                 setTimeForAnswer(t => {
                     width = Math.ceil(100 * t / (maxTime / 1000));
                     progressBar.style.width = width + '%';
-                    return t - 1
+                    return t - 1;
                 });
             }
-        }
+        };
 
         console.log('fromMove:', maxTime);
         let width = Math.ceil(100 * time / maxTime);
         const id = setInterval(frame, 1000); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
         return id;
-    }
+    };
 
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
@@ -170,7 +170,7 @@ const UserGame: FC<UserGameProps> = props => {
 
     const handleAnswer = (event: React.ChangeEvent<HTMLInputElement>) => {
         setAnswer(event.target.value);
-    }
+    };
 
     const handleSendButtonClick = () => {
         conn.send(JSON.stringify({
@@ -195,13 +195,14 @@ const UserGame: FC<UserGameProps> = props => {
                 isAnswerAccepted: false
             }), 5000);
         }, 2000);
-    }
+    };
 
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
                 <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                <Link to={`/game-answers/${gameId}`}
+                      className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
                 <div className={classes.gameName}>{gameName}</div>
             </Header>
@@ -214,7 +215,8 @@ const UserGame: FC<UserGameProps> = props => {
 
                 <div className={classes.answerWrapper}>
                     <div
-                        className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer) >= 0 ? Math.ceil(timeForAnswer) : 0} сек.
+                        className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer) >=
+                    0 ? Math.ceil(timeForAnswer) : 0} сек.
                     </div>
 
                     <div className={classes.progressBar} id="progress-bar"/>
@@ -240,6 +242,6 @@ const UserGame: FC<UserGameProps> = props => {
             </div>
         </PageWrapper>
     );
-}
+};
 
 export default UserGame;

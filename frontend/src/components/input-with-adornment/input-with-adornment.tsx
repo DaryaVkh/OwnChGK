@@ -1,10 +1,10 @@
 import React, {FC, useCallback, useEffect, useState} from 'react';
-import classes from "./input-with-adornment.module.scss";
-import {IconButton, InputAdornment, OutlinedInput} from "@mui/material";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
-import {InputWithAdornmentProps} from "../../entities/input-with-adornment/input-with-adornment.interfaces";
-import {Redirect} from "react-router-dom";
+import classes from './input-with-adornment.module.scss';
+import {IconButton, InputAdornment, OutlinedInput} from '@mui/material';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import HighlightOffOutlinedIcon from '@mui/icons-material/HighlightOffOutlined';
+import {InputWithAdornmentProps} from '../../entities/input-with-adornment/input-with-adornment.interfaces';
+import {Redirect} from 'react-router-dom';
 
 const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
     const [isRedirectedToEdit, setIsRedirectedToEdit] = useState(false);
@@ -23,8 +23,8 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
 
         return () => {
             window.removeEventListener('click', goToGame, true);
-        }
-    })
+        };
+    });
 
     const inputStyle = {
         cursor: props.type === 'game' ? 'pointer !important' : 'auto',
@@ -44,7 +44,7 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
     const handleDeleteClick = (event: React.SyntheticEvent) => {
         setItemName(event);
         handleOpenModal(event);
-    }
+    };
 
     const setItemName = useCallback(e => {
         props.setItemForDeleteName(props.name);
@@ -56,50 +56,50 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
 
     const handleEditClick = (event: React.SyntheticEvent) => {
         setIsRedirectedToEdit(true);
-    }
+    };
 
     if (isClicked) {
-        return <Redirect to={`/admin/start-game/${props.id}`}/>
+        return <Redirect to={`/admin/start-game/${props.id}`}/>;
     }
 
     return isRedirectedToEdit
-        ? <Redirect to={{pathname: pathToEdit, state: {id: props.id, name: props.name}}} />
+        ? <Redirect to={{pathname: pathToEdit, state: {id: props.id, name: props.name}}}/>
         : <OutlinedInput className={classes.InputWithAdornment} readOnly fullWidth name={props.name}
                          value={props.name} sx={inputStyle} id={`${props.name}`}
                          endAdornment={
-                           <>
-                               <InputAdornment position="end">
-                                   <IconButton
-                                       onClick={handleEditClick}
-                                       edge="end"
-                                       sx={{
-                                           '& .MuiSvgIcon-root': {
-                                               color: 'var(--background-color)',
-                                               fontSize: '4vmin'
-                                           }
-                                       }}
-                                   >
-                                       <EditOutlinedIcon />
-                                   </IconButton>
-                               </InputAdornment>
+                             <>
+                                 <InputAdornment position="end">
+                                     <IconButton
+                                         onClick={handleEditClick}
+                                         edge="end"
+                                         sx={{
+                                             '& .MuiSvgIcon-root': {
+                                                 color: 'var(--background-color)',
+                                                 fontSize: '4vmin'
+                                             }
+                                         }}
+                                     >
+                                         <EditOutlinedIcon/>
+                                     </IconButton>
+                                 </InputAdornment>
 
-                               <InputAdornment position="end">
-                                   <IconButton
-                                       onClick={handleDeleteClick}
-                                       edge="end"
-                                       sx={{
-                                           '& .MuiSvgIcon-root': {
-                                               color: 'darkred',
-                                               fontSize: '4vmin'
-                                           }
-                                       }}
-                                   >
-                                       <HighlightOffOutlinedIcon/>
-                                   </IconButton>
-                               </InputAdornment>
-                           </>
+                                 <InputAdornment position="end">
+                                     <IconButton
+                                         onClick={handleDeleteClick}
+                                         edge="end"
+                                         sx={{
+                                             '& .MuiSvgIcon-root': {
+                                                 color: 'darkred',
+                                                 fontSize: '4vmin'
+                                             }
+                                         }}
+                                     >
+                                         <HighlightOffOutlinedIcon/>
+                                     </IconButton>
+                                 </InputAdornment>
+                             </>
                          }
-            />
-}
+        />;
+};
 
 export default InputWithAdornment;

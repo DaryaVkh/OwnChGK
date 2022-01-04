@@ -13,7 +13,7 @@ import {getAll} from '../../server-api/server-api';
 import Modal from '../../components/modal/modal';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
-import Scrollbar from "../../components/scrollbar/scrollbar";
+import Scrollbar from '../../components/scrollbar/scrollbar';
 
 const inputStyles = {
     '& .MuiOutlinedInput-notchedOutline': {
@@ -48,7 +48,7 @@ const AdminComponent: FC<AdminProps> = props => {
 
     const handleDeleteClick = (e: React.SyntheticEvent) => {
         handleDelete(e);
-    }
+    };
 
     return (
         <div className={props.isSuperAdmin ? classes.superAdminInfoWrapper : classes.adminInfoWrapper}>
@@ -65,7 +65,7 @@ const AdminComponent: FC<AdminProps> = props => {
             }
         </div>
     );
-}
+};
 
 export interface Game {
     name: string,
@@ -87,7 +87,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     const [newAdmin, setNewAdmin] = useState<Admin | null>(null);
     const [isEmailInvalid, setIsEmailInvalid] = useState(false);
     const scrollbars = useRef<Scrollbars>(null);
-    let location = useLocation<{page: string}>();
+    let location = useLocation<{ page: string }>();
 
     // const [teams, setTeams] = useState<Team[]>([{name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}]);
     // const [admins, setAdmins] = useState<Admin[]>([{name: 'Павел Булгаков', email: 'parasite@comcast.net'}, {name: 'Владислав Сергеев', email: 'olaf.greenholt@larkin.com'}, {name: 'Василиса Суворова', email: 'cebileprei@yopmail.com'}, {name: 'Ульяна Королева', email: 'jeuquoutren@yopmail.com'}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}]);
@@ -105,7 +105,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
             color: 'black',
         }
     };
-    
+
     useEffect(() => {
         if (location.state !== undefined) {
             setPage(location.state.page);
@@ -148,13 +148,13 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         return teams.map((team, index) => <InputWithAdornment name={team.name} id={team.id} key={index} type="team"
                                                               openModal={setIsModalVisible}
                                                               setItemForDeleteName={setDeletedItemName}/>);
-    }
+    };
 
     const renderGames = () => {
         return games.map((game, index) => <InputWithAdornment name={game.name} id={game.id} key={index} type="game"
                                                               openModal={setIsModalVisible}
                                                               setItemForDeleteName={setDeletedItemName}/>);
-    }
+    };
 
     const renderAdmins = () => {
         let adminsForRender = [];
@@ -163,11 +163,11 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                                                  deleteAdmin={setAdmins} isSuperAdmin={props.isSuperAdmin}/>);
         }
         return adminsForRender;
-    }
+    };
 
     const handleAddAdminButton = () => {
         setNewAdmin({name: '', email: ''});
-    }
+    };
 
     useEffect(() => {
         if (newAdmin !== null) {
@@ -177,7 +177,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
 
     const scrollToBottom = () => {
         (scrollbars.current as Scrollbars).scrollToBottom();
-    }
+    };
 
     const handleAddNewAdmin = () => {
         let newAdminName = document.querySelector('#new-admin-name') as HTMLInputElement;
@@ -189,7 +189,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         } else {
             setIsEmailInvalid(true);
         }
-    }
+    };
 
     const renderPage = (page: string) => {
         switch (page) {
@@ -247,8 +247,12 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                                 className={props.isSuperAdmin ? classes.superAdminWrapper : classes.adminsWrapperWithScrollbar}>
                                 <Scrollbars ref={scrollbars} className={classes.scrollbar} autoHide
                                             autoHideTimeout={500} autoHideDuration={200}
-                                            renderThumbVertical={() => <div style={{backgroundColor: 'white', borderRadius: '4px', cursor: 'pointer'}}/>}
-                                            renderTrackHorizontal={props => <div {...props} style={{display: 'none'}} />}
+                                            renderThumbVertical={() => <div style={{
+                                                backgroundColor: 'white',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer'
+                                            }}/>}
+                                            renderTrackHorizontal={props => <div {...props} style={{display: 'none'}}/>}
                                             classes={{view: classes.scrollbarView}}>
 
                                     {renderAdmins()}
@@ -286,7 +290,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                     </div>
                 );
         }
-    }
+    };
 
     return (
         <PageWrapper>
@@ -301,6 +305,6 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
             {renderPage(page)}
         </PageWrapper>
     );
-}
+};
 
 export default AdminStartScreen;

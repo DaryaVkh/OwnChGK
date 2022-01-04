@@ -1,4 +1,4 @@
-import {Dispatch, SetStateAction} from "react";
+import {Dispatch, SetStateAction} from 'react';
 import {Game, Team} from '../../pages/admin-start-screen/admin-start-screen';
 
 export interface ModalProps {

@@ -1,4 +1,4 @@
-import {AppAction} from "../../redux/reducers/app-reducer/app-reducer.interfaces";
+import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
 import {User} from '../app/app.interfaces';
 
 export interface AuthorizationOwnProps {

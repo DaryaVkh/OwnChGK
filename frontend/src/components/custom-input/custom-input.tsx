@@ -1,8 +1,8 @@
 import React, {FC, useState} from 'react';
 import classes from './custom-input.module.scss';
-import {InputProps} from "../../entities/custom-input/custom-input.interfaces";
-import {IconButton, InputAdornment, OutlinedInput} from "@mui/material";
-import {Visibility, VisibilityOff} from "@mui/icons-material";
+import {InputProps} from '../../entities/custom-input/custom-input.interfaces';
+import {IconButton, InputAdornment, OutlinedInput} from '@mui/material';
+import {Visibility, VisibilityOff} from '@mui/icons-material';
 
 export const CustomInput: FC<InputProps> = props => {
     const [values, setValues] = useState({
@@ -44,7 +44,7 @@ export const CustomInput: FC<InputProps> = props => {
             ...values,
             showPassword: !values.showPassword,
         });
-    }
+    };
 
     return (
         <OutlinedInput className={cls.join(' ')}
@@ -75,7 +75,7 @@ export const CustomInput: FC<InputProps> = props => {
                                            }
                                        }}
                                    >
-                                       {values.showPassword ? <VisibilityOff /> : <Visibility />}
+                                       {values.showPassword ? <VisibilityOff/> : <Visibility/>}
                                    </IconButton>
                                </InputAdornment>
                                :
@@ -83,4 +83,4 @@ export const CustomInput: FC<InputProps> = props => {
                        }
         />
     );
-}
+};
