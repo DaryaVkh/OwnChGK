@@ -26,6 +26,16 @@
   font-weight: 300;
 }
 
+.breakHeader {
+  font-size: 2.5vmax;
+  color: white;
+  display: flex;
+  text-align: center;
+  align-self: center;
+  font-weight: 300;
+  margin: auto;
+}
+
 .contentWrapper {
   height: 91%;
   width: 80%;
@@ -33,6 +43,27 @@
   align-items: center;
   flex-direction: column;
   align-self: flex-end;
+}
+
+.breakContentWrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .logo {
+    width: 48%;
+    height: 14%;
+    margin: 18vh auto 4vh;
+    user-select: none;
+  }
+
+  .breakTime {
+    color: white;
+    font-weight: 800;
+    align-self: center;
+    font-size: 20vmin;
+  }
 }
 
 .teamWrapper {

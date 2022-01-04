@@ -26,6 +26,8 @@ const UserGame: FC<UserGameProps> = props => {
         isSnackbarOpen: false,
         isAnswerAccepted: false
     });
+    const [isBreak, setIsBreak] = useState<boolean>(false);
+    const [breakTime, setBreakTime] = useState('5:15');
 
     useEffect(() => {
         // TODO: Проверить, что игра началась (остальное продолжить только когда началась)
@@ -197,51 +199,66 @@ const UserGame: FC<UserGameProps> = props => {
         }, 2000);
     };
 
-    return (
-        <PageWrapper>
-            <Header isAuthorized={true} isAdmin={false}>
-                <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                <Link to={`/game-answers/${gameId}`}
-                      className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+    return isBreak
+        ?
+        (
+            <PageWrapper>
+                <Header isAuthorized={true} isAdmin={false}>
+                    <div className={classes.breakHeader}>Перерыв</div>
+                </Header>
 
-                <div className={classes.gameName}>{gameName}</div>
-            </Header>
+                <div className={classes.breakContentWrapper}>
+                    <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-            <div className={classes.contentWrapper}>
-                <div className={classes.teamWrapper}>
-                    <div className={classes.team}>Команда</div>
-                    <div className={classes.teamName}>{store.getState().appReducer.user.team}</div>
+                    <div className={classes.breakTime}>{breakTime}</div>
                 </div>
+            </PageWrapper>
+        )
+        :
+        (
+            <PageWrapper>
+                <Header isAuthorized={true} isAdmin={false}>
+                    <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                    <Link to={`/game-answers/${gameId}`}
+                          className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
-                <div className={classes.answerWrapper}>
-                    <div
-                        className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer) >=
-                    0 ? Math.ceil(timeForAnswer) : 0} сек.
+                    <div className={classes.gameName}>{gameName}</div>
+                </Header>
+
+                <div className={classes.contentWrapper}>
+                    <div className={classes.teamWrapper}>
+                        <div className={classes.team}>Команда</div>
+                        <div className={classes.teamName}>{store.getState().appReducer.user.team}</div>
                     </div>
 
-                    <div className={classes.progressBar} id="progress-bar"/>
-                    <div className={classes.answerBox}>
-                        <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
+                    <div className={classes.answerWrapper}>
+                        <div
+                            className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer) >=
+                        0 ? Math.ceil(timeForAnswer) : 0} сек.
+                        </div>
 
-                        <div className={classes.answerInputWrapper}>
-                            <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
-                                         style={{width: '79%'}} value={answer} onChange={handleAnswer}/>
-                            <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
-                            </button>
+                        <div className={classes.progressBar} id="progress-bar"/>
+                        <div className={classes.answerBox}>
+                            <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
+
+                            <div className={classes.answerInputWrapper}>
+                                <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
+                                             style={{width: '79%'}} value={answer} onChange={handleAnswer}/>
+                                <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {console.log('Из снэкбара', flags)}
-                <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}>
-                    <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
-                           sx={{width: '100%'}}>
-                        {flags.isAnswerAccepted ? 'Ответ успешно сохранен' : 'Ответ не отправлен'}
-                    </Alert>
-                </Snackbar>
-            </div>
-        </PageWrapper>
-    );
+                    <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}>
+                        <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
+                               sx={{width: '100%'}}>
+                            {flags.isAnswerAccepted ? 'Ответ успешно сохранен' : 'Ответ не отправлен'}
+                        </Alert>
+                    </Snackbar>
+                </div>
+            </PageWrapper>
+        );
 };
 
 export default UserGame;

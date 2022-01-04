@@ -298,9 +298,15 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                 <NavBar isAdmin={true} page={page} onLinkChange={setPage}/>
             </Header>
 
-            {isModalVisible ?
-                <Modal deleteElement={page === 'teams' ? setTeams : setGames} closeModal={setIsModalVisible}
-                       itemForDeleteName={deletedItemName} type={page === 'teams' ? 'team' : 'game'}/> : null}
+            {
+                isModalVisible
+                    ? <Modal modalType='delete'
+                             deleteElement={page === 'teams' ? setTeams : setGames}
+                             closeModal={setIsModalVisible}
+                             itemForDeleteName={deletedItemName}
+                             type={page === 'teams' ? 'team' : 'game'}/>
+                    : null
+            }
 
             {renderPage(page)}
         </PageWrapper>

@@ -11,6 +11,7 @@ import CircleOutlinedIcon from '@mui/icons-material/Circle';
 import {getGame} from '../../server-api/server-api';
 import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie} from '../../commonFunctions';
+import Modal from '../../components/modal/modal';
 
 let isOpposition = false;
 let interval: any;
@@ -25,6 +26,9 @@ const AdminGame: FC<AdminGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
     const [timer, setTimer] = useState(70000);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [breakTime, setBreakTime] = useState<number>(0);
+    const [isBreak, setIsBreak] = useState<boolean>(false);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
 
@@ -196,6 +200,15 @@ const AdminGame: FC<AdminGameProps> = props => {
         });
     };
 
+    const openBreakModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const stopBreak = () => {
+        setBreakTime(0);
+        setIsBreak(false);
+    }
+
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
@@ -204,9 +217,15 @@ const AdminGame: FC<AdminGameProps> = props => {
                 <div className={classes.gameName}>{gameName}</div>
             </Header>
 
+            {
+                isModalOpen
+                    ? <Modal modalType='break' closeModal={setIsModalOpen} startBreak={setIsBreak} setBreakTime={setBreakTime} />
+                    : null
+            }
+
             <div className={classes.contentWrapper}>
                 <div className={classes.buttonsWrapper}>
-                    <button className={`${classes.button} ${classes.breakButton}`}>Перерыв</button>
+                    <button className={`${classes.button} ${classes.breakButton}`} onClick={isBreak ? stopBreak : openBreakModal}>{isBreak ? 'Остановить перерыв' : 'Перерыв'}</button>
 
                     <button className={`${classes.button} ${classes.playButton}`} onClick={handlePlayClick}>
                         {playOrPause === 'play'
@@ -239,6 +258,11 @@ const AdminGame: FC<AdminGameProps> = props => {
                         </Scrollbar>
                     </div>
                 </div>
+                {
+                    isBreak
+                        ? <p className={classes.breakInformer}>Идет перерыв: <b>{breakTime}</b></p>
+                        : null
+                }
             </div>
         </PageWrapper>
     );

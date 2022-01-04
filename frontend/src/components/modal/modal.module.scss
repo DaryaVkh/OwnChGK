@@ -40,6 +40,10 @@
   font-size: 3.5vmin;
 }
 
+.breakModalText {
+  text-align: center;
+}
+
 .modalButtonWrapper {
   width: 34vw;
   display: flex;
@@ -70,4 +74,19 @@
       box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
     }
   }
+}
+
+.minutesInput {
+  display: inline;
+  border: 2px solid var(--foreground-color);
+  height: 6.5vh;
+  border-radius: 8px;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+  font-size: 1.5vw;
+  box-sizing: border-box;
+  font-weight: var(--regular-weight);
+  width: 3.5vw;
+  text-align: center;
+  min-height: 26px;
+  margin: 0 1vw;
 }
