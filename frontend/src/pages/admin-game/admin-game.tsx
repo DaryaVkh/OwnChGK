@@ -172,7 +172,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         Вопрос {i + 1}
                     </div>
 
-                    <Link className={classes.answersButtonLink} to={`/answers/${activeTourNumber}/${i + 1}`}>
+                    <Link className={classes.answersButtonLink} to={`/admin/game/${gameId}/answers/${activeTourNumber}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {

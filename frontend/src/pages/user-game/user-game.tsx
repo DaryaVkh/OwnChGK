@@ -201,7 +201,7 @@ const UserGame: FC<UserGameProps> = props => {
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
                 <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                <Link to="/game-answers" className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
                 <div className={classes.gameName}>{gameName}</div>
             </Header>

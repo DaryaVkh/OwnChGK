@@ -173,10 +173,11 @@ function GetAnswer(answer: string, teamId: number, gameId: number) {
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);
 }
 
-function GetAppeal(appeal: string, teamId: number, gameId: number) {
+function GetAppeal(appeal: string, teamId: number, gameId: number, number: number) {
     console.log('received: %s', appeal, teamId);
-    const roundNumber = gamesCurrentAnswer[gameId][0] - 1;
-    const questionNumber = gamesCurrentAnswer[gameId][1] - 1;
+    const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount - 1);
+    let questionNumber = number - (roundNumber + 1) * games[gameId].rounds[0].questionsCount;
+    console.log(roundNumber, questionNumber);
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAppeal(teamId, appeal);
 }
 
@@ -188,7 +189,7 @@ function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: numbe
 
 function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: number, teamId: number, answers: string[]) {
     for (const answer of answers) {
-        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(teamId, answer);
+        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(teamId, answer); // TODO: переписать, acceptAppeal должен принимать ответ, а не команду
     }
 }
 
@@ -204,17 +205,32 @@ function RejectAnswer(gameId: number, roundNumber: number, questionNumber: numbe
     }
 }
 
-function GetAllAnswers(gameId: number, roundNumber: number, questionNumber: number, ws) {
+function GetAllTeamsAnswers(gameId: number, roundNumber: number, questionNumber: number, ws) {
     const answers = games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].answers;
     console.log(answers);
     const acceptedAnswers = answers.filter(ans => ans.status === 0).map(ans => ans.text);
-    const rejectedAnswers = answers.filter(ans => ans.status === 1).map(ans => ans.text);
+    const rejectedAnswers = answers.filter(ans => ans.status === 1 || ans.status === 3).map(ans => ans.text);
     const uncheckedAnswers = answers.filter(ans => ans.status === 2).map(ans => ans.text);
     ws.send(JSON.stringify({
         'action': 'answers',
         'acceptedAnswers': acceptedAnswers,
         'rejectedAnswers': rejectedAnswers,
         'uncheckedAnswers': uncheckedAnswers
+    }));
+}
+
+function GetAllTeamsAppeals(gameId: number, roundNumber: number, questionNumber: number, ws) {
+    const appeals = games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].appeals
+        .map(appeal => {
+            return {
+                teamName: games[gameId].teams[appeal.teamNumber].name,
+                text: appeal.text,
+                answer: games[gameId].teams[appeal.teamNumber].getAnswer(roundNumber, questionNumber).text
+            }
+        });
+    ws.send(JSON.stringify({
+        'action': 'appeals',
+        appeals
     }));
 }
 
@@ -275,21 +291,18 @@ wss.on('connection', (ws: WebSocket) => {
                 } else if (jsonMessage.action == 'Stop') {
                     StopTimer(gameId);
                 } else if (jsonMessage.action == 'AcceptAnswer') {
-                    console.log('__________AcceptAnswer');
-                    console.log(jsonMessage);
-                    console.log('_________________');
                     AcceptAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
-                } else if (jsonMessage.action == 'AcceptAppeal') {
-                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.answers);
+                } else if (jsonMessage.action == 'AcceptAppeals') {
+                    console.log(jsonMessage.appeals);
+                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.appeals);
                 } else if (jsonMessage.action == 'RejectAnswer') {
-                    console.log('__________RejectAnswer');
-                    console.log(jsonMessage);
-                    console.log('_________________');
                     RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
-                } else if (jsonMessage.action == 'RejectAppeal') {
-                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.answers);
+                } else if (jsonMessage.action == 'RejectAppeals') {
+                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.appeals);
                 } else if (jsonMessage.action == 'getAnswers') {
-                    GetAllAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
+                    GetAllTeamsAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
+                } else if (jsonMessage.action == 'getAppeals') {
+                    GetAllTeamsAppeals(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
                 }
             } else {
                 gameUsers[gameId].add(ws);
@@ -302,7 +315,24 @@ wss.on('connection', (ws: WebSocket) => {
                 } else if (jsonMessage.action == 'Appeal') {
                     for (let ws of gameAdmins[gameId])
                         ws.send('Appeal'); // TODO: какой вопрос, тур? Отправлять в сообщении и брать оттуда
-                    GetAppeal(jsonMessage.appeal, teamId, gameId);
+
+                    GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number);
+                } else if (jsonMessage.action == 'getTeamAnswers') {
+                    const result = [];
+                    const answers = games[gameId].teams[teamId].answers;
+                    for (let i = 1; i < answers.length; i++) {
+                        for (let j = 1; j < answers[i].length; j++) {
+                            result.push({
+                                number: (i - 1) * answers[i].length + j,
+                                answer: answers[i][j].text,
+                                status: answers[i][j].status
+                            })
+                        }
+                    }
+                    ws.send(JSON.stringify({
+                        'action': 'teamAnswers',
+                        'answers': result
+                    }))
                 }
             }
         }
