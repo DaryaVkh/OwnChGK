@@ -16,7 +16,7 @@ const AdminAnswersPage: FC = () => {
     const {tour, question } = useParams<{tour: string, question: string}>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');
-    const [gameAnswers, setGameAnswers] = useState<string[]>([]); // TODO сюда наверное они откуда то поступают, потом нужно будет синхронозироват с uncheckedAnswers, если сюда чето новое попало, чтобы туда тоже попадало
+    const [gameAnswers, setGameAnswers] = useState<string[]>([]); // Это accept + unchecked + rejected, нужно, чтобы считать
     const [acceptedAnswers, setAcceptedAnswers] = useState<string[]>([]);
     const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>([]);
     const [rejectedAnswers, setRejectedAnswers] = useState<string[]>([]);
@@ -46,28 +46,29 @@ const AdminAnswersPage: FC = () => {
 
         window.addEventListener('resize', handleWindowResize);
 
+        conn.onopen = function () {
+            conn.send(JSON.stringify({
+                'cookie': getCookie("authorization"),
+                'action': 'getAnswers',
+                'roundNumber': +tour,
+                'questionNumber': +question,
+            }));
+        };
+
+        conn.onmessage = function (event) {
+            const jsonMessage = JSON.parse(event.data);
+            if (jsonMessage.action === 'answers') {
+                setAcceptedAnswers(jsonMessage.acceptedAnswers);
+                setRejectedAnswers(jsonMessage.rejectedAnswers);
+                setUncheckedAnswers(jsonMessage.uncheckedAnswers);
+                setGameAnswers([...jsonMessage.acceptedAnswers, ...jsonMessage.rejectedAnswers, ...jsonMessage.uncheckedAnswers]);
+            }
+        }
+
         return () => {
             window.removeEventListener('resize', handleWindowResize);
         }
     }, []);
-
-    conn.onopen = function () {
-        conn.send(JSON.stringify({
-            'cookie': getCookie("authorization"),
-            'action': 'getAnswers',
-            'roundNumber': +tour,
-            'questionNumber': +question,
-        }));
-    };
-
-    conn.onmessage = function (event) {
-        const jsonMessage = JSON.parse(event.data);
-        if (jsonMessage.action === 'answers') {
-            setGameAnswers(jsonMessage.answers); // TODO: в чём разница их двух?
-            setUncheckedAnswers(jsonMessage.answers); // TODO: добавить accept, reject списки, из логики: 0 - accept, 1 - reject, 2 - unchecked
-            //todo а в чем разница для фронта
-        }
-    }
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         const element = event.target as HTMLInputElement;
@@ -139,7 +140,7 @@ const AdminAnswersPage: FC = () => {
                     'action': 'RejectAnswer',
                     'roundNumber': tour,
                     'questionNumber': question,
-                    'answers': currentHandledAnswers // TODO: как енто работаит?
+                    'answers': currentHandledAnswers // TODO: как енто работаит? Вроде ок, но проверить
                 }));
                 setRejectedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setAcceptedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
@@ -158,7 +159,7 @@ const AdminAnswersPage: FC = () => {
                     'action': 'RejectAnswer',
                     'roundNumber': tour,
                     'questionNumber': question,
-                    'answers': currentHandledAnswers // TODO надо передать то список, который противоположный (не Handled, возможно который unchecked)
+                    'answers': [...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]
                 }));
                 setAcceptedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setRejectedAnswers(prev => [...prev, ...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]);
@@ -252,7 +253,7 @@ const AdminAnswersPage: FC = () => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <Link to='/admin/game' className={classes.toGameLink}>В игру</Link>
+                <Link to={`/admin/game/${gameId}`} className={classes.toGameLink}>В игру</Link>
 
                 <div className={classes.tourNumber}>Тур {tour}</div>
                 <div className={classes.questionNumber}>Вопрос {question}</div>
