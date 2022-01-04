@@ -36,8 +36,8 @@ const NavBar: FC<NavBarProps> = props => {
         const indicator = document.querySelector('#indicator') as HTMLSpanElement;
         const activeItem = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
 
-        indicator.style.width = `${activeItem.offsetWidth}px`;
-        indicator.style.left = `${activeItem.offsetLeft}px`;
+        indicator.style.width = `${activeItem?.offsetWidth | 0}px`;
+        indicator.style.left = `${activeItem?.offsetLeft}px`;
         indicator.style.backgroundColor = "white";
     }
 
@@ -55,10 +55,8 @@ const NavBar: FC<NavBarProps> = props => {
     }, []);
 
     useEffect(() => {
-        if (props.page !== '') {
-            activateIndicator();
-        }
-    }, [props]);
+        activateIndicator();
+    }, []);
 
     return (
         <nav className={`${classes.nav} ${props.isAdmin ? classes['nav-admin'] : classes['nav-user']}`}>

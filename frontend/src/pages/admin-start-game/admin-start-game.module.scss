@@ -1,6 +1,6 @@
 .contentWrapper {
   height: 100%;
-  width: 30%;
+  width: 100%;
   display: flex;
   flex-direction: column;
 
@@ -19,9 +19,8 @@
   }
 
   .button {
-    height: 7vh;
     font-size: 3.5vmin;
-    width: 80%;
+    padding: 1vh 4vw;
     align-self: center;
     margin-top: 7vh;
     font-weight: 700;

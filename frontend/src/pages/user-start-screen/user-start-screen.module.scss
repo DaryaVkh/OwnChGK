@@ -62,3 +62,25 @@
   font-weight: 300;
   font-size: 2.95vmin;
 }
+
+.gameStartContentWrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .logo {
+    width: 48%;
+    height: 14%;
+    margin: 18vh auto 8vh;
+    user-select: none;
+  }
+
+  .pageText {
+    color: white;
+    font-weight: 300;
+    text-align: center;
+    font-size: 6vmin;
+    margin-bottom: 2vh;
+  }
+}
