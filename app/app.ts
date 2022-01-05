@@ -173,12 +173,12 @@ function GetAnswer(answer: string, teamId: number, gameId: number) {
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);
 }
 
-function GetAppeal(appeal: string, teamId: number, gameId: number, number: number) {
+function GetAppeal(appeal: string, teamId: number, gameId: number, number: number, answer: string) {
     console.log('received: %s', appeal, teamId);
     const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount - 1);
     let questionNumber = number - (roundNumber + 1) * games[gameId].rounds[0].questionsCount;
     console.log(roundNumber, questionNumber);
-    games[gameId].rounds[roundNumber].questions[questionNumber].giveAppeal(teamId, appeal);
+    games[gameId].rounds[roundNumber].questions[questionNumber].giveAppeal(teamId, appeal, answer);
 }
 
 function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
@@ -187,15 +187,15 @@ function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: numbe
     }
 }
 
-function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: number, teamId: number, answers: string[]) {
+function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
     for (const answer of answers) {
-        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(teamId, answer); // TODO: переписать, acceptAppeal должен принимать ответ, а не команду
+        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(answer, ''); // TODO: переписать, acceptAppeal должен принимать ответ, а не команду
     }
 }
 
-function RejectAppeal(gameId: number, roundNumber: number, questionNumber: number, teamId: number, answers: string[]) {
+function RejectAppeal(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
     for (const answer of answers) {
-        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].rejectAppeal(teamId, answer);
+        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].rejectAppeal(answer, '');
     }
 }
 
@@ -294,11 +294,11 @@ wss.on('connection', (ws: WebSocket) => {
                     AcceptAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == 'AcceptAppeals') {
                     console.log(jsonMessage.appeals);
-                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.appeals);
+                    AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
                 } else if (jsonMessage.action == 'RejectAnswer') {
                     RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
                 } else if (jsonMessage.action == 'RejectAppeals') {
-                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, jsonMessage.appeals);
+                    RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
                 } else if (jsonMessage.action == 'getAnswers') {
                     GetAllTeamsAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
                 } else if (jsonMessage.action == 'getAppeals') {
@@ -316,7 +316,7 @@ wss.on('connection', (ws: WebSocket) => {
                     for (let ws of gameAdmins[gameId])
                         ws.send('Appeal'); // TODO: какой вопрос, тур? Отправлять в сообщении и брать оттуда
 
-                    GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number);
+                    GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
                 } else if (jsonMessage.action == 'getTeamAnswers') {
                     const result = [];
                     const answers = games[gameId].teams[teamId].answers;

@@ -25,7 +25,8 @@ const UserAnswer: FC<UserAnswerProps> = props => {
                 'cookie': getCookie('authorization'),
                 'action': 'Appeal',
                 'number': props.order,
-                'appeal': opposition
+                'appeal': opposition,
+                'answer': props.answer
             }));
             // TODO тут отправляем апелляцию на сервак или куда там
         }
