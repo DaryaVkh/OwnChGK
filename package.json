@@ -5,7 +5,8 @@
   "main": "build/app/app.js",
   "scripts": {
     "build": "tsc",
-    "start": "cd frontend && npm install && npm run build && cd .. && tsc && node build/app/app.js",
+    "start": "tsc && node build/app/app.js",
+    "heroku-postbuild": "cd frontend && npm install && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
