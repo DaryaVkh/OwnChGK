@@ -21,7 +21,7 @@ export const timesIsOnPause: { [id: string]: boolean; } = {};
 
 const port = parseInt(process.env.PORT || '3000');
 
-const wss = new WebSocket.Server({port: 80});
+const wss = new WebSocket.Server({port: 1025});
 const seconds70PerQuestion = 70000;
 const extra10Seconds = 10000;
 
