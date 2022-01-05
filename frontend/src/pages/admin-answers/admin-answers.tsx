@@ -8,11 +8,11 @@ import {Scrollbars} from 'rc-scrollbars';
 import _ from 'lodash';
 import {AnswerType, Opposition, Page} from '../../entities/admin-answers-page/admin-answers-page.interfaces';
 import Scrollbar from '../../components/scrollbar/scrollbar';
-import {getCookie} from '../../commonFunctions';
+import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
 const AdminAnswersPage: FC = () => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
+    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const {tour, question} = useParams<{ tour: string, question: string }>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');

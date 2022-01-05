@@ -8,10 +8,10 @@ import UserAnswer from '../../components/user-answer/user-answer';
 import Scrollbar from '../../components/scrollbar/scrollbar';
 import {store} from '../../index';
 import {getGame} from '../../server-api/server-api';
-import {getCookie} from '../../commonFunctions';
+import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
-    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
+    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>('');
     const [teamName, setTeamName] = useState<string>(store.getState().appReducer.user.team);
