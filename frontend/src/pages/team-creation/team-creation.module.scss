@@ -1,0 +1,30 @@
+.teamCreationForm {
+  width: 26%;
+  height: 91%;
+  align-self: flex-end;
+}
+
+.pageTitle {
+  font-size: 4vmin;
+  color: white;
+  display: flex;
+  text-align: center;
+  align-self: center;
+  font-weight: 300;
+  margin: 5vh 0 10vh;
+}
+
+.contentWrapper {
+  height: 70%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  margin-bottom: 5vh;
+  box-sizing: content-box;
+}
+
+.link {
+  text-decoration: none;
+}

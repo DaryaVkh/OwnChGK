@@ -1,0 +1,115 @@
+.pageWrapper {
+  width: 60%;
+  height: 91%;
+  flex-direction: column;
+  justify-content: center;
+  align-self: flex-end;
+}
+
+.gameCreationForm {
+  width: 100%;
+  height: 90%;
+  align-self: flex-end;
+}
+
+.pageTitle {
+  font-size: 4vmin;
+  color: white;
+  text-align: center;
+  font-weight: 300;
+  margin-top: 5vh;
+  margin-bottom: -3vh;
+}
+
+.contentWrapper {
+  height: 70%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  justify-content: space-evenly;
+  margin-bottom: 5vh;
+}
+
+.gameParametersWrapper,
+.teamsWrapper {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 40%;
+  height: 80%;
+  align-self: flex-end;
+}
+
+.teamsWrapper {
+  border: 2px solid var(--foreground-color);
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.teamsDiv {
+  margin: 1.5vw;
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding-right: 0.2vw;
+}
+
+.toursCountInput,
+.questionsCountInput {
+  border: 2px solid var(--foreground-color);
+  height: 6.5vh;
+  border-radius: 8px;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+  font-size: 1.5vw;
+  box-sizing: border-box;
+  font-weight: var(--regular-weight);
+  width: 3.5vw;
+  margin: 0;
+  text-align: center;
+  min-height: 26px;
+}
+
+.questionsCountWrapper,
+.toursCountWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 3%;
+}
+
+.toursCountLabel,
+.questionsCountLabel {
+  color: #F6F7FF;
+  padding: 1.5vh 5vh;
+  font-weight: 700;
+  font-size: 1.4vw;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.teamsLabel {
+  background-color: var(--background-color);
+  color: white;
+  position: absolute;
+  top: -1vw;
+  left: 1vw;
+  width: 35%;
+  font-weight: 700;
+  font-size: 1.4vw;
+  text-align: center;
+  user-select: none;
+}
+
+.scrollbarView {
+  overflow-x: hidden !important;
+  padding: 1vh 0.5vw 1vh 0;
+}
+
+.link {
+  text-decoration: none;
+}

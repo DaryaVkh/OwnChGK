@@ -1,0 +1,136 @@
+.AdminStartScreen {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  flex-grow: 1;
+  background-color: var(--background-color);
+}
+
+.contentWrapper {
+  height: 100%;
+  width: 26%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.containerWrapper {
+  height: 91%;
+  align-self: flex-end;
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.box {
+  background-color: var(--background-color);
+  border-radius: 10px;
+  box-shadow: 0 0 3vh 1vh rgba(50, 130, 184, 0.25);
+  width: 100%;
+  padding: 5vh 0.5vw 3vh 2vw;
+  box-sizing: border-box;
+  height: 85%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.adminBox {
+  padding: 5vh 2vw;
+}
+
+.adminsWrapperWithScrollbar {
+  width: 100%;
+  height: 100%;
+}
+
+.gamesWrapper,
+.teamsWrapper,
+.superAdminWrapper {
+  width: 100%;
+  height: 85%;
+}
+
+.scrollbar {
+  :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.scrollbarView {
+  padding: 1% 1vw 0 0;
+}
+
+.adminsWrapper {
+  height: 91%;
+  align-self: flex-end;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.superAdminInfoWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.adminInfoWrapper {
+  width: 100%;
+  display: flex;
+
+  .adminName {
+    width: 38%;
+    margin-right: 2%;
+    margin-bottom: 2.5vh;
+  }
+}
+
+.adminName {
+  width: 38%;
+}
+
+.adminEmail {
+  width: 52%;
+}
+
+.adminInput {
+  border: none;
+  font-size: 1.4vw !important;
+  height: 6vh;
+  border-radius: 8px !important;
+  background-color: white;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+  margin-bottom: 2vh;
+  min-height: 26px;
+}
+
+.adminButton {
+  width: 7% !important;
+  min-width: 0 !important;
+  height: 6vh;
+  font-size: 1.5vw;
+  border: 2px solid var(--foreground-color) !important;
+  background-color: white !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  user-select: none;
+  font-family: Roboto, sans-serif;
+  min-height: 26px;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.invalidEmail {
+  & .MuiOutlinedInput-notchedOutline {
+    border: 2px solid #FF0000 !important;
+    background-color: #FFF6F6;
+  }
+}

@@ -1,0 +1,44 @@
+.contentWrapper {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .logo {
+    width: 48%;
+    height: 14%;
+    margin: 18vh auto 8vh;
+    user-select: none;
+  }
+
+  .gameName {
+    color: white;
+    font-weight: 300;
+    text-align: center;
+    font-size: 6vmin;
+  }
+
+  .button {
+    font-size: 3.5vmin;
+    padding: 1vh 4vw;
+    align-self: center;
+    margin-top: 7vh;
+    font-weight: 700;
+    border: 2px solid var(--foreground-color);
+    border-radius: 7px;
+    filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25));
+    overflow: hidden;
+    user-select: none;
+    font-family: Roboto, sans-serif;
+    min-height: 26px;
+
+    &:hover {
+      cursor: pointer;
+      box-shadow: 0 0 2vh 2px var(--foreground-color);
+    }
+
+    &:active {
+      box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+    }
+  }
+}

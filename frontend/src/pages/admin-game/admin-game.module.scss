@@ -1,0 +1,200 @@
+.menuLink {
+  text-decoration: none;
+  color: white;
+  position: absolute;
+  top: 35%;
+  font-weight: 300;
+  font-size: 2.5vmin;
+  left: 10%;
+}
+
+.gameName {
+  position: absolute;
+  right: 20%;
+  font-size: 2.5vmax;
+  color: white;
+  display: flex;
+  text-align: center;
+  align-self: center;
+  font-weight: 300;
+}
+
+.button {
+  height: 7vh;
+  font-size: 1.4vw;
+  font-weight: 500;
+  border: 2px solid var(--foreground-color);
+  border-radius: 4px;
+  filter: drop-shadow(0px 4px 4px rgba(255, 255, 255, 0.25));
+  overflow: hidden;
+  user-select: none;
+  font-family: Roboto, sans-serif;
+  min-height: 26px;
+
+  &:hover {
+    cursor: pointer;
+    box-shadow: 0 0 2vh 2px var(--foreground-color);
+  }
+
+  &:active {
+    box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+  }
+}
+
+.contentWrapper {
+  display: flex;
+  height: 91%;
+  align-self: flex-end;
+  flex-direction: column;
+  width: 50%;
+
+  .buttonsWrapper {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 7vh;
+
+    .breakButton {
+      width: 35%;
+    }
+
+    .playButton,
+    .stopButton {
+      width: 7%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tenSecondsButton {
+      width: 20%;
+    }
+
+    .answerTime {
+      width: 20%;
+      color: white;
+      font-weight: 500;
+      font-size: 2.8vw;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 7vh;
+    }
+  }
+
+  .tablesWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    height: 65%;
+
+    .toursWrapper,
+    .questionsWrapper {
+      margin-top: 2vh;
+      border: 3px solid white;
+      border-radius: 10px;
+      height: 100%;
+      box-shadow: 0 0 3vh 1vh rgba(50, 130, 184, 0.25);
+      box-sizing: border-box;
+    }
+
+    .tour,
+    .question {
+      height: 6.5vh;
+      border: 2px solid var(--foreground-color);
+      background-color: white;
+      font-size: 1.4vw;
+      font-weight: 400;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 2vh;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    .toursWrapper {
+      width: 34.5%;
+      padding: 3vh 0.5vw 3vh 2vw;
+
+      .tour {
+        color: var(--foreground-color);
+      }
+
+      .activeTour {
+        color: white;
+      }
+    }
+
+    .questionsWrapper {
+      width: 62%;
+      padding: 3vh 0.5vw 3vh 2vw;
+
+      .questionWrapper {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+
+        .question {
+          filter: drop-shadow(0px 4px 4px rgba(255, 255, 255, 0.25));
+          color: black;
+          position: relative;
+          width: 70%;
+        }
+
+        .answersButtonLink {
+          width: 25%;
+        }
+
+        .answersButton {
+          width: 100%;
+          border-radius: 8px;
+          font-weight: 400;
+          position: relative;
+          overflow: visible;
+          height: 6.5vh;
+          font-size: 1.4vw;
+          text-decoration: none;
+        }
+
+        .activeQuestion {
+          color: white;
+        }
+      }
+    }
+
+    .activeTour,
+    .activeQuestion {
+      background-color: var(--foreground-color);
+      border-color: white;
+    }
+  }
+}
+
+.scrollbar {
+  :last-child {
+    margin-bottom: 0 !important;
+  }
+}
+
+.scrollbarView {
+  padding: 1vh;
+}
+
+.opposition {
+  position: absolute;
+  right: 0.6vw;
+  top: -0.8vw;
+  user-select: none;
+  pointer-events: none;
+}
+
+.breakInformer {
+  color: white;
+  font-size: 3vmin;
+  margin: 4vh 0;
+}
