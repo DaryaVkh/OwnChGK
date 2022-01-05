@@ -4,7 +4,7 @@ import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
-import {gameAdmins, games, gamesCurrentAnswer, gameUsers} from '../app';
+import {gameAdmins, games, gamesCurrentAnswer, gameUsers} from '../socket';
 import {Game, Round} from '../logic/Game';
 import {Team} from '../logic/Team';
 import {GameDTO} from '../dto';
