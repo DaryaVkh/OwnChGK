@@ -9,6 +9,7 @@ import {UserGameProps} from '../../entities/user-game/user-game.interfaces';
 import {getGame} from '../../server-api/server-api';
 import {store} from '../../index';
 import {getCookie} from '../../commonFunctions';
+import NavBar from '../../components/nav-bar/nav-bar';
 
 let progressBar: any;
 
@@ -28,6 +29,7 @@ const UserGame: FC<UserGameProps> = props => {
     });
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState('5:15');
+    const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
 
     useEffect(() => {
         // TODO: Проверить, что игра началась (остальное продолжить только когда началась)
@@ -199,23 +201,41 @@ const UserGame: FC<UserGameProps> = props => {
         }, 2000);
     };
 
-    return isBreak
-        ?
-        (
-            <PageWrapper>
-                <Header isAuthorized={true} isAdmin={false}>
-                    <div className={classes.breakHeader}>Перерыв</div>
-                </Header>
+    const renderPage = () => {
+        if (!isGameStarted) {
+            return (
+                <PageWrapper>
+                    <Header isAuthorized={true} isAdmin={false}>
+                        <NavBar isAdmin={false} page=''/>
+                    </Header>
 
-                <div className={classes.breakContentWrapper}>
-                    <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
+                    <div className={classes.gameStartContentWrapper}>
+                        <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                    <div className={classes.breakTime}>{breakTime}</div>
-                </div>
-            </PageWrapper>
-        )
-        :
-        (
+                        <div className={classes.pageText}>Игра скоро начнется</div>
+                        <div className={classes.pageText}>Подождите</div>
+                    </div>
+                </PageWrapper>
+            )
+        }
+
+        if (isBreak) {
+            return (
+                <PageWrapper>
+                    <Header isAuthorized={true} isAdmin={false}>
+                        <div className={classes.breakHeader}>Перерыв</div>
+                    </Header>
+
+                    <div className={classes.breakContentWrapper}>
+                        <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
+
+                        <div className={classes.breakTime}>{breakTime}</div>
+                    </div>
+                </PageWrapper>
+            );
+        }
+
+        return (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={false}>
                     <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
@@ -259,6 +279,9 @@ const UserGame: FC<UserGameProps> = props => {
                 </div>
             </PageWrapper>
         );
+    }
+
+    return renderPage();
 };
 
 export default UserGame;

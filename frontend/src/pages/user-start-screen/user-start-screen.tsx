@@ -69,7 +69,6 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     };
 
     const handleClick = (id: string) => {
-        setPage('');
         fetch(`/users/${id}/changeToken`, {
             method: 'PATCH',
             headers: {
@@ -78,7 +77,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
             }
         }).then((res) => {
             if (res.status === 200) {
-                // setGameId(id); // TODO начинать начатую игру (setGameId(id)), ставить заглушку перед не начатой (setPage(''))
+                // setGameId(id); // TODO тут непонятно шо
             }
         });
     };
@@ -139,15 +138,6 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                );
-            case '':
-                return (
-                    <div className={classes.gameStartContentWrapper}>
-                        <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
-
-                        <div className={classes.pageText}>Игра скоро начнется</div>
-                        <div className={classes.pageText}>Подождите</div>
                     </div>
                 );
         }
