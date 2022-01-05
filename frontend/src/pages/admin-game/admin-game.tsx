@@ -15,6 +15,7 @@ import Modal from '../../components/modal/modal';
 
 let isOpposition = false;
 let interval: any;
+const conn = new WebSocket(getUrlForSocket());
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
@@ -24,7 +25,6 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [questionsCount, setQuestionsCount] = useState(0);
     const [gameName, setGameName] = useState('');
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const [timer, setTimer] = useState(70000);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0);
