@@ -44,15 +44,17 @@ export class Appeal {
     public readonly text: string;
     public readonly roundNumber: number;
     public readonly questionNumber: number;
+    public readonly wrongAnswer: string;
     private _comment: string;
     private _status: Status;
 
-    constructor(teamNumber: number, roundNumber: number, questionNumber: number, text: string) {
+    constructor(teamNumber: number, roundNumber: number, questionNumber: number, text: string, wrongAnswer: string) {
         this.teamNumber = teamNumber;
         this.roundNumber = roundNumber;
         this.questionNumber = questionNumber;
         this.text = text;
         this._status = Status.UnChecked;
+        this.wrongAnswer = wrongAnswer;
         this._comment = '';
     }
 

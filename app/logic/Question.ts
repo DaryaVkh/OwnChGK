@@ -29,8 +29,8 @@ export class Question {
         team.addAnswer(answer);
     }
 
-    giveAppeal(teamNumber: number, text: string): void {
-        const appeal = new Appeal(teamNumber, this.roundNumber, this.number, text);
+    giveAppeal(teamNumber: number, text: string, wrongAnswer:string): void {
+        const appeal = new Appeal(teamNumber, this.roundNumber, this.number, text, wrongAnswer);
         this.appeals.push(appeal);
         const index = this.answers.map(ans => ans.teamNumber).indexOf(teamNumber);
         this.answers[index].onAppeal();
@@ -52,33 +52,28 @@ export class Question {
         }
     }
 
-    acceptAppeal(teamId: number, comment: string = ""): void {
+    acceptAppeal(answer: string, comment: string = ""): void {
         console.log('appeals:', this.appeals);
-        const appeal = this.appeals.find((value, index, obj) =>
-            value.teamNumber === teamId);
-        console.log('appeal:', appeal);
+        const appeals = this.appeals.filter((value, index, obj) =>
+            value.wrongAnswer === answer);
+        console.log('appeal:', appeals);
 
-        if (appeal !== undefined) {
+        for (const appeal of appeals) {
             appeal.accept(comment);
             console.log('newAppeal:', appeal);
         }
 
-        const answer = this.answers.find((value, index, obj) =>
-            value.teamNumber === teamId);
-
-        console.log('answers:', this.answers);
-        console.log('answer:', answer);
-        if (answer !== undefined) {
-            this.acceptAnswers(answer.text);
-        }
+        this.acceptAnswers(answer);
     }
 
-    rejectAppeal(teamId: number, comment: string = ""): void {
-        const appeal = this.appeals.find((value, index, obj) =>
-            value.teamNumber === teamId);
-
-        if (appeal !== undefined) {
+    rejectAppeal(answer: string, comment: string = ""): void {
+        const appeals = this.appeals.filter((value, index, obj) =>
+            value.wrongAnswer === answer);
+//Todo: проверить поведение, когда у нас есть несколько одинаковых апелляций
+        for (const appeal of appeals) {
             appeal.reject(comment);
         }
+
+        this.rejectAnswers(answer);
     }
 }

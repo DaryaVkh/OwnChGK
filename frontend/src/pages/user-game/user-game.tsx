@@ -8,7 +8,7 @@ import {Alert, Snackbar} from '@mui/material';
 import {UserGameProps} from '../../entities/user-game/user-game.interfaces';
 import {getGame} from '../../server-api/server-api';
 import {store} from '../../index';
-import {getCookie} from '../../commonFunctions';
+import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import NavBar from '../../components/nav-bar/nav-bar';
 
 let progressBar: any;
@@ -18,7 +18,7 @@ const UserGame: FC<UserGameProps> = props => {
     const [answer, setAnswer] = useState('');
     const [gameName, setGameName] = useState('');
     const [questionNumber, setQuestionNumber] = useState(1);
-    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
+    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const [timeForAnswer, setTimeForAnswer] = useState(70);
     const [flags, setFlags] = useState<{
         isSnackbarOpen: boolean,
