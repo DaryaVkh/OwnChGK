@@ -9,6 +9,7 @@ import {CustomInput} from '../../components/custom-input/custom-input';
 import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
 import {useLocation, Redirect} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
+import {store} from '../../index';
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>([]);
@@ -21,28 +22,32 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     const [captain, setCaptain] = useState('');
 
     useEffect(() => {
-        getUsersWithoutTeam().then(res => {
-            if (res.status === 200) {
-                res.json().then(({users}) => {
-                    setUsersFromDB([...users]);
-                    if (props.mode === 'edit') {
-                        getTeam(teamName).then(res => {
-                            if (res.status === 200) {
-                                res.json().then(data => {
-                                    setCaptain(data.captain);
-                                    setOldCaptain(data.captain);
-                                    if (data.captain) {
-                                        setUsersFromDB([...users, data.captain]);
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            } else {
-                // TODO: код не 200, мейби всплывашку, что что-то не так?
-            }
-        });
+        if (!props.isAdmin) {
+            setOldCaptain(store.getState().appReducer.user.email);
+        } else {
+            getUsersWithoutTeam().then(res => {
+                if (res.status === 200) {
+                    res.json().then(({users}) => {
+                        setUsersFromDB([...users]);
+                        if (props.mode === 'edit') {
+                            getTeam(teamName).then(res => {
+                                if (res.status === 200) {
+                                    res.json().then(data => {
+                                        setCaptain(data.captain);
+                                        setOldCaptain(data.captain);
+                                        if (data.captain) {
+                                            setUsersFromDB([...users, data.captain]);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    // TODO: код не 200, мейби всплывашку, что что-то не так?
+                }
+            });
+        }
     }, []);
 
     const handleAutocompleteChange = (event: React.SyntheticEvent, value: string | null) => {
@@ -105,13 +110,14 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                      defaultValue={teamName}
                                      onChange={handleInputChange} isInvalid={isNameInvalid}/>
 
-                        {props.mode === 'edit' && oldCaptain === undefined ?
+                        {(props.mode === 'edit' || !props.isAdmin ) && oldCaptain === undefined?
                             null : <Autocomplete
                                 disablePortal
                                 fullWidth
                                 id="captain"
                                 options={usersFromDB}
                                 defaultValue={oldCaptain}
+                                disabled={!props.isAdmin}
                                 onChange={handleAutocompleteChange}
                                 sx={{
                                     border: 'none',

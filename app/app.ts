@@ -243,6 +243,15 @@ wss.on('connection', (ws: WebSocket) => {
         } else {
             const {roles: userRoles, teamId: teamId, gameId: gameId} =
                 jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload;
+
+            if (!games[gameId]) {
+                ws.send(JSON.stringify({
+                    'action': 'error',
+                    'gameIsStarted': games[gameId]
+                }));
+                return;
+            }
+
             if (jsonMessage.action == 'time') {
                 if (timers[gameId]) {
                     const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
@@ -275,9 +284,10 @@ wss.on('connection', (ws: WebSocket) => {
                 gamesCurrentAnswer[gameId] = [jsonMessage.tourNumber, jsonMessage.questionNumber];
                 ChangeQuestionNumber(gameId, jsonMessage.questionNumber, jsonMessage.tourNumber);
             } else if (jsonMessage.action == 'getQuestionNumber') {
+                const result = games[gameId].rounds[0].questionsCount * (gamesCurrentAnswer[gameId][0] - 1) + gamesCurrentAnswer[gameId][1];
                 ws.send(JSON.stringify({
                     'action': 'changeQuestionNumber',
-                    'number': games[gameId].rounds[0].questionsCount * (gamesCurrentAnswer[gameId][0] - 1) + gamesCurrentAnswer[gameId][1],
+                    'number': result,
                 }));
             }
             if (userRoles == 'admin' || userRoles == 'superadmin') {
@@ -305,6 +315,13 @@ wss.on('connection', (ws: WebSocket) => {
                     GetAllTeamsAppeals(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
                 }
             } else {
+                if (!games[gameId]) {
+                    ws.send(JSON.stringify({
+                        'action': 'error',
+                        'gameIsStarted': games[gameId]
+                    }));
+                    return;
+                }
                 gameUsers[gameId].add(ws);
                 if (gameIsTimerStart[gameId] && jsonMessage.action == 'Answer') {
                     GetAnswer(jsonMessage.answer, teamId, gameId); // TODO: отправить мол приняли ответ, а в юзерке выводить плашку, иначе красную

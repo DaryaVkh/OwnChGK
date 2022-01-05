@@ -36,8 +36,8 @@ const Authorization: FC<AuthorizationProps> = props => {
             })
         }).then(response => {
             if (response.status === 200) {
-                response.json().then(({role, team}) => {
-                    props.onAuthorizeUserWithRole(role, team);
+                response.json().then(({role, team, email, name}) => {
+                    props.onAuthorizeUserWithRole(role, team, email, name);
                 });
             } else {
                 setWrongEmailOrPassword(true);
@@ -121,7 +121,7 @@ function mapStateToProps(state: AppState): AuthorizationStateProps {
 
 function mapDispatchToProps(dispatch: Dispatch<AppAction>): AuthorizationDispatchProps {
     return {
-        onAuthorizeUserWithRole: (role: string, team: string) => dispatch(authorizeUserWithRole(role, team))
+        onAuthorizeUserWithRole: (role: string, team: string, email: string, name: string) => dispatch(authorizeUserWithRole(role, team, email, name))
     };
 }
 

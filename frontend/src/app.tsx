@@ -26,8 +26,8 @@ const App: FC<AppProps> = props => {
     useEffect(() => {
         checkToken().then((res) => {
             if (res.status === 200) {
-                res.json().then(({role, team}) => {
-                    props.onAuthorizeUserWithRole(role, team);
+                res.json().then(({role, team, email, name}) => {
+                    props.onAuthorizeUserWithRole(role, team, email, name);
                 });
             } else {
                 props.onCheckToken();
@@ -149,7 +149,7 @@ function mapStateToProps(state: AppState): AppStateProps {
 function mapDispatchToProps(dispatch: Dispatch<AppAction>): AppDispatchProps {
     return {
         onCheckToken: () => dispatch(testToken()),
-        onAuthorizeUserWithRole: (role: string, team: string) => dispatch(authorizeUserWithRole(role, team)),
+        onAuthorizeUserWithRole: (role: string, team: string, email: string, name: string) => dispatch(authorizeUserWithRole(role, team, email, name)),
     };
 }
 

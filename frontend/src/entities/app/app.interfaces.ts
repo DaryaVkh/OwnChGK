@@ -3,6 +3,8 @@ import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces
 export interface User {
     role: string;
     team: string;
+    email: string,
+    name: string
 }
 
 export interface AppStateProps {
@@ -13,7 +15,7 @@ export interface AppStateProps {
 
 export interface AppDispatchProps {
     onCheckToken: () => AppAction;
-    onAuthorizeUserWithRole: (role: string, team: string) => AppAction;
+    onAuthorizeUserWithRole: (role: string, team: string, email: string, name: string) => AppAction;
 }
 
 export type AppProps = AppStateProps & AppDispatchProps;

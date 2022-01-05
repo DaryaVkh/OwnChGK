@@ -127,6 +127,7 @@ export class GamesController {
             }
             const answer = {
                 name: game.name,
+                status: game.status,
                 id: game.id,
                 teams: game.teams.map(value => value.name),
                 roundCount: game.rounds.length,
@@ -166,6 +167,7 @@ export class GamesController {
             for (const team of game.teams) {
                 games[game.id].addTeam(new Team(team.name, team.id));
             }
+            await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, "started");
             console.log('GAMEADMINS:', gameAdmins);
             res.status(200).json(answer);
         } catch (error: any) {
@@ -206,7 +208,7 @@ export class GamesController {
 
             const {gameName} = req.params;
             const {status} = req.body;
-            await getCustomRepository(GameRepository).updateByNameAndStatus(gameName, status);
+            await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameName, status);
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});

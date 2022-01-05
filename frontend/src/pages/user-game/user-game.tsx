@@ -56,6 +56,15 @@ const UserGame: FC<UserGameProps> = props => {
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
+            if (jsonMessage.action === 'error') {
+                if (!jsonMessage.gameIsStarted) {
+                    setIsGameStarted(false);
+                    return;
+                }
+            } else {
+                setIsGameStarted(true);
+            }
+
             if (jsonMessage.action === 'time') {
                 console.log('a');
                 console.log(jsonMessage.time);
