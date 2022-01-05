@@ -76,7 +76,7 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const parseTimer = () => {
         const minutes = Math.floor(timer / 1000 / 60).toString().padStart(1, '0');
-        const sec = Math.ceil(timer / 1000 % 60).toString().padStart(2, '0');
+        const sec = Math.floor(timer / 1000 % 60).toString().padStart(2, '0');
         return `${minutes}:${sec}`;
     };
 

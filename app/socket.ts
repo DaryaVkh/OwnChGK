@@ -141,7 +141,7 @@ function PauseTimer(gameId: number) {
         gameIsTimerStart[gameId] = false;
         timesIsOnPause[gameId] = true;
         //addedTime[gameId] = 0;
-        timesWhenPauseClick[gameId] = (timesWhenPauseClick[gameId] ?? seconds70PerQuestion + addedTime[gameId]) - Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
+        timesWhenPauseClick[gameId] = (timesWhenPauseClick[gameId] ?? seconds70PerQuestion + (addedTime[gameId] ?? 0)) - Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
         clearTimeout(timers[gameId]);
 
         for (let user of gameUsers[gameId]) {
@@ -309,6 +309,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 return;
             }
             gameUsers[gameId].add(ws);
+            console.log('USERS SOCKETS:', gameUsers[gameId]);
             if (gameIsTimerStart[gameId] && jsonMessage.action == 'Answer') {
                 GetAnswer(jsonMessage.answer, teamId, gameId); // TODO: отправить мол приняли ответ, а в юзерке выводить плашку, иначе красную
                 ws.send(JSON.stringify({
