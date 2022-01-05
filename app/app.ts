@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import {secret} from './jwtToken';
 import {Game} from './logic/Game';
 import {CreateTransporter} from './email';
+import {Status} from "./logic/AnswerAndAppeal";
 
 export const games: { [id: string]: Game; } = {};
 export const gamesCurrentAnswer: { [id: string]: [number, number]; } = {};
@@ -175,10 +176,10 @@ function GetAnswer(answer: string, teamId: number, gameId: number) {
 
 function GetAppeal(appeal: string, teamId: number, gameId: number, number: number, answer: string) {
     console.log('received: %s', appeal, teamId);
-    const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount - 1);
-    let questionNumber = number - (roundNumber + 1) * games[gameId].rounds[0].questionsCount;
+    const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount);
+    let questionNumber = number - (roundNumber - 1) * games[gameId].rounds[0].questionsCount;
     console.log(roundNumber, questionNumber);
-    games[gameId].rounds[roundNumber].questions[questionNumber].giveAppeal(teamId, appeal, answer);
+    games[gameId].rounds[roundNumber-1].questions[questionNumber-1].giveAppeal(teamId, appeal, answer);
 }
 
 function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
@@ -221,6 +222,7 @@ function GetAllTeamsAnswers(gameId: number, roundNumber: number, questionNumber:
 
 function GetAllTeamsAppeals(gameId: number, roundNumber: number, questionNumber: number, ws) {
     const appeals = games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].appeals
+        .filter(value => value.status === Status.UnChecked)
         .map(appeal => {
             return {
                 teamName: games[gameId].teams[appeal.teamNumber].name,

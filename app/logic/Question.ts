@@ -73,5 +73,7 @@ export class Question {
         for (const appeal of appeals) {
             appeal.reject(comment);
         }
+
+        this.rejectAnswers(answer);
     }
 }
