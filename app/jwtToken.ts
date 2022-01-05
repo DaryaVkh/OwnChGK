@@ -1,14 +1,15 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
 export const secret = process.env.SECRET_KEY ?? 'SECRET_KEY';
 
-export const generateAccessToken = (id: number, email: string, roles: string, teamId: number, gameId:number) => {
+export const generateAccessToken = (id: number, email: string, roles: string, teamId: number, gameId: number, name?: string) => {
     const payload = {
         id,
         email,
         roles,
         teamId,
-        gameId
+        gameId,
+        name
     };
 
     return jwt.sign(payload, secret, {expiresIn: '24h'});

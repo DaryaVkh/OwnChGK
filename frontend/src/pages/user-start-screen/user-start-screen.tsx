@@ -77,7 +77,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
             }
         }).then((res) => {
             if (res.status === 200) {
-                // setGameId(id); // TODO тут непонятно шо
+                setGameId(id);
             }
         });
     };

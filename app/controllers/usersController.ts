@@ -39,6 +39,7 @@ export class UsersController { // TODO: дописать смену имени �
                 res.status(200).json({
                     id: user.id,
                     email: user.email,
+                    name: user.name,
                     role: "user",
                     team: user.team?.name ?? ''
                 });
@@ -181,13 +182,14 @@ export class UsersController { // TODO: дописать смену имени �
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const oldToken = req.cookies['authorization'];
-            const {id: userId, email: email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            const {id: userId, email: email, roles: userRoles, name: name} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
 
             if (userId !== undefined && email !== undefined && userRoles !== undefined) {
                 const user = await getCustomRepository(UserRepository).findOne(+userId, {relations: ['team']})
                 res.status(200).json({
                     id: userId,
                     email,
+                    name,
                     role: userRoles,
                     team: user.team?.name ?? ''
                 })

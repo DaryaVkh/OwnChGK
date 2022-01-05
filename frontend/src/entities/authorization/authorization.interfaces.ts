@@ -11,7 +11,7 @@ export interface AuthorizationStateProps {
 }
 
 export interface AuthorizationDispatchProps {
-    onAuthorizeUserWithRole: (role: string, team: string) => AppAction;
+    onAuthorizeUserWithRole: (role: string, team: string, email: string, name: string) => AppAction;
 }
 
 export type AuthorizationProps = AuthorizationStateProps & AuthorizationDispatchProps & AuthorizationOwnProps;

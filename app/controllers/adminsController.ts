@@ -35,6 +35,7 @@ export class AdminsController {
                 res.status(200).json({
                     id: admin.id,
                     email: admin.email,
+                    name: admin.name,
                     role: admin.role
                 });
             } else {

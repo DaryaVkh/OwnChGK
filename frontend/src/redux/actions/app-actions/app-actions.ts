@@ -1,10 +1,10 @@
 import {AUTHORIZE_USER_WITH_ROLE, CHECK_TOKEN, LOG_OUT} from './app-action-types';
 import {AppAction} from '../../reducers/app-reducer/app-reducer.interfaces';
 
-export function authorizeUserWithRole(role: string, team: string): AppAction {
+export function authorizeUserWithRole(role: string, team: string, email: string, name: string): AppAction {
     return {
         type: AUTHORIZE_USER_WITH_ROLE,
-        payload: {role, team}
+        payload: {role, team, email, name}
     };
 }
 

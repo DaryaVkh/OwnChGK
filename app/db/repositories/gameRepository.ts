@@ -88,7 +88,7 @@ export class GameRepository extends Repository<Game> {
         });
     }
 
-    updateByNameAndStatus(name: string, newStatus: string) {
-        return this.update({name}, {'status': newStatus});
+    updateByGameIdAndStatus(gameId: string, newStatus: string) {
+        return this.update(gameId, {'status': newStatus});
     }
 }

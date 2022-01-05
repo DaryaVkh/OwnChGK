@@ -5,7 +5,9 @@ import {AUTHORIZE_USER_WITH_ROLE, LOG_OUT, CHECK_TOKEN} from '../../actions/app-
 const initialState: AppReducerState = {
     user: {
         role: '',
-        team: ''
+        team: '',
+        email: '',
+        name: ''
     },
     isLoggedIn: false,
     isTokenChecked: false
@@ -19,7 +21,9 @@ export const appReducer: Reducer<AppReducerState, AppAction> = (state: AppReduce
                 user: {
                     ...state.user,
                     role: action.payload.role,
-                    team: action.payload.team
+                    team: action.payload.team,
+                    email: action.payload.email,
+                    name: action.payload.name
                 },
                 isLoggedIn: true,
                 isTokenChecked: true
@@ -30,7 +34,9 @@ export const appReducer: Reducer<AppReducerState, AppAction> = (state: AppReduce
                 user: {
                     ...state.user,
                     role: '',
-                    team: ''
+                    team: '',
+                    email: '',
+                    name: '',
                 },
                 isLoggedIn: false
             };
