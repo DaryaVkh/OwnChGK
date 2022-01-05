@@ -2,12 +2,12 @@ import React, {FC, useState} from 'react';
 import classes from './user-answer.module.scss';
 import {TextareaAutosize} from '@mui/material';
 import {UserAnswerProps} from '../../entities/user-answer/user-answer.interfaces';
-import {getCookie} from '../../commonFunctions';
+import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
 const UserAnswer: FC<UserAnswerProps> = props => {
     const [isOppositionClicked, setIsOppositionClicked] = useState<boolean>(false);
     const [opposition, setOpposition] = useState<string>('');
-    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
+    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const [answerStatus, setAnswerStatus] = useState<'success' | 'error' | 'opposition'>(props.status);
 
     const handleOppositionButtonClick = () => {

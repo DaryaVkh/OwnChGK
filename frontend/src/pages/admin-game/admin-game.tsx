@@ -10,7 +10,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import CircleOutlinedIcon from '@mui/icons-material/Circle';
 import {getGame} from '../../server-api/server-api';
 import Scrollbar from '../../components/scrollbar/scrollbar';
-import {getCookie} from '../../commonFunctions';
+import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Modal from '../../components/modal/modal';
 
 let isOpposition = false;
@@ -24,7 +24,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [questionsCount, setQuestionsCount] = useState(0);
     const [gameName, setGameName] = useState('');
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState(new WebSocket('ws://localhost:80/'));
+    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const [timer, setTimer] = useState(70000);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0);
