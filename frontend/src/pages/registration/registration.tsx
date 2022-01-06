@@ -83,7 +83,7 @@ const Registration: FC = () => {
 
             <div className={classes.toAuthorizationWrapper}>
                 <p className={classes.toAuthorizationParagraph}>Уже есть аккаунт?</p>
-                <Link className={classes.toAuthorizationLink} to="/authorization" id="toAuthorization"> Войти</Link>
+                <Link className={classes.toAuthorizationLink} to="/auth" id="toAuthorization"> Войти</Link>
             </div>
         </div>
     </PageWrapper>);
