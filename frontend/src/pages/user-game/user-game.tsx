@@ -207,7 +207,7 @@ const UserGame: FC<UserGameProps> = props => {
                 isSnackbarOpen: false,
                 isAnswerAccepted: false
             }), 5000);
-        }, 2000);
+        }, 1000);
     };
 
     const renderPage = () => {
@@ -282,7 +282,7 @@ const UserGame: FC<UserGameProps> = props => {
                     <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}>
                         <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
                                sx={{width: '100%'}}>
-                            {flags.isAnswerAccepted ? 'Ответ успешно сохранен' : 'Ответ не отправлен'}
+                            {flags.isAnswerAccepted ? 'Ответ успешно отправлен' : 'Ответ не отправлен'}
                         </Alert>
                     </Snackbar>
                 </div>

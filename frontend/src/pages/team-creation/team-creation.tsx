@@ -115,7 +115,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                 ? <CustomInput type='text' id='captain' name='captain' placeholder='Капитан' value={captain} readonly={true} />
                                 :
                                 (
-                                    props.mode === 'edit' && oldCaptain !== undefined
+                                    props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation'
                                         ? <Autocomplete disablePortal
                                                         fullWidth
                                                         id="captain"

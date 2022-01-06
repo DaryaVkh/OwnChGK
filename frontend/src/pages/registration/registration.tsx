@@ -10,8 +10,8 @@ import {Alert} from '@mui/material';
 const Registration: FC = () => {
     const [isRepeatedPasswordInvalid, setIsRepeatedPasswordInvalid] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
-    let email: string = '';
-    let password: string = '';
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
 
     const checkRepeatedPassword = () => {
         const pswd = document.querySelector('#password') as HTMLInputElement;
@@ -19,13 +19,13 @@ const Registration: FC = () => {
         if (pswd.value !== repeatedPassword.value) {
             setIsRepeatedPasswordInvalid(true);
         } else {
-            password = pswd.value;
+            setPassword(pswd.value);
             setIsRepeatedPasswordInvalid(false);
         }
     };
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        email = event.target.value;
+        setEmail(event.target.value);
     };
 
     const validateForm = async (event: React.SyntheticEvent) => {
