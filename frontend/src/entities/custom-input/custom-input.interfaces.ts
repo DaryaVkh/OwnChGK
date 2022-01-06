@@ -13,4 +13,5 @@ export interface InputProps {
     defaultValue?: string;
     required?: boolean;
     onFocus?: () => void;
+    readonly?: boolean;
 }

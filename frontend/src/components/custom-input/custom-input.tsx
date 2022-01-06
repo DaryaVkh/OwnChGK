@@ -61,6 +61,7 @@ export const CustomInput: FC<InputProps> = props => {
                        style={props.style}
                        required={required}
                        onFocus={props.onFocus}
+                       readOnly={props.readonly}
                        sx={styles}
                        endAdornment={
                            props.type === 'password'

@@ -295,7 +295,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <NavBar isAdmin={true} page={page} onLinkChange={setPage}/>
+                <NavBar isAdmin={true} page={location.state !== undefined ? location.state.page : page} onLinkChange={setPage}/>
             </Header>
 
             {

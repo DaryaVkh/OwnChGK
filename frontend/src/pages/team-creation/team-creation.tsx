@@ -23,7 +23,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
     useEffect(() => {
         if (!props.isAdmin) {
-            setOldCaptain(store.getState().appReducer.user.email);
+            setCaptain(store.getState().appReducer.user.email);
         } else {
             getUsersWithoutTeam().then(res => {
                 if (res.status === 200) {
@@ -110,47 +110,53 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                      defaultValue={teamName}
                                      onChange={handleInputChange} isInvalid={isNameInvalid}/>
 
-                        {(props.mode === 'edit' || !props.isAdmin ) && oldCaptain === undefined?
-                            null : <Autocomplete
-                                disablePortal
-                                fullWidth
-                                id="captain"
-                                options={usersFromDB}
-                                defaultValue={oldCaptain}
-                                disabled={!props.isAdmin}
-                                onChange={handleAutocompleteChange}
-                                sx={{
-                                    border: 'none',
-                                    fontSize: '1.5vw',
-                                    minHeight: '26px',
-                                    height: '7vh !important',
-                                    borderRadius: '8px',
-                                    backgroundColor: 'white',
-                                    boxShadow: 'inset 0 4px 10px rgba(0, 0, 0, 0.5)',
-                                    marginBottom: '3%',
-                                    '& .MuiOutlinedInput-input': {
-                                        padding: '0 0 0 1.5vw !important',
-                                        border: 'none',
-                                        fontFamily: 'Roboto, sans-serif',
-                                        color: 'black',
-                                        fontSize: '1.5vw',
-                                    },
-                                    '& .MuiOutlinedInput-root': {
-                                        height: '7vh !important',
-                                        minHeight: '26px',
-                                        padding: '0'
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        border: '2px solid var(--foreground-color) !important',
-                                        borderRadius: '8px',
-                                        minHeight: '26px',
-                                    },
-                                    '& .MuiSvgIcon-root': {
-                                        color: 'var(--background-color)'
-                                    }
-                                }}
-                                renderInput={(params) => <TextField {...params} placeholder="Капитан"/>}
-                            />}
+                        {
+                            !props.isAdmin && captain !== undefined
+                                ? <CustomInput type='text' id='captain' name='captain' placeholder='Капитан' value={captain} readonly={true} />
+                                :
+                                (
+                                    props.mode === 'edit' && oldCaptain !== undefined
+                                        ? <Autocomplete disablePortal
+                                                        fullWidth
+                                                        id="captain"
+                                                        options={usersFromDB}
+                                                        defaultValue={oldCaptain}
+                                                        onChange={handleAutocompleteChange}
+                                                        sx={{
+                                                            border: 'none',
+                                                            fontSize: '1.5vw',
+                                                            minHeight: '26px',
+                                                            height: '7vh !important',
+                                                            borderRadius: '8px',
+                                                            backgroundColor: 'white',
+                                                            boxShadow: 'inset 0 4px 10px rgba(0, 0, 0, 0.5)',
+                                                            marginBottom: '3%',
+                                                            '& .MuiOutlinedInput-input': {
+                                                                padding: '0 0 0 1.5vw !important',
+                                                                border: 'none',
+                                                                fontFamily: 'Roboto, sans-serif',
+                                                                color: 'black',
+                                                                fontSize: '1.5vw',
+                                                            },
+                                                            '& .MuiOutlinedInput-root': {
+                                                                height: '7vh !important',
+                                                                minHeight: '26px',
+                                                                padding: '0'
+                                                            },
+                                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                                border: '2px solid var(--foreground-color) !important',
+                                                                borderRadius: '8px',
+                                                                minHeight: '26px',
+                                                            },
+                                                            '& .MuiSvgIcon-root': {
+                                                                color: 'var(--background-color)'
+                                                            }
+                                                        }}
+                                                        renderInput={(params) => <TextField {...params} placeholder="Капитан"/>}
+                                        />
+                                        : null
+                                )
+                        }
 
                     </div>
 
