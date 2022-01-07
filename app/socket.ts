@@ -205,7 +205,7 @@ function GetAllTeamsAnswers(gameId: number, roundNumber: number, questionNumber:
     }));
 }
 
-function GetAllTeamsAppeals(gameId: number, roundNumber: number, questionNumber: number, ws) {
+function GetAppealsByNumber(gameId: number, roundNumber: number, questionNumber: number, ws) {
     const appeals = games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].appeals
         .filter(value => value.status === Status.UnChecked)
         .map(appeal => {
@@ -218,6 +218,20 @@ function GetAllTeamsAppeals(gameId: number, roundNumber: number, questionNumber:
     ws.send(JSON.stringify({
         'action': 'appeals',
         appeals
+    }));
+}
+
+function GetAllAppeals(gameId: number, ws) {
+    const res = [];
+    for (let roundNumber = 0; roundNumber < games[gameId].rounds.length; roundNumber++) {
+        for (let questionNumber = 0; questionNumber < games[gameId].rounds[roundNumber].questions.length; questionNumber++) {
+            if (games[gameId].rounds[roundNumber].questions[questionNumber].appeals.length > 0)
+                res.push(roundNumber*games[gameId].rounds[roundNumber].questions.length+(questionNumber+1));
+        }
+    }
+    ws.send(JSON.stringify({
+        action: 'appeals',
+        appealByQuestionNumber: res
     }));
 }
 
@@ -298,7 +312,9 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
             } else if (jsonMessage.action == 'getAnswers') {
                 GetAllTeamsAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
             } else if (jsonMessage.action == 'getAppeals') {
-                GetAllTeamsAppeals(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
+                GetAppealsByNumber(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
+            } else if (jsonMessage.action == 'getAllAppeals') {
+                GetAllAppeals(gameId, ws);
             }
         } else {
             if (!games[gameId]) {
@@ -309,30 +325,32 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 return;
             }
             gameUsers[gameId].add(ws);
-            console.log('USERS SOCKETS:', gameUsers[gameId]);
             if (gameIsTimerStart[gameId] && jsonMessage.action == 'Answer') {
-                GetAnswer(jsonMessage.answer, teamId, gameId); // TODO: отправить мол приняли ответ, а в юзерке выводить плашку, иначе красную
+                GetAnswer(jsonMessage.answer, teamId, gameId);
                 ws.send(JSON.stringify({
                     'action': 'statusAnswer',
                     'isAccepted': true
                 }));
-            } else if (jsonMessage.action == 'Appeal') {
+            } else if (jsonMessage.action == 'appeal') {
+                console.log(jsonMessage);
                 for (let ws of gameAdmins[gameId])
-                    ws.send('Appeal'); // TODO: какой вопрос, тур? Отправлять в сообщении и брать оттуда
+                    ws.send(JSON.stringify({
+                        action: 'appeal',
+                        questionNumber: jsonMessage.number
+                    }));
 
                 GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
             } else if (jsonMessage.action == 'getTeamAnswers') {
-                const result = [];
-                const answers = games[gameId].teams[teamId].answers;
-                for (let i = 1; i < answers.length; i++) {
-                    for (let j = 1; j < answers[i].length; j++) {
-                        result.push({
-                            number: (i - 1) * answers[i].length + j,
-                            answer: answers[i][j].text,
-                            status: answers[i][j].status
-                        })
+                const answers = games[gameId].teams[teamId].getAnswers();
+                console.log(answers, ' =answers');
+                const result = answers.map((ans) => {
+                    return {
+                        number: (ans.roundNumber - 1) * games[gameId].rounds[0].questionsCount + ans.questionNumber,
+                        answer: ans.text,
+                        status: ans.status
                     }
-                }
+                })
+
                 ws.send(JSON.stringify({
                     'action': 'teamAnswers',
                     'answers': result

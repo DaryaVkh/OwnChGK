@@ -13,7 +13,6 @@ import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Modal from '../../components/modal/modal';
 
-let isOpposition = false;
 let interval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
@@ -29,6 +28,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0);
     const [isBreak, setIsBreak] = useState<boolean>(false);
+    const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
 
@@ -43,6 +43,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                     setGameName(name);
                     setToursCount(roundCount);
                     setQuestionsCount(questionCount);
+                    setIsAppeal(new Array(questionCount*roundCount).fill(false));
                 });
             }
         });
@@ -51,6 +52,10 @@ const AdminGame: FC<AdminGameProps> = props => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'time'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getAllAppeals'
             }));
         };
 
@@ -70,6 +75,19 @@ const AdminGame: FC<AdminGameProps> = props => {
                         return res > 0 ? res : 0;
                     }), 1000);
                 }
+            } else if (jsonMessage.action === 'appeal') {
+                setIsAppeal(appeals => {
+                    appeals[jsonMessage.questionNumber-1] = true;
+                    return appeals;
+                })
+            } else if (jsonMessage.action === 'appeals') {
+                setIsAppeal(appeals => {
+                    const appealsCopy = new Array(appeals.length).fill(false)
+                    for (const number of jsonMessage.appealByQuestionNumber) {
+                        appealsCopy[number-1] = true;
+                    }
+                    return appealsCopy;
+                })
             }
         };
     }, []);
@@ -180,7 +198,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
-                                isOpposition
+                                isAppeal[(activeTourNumber-1)*questionsCount+i]
                                     ?
                                     <div className={classes.opposition}>
                                         <CircleOutlinedIcon sx={{

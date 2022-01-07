@@ -38,10 +38,11 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'teamAnswers') {
-                setAnswers(jsonMessage.answers.map((ans: { answer: string; status: number; }) => {
+                setAnswers(jsonMessage.answers.map((ans: { answer: string; status: number; number: number}) => {
                     return {
                         answer: ans.answer,
-                        status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition')
+                        status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
+                        number: ans.number
                     };
                 }));
             }
@@ -49,10 +50,11 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     }, []);
 
     const renderAnswers = () => {
-        return answers.map((answer, index) => {
+        return answers.sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
+            .map((answer, index) => {
             return (
                 <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                            order={index + 1}/>
+                            order={answer.number}/>
             );
         });
     };

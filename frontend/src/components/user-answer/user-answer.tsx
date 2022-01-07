@@ -23,7 +23,7 @@ const UserAnswer: FC<UserAnswerProps> = props => {
             setAnswerStatus('opposition');
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': 'Appeal',
+                'action': 'appeal',
                 'number': props.order,
                 'appeal': opposition,
                 'answer': props.answer
