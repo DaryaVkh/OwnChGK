@@ -102,14 +102,16 @@ const UserGame: FC<UserGameProps> = props => {
                 console.log('p');
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
-                progressBar.style.width = '100%';
+                let progress = document.querySelector('#progress-bar') as HTMLDivElement;
+                progress.style.width = '100%';
             } else if (jsonMessage.action === 'changeQuestionNumber') {
                 console.log('e');
                 console.log(jsonMessage.time);
                 setQuestionNumber(+jsonMessage.number);
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
-                progressBar.style.width = '100%';
+                let progress = document.querySelector('#progress-bar') as HTMLDivElement;
+                progress.style.width = '100%';
             } else if (jsonMessage.action === 'statusAnswer') {
                 if (jsonMessage.isAccepted) {
                     setFlags({

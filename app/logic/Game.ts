@@ -1,5 +1,6 @@
 import {Team} from "./Team";
 import {Question} from "./Question";
+import {seconds70PerQuestion} from "../socket";
 
 
 export class Round {
@@ -39,6 +40,13 @@ export class Game {
     public status: GameStatus;
     public breakTime: number;
     private interval: any;
+    public currentQuestion: [number, number];
+    public isTimerStart: boolean;
+
+    public timer: any;
+    public leftTime: number;
+    public maxTime: number;
+    public timeIsOnPause: boolean;
 
     constructor(name: string) {
         this.id = Math.round(Math.random() * 1000000)
@@ -47,6 +55,11 @@ export class Game {
         this.teams = {};
         this.status = GameStatus.Start;
         this.breakTime = 0;
+        this.currentQuestion = [1, 1];
+        this.isTimerStart = false;
+        this.leftTime = seconds70PerQuestion;
+        this.timeIsOnPause = false;
+        this.maxTime = seconds70PerQuestion;
     }
 
     startBreak(time: number): void {

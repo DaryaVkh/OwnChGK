@@ -4,7 +4,7 @@ import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
-import {gameAdmins, games, gamesCurrentAnswer, gameUsers} from '../socket';
+import {gameAdmins, games, gameUsers} from '../socket';
 import {Game, Round} from '../logic/Game';
 import {Team} from '../logic/Team';
 import {GameDTO} from '../dto';
@@ -17,8 +17,6 @@ export class GamesController {
             if (amIParticipate) {
                 const oldToken = req.cookies['authorization'];
                 const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
-
-                console.log('111111111111111');
                 console.log(userId);
                 if (!userId) {
                     console.log('true');
@@ -159,8 +157,13 @@ export class GamesController {
             };
             gameAdmins[game.id] = new Set();
             gameUsers[game.id] = new Set();
-            gamesCurrentAnswer[gameId] = [1, 1];
             games[game.id] = new Game(game.name);
+            setTimeout(() => {
+                delete games[gameId];
+                delete gameUsers[gameId];
+                delete gameAdmins[gameId];
+                console.log('all: ', gameAdmins, gameUsers, games);
+            }, 1000*60*60*24*3);
             for (let i = 0; i < game.rounds.length; i++) {
                 games[game.id].addRound(new Round(i + 1, answer.questionCount, 60, 1));
             }
