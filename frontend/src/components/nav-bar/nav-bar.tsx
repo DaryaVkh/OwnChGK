@@ -5,7 +5,6 @@ import {NavBarProps} from '../../entities/nav-bar/nav-bar.interfaces';
 
 const NavBar: FC<NavBarProps> = props => {
     const handleIndicator = (e: React.SyntheticEvent) => {
-        handleLinkChange(e);
         const indicator = document.querySelector('#indicator') as HTMLSpanElement;
         const items = document.querySelectorAll(`.${classes['nav-item']}`);
         const el = e.target as HTMLElement;
@@ -20,6 +19,7 @@ const NavBar: FC<NavBarProps> = props => {
         indicator.style.backgroundColor = 'white';
 
         el.classList.add(classes['is-active']);
+        handleLinkChange(e);
     };
 
     const handleWindowResize = () => {
@@ -36,8 +36,8 @@ const NavBar: FC<NavBarProps> = props => {
         const indicator = document.querySelector('#indicator') as HTMLSpanElement;
         const activeItem = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
 
-        indicator.style.width = `${activeItem?.offsetWidth | 0}px`;
-        indicator.style.left = `${activeItem?.offsetLeft}px`;
+        indicator.style.width = `${activeItem.offsetWidth}px`;
+        indicator.style.left = `${activeItem.offsetLeft}px`;
         indicator.style.backgroundColor = 'white';
     };
 
@@ -55,7 +55,9 @@ const NavBar: FC<NavBarProps> = props => {
     }, []);
 
     useEffect(() => {
-        activateIndicator();
+        if (props.page !== '') {
+            activateIndicator();
+        }
     }, []);
 
     return (

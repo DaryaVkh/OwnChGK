@@ -6,5 +6,5 @@ export const getCookie = (name: string) => {
 }
 
 export const getUrlForSocket = () => {
-    return `ws://${window.location.host.split(':')[0]}:80`;
+    return window.location.origin.replace(/^http/, 'ws')
 }

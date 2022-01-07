@@ -5,7 +5,7 @@ import NavBar from '../../components/nav-bar/nav-bar';
 import Header from '../../components/header/header';
 import {UserStartScreenProps} from '../../entities/user-start-screen/user-start-screen.interfaces';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import {Link, Redirect} from 'react-router-dom';
+import {Link, Redirect, useLocation} from 'react-router-dom';
 import {IconButton} from '@mui/material';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import {
@@ -23,6 +23,13 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     const [teamsFromDB, setTeamsFromDB] = useState<Team[]>([]);
     const [userTeam, setUserTeam] = useState('');
     const [gameId, setGameId] = useState('');
+    let location = useLocation<{ page: string }>();
+
+    useEffect(() => {
+        if (location.state !== undefined) {
+            setPage(location.state.page);
+        }
+    }, [location]);
 
     useEffect(() => {
         getTeamByCurrentUser().then(res => {
@@ -35,7 +42,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                         getTeamsWithoutUser().then(res => {
                             if (res.status === 200) {
                                 res.json().then(({teams}) => {
-                                    setTeamsFromDB(teams);
+                                    setTeamsFromDB(teams.sort((team1: Team, team2: Team) => team1.name > team2.name ? 1 : -1));
                                 });
                             } else {
                                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -49,7 +56,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
         getAmIParticipateGames().then(res => { // TODO: игры, в которых я состою
             if (res.status === 200) {
                 res.json().then(({games}) => {
-                    setGamesFromDB(games);
+                    setGamesFromDB(games.sort((game1: Game, game2: Game) => game1.name > game2.name ? 1 : -1));
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -150,7 +157,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
-                <NavBar isAdmin={false} page={page} onLinkChange={setPage}/>
+                <NavBar isAdmin={false} page={location.state !== undefined ? location.state.page : page} onLinkChange={setPage}/>
             </Header>
 
             {renderPage(page)}

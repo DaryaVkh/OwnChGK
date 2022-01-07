@@ -10,72 +10,87 @@ import {Alert} from '@mui/material';
 const Registration: FC = () => {
     const [isRepeatedPasswordInvalid, setIsRepeatedPasswordInvalid] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
-    let email: string = '';
-    let password: string = '';
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isError, setIsError] = useState<boolean>(false);
 
     const checkRepeatedPassword = () => {
         const pswd = document.querySelector('#password') as HTMLInputElement;
         const repeatedPassword = document.querySelector('#repeatPassword') as HTMLInputElement;
         if (pswd.value !== repeatedPassword.value) {
             setIsRepeatedPasswordInvalid(true);
+            return false;
         } else {
-            password = pswd.value;
+            setPassword(pswd.value);
             setIsRepeatedPasswordInvalid(false);
+            return true;
         }
     };
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        email = event.target.value;
+        setEmail(event.target.value);
     };
 
     const validateForm = async (event: React.SyntheticEvent) => {
         event.preventDefault();
-        if (isRepeatedPasswordInvalid) {
+
+        setIsError(false);
+        if (!checkRepeatedPassword()) {
             return false;
+        } else {
+            await fetch('/users/insert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            }).then(response => {
+                if (response.status === 200) {
+                    setLoggedIn(true);
+                } else {
+                    setIsError(true);
+                }
+            });
         }
-
-        checkRepeatedPassword();
-
-        await fetch('/users/insert', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                email,
-                password
-            })
-        }).then(response => {
-            if (response.status === 200) {
-                setLoggedIn(true);
-            }
-        });
     };
 
-    return loggedIn ? (
-        <Redirect to="/start-screen"/>
-    ) : (<PageWrapper>
+    if (loggedIn) {
+        return <Redirect to='/start-screen' />
+    }
+
+    return (<PageWrapper>
         <Header isAuthorized={false} isAdmin={false}/>
 
         <div className={classes.contentWrapper}>
             <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
             <form onSubmit={validateForm}>
-                {isRepeatedPasswordInvalid ? <Alert severity="error" sx={{
-                    color: 'white',
-                    backgroundColor: '#F44336',
-                    marginBottom: '2vh',
-                    marginTop: '-5vh',
-                    '& .MuiAlert-icon': {
-                        color: 'white'
-                    }
-                }}>Пароли не совпадают</Alert> : null}
+                {
+                    isRepeatedPasswordInvalid || isError
+                        ?
+                        <Alert severity="error" sx={
+                            {
+                                color: 'white',
+                                backgroundColor: '#F44336',
+                                marginBottom: '2vh',
+                                marginTop: '-5vh',
+                                '& .MuiAlert-icon': {
+                                    color: 'white'
+                                }
+                            }
+                        }>
+                            {isRepeatedPasswordInvalid ? 'Пароли не совпадают' : 'Ошибка регистрации, попробуйте снова'}
+                        </Alert>
+                        : null
+                }
                 <CustomInput type="email" id="email" name="email" placeholder="E-mail" onChange={handleEmailChange}/>
                 <CustomInput type="password" id="password" name="password" placeholder="Пароль"
                              isInvalid={isRepeatedPasswordInvalid}/>
                 <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите пароль"
-                             onBlur={checkRepeatedPassword}
                              isInvalid={isRepeatedPasswordInvalid}/>
 
                 <FormButton type="signUpButton" text="Зарегистрироваться"/>
@@ -83,7 +98,7 @@ const Registration: FC = () => {
 
             <div className={classes.toAuthorizationWrapper}>
                 <p className={classes.toAuthorizationParagraph}>Уже есть аккаунт?</p>
-                <Link className={classes.toAuthorizationLink} to="/authorization" id="toAuthorization"> Войти</Link>
+                <Link className={classes.toAuthorizationLink} to="/auth" id="toAuthorization"> Войти</Link>
             </div>
         </div>
     </PageWrapper>);

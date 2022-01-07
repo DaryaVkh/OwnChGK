@@ -116,7 +116,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         getAll('/teams/').then(res => {
             if (res.status === 200) {
                 res.json().then(({teams}) => {
-                    setTeams(teams);
+                    setTeams(teams.sort((team1: Team, team2: Team) => team1.name > team2.name ? 1 : -1));
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -126,7 +126,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         getAll('/games/').then(res => {
             if (res.status === 200) {
                 res.json().then(({games}) => {
-                    setGames(games);
+                    setGames(games.sort((game1: Game, game2: Game) => game1.name > game2.name ? 1 : -1));
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -295,7 +295,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <NavBar isAdmin={true} page={page} onLinkChange={setPage}/>
+                <NavBar isAdmin={true} page={location.state !== undefined ? location.state.page : page} onLinkChange={setPage}/>
             </Header>
 
             {

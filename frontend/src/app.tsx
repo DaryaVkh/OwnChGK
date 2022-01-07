@@ -21,6 +21,7 @@ import {Dispatch} from 'redux';
 import {AppAction} from './redux/reducers/app-reducer/app-reducer.interfaces';
 import {authorizeUserWithRole, checkToken as testToken} from './redux/actions/app-actions/app-actions';
 import StartGame from './pages/admin-start-game/admin-start-game';
+import {adminRoles, userRoles} from './entities/common/common.constants';
 
 const App: FC<AppProps> = props => {
     useEffect(() => {
@@ -54,81 +55,81 @@ const App: FC<AppProps> = props => {
                 </Route>
 
                 <ProtectedRoute path="/admin/start-screen" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath={'/admin'}>
                     <AdminStartScreen isSuperAdmin={false}/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/profile" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath="/admin">
                     <Profile isAdmin={true}/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/game-creation" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath="/admin">
                     <GameCreator mode="creation" isAdmin={true}/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/game-creation/edit" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath="/admin">
                     <GameCreator mode="edit" isAdmin={true}/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/team-creation" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath="/admin">
                     <TeamCreator mode="creation" isAdmin={true}/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/team-creation/edit" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath="/admin">
                     <TeamCreator mode="edit" isAdmin={true}/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/game/:gameId" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath="/admin">
                     <AdminGame/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/game/:gameId/answers/:tour/:question" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath="/admin">
                     <AdminAnswersPage/>
                 </ProtectedRoute>
 
 
                 <ProtectedRoute path="/admin/start-game/:gameId" exact
-                                neededRole={['admin', 'superadmin']}
+                                neededRole={adminRoles}
                                 redirectPath="/admin">
                     <StartGame/>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/start-screen" exact neededRole={['user']} redirectPath="/auth">
+                <ProtectedRoute path="/start-screen" exact neededRole={userRoles} redirectPath="/auth">
                     <UserStartScreen/>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/profile" exact neededRole={['user']} redirectPath="/auth">
+                <ProtectedRoute path="/profile" exact neededRole={userRoles} redirectPath="/auth">
                     <Profile isAdmin={false}/>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/team-creation" exact neededRole={['user']} redirectPath="/auth">
+                <ProtectedRoute path="/team-creation" exact neededRole={userRoles} redirectPath="/auth">
                     <TeamCreator mode="creation" isAdmin={false}/>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/team-creation/edit" exact neededRole={['user']} redirectPath="/auth">
+                <ProtectedRoute path="/team-creation/edit" exact neededRole={userRoles} redirectPath="/auth">
                     <TeamCreator mode="edit" isAdmin={false}/>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/game/:gameId" exact neededRole={['user']} redirectPath="/auth">
+                <ProtectedRoute path="/game/:gameId" exact neededRole={userRoles} redirectPath="/auth">
                     <UserGame/>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/game-answers/:gameId" exact neededRole={['user']} redirectPath={'/auth'}>
+                <ProtectedRoute path="/game-answers/:gameId" exact neededRole={userRoles} redirectPath={'/auth'}>
                     <UserAnswersPage/>
                 </ProtectedRoute>
 

@@ -55,6 +55,7 @@ const Authorization: FC<AuthorizationProps> = props => {
 
     const handleErrorFixes = () => {
         if (wrongEmailOrPassword) {
+            setPassword('');
             setWrongEmailOrPassword(false);
         }
     };
