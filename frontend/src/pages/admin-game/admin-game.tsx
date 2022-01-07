@@ -62,6 +62,10 @@ const AdminGame: FC<AdminGameProps> = props => {
                 'cookie': getCookie('authorization'),
                 'action': 'isOnBreak'
             }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber'
+            }));
         };
 
         conn.onmessage = function (event) {
@@ -104,6 +108,11 @@ const AdminGame: FC<AdminGameProps> = props => {
                         return time - 1 > 0 ? time-1 : 0;
                     }), 1000)
                 }
+            } else if (jsonMessage.action == 'changeQuestionNumber') {
+                console.log(jsonMessage.round);
+                console.log(jsonMessage.question);
+                setActiveTour(jsonMessage.round);
+                setActiveQuestion(jsonMessage.question);
             }
         };
     }, []);

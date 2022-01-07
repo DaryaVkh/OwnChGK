@@ -283,12 +283,6 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
         } else if (jsonMessage.action == 'changeQuestion') {
             gamesCurrentAnswer[gameId] = [jsonMessage.tourNumber, jsonMessage.questionNumber];
             ChangeQuestionNumber(gameId, jsonMessage.questionNumber, jsonMessage.tourNumber);
-        } else if (jsonMessage.action == 'getQuestionNumber') {
-            const result = games[gameId].rounds[0].questionsCount * (gamesCurrentAnswer[gameId][0] - 1) + gamesCurrentAnswer[gameId][1];
-            ws.send(JSON.stringify({
-                'action': 'changeQuestionNumber',
-                'number': result,
-            }));
         } else if (jsonMessage.action == 'isOnBreak') {
             ws.send(JSON.stringify({
                 action: 'isOnBreak',
@@ -346,6 +340,14 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                         time: 0
                     }))
                 }
+            } else if (jsonMessage.action == 'getQuestionNumber') {
+                console.log('tour ' + gamesCurrentAnswer[gameId][0]);
+                console.log('tour ' + gamesCurrentAnswer[gameId][1]);
+                ws.send(JSON.stringify({
+                    'action': 'changeQuestionNumber',
+                    'round': gamesCurrentAnswer[gameId][0],
+                    'question': gamesCurrentAnswer[gameId][1]
+                }));
             }
         } else {
             if (!games[gameId]) {
@@ -384,6 +386,12 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                     'action': 'teamAnswers',
                     'answers': result
                 }))
+            } else if (jsonMessage.action == 'getQuestionNumber') {
+                const result = games[gameId].rounds[0].questionsCount * (gamesCurrentAnswer[gameId][0] - 1) + gamesCurrentAnswer[gameId][1];
+                ws.send(JSON.stringify({
+                    'action': 'changeQuestionNumber',
+                    'number': result,
+                }));
             }
         }
     }
