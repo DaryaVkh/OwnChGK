@@ -45,11 +45,13 @@ export class Team {
     getScoreTable(): number[][] {
         const scoreTable = [];
         for (let answers of this.answers) {
-            for (let answer of answers) {
-                if (answer.roundNumber > scoreTable.length) {
-                    scoreTable.push([answer.score]);
-                } else
-                    scoreTable[scoreTable.length - 1].push(answer.score);
+            for (let i=1; i<answers.length; i++) {
+                if (answers[i].roundNumber > scoreTable.length) {
+                    scoreTable.push({roundNumber: [answers[i].score]});
+                } else {
+                    console.log(scoreTable[scoreTable.length - 1]);
+                    scoreTable[scoreTable.length - 1].push(answers[i].score);
+                }
             }
         }
         return scoreTable;

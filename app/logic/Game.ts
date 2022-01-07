@@ -47,12 +47,23 @@ export class Game {
         this.rounds.push(round);
     }
 
-    getScoreTable(): { [name: string]: number[][] } {
-        const table = {};
+    getScoreTable(): [{name:string, scoreTable: number[][]}] {
+        const table = [];
         for (let teamId in this.teams) {
             // @ts-ignore
-            table[this.teams[teamId].name] = this.teams[teamId].getScoreTable();
+            table.push({name: this.teams[teamId].name, scoreTable: this.teams[teamId].getScoreTable()});
         }
+        // @ts-ignore
+        return table;
+    }
+
+    getTotalScoreForAllTeams(): [{name:string, score:number}] {
+        const table = [];
+        for (let teamId in this.teams) {
+            // @ts-ignore
+            table.push({name: this.teams[teamId].name, score: this.teams[teamId].getTotalScore()});
+        }
+        // @ts-ignore
         return table;
     }
 }
