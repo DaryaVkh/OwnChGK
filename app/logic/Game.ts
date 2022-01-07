@@ -57,7 +57,6 @@ export class Game {
                 this.stopBreak();
             } else {
                 this.breakTime -= 1;
-                console.log(this.breakTime);
             }
         }, 1000, this);
     }

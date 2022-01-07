@@ -21,7 +21,6 @@ const Registration: FC = () => {
             setIsRepeatedPasswordInvalid(true);
             return false;
         } else {
-            setPassword(pswd.value);
             setIsRepeatedPasswordInvalid(false);
             return true;
         }
@@ -29,6 +28,10 @@ const Registration: FC = () => {
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
+    };
+
+    const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(event.target.value);
     };
 
     const validateForm = async (event: React.SyntheticEvent) => {
@@ -89,7 +92,7 @@ const Registration: FC = () => {
                 }
                 <CustomInput type="email" id="email" name="email" placeholder="E-mail" onChange={handleEmailChange}/>
                 <CustomInput type="password" id="password" name="password" placeholder="Пароль"
-                             isInvalid={isRepeatedPasswordInvalid}/>
+                             isInvalid={isRepeatedPasswordInvalid} onChange={handlePasswordChange}/>
                 <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите пароль"
                              isInvalid={isRepeatedPasswordInvalid}/>
 

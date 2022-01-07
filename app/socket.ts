@@ -273,7 +273,6 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 }));
                 console.log(result);
             } else {
-                console.log('addedTime:', addedTime[gameId]);
                 ws.send(JSON.stringify({
                     'action': 'time',
                     'isStarted': gameIsTimerStart[gameId],

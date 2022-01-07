@@ -127,7 +127,7 @@ export class GamesController {
             }
             const answer = {
                 name: game.name,
-                status: game.status,
+                isStarted: !!games[gameId],
                 id: game.id,
                 teams: game.teams.map(value => value.name),
                 roundCount: game.rounds.length,
@@ -168,7 +168,6 @@ export class GamesController {
                 games[game.id].addTeam(new Team(team.name, team.id));
             }
             await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, "started");
-            console.log('GAMEADMINS:', gameAdmins);
             res.status(200).json(answer);
         } catch (error: any) {
             res.status(400).json({'message': error.message});

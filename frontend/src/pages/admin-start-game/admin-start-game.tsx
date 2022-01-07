@@ -14,8 +14,9 @@ const StartGame: FC = () => {
     useEffect(() => {
         getGame(gameId).then((res) => {
             if (res.status === 200) {
-                res.json().then(({name}) => {
+                res.json().then(({name, isStarted}) => {
                     setGameName(name);
+                    setIsGameStart(isStarted);
                 });
             }
         });
