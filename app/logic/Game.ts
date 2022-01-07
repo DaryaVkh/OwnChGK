@@ -26,17 +26,46 @@ export class Round {
     }
 }
 
+export enum GameStatus {
+    IsOnBreak,
+    Start
+}
+
 export class Game {
     public readonly id: number;
     public readonly name: string;
     public readonly rounds: Round[]; // TODO: public?
     public readonly teams: { [name: number]: Team }; // TODO: public?
+    public status: GameStatus;
+    public breakTime: number;
+    private interval: any;
 
     constructor(name: string) {
         this.id = Math.round(Math.random() * 1000000)
         this.name = name;
         this.rounds = [];
         this.teams = {};
+        this.status = GameStatus.Start;
+        this.breakTime = 0;
+    }
+
+    startBreak(time: number): void {
+        this.status = GameStatus.IsOnBreak;
+        this.breakTime = time;
+        this.interval = setInterval(() => {
+            if (this.breakTime === 0) {
+                this.stopBreak();
+            } else {
+                this.breakTime -= 1;
+                console.log(this.breakTime);
+            }
+        }, 1000, this);
+    }
+
+    stopBreak(): void {
+        clearInterval(this.interval);
+        this.status = GameStatus.Start;
+        this.breakTime = 0;
     }
 
     addTeam(team: Team): void {

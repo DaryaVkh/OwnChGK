@@ -4,6 +4,7 @@ import {Status} from './logic/AnswerAndAppeal';
 import jwt from 'jsonwebtoken';
 import {secret} from './jwtToken';
 import * as WebSocket from 'ws';
+import {GameStatus} from "./logic/Game";
 
 export const games: { [id: string]: Game; } = {};
 export const gamesCurrentAnswer: { [id: string]: [number, number]; } = {};
@@ -164,7 +165,7 @@ function GetAppeal(appeal: string, teamId: number, gameId: number, number: numbe
     const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount);
     let questionNumber = number - (roundNumber - 1) * games[gameId].rounds[0].questionsCount;
     console.log(roundNumber, questionNumber);
-    games[gameId].rounds[roundNumber-1].questions[questionNumber-1].giveAppeal(teamId, appeal, answer);
+    games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].giveAppeal(teamId, appeal, answer);
 }
 
 function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
@@ -226,7 +227,7 @@ function GetAllAppeals(gameId: number, ws) {
     for (let roundNumber = 0; roundNumber < games[gameId].rounds.length; roundNumber++) {
         for (let questionNumber = 0; questionNumber < games[gameId].rounds[roundNumber].questions.length; questionNumber++) {
             if (games[gameId].rounds[roundNumber].questions[questionNumber].appeals.length > 0)
-                res.push(roundNumber*games[gameId].rounds[roundNumber].questions.length+(questionNumber+1));
+                res.push(roundNumber * games[gameId].rounds[roundNumber].questions.length + (questionNumber + 1));
         }
     }
     ws.send(JSON.stringify({
@@ -289,6 +290,12 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 'action': 'changeQuestionNumber',
                 'number': result,
             }));
+        } else if (jsonMessage.action == 'isOnBreak') {
+            ws.send(JSON.stringify({
+                action: 'isOnBreak',
+                status: !games[gameId].status, //не статус = на паузе
+                time: games[gameId].breakTime
+            }))
         }
         if (userRoles == 'admin' || userRoles == 'superadmin') {
             gameAdmins[gameId].add(ws);
@@ -315,6 +322,31 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 GetAppealsByNumber(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
             } else if (jsonMessage.action == 'getAllAppeals') {
                 GetAllAppeals(gameId, ws);
+            } else if (jsonMessage.action == 'breakTime') {
+                games[gameId].startBreak(jsonMessage.time);
+                for (const adminWs of gameAdmins[gameId]) {
+                    adminWs.send(JSON.stringify({
+                        action: 'isOnBreak',
+                        status: true,
+                        time: jsonMessage.time
+                    }));
+                }
+                for (const userWs of gameUsers[gameId]) {
+                    userWs.send(JSON.stringify({
+                        action: 'isOnBreak',
+                        status: true,
+                        time: jsonMessage.time
+                    }));
+                }
+            } else if (jsonMessage.action == 'stopBreak') {
+                games[gameId].stopBreak();
+                for (const userWs of gameUsers[gameId]) {
+                    userWs.send(JSON.stringify({
+                        action: 'isOnBreak',
+                        status: false,
+                        time: 0
+                    }))
+                }
             }
         } else {
             if (!games[gameId]) {
@@ -342,7 +374,6 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
             } else if (jsonMessage.action == 'getTeamAnswers') {
                 const answers = games[gameId].teams[teamId].getAnswers();
-                console.log(answers, ' =answers');
                 const result = answers.map((ans) => {
                     return {
                         number: (ans.roundNumber - 1) * games[gameId].rounds[0].questionsCount + ans.questionNumber,
@@ -350,7 +381,6 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                         status: ans.status
                     }
                 })
-
                 ws.send(JSON.stringify({
                     'action': 'teamAnswers',
                     'answers': result

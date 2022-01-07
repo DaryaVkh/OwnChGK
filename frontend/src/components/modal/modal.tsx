@@ -4,9 +4,11 @@ import React, {FC, useCallback, useState} from 'react';
 import classes from './modal.module.scss';
 import {ModalProps} from '../../entities/modal/modal.interfaces';
 import {deleteGame, deleteTeam} from '../../server-api/server-api';
+import {getCookie, getUrlForSocket} from "../../commonFunctions";
 
 const Modal: FC<ModalProps> = props => {
     const [minutes, setMinutes] = useState<number>(0);
+    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
 
     const handleMinutesCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMinutes(+event.target.value);
@@ -39,6 +41,13 @@ const Modal: FC<ModalProps> = props => {
         if (minutes !== 0) {
             props.setBreakTime?.(minutes);
             props.startBreak?.(true);
+            conn.send(JSON.stringify({
+                        'cookie': getCookie('authorization'),
+                        'action': 'breakTime',
+                        'time': minutes * 60
+                    }
+                )
+            )
         }
         handleCloseModal(e);
     }

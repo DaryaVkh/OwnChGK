@@ -12,6 +12,7 @@ import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import NavBar from '../../components/nav-bar/nav-bar';
 
 let progressBar: any;
+let interval: any;
 
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -28,7 +29,7 @@ const UserGame: FC<UserGameProps> = props => {
         isAnswerAccepted: false
     });
     const [isBreak, setIsBreak] = useState<boolean>(false);
-    const [breakTime, setBreakTime] = useState('5:15');
+    const [breakTime, setBreakTime] = useState(0);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
 
     useEffect(() => {
@@ -51,6 +52,10 @@ const UserGame: FC<UserGameProps> = props => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'time'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'isOnBreak'
             }));
         };
 
@@ -121,9 +126,31 @@ const UserGame: FC<UserGameProps> = props => {
                     isSnackbarOpen: false,
                     isAnswerAccepted: false
                 }), 5000);
+            } else if (jsonMessage.action === 'isOnBreak') {
+                if (jsonMessage.status) {
+                    setIsBreak(true);
+                    setBreakTime(jsonMessage.time);
+                    interval = setInterval(() => setBreakTime((time) => {
+                        if (time - 1 <= 0) {
+                            clearInterval(interval);
+                            setIsBreak(false);
+                        }
+                        return time - 1 > 0 ? time-1 : 0;
+                    }), 1000)
+                } else {
+                    setIsBreak(false);
+                    setBreakTime(0);
+                    clearInterval(interval);
+                }
             }
         };
     }, []);
+
+    const parseTimer = () => {
+        const minutes = Math.floor(breakTime / 60).toString().padStart(1, '0');
+        const sec = Math.floor(breakTime % 60).toString().padStart(2, '0');
+        return `${minutes}:${sec}`;
+    };
 
     const changeColor = (progressBar: HTMLDivElement) => {
         if (progressBar.style.width) {
@@ -238,7 +265,7 @@ const UserGame: FC<UserGameProps> = props => {
                     <div className={classes.breakContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                        <div className={classes.breakTime}>{breakTime}</div>
+                        <div className={classes.breakTime}>{parseTimer()}</div>
                     </div>
                 </PageWrapper>
             );

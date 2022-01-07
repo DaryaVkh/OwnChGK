@@ -14,6 +14,7 @@ import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Modal from '../../components/modal/modal';
 
 let interval: any;
+let breakInterval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
@@ -26,7 +27,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const [timer, setTimer] = useState(70000);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [breakTime, setBreakTime] = useState<number>(0);
+    const [breakTime, setBreakTime] = useState<number>(0); // в секундах
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
@@ -43,7 +44,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                     setGameName(name);
                     setToursCount(roundCount);
                     setQuestionsCount(questionCount);
-                    setIsAppeal(new Array(questionCount*roundCount).fill(false));
+                    setIsAppeal(new Array(questionCount * roundCount).fill(false));
                 });
             }
         });
@@ -56,6 +57,10 @@ const AdminGame: FC<AdminGameProps> = props => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'getAllAppeals'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'isOnBreak'
             }));
         };
 
@@ -77,24 +82,35 @@ const AdminGame: FC<AdminGameProps> = props => {
                 }
             } else if (jsonMessage.action === 'appeal') {
                 setIsAppeal(appeals => {
-                    appeals[jsonMessage.questionNumber-1] = true;
+                    appeals[jsonMessage.questionNumber - 1] = true;
                     return appeals;
                 })
             } else if (jsonMessage.action === 'appeals') {
                 setIsAppeal(appeals => {
                     const appealsCopy = new Array(appeals.length).fill(false)
                     for (const number of jsonMessage.appealByQuestionNumber) {
-                        appealsCopy[number-1] = true;
+                        appealsCopy[number - 1] = true;
                     }
                     return appealsCopy;
                 })
+            } else if (jsonMessage.action === 'isOnBreak') {
+                if (jsonMessage.status) {
+                    setIsBreak(true);
+                    setBreakTime(jsonMessage.time);
+                    breakInterval = setInterval(() => setBreakTime((time) => {
+                        if (time - 1 <= 0) {
+                            clearInterval(breakInterval);
+                        }
+                        return time - 1 > 0 ? time-1 : 0;
+                    }), 1000)
+                }
             }
         };
     }, []);
 
-    const parseTimer = () => {
-        const minutes = Math.floor(timer / 1000 / 60).toString().padStart(1, '0');
-        const sec = Math.floor(timer / 1000 % 60).toString().padStart(2, '0');
+    const parseTimer = (time:number) => {
+        const minutes = Math.floor(time / 1000 / 60).toString().padStart(1, '0');
+        const sec = Math.floor(time / 1000 % 60).toString().padStart(2, '0');
         return `${minutes}:${sec}`;
     };
 
@@ -198,7 +214,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
-                                isAppeal[(activeTourNumber-1)*questionsCount+i]
+                                isAppeal[(activeTourNumber - 1) * questionsCount + i]
                                     ?
                                     <div className={classes.opposition}>
                                         <CircleOutlinedIcon sx={{
@@ -225,6 +241,11 @@ const AdminGame: FC<AdminGameProps> = props => {
     const stopBreak = () => {
         setBreakTime(0);
         setIsBreak(false);
+        clearInterval(breakInterval);
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'stopBreak'
+        }))
     }
 
     return (
@@ -237,13 +258,15 @@ const AdminGame: FC<AdminGameProps> = props => {
 
             {
                 isModalOpen
-                    ? <Modal modalType='break' closeModal={setIsModalOpen} startBreak={setIsBreak} setBreakTime={setBreakTime} />
+                    ? <Modal modalType='break' closeModal={setIsModalOpen} startBreak={setIsBreak}
+                             setBreakTime={setBreakTime}/>
                     : null
             }
 
             <div className={classes.contentWrapper}>
                 <div className={classes.buttonsWrapper}>
-                    <button className={`${classes.button} ${classes.breakButton}`} onClick={isBreak ? stopBreak : openBreakModal}>{isBreak ? 'Остановить перерыв' : 'Перерыв'}</button>
+                    <button className={`${classes.button} ${classes.breakButton}`}
+                            onClick={isBreak ? stopBreak : openBreakModal}>{isBreak ? 'Остановить перерыв' : 'Перерыв'}</button>
 
                     <button className={`${classes.button} ${classes.playButton}`} onClick={handlePlayClick}>
                         {playOrPause === 'play'
@@ -260,7 +283,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         10 сек.
                     </button>
 
-                    <div className={classes.answerTime}>{parseTimer()}</div>
+                    <div className={classes.answerTime}>{parseTimer(timer)}</div>
                 </div>
 
                 <div className={classes.tablesWrapper}>
@@ -278,7 +301,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                 </div>
                 {
                     isBreak
-                        ? <p className={classes.breakInformer}>Идет перерыв: <b>{breakTime}</b></p>
+                        ? <p className={classes.breakInformer}>Идет перерыв: <b>{parseTimer(breakTime*1000)}</b></p>
                         : null
                 }
             </div>
