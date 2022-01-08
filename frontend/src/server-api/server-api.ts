@@ -6,6 +6,14 @@ export const getAmIParticipateGames = async () => {
     return await fetch('/games/?amIParticipate=true');
 };
 
+export const getResult = async (gameId: string) => {
+    return await fetch(`/games/${gameId}/result`);
+};
+
+export const getResultTable = async (gameId: string) => {
+    return await fetch(`/games/${gameId}/resultTable`);
+};
+
 export const getUsersWithoutTeam = async () => {
     return await fetch(`/users/?withoutTeam=true`);
 };

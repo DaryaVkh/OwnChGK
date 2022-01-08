@@ -19,6 +19,7 @@ export const gamesRouter = () => {
     router.patch('/:gameName/changeAdmin', roleMiddleware(adminAccess), gamesController.editGameAdmin);
     router.delete('/:gameName', roleMiddleware(adminAccess), gamesController.deleteGame);
     router.get('/:gameId/result', roleMiddleware(adminAccess), gamesController.getGameResult);
+    router.get('/:gameId/resultTable', roleMiddleware(adminAccess), gamesController.getGameResultScoreTable);
 
     router.post('/', roleMiddleware(adminAccess), gamesController.insertGame);
 

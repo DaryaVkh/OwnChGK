@@ -35,17 +35,4 @@ export class Team {
         return this.answers.find((ans:Answer) => ans.roundNumber == roundNumber &&
             ans.questionNumber == questionNumber);
     }
-
-    // getScoreTable(): number[][] {
-    //     const scoreTable = [];
-    //     for (let answer of this.answers) {
-    //         if (answers[i].roundNumber > scoreTable.length) {
-    //                 scoreTable.push({roundNumber: [answers[i].score]});
-    //             } else {
-    //                 console.log(scoreTable[scoreTable.length - 1]);
-    //                 scoreTable[scoreTable.length - 1].push(answers[i].score);
-    //             }
-    //     }
-    //     return scoreTable;
-    // }
 }

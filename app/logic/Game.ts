@@ -88,17 +88,26 @@ export class Game {
         this.rounds.push(round);
     }
 
-    getScoreTable(): [{name:string, scoreTable: number[][]}] {
-        const table = [];
+    getScoreTable(): { name: string, scoreTable: number[][] } {
+        let table = {};
+        const roundsCount = this.rounds.length;
+        const questionsCount = this.rounds[0].questions.length;
+
         for (let teamId in this.teams) {
-            // @ts-ignore
-            table.push({name: this.teams[teamId].name, scoreTable: this.teams[teamId].getScoreTable()});
+            table[this.teams[teamId].name] = new Array(roundsCount);
+            for (let round = 0; round < roundsCount; round++) {
+                table[this.teams[teamId].name][round] = new Array(questionsCount).fill(0);
+            }
+            const teamAnswers = this.teams[teamId].getAnswers();
+            for (let answer of teamAnswers) {
+                table[this.teams[teamId].name][answer.roundNumber-1][answer.questionNumber-1] = answer.score;
+            }
         }
         // @ts-ignore
         return table;
     }
 
-    getTotalScoreForAllTeams(): [{name:string, score:number}] {
+    getTotalScoreForAllTeams(): [{ name: string, score: number }] {
         const table = [];
         for (let teamId in this.teams) {
             // @ts-ignore

@@ -212,12 +212,32 @@ export class GamesController {
                 res.status(404).json({'message': 'Игра не началась'});
                 return;
             }
-            const scoreTable = games[gameId].getScoreTable();
             const totalScore = games[gameId].getTotalScoreForAllTeams();
             const answer = {
-                scoreTableForAllTeams: scoreTable,
                 totalScoreForAllTeams: totalScore,
             };
+            res.status(200).json(answer);
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async getGameResultScoreTable(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {gameId} = req.params;
+            if (!games[gameId]) {
+                res.status(404).json({'message': 'Игра не началась'});
+                return;
+            }
+
+            const answer = {
+                totalScoreForAllTeams: games[gameId].getScoreTable(),
+            };
+
             res.status(200).json(answer);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
