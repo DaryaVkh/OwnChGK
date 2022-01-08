@@ -1,5 +1,9 @@
 import nodemailer from 'nodemailer'
 
+const changePasswordMessage = 'Ваш код подтверждения для смены пароля:';
+const adminPasswordMessage = 'Вас назначили администратором проекта Своей ЧГКи. Ваш временный пароль:';
+const ignoreMessage = 'Если вы не запрашивали код, то проигнорируйте это сообщение';
+
 export function CreateTransporter(user: string, password: string) {
     return nodemailer.createTransport({
         service: 'Gmail',
@@ -24,7 +28,16 @@ export function SendMailWithTemporaryPassword(transporter, email: string, code: 
     transporter.sendMail({
         from: '"Своя ЧГК" <ownchgk@gmail.com>',
         to: email,
+        subject: 'Temporary password',
+        text: changePasswordMessage + '\n' +  code + '\n' + ignoreMessage
+    })
+}
+
+export function SendMailWithTemporaryPasswordToAdmin(transporter, email: string, code: string) {
+    transporter.sendMail({
+        from: '"Своя ЧГК" <ownchgk@gmail.com>',
+        to: email,
         subject: 'Change password',
-        text: 'This message was sent you to change your password \n Your code to enter: ' + code
+        text: adminPasswordMessage + '\n' +  code + '\n' + ignoreMessage
     })
 }
