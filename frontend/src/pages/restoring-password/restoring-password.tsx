@@ -7,6 +7,7 @@ import {Link, Redirect} from 'react-router-dom';
 import {RestoringPasswordProps} from '../../entities/restoring-password/restoring-password.interfaces';
 import {Alert} from '@mui/material';
 import {FormButton} from '../../components/form-button/form-button';
+import {changePasswordByCode, checkTemporaryPassword, sendTemporaryPassword} from '../../server-api/server-api';
 
 const RestoringPassword: FC<RestoringPasswordProps> = props => {
     const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
@@ -31,16 +32,35 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
 
     const handleSendCode = () => {
         // TODO тут отправляем код на почту email и меняем шаг на 'second' (setStep('second')) или говорим, что такого имейла в базе нет и ставим isEmailInvalid в false
-        setStep('second');
+        sendTemporaryPassword(email, props.isAdmin).then(res => {
+            if (res.status === 200) {
+                setStep('second');
+            } else {
+                setIsEmailInvalid(false);
+            }
+        })
     }
 
     const handleResendCode = () => {
         // TODO тут отправляем новый код на почту email, ибо прошлый юзер продолбал
+        sendTemporaryPassword(email, props.isAdmin).then(res => {
+            if (res.status === 200) {
+                setStep('second');
+            } else {
+                setIsEmailInvalid(false);
+            }
+        })
     }
 
     const handleCheckCode = () => {
         // TODO тут проверяем, что код верный и меняем шаг на 'third' (setStep('third')) или говорим, что код не верный и ставим isCodeInvalid в false
-        setStep('third');
+        checkTemporaryPassword(email, code, props.isAdmin).then(res => {
+            if (res.status === 200) {
+                setStep('third');
+            } else {
+                setIsCodeInvalid(true);
+            }
+        })
     }
 
     const handleChangeNewPassword = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +79,14 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
         } else {
             setIsRepeatedPasswordInvalid(false);
             // TODO тут записываем новый пароль newPassword в базу
-            setIsSuccess(true);
+            console.log(props.isAdmin);
+            changePasswordByCode(email, newPassword, code, props.isAdmin).then(res => {
+                if (res.status === 200) {
+                    setIsSuccess(true);
+                } else {
+                    setIsSuccess(false);
+                }
+            })
         }
     }
 
@@ -76,9 +103,11 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                         </p>
 
                         <div className={classes.form}>
-                            <CustomInput type="email" placeholder="E-mail" name="email" id="email" value={email} style={{width: '65%'}}
+                            <CustomInput type="email" placeholder="E-mail" name="email" id="email" value={email}
+                                         style={{width: '65%'}}
                                          onChange={handleEmailChange} isInvalid={isEmailInvalid}/>
-                            <button className={classes.sendButton} type="submit" onClick={handleSendCode}>Отправить</button>
+                            <button className={classes.sendButton} type="submit" onClick={handleSendCode}>Отправить
+                            </button>
                         </div>
 
                         <div className={classes.linkToSignInWrapper}
@@ -108,26 +137,31 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
             case 'second':
                 return (
                     <div className={classes.stepWrapper}>
-                        <p className={classes.instructionsParagraph} style={{margin: '17vh 0 8vh', textAlign: 'center'}}>
+                        <p className={classes.instructionsParagraph}
+                           style={{margin: '17vh 0 8vh', textAlign: 'center'}}>
                             Код отправлен на <b>{email}</b>
                         </p>
 
                         <div className={classes.secondStepForm}>
-                            <CustomInput type="text" placeholder="Введите код" name="code" id="code" value={code} style={{width: '35%', marginRight: '1vw'}}
-                                         onChange={handleCodeChange} isInvalid={isCodeInvalid} />
-                            <button className={classes.sendButton} type="submit" onClick={handleCheckCode}>Отправить</button>
+                            <CustomInput type="text" placeholder="Введите код" name="code" id="code" value={code}
+                                         style={{width: '35%', marginRight: '1vw'}}
+                                         onChange={handleCodeChange} isInvalid={isCodeInvalid}/>
+                            <button className={classes.sendButton} type="submit" onClick={handleCheckCode}>Отправить
+                            </button>
                         </div>
 
                         <div className={classes.resendCodeWrapper}>
-                            <div className={classes.ghostDiv} />
-                            <Link className={classes.resendCode} to='#' onClick={handleResendCode}>Переотправить код</Link>
+                            <div className={classes.ghostDiv}/>
+                            <Link className={classes.resendCode} to="#" onClick={handleResendCode}>Переотправить
+                                код</Link>
                         </div>
                     </div>
                 );
             case 'third':
                 return (
                     <div className={classes.stepWrapper}>
-                        <p className={classes.instructionsParagraph} style={{margin: '17vh auto 10vh', textAlign: 'center'}}>
+                        <p className={classes.instructionsParagraph}
+                           style={{margin: '17vh auto 10vh', textAlign: 'center'}}>
                             Придумайте новый пароль
                         </p>
 
@@ -151,10 +185,13 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                                     : null
                             }
                             <CustomInput type="password" id="password" name="password" placeholder="Новый пароль"
-                                         value={newPassword} onChange={handleChangeNewPassword} isInvalid={isRepeatedPasswordInvalid}/>
-                            <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите новый пароль"
-                                         value={repeatedPassword} onChange={handleChangeRepeatedPassword} isInvalid={isRepeatedPasswordInvalid}/>
-                            <FormButton text="Сохранить" style={{padding: '0 2vw'}} />
+                                         value={newPassword} onChange={handleChangeNewPassword}
+                                         isInvalid={isRepeatedPasswordInvalid}/>
+                            <CustomInput type="password" id="repeatPassword" name="repeatPassword"
+                                         placeholder="Повторите новый пароль"
+                                         value={repeatedPassword} onChange={handleChangeRepeatedPassword}
+                                         isInvalid={isRepeatedPasswordInvalid}/>
+                            <FormButton text="Сохранить" style={{padding: '0 2vw'}}/>
                         </form>
                     </div>
                 );
@@ -162,10 +199,10 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
     }
 
     return isSuccess
-        ? <Redirect to={props.isAdmin ? '/admin' : '/auth'} />
+        ? <Redirect to={props.isAdmin ? '/admin' : '/auth'}/>
         : (
             <PageWrapper>
-                <Header isAuthorized={false} isAdmin={false}>
+                <Header isAuthorized={false} isAdmin={props.isAdmin}>
                     <div className={classes.pageTitle}>Восстановление пароля</div>
                 </Header>
 

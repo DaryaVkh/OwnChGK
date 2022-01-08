@@ -12,8 +12,12 @@ export const usersRouter = () => {
     router.post('/login', usersController.login);
     router.post('/insert', usersController.insert);
     router.post('/logout', usersController.logout);
+    router.post('/sendMail', usersController.sendPasswordWithTemporaryPassword);
+    router.post('/checkTemporaryPassword', usersController.confirmTemporaryPassword);
     router.get('/getTeam', usersController.getTeam);
     router.patch('/:gameId/changeToken', usersController.changeTokenWhenGoIntoGame);
+    router.patch('/changePasswordByCode', usersController.changePasswordByCode);
+    router.patch('/changePassword', usersController.changePasswordByOldPassword);
 
     return router;
 }

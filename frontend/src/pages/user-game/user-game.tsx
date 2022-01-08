@@ -250,7 +250,7 @@ const UserGame: FC<UserGameProps> = props => {
                     <div className={classes.gameStartContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                        <div className={classes.pageText}>Игра скоро начнется</div>
+                        <div className={classes.pageText}>{gameName} скоро начнется</div>
                         <div className={classes.pageText}>Подождите</div>
                     </div>
                 </PageWrapper>

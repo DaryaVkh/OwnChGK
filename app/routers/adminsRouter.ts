@@ -13,6 +13,10 @@ export const adminsRouter = () => {
     router.post('/add', roleMiddleware(superAdminAccess), adminsController.insert);
     router.post('/logout', adminsController.logout);
     router.post('/delete', roleMiddleware(superAdminAccess), adminsController.delete);
+    router.post('/sendMail', adminsController.sendPasswordWithTemporaryPassword);
+    router.post('/checkTemporaryPassword', adminsController.confirmTemporaryPassword);
+    router.patch('/changePasswordByCode', adminsController.changePasswordByCode);
+    router.patch('/changePassword', adminsController.changePasswordByOldPassword);
 
     return router;
 }

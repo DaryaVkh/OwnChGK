@@ -111,3 +111,60 @@ export const getTeamsWithoutUser = async () => {
 export const checkToken = async () => {
     return await fetch('/users/current');
 };
+
+export const sendTemporaryPassword = async (email: string, isAdmin: boolean) => {
+    return await fetch(`/${isAdmin ? 'admins' : 'users'}/sendMail`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email
+        })
+    });
+}
+
+export const checkTemporaryPassword = async (email: string, code: string, isAdmin: boolean) => {
+    return await fetch(`/${isAdmin ? 'admins' : 'users'}/checkTemporaryPassword`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+            code
+        })
+    });
+}
+
+export const changePassword = async (email: string, password: string, oldPassword: string, isAdmin=false) => {
+    return await fetch(`/${isAdmin ? 'admins' : 'users'}/changePassword`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+            password,
+            oldPassword
+        })
+    });
+};
+
+export const changePasswordByCode = async (email: string, password: string, code: string, isAdmin: boolean) => {
+    return await fetch(`/${isAdmin ? 'admins' : 'users'}/changePasswordByCode`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+            password,
+            code
+        })
+    });
+};

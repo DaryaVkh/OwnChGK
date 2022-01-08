@@ -5,7 +5,7 @@ import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken, secret} from '../jwtToken';
 import jwt from 'jsonwebtoken';
-import {SendMailWithTemporaryPassword} from "../email";
+import {makeTemporaryPassword, SendMailWithTemporaryPassword} from '../email';
 import {transporter} from "../socket";
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
@@ -107,14 +107,29 @@ export class UsersController { // TODO: дописать смену имени �
         }
     }
 
-    public async changePassword(req: Request, res: Response) {
+    public async changePasswordByOldPassword(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {email, password} = req.body;
+            const {email, password, oldPassword} = req.body;
+            if (!email) {
+                res.status(400).json({message: 'email invalid'})
+            }
             const hashedPassword = await hash(password, 10);
+            let user = await getCustomRepository(UserRepository).findByEmail(email);
+            if (user) {
+                if (await compare(oldPassword, user.password)) {
+                    user.password = hashedPassword;
+                    await user.save();
+                } else {
+                    res.status(403).json({message: 'oldPassword invalid'})
+                }
+            } else {
+                res.status(404).json({message: 'email invalid'});
+            }
+
             await getCustomRepository(UserRepository).updateByEmailAndPassword(email, hashedPassword);
             res.status(200).json({});
         } catch (error: any) {
@@ -122,25 +137,64 @@ export class UsersController { // TODO: дописать смену имени �
         }
     }
 
-    public async SendPasswordWithTemporaryPassword(req: Request, res: Response) {
+    public async changePasswordByCode(req: Request, res: Response) {
         try {
-            const {email} = req.params;
-            const code = Math.round(100 - 0.5 + Math.random() * (1000 - 100 + 1)).toString(); //случайное число от 100 до 1000
-            SendMailWithTemporaryPassword(transporter, email, code);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {email, password, code} = req.body;
+            if (!email) {
+                res.status(400).json({message: 'email invalid'})
+            }
+            const hashedPassword = await hash(password, 10);
             let user = await getCustomRepository(UserRepository).findByEmail(email);
-            user.temporaryCode = code;
-            await user.save();
+            if (user) {
+                if (user.temporary_code === code) {
+                    user.password = hashedPassword;
+                    user.temporary_code = null;
+                    await user.save();
+                } else {
+                    res.status(403).json({'message': 'code invalid'});
+                }
+            } else {
+                res.status(400).json({'message': 'email invalid'});
+            }
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
     }
 
-    public async ConfirmTemporaryPassword(req: Request, res: Response) {
+    public async sendPasswordWithTemporaryPassword(req: Request, res: Response) {
         try {
-            const {email, code} = req.params;
+            const {email} = req.body;
+            if (!email) {
+                res.status(400).json({'message': 'email is invalid'});
+            }
+            const code = makeTemporaryPassword(8);
+            SendMailWithTemporaryPassword(transporter, email, code);
             let user = await getCustomRepository(UserRepository).findByEmail(email);
-            if (user.temporaryCode === code) {
+            if (user) {
+                user.temporary_code = code;
+                await user.save();
+                res.status(200).json({});
+            } else {
+                res.status(404).json({});
+            }
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async confirmTemporaryPassword(req: Request, res: Response) {
+        try {
+            const {email, code} = req.body;
+            let user = await getCustomRepository(UserRepository).findByEmail(email);
+            if (!user) {
+                res.status(404).json({});
+            }
+            if (user.temporary_code === code) {
                 res.status(200).json({});
             } else {
                 res.status(403).json({});

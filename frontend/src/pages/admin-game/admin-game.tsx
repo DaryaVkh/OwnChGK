@@ -18,8 +18,8 @@ let breakInterval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
-    const [activeTourNumber, setActiveTour] = useState<number>(1);
-    const [activeQuestionNumber, setActiveQuestion] = useState<number>(1);
+    const [activeTourNumber, setActiveTour] = useState<number>();
+    const [activeQuestionNumber, setActiveQuestion] = useState<number>();
     const [toursCount, setToursCount] = useState(0);
     const [questionsCount, setQuestionsCount] = useState(0);
     const [gameName, setGameName] = useState('');
@@ -104,6 +104,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                     breakInterval = setInterval(() => setBreakTime((time) => {
                         if (time - 1 <= 0) {
                             clearInterval(breakInterval);
+                            setIsBreak(false);
                         }
                         return time - 1 > 0 ? time-1 : 0;
                     }), 1000)
@@ -203,17 +204,24 @@ const AdminGame: FC<AdminGameProps> = props => {
     };
 
     const renderTours = () => {
+        if (activeTourNumber === undefined) {
+            return null;
+        }
         return Array.from(Array(toursCount).keys()).map(i => {
-            return <div className={`${classes.tour} ${i === 0 ? classes.activeTour : ''}`} id={`${i + 1}`}
+            return <div className={`${classes.tour} ${i === activeTourNumber - 1 ? classes.activeTour : ''}`} id={`${i + 1}`}
                         onClick={handleTourClick} key={`tour_${i + 1}`}>Тур {i + 1}</div>;
         });
     };
 
     const renderQuestions = () => {
+        if (activeTourNumber === undefined || activeQuestionNumber === undefined) {
+            return null;
+        }
+
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
                 <div className={classes.questionWrapper} key={`tour_${activeTourNumber}_question_${i + 1}`}>
-                    <div className={`${classes.question} ${i === 0 ? classes.activeQuestion : ''}`} id={`${i + 1}`}
+                    <div className={`${classes.question} ${i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`} id={`${i + 1}`}
                          onClick={handleQuestionClick}>
                         Вопрос {i + 1}
                     </div>
@@ -298,13 +306,13 @@ const AdminGame: FC<AdminGameProps> = props => {
                 <div className={classes.tablesWrapper}>
                     <div className={classes.toursWrapper}>
                         <Scrollbar>
-                            {renderTours()}
+                            {activeTourNumber ? renderTours() : null}
                         </Scrollbar>
                     </div>
 
                     <div className={classes.questionsWrapper}>
                         <Scrollbar>
-                            {renderQuestions()}
+                            {activeQuestionNumber ? renderQuestions() : null}
                         </Scrollbar>
                     </div>
                 </div>
