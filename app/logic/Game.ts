@@ -107,11 +107,10 @@ export class Game {
         return table;
     }
 
-    getTotalScoreForAllTeams(): [{ name: string, score: number }] {
-        const table = [];
+    getTotalScoreForAllTeams(): { name: string, score: number } {
+        const table = {};
         for (let teamId in this.teams) {
-            // @ts-ignore
-            table.push({name: this.teams[teamId].name, score: this.teams[teamId].getTotalScore()});
+            table[this.teams[teamId].name] = this.teams[teamId].getTotalScore();
         }
         // @ts-ignore
         return table;

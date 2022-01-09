@@ -163,7 +163,7 @@ export class GamesController {
                 delete gameUsers[gameId];
                 delete gameAdmins[gameId];
                 console.log('all: ', gameAdmins, gameUsers, games);
-            }, 1000*60*60*24*3);
+            }, 1000 * 60 * 60 * 24 * 3);
             for (let i = 0; i < game.rounds.length; i++) {
                 games[game.id].addRound(new Round(i + 1, answer.questionCount, 60, 1));
             }
@@ -238,6 +238,54 @@ export class GamesController {
                 totalScoreForAllTeams: games[gameId].getScoreTable(),
             };
 
+            res.status(200).json(answer);
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async getResultWithFormat(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {gameId} = req.params;
+            if (!games[gameId]) {
+                res.status(404).json({'message': 'Игра не началась'});
+                return;
+            }
+            const headersList = ['Название команды', 'Сумма'];
+            for (let i = 1; i <= games[gameId].rounds.length; i++) {
+                headersList.push('Тур ' + i);
+                for (let j = 1; j <= games[gameId].rounds[i - 1].questionsCount; j++) {
+                    headersList.push('Вопрос ' + j);
+                }
+            }
+            const teamRows = [];
+            const totalScoreForAllTeams = games[gameId].getTotalScoreForAllTeams();
+            const scoreTable = games[gameId].getScoreTable();
+            let roundsResultList = [];
+            for (const team in scoreTable) {
+                let roundSum = 0;
+                for (let i = 0; i < games[gameId].rounds.length; i++) {
+                    for (let j = 0; j < games[gameId].rounds[i].questionsCount; j++) {
+                        roundSum += scoreTable[team][i][j];
+                    }
+                    roundsResultList.push(roundSum);
+                    roundsResultList.push(scoreTable[team][i].join(';'));
+                    roundSum = 0;
+                }
+                teamRows.push(team + ';' + totalScoreForAllTeams[team] + ';' + roundsResultList.join(';'));
+                roundsResultList = [];
+            }
+
+            const headers = headersList.join(';');
+            const value = teamRows.join('\n');
+            const answer = {
+                totalTable: headers + '\n' + value,
+            };
+            console.log(answer.totalTable);
             res.status(200).json(answer);
         } catch (error: any) {
             res.status(400).json({'message': error.message});
