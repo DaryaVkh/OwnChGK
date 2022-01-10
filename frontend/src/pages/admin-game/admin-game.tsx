@@ -18,6 +18,7 @@ let breakInterval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
+    const [chosenTourNumber, setChosenTourNumber] = useState<number>();
     const [activeTourNumber, setActiveTour] = useState<number | 'none'>();
     const [activeQuestionNumber, setActiveQuestion] = useState<number | 'none'>();
     const [toursCount, setToursCount] = useState(0);
@@ -115,6 +116,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             } else if (jsonMessage.action == 'changeQuestionNumber') {
                 console.log(jsonMessage.round);
                 console.log(jsonMessage.question);
+                setChosenTourNumber(jsonMessage.round);
                 setActiveTour(jsonMessage.round);
                 setActiveQuestion(jsonMessage.question);
             }
@@ -132,7 +134,16 @@ const AdminGame: FC<AdminGameProps> = props => {
         const clickedTour = event.target as HTMLDivElement;
         activeTour.classList.remove(classes.activeTour);
         clickedTour.classList.add(classes.activeTour);
-        setActiveTour(+clickedTour.id);
+        setChosenTourNumber(() => {
+            if (activeTourNumber === +clickedTour.id) {
+                conn.send(JSON.stringify({
+                    'cookie': getCookie('authorization'),
+                    'action': 'getQuestionNumber'
+                }));
+            }
+
+            return +clickedTour.id
+        });
         setActiveQuestion('none');
 
         /*conn.send(JSON.stringify({
@@ -142,7 +153,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             'tourNumber': +clickedTour.id,
         }));*/
 
-        handleStopClick(); // Прошлый вопрос остановится!
+        //handleStopClick(); // Прошлый вопрос остановится!
     };
 
     const handleQuestionClick = (event: React.SyntheticEvent) => {
@@ -153,12 +164,13 @@ const AdminGame: FC<AdminGameProps> = props => {
         }
         clickedQuestion.classList.add(classes.activeQuestion);
         setActiveQuestion(+clickedQuestion.id);
+        setActiveTour(chosenTourNumber);
 
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'changeQuestion',
             'questionNumber': +clickedQuestion.id,
-            'tourNumber': activeTourNumber,
+            'tourNumber': chosenTourNumber,
         }));
 
         handleStopClick(); // Прошлый вопрос остановится!
@@ -210,17 +222,18 @@ const AdminGame: FC<AdminGameProps> = props => {
     };
 
     const renderTours = () => {
-        if (activeTourNumber === undefined) {
+        if (activeTourNumber === undefined || chosenTourNumber === undefined) {
             return null;
         }
+
         return Array.from(Array(toursCount).keys()).map(i => {
-            return <div className={`${classes.tour} ${typeof activeTourNumber === 'number' && i === activeTourNumber - 1 ? classes.activeTour : ''}`} id={`${i + 1}`}
-                        onClick={handleTourClick} key={`tour_${i + 1}`}>Тур {i + 1}</div>;
+            return <div className={`${classes.tour} ${i === chosenTourNumber - 1 ? classes.activeTour : ''}`} id={`${i + 1}`}
+                        onClick={handleTourClick} key={`tour_${i + 1}`}>{typeof activeTourNumber === 'number' && i === activeTourNumber - 1 ? '->': ''}Тур {i + 1}</div>;
         });
     };
 
     const renderQuestions = () => {
-        if (activeTourNumber === undefined || activeQuestionNumber === undefined) {
+        if (activeTourNumber === undefined || activeQuestionNumber === undefined || chosenTourNumber === undefined) {
             return null;
         }
 
@@ -237,7 +250,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
-                                typeof activeTourNumber === 'number' && isAppeal[(activeTourNumber - 1) * questionsCount + i]
+                                isAppeal[(chosenTourNumber - 1) * questionsCount + i]
                                     ?
                                     <div className={classes.opposition}>
                                         <CircleOutlinedIcon sx={{

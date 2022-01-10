@@ -1,6 +1,6 @@
-import {Team} from "./Team";
-import {Question} from "./Question";
-import {seconds70PerQuestion} from "../socket";
+import {Team} from './Team';
+import {Question} from './Question';
+import {seconds70PerQuestion} from '../socket';
 
 
 export class Round {
@@ -100,7 +100,7 @@ export class Game {
             }
             const teamAnswers = this.teams[teamId].getAnswers();
             for (let answer of teamAnswers) {
-                table[this.teams[teamId].name][answer.roundNumber-1][answer.questionNumber-1] = answer.score;
+                table[this.teams[teamId].name][answer.roundNumber - 1][answer.questionNumber - 1] = answer.score;
             }
         }
         // @ts-ignore

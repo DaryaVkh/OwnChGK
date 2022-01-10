@@ -4,7 +4,7 @@ import {compare, hash} from 'bcrypt';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken, secret} from '../jwtToken';
-import {makeTemporaryPassword, SendMailWithTemporaryPassword} from '../email';
+import {makeTemporaryPassword, SendMailWithTemporaryPassword, SendMailWithTemporaryPasswordToAdmin} from '../email';
 import {transporter} from '../socket';
 import jwt from 'jsonwebtoken';
 
@@ -63,8 +63,10 @@ export class AdminsController {
                 const hashedPassword = await hash(password, 10);
                 await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword, name);
             } else {
-                const hashedPassword = await hash(makeTemporaryPassword(20), 10);
+                const pass = makeTemporaryPassword(20);
+                const hashedPassword = await hash(pass, 10);
                 await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword, name);
+                SendMailWithTemporaryPasswordToAdmin(transporter, email, pass)
             }
             res.status(200).json({});
         } catch (error: any) {

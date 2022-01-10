@@ -217,7 +217,8 @@ function GetAllAppeals(gameId: number, ws) {
     const res = [];
     for (let roundNumber = 0; roundNumber < games[gameId].rounds.length; roundNumber++) {
         for (let questionNumber = 0; questionNumber < games[gameId].rounds[roundNumber].questions.length; questionNumber++) {
-            if (games[gameId].rounds[roundNumber].questions[questionNumber].appeals.filter(a => a.status === Status.UnChecked).length > 0)
+            if (games[gameId].rounds[roundNumber].questions[questionNumber].appeals
+                .filter(a => a.status === Status.UnChecked).length > 0)
                 res.push(roundNumber * games[gameId].rounds[roundNumber].questions.length + (questionNumber + 1));
         }
     }
