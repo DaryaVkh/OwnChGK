@@ -124,9 +124,11 @@ const UserGame: FC<UserGameProps> = props => {
                         isSnackbarOpen: true
                     });
                 }
-                setTimeout(() => setFlags({
-                    isSnackbarOpen: false,
-                    isAnswerAccepted: false
+                setTimeout(() => setFlags(flags => {
+                    return {
+                        isSnackbarOpen: false,
+                        isAnswerAccepted: flags.isAnswerAccepted
+                    }
                 }), 5000);
             } else if (jsonMessage.action === 'isOnBreak') {
                 if (jsonMessage.status) {
@@ -137,7 +139,7 @@ const UserGame: FC<UserGameProps> = props => {
                             clearInterval(interval);
                             setIsBreak(false);
                         }
-                        return time - 1 > 0 ? time-1 : 0;
+                        return time - 1 > 0 ? time - 1 : 0;
                     }), 1000)
                 } else {
                     setIsBreak(false);
@@ -224,18 +226,24 @@ const UserGame: FC<UserGameProps> = props => {
         console.log('click');
         setTimeout(() => {
             setFlags(flags => {
-                let result = {
+                const res = {
                     isSnackbarOpen: true,
-                    isAnswerAccepted: flags.isAnswerAccepted
+                    isAnswerAccepted: false
                 };
-                console.log('из таймаута', result);
-                return result;
-            });
 
-            setTimeout(() => setFlags({
-                isSnackbarOpen: false,
-                isAnswerAccepted: false
-            }), 5000);
+                console.log(flags);
+                if (!flags.isSnackbarOpen) {
+                    setTimeout(() => setFlags(flags => {
+                        return {
+                            isSnackbarOpen: false,
+                            isAnswerAccepted: flags.isAnswerAccepted
+                        }
+                    }), 5000);
+                    return res;
+                }
+
+                return flags;
+            });
         }, 1000);
     };
 
@@ -244,7 +252,7 @@ const UserGame: FC<UserGameProps> = props => {
             return (
                 <PageWrapper>
                     <Header isAuthorized={true} isAdmin={false}>
-                        <NavBar isAdmin={false} page=''/>
+                        <NavBar isAdmin={false} page=""/>
                     </Header>
 
                     <div className={classes.gameStartContentWrapper}>

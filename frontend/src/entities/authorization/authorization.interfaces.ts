@@ -8,9 +8,11 @@ export interface AuthorizationOwnProps {
 export interface AuthorizationStateProps {
     isLoggedIn: boolean;
     user: User;
+    isTokenChecked: boolean;
 }
 
 export interface AuthorizationDispatchProps {
+    onCheckToken: () => AppAction;
     onAuthorizeUserWithRole: (role: string, team: string, email: string, name: string) => AppAction;
 }
 

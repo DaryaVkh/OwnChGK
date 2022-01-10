@@ -18,8 +18,8 @@ let breakInterval: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
-    const [activeTourNumber, setActiveTour] = useState<number>();
-    const [activeQuestionNumber, setActiveQuestion] = useState<number>();
+    const [activeTourNumber, setActiveTour] = useState<number | 'none'>();
+    const [activeQuestionNumber, setActiveQuestion] = useState<number | 'none'>();
     const [toursCount, setToursCount] = useState(0);
     const [questionsCount, setQuestionsCount] = useState(0);
     const [gameName, setGameName] = useState('');
@@ -86,10 +86,13 @@ const AdminGame: FC<AdminGameProps> = props => {
                 }
             } else if (jsonMessage.action === 'appeal') {
                 setIsAppeal(appeals => {
-                    appeals[jsonMessage.questionNumber - 1] = true;
-                    return appeals;
+                    const appealsCopy = appeals.slice();
+                    appealsCopy[jsonMessage.questionNumber - 1] = true;
+                    return appealsCopy;
                 })
             } else if (jsonMessage.action === 'appeals') {
+                console.log('appeals');
+                console.log(jsonMessage.appealByQuestionNumber);
                 setIsAppeal(appeals => {
                     const appealsCopy = new Array(appeals.length).fill(false)
                     for (const number of jsonMessage.appealByQuestionNumber) {
@@ -130,21 +133,24 @@ const AdminGame: FC<AdminGameProps> = props => {
         activeTour.classList.remove(classes.activeTour);
         clickedTour.classList.add(classes.activeTour);
         setActiveTour(+clickedTour.id);
+        setActiveQuestion('none');
 
-        conn.send(JSON.stringify({
+        /*conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'changeQuestion',
             'questionNumber': 1,
             'tourNumber': +clickedTour.id,
-        }));
+        }));*/
 
-        handleStopClick();
+        handleStopClick(); // Прошлый вопрос остановится!
     };
 
     const handleQuestionClick = (event: React.SyntheticEvent) => {
         const activeQuestion = document.querySelector(`.${classes.activeQuestion}`) as HTMLDivElement;
         const clickedQuestion = event.target as HTMLDivElement;
-        activeQuestion.classList.remove(classes.activeQuestion);
+        if (activeQuestion) {
+            activeQuestion.classList.remove(classes.activeQuestion);
+        }
         clickedQuestion.classList.add(classes.activeQuestion);
         setActiveQuestion(+clickedQuestion.id);
 
@@ -155,7 +161,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             'tourNumber': activeTourNumber,
         }));
 
-        handleStopClick();
+        handleStopClick(); // Прошлый вопрос остановится!
     };
 
     const handlePlayClick = () => {
@@ -208,7 +214,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             return null;
         }
         return Array.from(Array(toursCount).keys()).map(i => {
-            return <div className={`${classes.tour} ${i === activeTourNumber - 1 ? classes.activeTour : ''}`} id={`${i + 1}`}
+            return <div className={`${classes.tour} ${typeof activeTourNumber === 'number' && i === activeTourNumber - 1 ? classes.activeTour : ''}`} id={`${i + 1}`}
                         onClick={handleTourClick} key={`tour_${i + 1}`}>Тур {i + 1}</div>;
         });
     };
@@ -221,7 +227,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
                 <div className={classes.questionWrapper} key={`tour_${activeTourNumber}_question_${i + 1}`}>
-                    <div className={`${classes.question} ${i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`} id={`${i + 1}`}
+                    <div className={`${classes.question} ${typeof activeQuestionNumber === 'number' && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`} id={`${i + 1}`}
                          onClick={handleQuestionClick}>
                         Вопрос {i + 1}
                     </div>
@@ -231,7 +237,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
-                                isAppeal[(activeTourNumber - 1) * questionsCount + i]
+                                typeof activeTourNumber === 'number' && isAppeal[(activeTourNumber - 1) * questionsCount + i]
                                     ?
                                     <div className={classes.opposition}>
                                         <CircleOutlinedIcon sx={{

@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './authorization.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
@@ -14,13 +14,26 @@ import {Alert} from '@mui/material';
 import {connect} from 'react-redux';
 import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
 import {Dispatch} from 'redux';
-import {authorizeUserWithRole} from '../../redux/actions/app-actions/app-actions';
+import {authorizeUserWithRole, checkToken as testToken} from '../../redux/actions/app-actions/app-actions';
 import {AppState} from '../../entities/app/app.interfaces';
+import {checkToken} from '../../server-api/server-api';
 
 const Authorization: FC<AuthorizationProps> = props => {
     const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    useEffect(() => {
+        checkToken().then((res) => {
+            if (res.status === 200) {
+                res.json().then(({role, team, email, name}) => {
+                    props.onAuthorizeUserWithRole(role, team, email, name);
+                });
+            } else {
+                props.onCheckToken();
+            }
+        });
+    }, []);
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
@@ -116,12 +129,14 @@ const Authorization: FC<AuthorizationProps> = props => {
 function mapStateToProps(state: AppState): AuthorizationStateProps {
     return {
         isLoggedIn: state.appReducer.isLoggedIn,
-        user: state.appReducer.user
+        user: state.appReducer.user,
+        isTokenChecked: state.appReducer.isTokenChecked
     };
 }
 
 function mapDispatchToProps(dispatch: Dispatch<AppAction>): AuthorizationDispatchProps {
     return {
+        onCheckToken: () => dispatch(testToken()),
         onAuthorizeUserWithRole: (role: string, team: string, email: string, name: string) => dispatch(authorizeUserWithRole(role, team, email, name))
     };
 }

@@ -54,7 +54,7 @@ const AdminAnswersPage: FC = () => {
 
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': 'getAppeals',
+                'action': 'getAppealsByNumber',
                 'roundNumber': +tour,
                 'questionNumber': +question,
             }));
@@ -67,7 +67,7 @@ const AdminAnswersPage: FC = () => {
                 setRejectedAnswers(jsonMessage.rejectedAnswers);
                 setUncheckedAnswers(jsonMessage.uncheckedAnswers);
                 setGameAnswers([...jsonMessage.acceptedAnswers, ...jsonMessage.rejectedAnswers, ...jsonMessage.uncheckedAnswers]);
-            } else if (jsonMessage.action === 'appeals') {
+            } else if (jsonMessage.action === 'appealsByNumber') {
                 console.log(jsonMessage.appeals);
                 setAppeals(jsonMessage.appeals);
             }

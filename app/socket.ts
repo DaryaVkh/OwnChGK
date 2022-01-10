@@ -205,8 +205,10 @@ function GetAppealsByNumber(gameId: number, roundNumber: number, questionNumber:
                 answer: games[gameId].teams[appeal.teamNumber].getAnswer(roundNumber, questionNumber).text
             }
         });
+
+    console.log('APPEALS', appeals);
     ws.send(JSON.stringify({
-        'action': 'appeals',
+        'action': 'appealsByNumber',
         appeals
     }));
 }
@@ -215,7 +217,7 @@ function GetAllAppeals(gameId: number, ws) {
     const res = [];
     for (let roundNumber = 0; roundNumber < games[gameId].rounds.length; roundNumber++) {
         for (let questionNumber = 0; questionNumber < games[gameId].rounds[roundNumber].questions.length; questionNumber++) {
-            if (games[gameId].rounds[roundNumber].questions[questionNumber].appeals.length > 0)
+            if (games[gameId].rounds[roundNumber].questions[questionNumber].appeals.filter(a => a.status === Status.UnChecked).length > 0)
                 res.push(roundNumber * games[gameId].rounds[roundNumber].questions.length + (questionNumber + 1));
         }
     }
@@ -268,6 +270,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 }));
             }
         } else if (jsonMessage.action == 'changeQuestion') {
+            console.log('changeQuestion', jsonMessage.tourNumber, jsonMessage.questionNumber);
             games[gameId].currentQuestion = [jsonMessage.tourNumber, jsonMessage.questionNumber];
             ChangeQuestionNumber(gameId, jsonMessage.questionNumber, jsonMessage.tourNumber);
         } else if (jsonMessage.action == 'isOnBreak') {
@@ -298,7 +301,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
             } else if (jsonMessage.action == 'getAnswers') {
                 GetAllTeamsAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
-            } else if (jsonMessage.action == 'getAppeals') {
+            } else if (jsonMessage.action == 'getAppealsByNumber') {
                 GetAppealsByNumber(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
             } else if (jsonMessage.action == 'getAllAppeals') {
                 GetAllAppeals(gameId, ws);
@@ -353,13 +356,12 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 }));
             } else if (jsonMessage.action == 'appeal') {
                 console.log(jsonMessage);
+                GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
                 for (let ws of gameAdmins[gameId])
                     ws.send(JSON.stringify({
                         action: 'appeal',
                         questionNumber: jsonMessage.number
                     }));
-
-                GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
             } else if (jsonMessage.action == 'getTeamAnswers') {
                 const answers = games[gameId].teams[teamId].getAnswers();
                 const result = answers.map((ans) => {
