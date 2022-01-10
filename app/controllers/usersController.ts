@@ -107,6 +107,40 @@ export class UsersController { // TODO: дописать смену имени �
         }
     }
 
+    public async changeName(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {newName} = req.body;
+            if (!newName) {
+                return res.status(400).json({});
+            }
+
+            const oldToken = req.cookies['authorization'];
+            const payload = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            if (payload.id) {
+                const user = await getCustomRepository(UserRepository).findOne(payload.id);
+                if (user) {
+                    user.name = newName;
+                    await user.save();
+                    const newToken = generateAccessToken(payload.id, payload.email, payload.roles, payload.teamId, payload.gameId, newName);
+                    res.cookie('authorization', newToken, {
+                        maxAge: 24 * 60 * 60 * 1000,
+                        //httpOnly: true,
+                        secure: true
+                    });
+                    res.status(200).json({});
+                } else {
+                    res.status(404).json({});
+                }
+            }
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
     public async changePasswordByOldPassword(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
@@ -115,7 +149,7 @@ export class UsersController { // TODO: дописать смену имени �
             }
             const {email, password, oldPassword} = req.body;
             if (!email) {
-                res.status(400).json({message: 'email invalid'})
+                return res.status(400).json({message: 'email invalid'});
             }
             const hashedPassword = await hash(password, 10);
             let user = await getCustomRepository(UserRepository).findByEmail(email);
@@ -123,15 +157,13 @@ export class UsersController { // TODO: дописать смену имени �
                 if (await compare(oldPassword, user.password)) {
                     user.password = hashedPassword;
                     await user.save();
+                    res.status(200).json({});
                 } else {
                     res.status(403).json({message: 'oldPassword invalid'})
                 }
             } else {
                 res.status(404).json({message: 'email invalid'});
             }
-
-            await getCustomRepository(UserRepository).updateByEmailAndPassword(email, hashedPassword);
-            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }

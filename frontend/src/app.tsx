@@ -57,7 +57,7 @@ const App: FC<AppProps> = props => {
                 <ProtectedRoute path="/admin/start-screen" exact
                                 neededRole={adminRoles}
                                 redirectPath={'/admin'}>
-                    <AdminStartScreen isSuperAdmin={false}/>
+                    <AdminStartScreen isSuperAdmin={props.user.role === 'superadmin'}/>
                 </ProtectedRoute>
 
                 <ProtectedRoute path="/admin/profile" exact

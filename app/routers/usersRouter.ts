@@ -14,10 +14,11 @@ export const usersRouter = () => {
     router.post('/logout', usersController.logout);
     router.post('/sendMail', usersController.sendPasswordWithTemporaryPassword);
     router.post('/checkTemporaryPassword', usersController.confirmTemporaryPassword);
-    router.get('/getTeam', usersController.getTeam);
-    router.patch('/:gameId/changeToken', usersController.changeTokenWhenGoIntoGame);
+    router.get('/getTeam', middleware, usersController.getTeam);
+    router.patch('/:gameId/changeToken', middleware, usersController.changeTokenWhenGoIntoGame);
     router.patch('/changePasswordByCode', usersController.changePasswordByCode);
-    router.patch('/changePassword', usersController.changePasswordByOldPassword);
+    router.patch('/changeName', middleware, usersController.changeName);
+    router.patch('/changePassword', middleware, usersController.changePasswordByOldPassword);
 
     return router;
 }

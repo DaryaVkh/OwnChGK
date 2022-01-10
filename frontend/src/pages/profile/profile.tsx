@@ -6,12 +6,15 @@ import Header from '../../components/header/header';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {Redirect} from 'react-router-dom';
 import {Alert} from '@mui/material';
+import {store} from '../../index';
+import {changeName, changePassword} from '../../server-api/server-api';
 
 const Profile: FC<ProfileProps> = props => {
-    let userName: string = '';
-    let userTeam: string = '';
-    let userEmail: string = '';
-    let userPassword: string = '';
+    const [userName, setUserName] = useState(store.getState().appReducer.user.name);
+    const [userTeam, setUserTeam] = useState(store.getState().appReducer.user.team);
+    const [userEmail, setUserEmail] = useState(store.getState().appReducer.user.email);
+    const [userPassword, setUserPassword] = useState('');
+    const [userOldPassword, setUserOldPassword] = useState('');
     const [isRepeatedPasswordInvalid, setIsRepeatedPasswordInvalid] = useState(false);
     const [isOldPasswordInvalid, setIsOldPasswordInvalid] = useState(false);
     const [isRedirected, setIsRedirected] = useState(false);
@@ -23,28 +26,55 @@ const Profile: FC<ProfileProps> = props => {
         const repeatedPassword = document.querySelector('#repeat-new-password') as HTMLInputElement;
         if (pswd.value !== repeatedPassword.value) {
             setIsRepeatedPasswordInvalid(true);
+            return false;
         } else {
-            userPassword = pswd.value;
             setIsRepeatedPasswordInvalid(false);
+            return true;
         }
     };
 
     const handleSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
-        checkRepeatedPassword();
 
-        //TODO проверять по бд старый пароль
-        if (isOldPasswordInvalid) {
+        changeName(userName, props.isAdmin)
+            .then(res => {
+                if (res.status !== 200) {
+                    // TODO: если не смогли имя поменять?
+                }
+            });
+
+        if (userPassword === '') {
             return false;
         }
 
-        if (isRepeatedPasswordInvalid) {
+        if (userOldPassword === '') {
+            setIsOldPasswordInvalid(true);
             return false;
         }
 
-        //TODO передаем изменения в бд
-        setIsRedirected(true);
+        if (checkRepeatedPassword()) {
+            changePassword(userEmail, userPassword, userOldPassword, props.isAdmin)
+                .then(res => {
+                    if (res.status === 200) {
+                        setIsRedirected(true);
+                    } else if (res.status === 403) {
+                        setIsOldPasswordInvalid(true);
+                    }
+                });
+        }
     };
+
+    const handleUserOldPassportChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUserOldPassword(event.target.value);
+    }
+
+    const handleUserPassportChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUserPassword(event.target.value);
+    }
+
+    const handleUserNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUserName(event.target.value);
+    }
 
     return isRedirected
         ? <Redirect to={props.isAdmin ? '/admin/start-screen' : '/start-screen'}/>
@@ -59,7 +89,8 @@ const Profile: FC<ProfileProps> = props => {
                     <div className={classes.contentWrapper}>
                         <div className={classes.infoWrapper}>
                             <CustomInput type="text" id="name" name="name" placeholder="Имя" defaultValue={userName}
-                                         required={false} style={{marginTop: 'calc(2vw + 2vh)'}}/>
+                                         required={false} style={{marginTop: 'calc(2vw + 2vh)'}} value={userName}
+                                         onChange={handleUserNameChange}/>
 
                             {
                                 !props.isAdmin
@@ -82,10 +113,12 @@ const Profile: FC<ProfileProps> = props => {
 
                             <CustomInput type="password" id="old-password" name="old-password"
                                          placeholder="Введите старый пароль" style={{marginBottom: '3.5vh'}}
-                                         isInvalid={isOldPasswordInvalid} required={false}/>
+                                         isInvalid={isOldPasswordInvalid} required={false} value={userOldPassword}
+                                         onChange={handleUserOldPassportChange}/>
                             <CustomInput type="password" id="new-password" name="new-password"
                                          placeholder="Введите новый пароль" isInvalid={isRepeatedPasswordInvalid}
-                                         required={false}/>
+                                         required={false} value={userPassword}
+                                         onChange={handleUserPassportChange}/>
                             <CustomInput type="password" id="repeat-new-password" name="repeat-new-password"
                                          placeholder="Повторите новый пароль" isInvalid={isRepeatedPasswordInvalid}
                                          onBlur={checkRepeatedPassword} required={false}/>

@@ -176,3 +176,43 @@ export const changePasswordByCode = async (email: string, password: string, code
         })
     });
 };
+
+export const changeName = async (newName: string, isAdmin: boolean) => {
+    return await fetch(`/${isAdmin ? 'admins' : 'users'}/changeName`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            newName
+        })
+    });
+};
+
+export const deleteAdmin = async (adminEmail: string) => {
+    return await fetch(`/admins/delete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email: adminEmail
+        })
+    });
+}
+
+export const addAdmin = async (adminEmail: string, adminName='') => {
+    return await fetch(`/admins/insert`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email: adminEmail,
+            name: adminName
+        })
+    });
+}

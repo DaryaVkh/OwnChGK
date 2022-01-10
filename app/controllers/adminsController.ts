@@ -3,10 +3,10 @@ import {AdminRepository} from '../db/repositories/adminRepository';
 import {compare, hash} from 'bcrypt';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
-import {generateAccessToken} from '../jwtToken';
+import {generateAccessToken, secret} from '../jwtToken';
 import {makeTemporaryPassword, SendMailWithTemporaryPassword} from '../email';
 import {transporter} from '../socket';
-import {UserRepository} from '../db/repositories/userRepository';
+import jwt from 'jsonwebtoken';
 
 export class AdminsController {
     public async getAll(req: Request, res: Response) {
@@ -58,10 +58,14 @@ export class AdminsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {email, password} = req.body;
-            const hashedPassword = await hash(password, 10);
-
-            await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword);
+            const {email, name, password} = req.body;
+            if (password) {
+                const hashedPassword = await hash(password, 10);
+                await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword, name);
+            } else {
+                const hashedPassword = await hash(makeTemporaryPassword(20), 10);
+                await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword, name);
+            }
             res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
@@ -106,6 +110,40 @@ export class AdminsController {
         }
     }
 
+    public async changeName(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {newName} = req.body;
+            if (!newName) {
+                return res.status(400).json({});
+            }
+
+            const oldToken = req.cookies['authorization'];
+            const payload = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            if (payload.id) {
+                const admin = await getCustomRepository(AdminRepository).findOne(payload.id);
+                if (admin) {
+                    admin.name = newName;
+                    await admin.save();
+                    const newToken = generateAccessToken(payload.id, payload.email, payload.roles, payload.teamId, payload.gameId, newName);
+                    res.cookie('authorization', newToken, {
+                        maxAge: 24 * 60 * 60 * 1000,
+                        //httpOnly: true,
+                        secure: true
+                    });
+                    res.status(200).json({});
+                } else {
+                    res.status(404).json({});
+                }
+            }
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
+    }
+
     public async changePasswordByOldPassword(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
@@ -114,23 +152,22 @@ export class AdminsController {
             }
             const {email, password, oldPassword} = req.body;
             if (!email) {
-                res.status(400).json({message: 'email invalid'})
+                return res.status(400).json({message: 'email invalid'})
             }
+
             const hashedPassword = await hash(password, 10);
             let admin = await getCustomRepository(AdminRepository).findByEmail(email);
             if (admin) {
                 if (await compare(oldPassword, admin.password)) {
                     admin.password = hashedPassword;
                     await admin.save();
+                    res.status(200).json({});
                 } else {
                     res.status(403).json({message: 'oldPassword invalid'})
                 }
             } else {
                 res.status(404).json({message: 'email invalid'});
             }
-
-            await getCustomRepository(AdminRepository).updateByEmailAndPassword(email, hashedPassword);
-            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -183,6 +220,16 @@ export class AdminsController {
     }
 
     public async delete(req: Request, res: Response) {
-        //todo: makeMethod
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {email} = req.body;
+            await getCustomRepository(AdminRepository).delete({email});
+            res.status(200).json({});
+        } catch (error: any) {
+            res.status(400).json({'message': error.message});
+        }
     }
 }

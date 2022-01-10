@@ -9,7 +9,7 @@ import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOu
 import {Scrollbars} from 'rc-scrollbars';
 import {Link, useLocation} from 'react-router-dom';
 import InputWithAdornment from '../../components/input-with-adornment/input-with-adornment';
-import {getAll} from '../../server-api/server-api';
+import {addAdmin, deleteAdmin, getAll} from '../../server-api/server-api';
 import Modal from '../../components/modal/modal';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -42,7 +42,12 @@ interface AdminProps {
 
 const AdminComponent: FC<AdminProps> = props => {
     const handleDelete = useCallback(e => {
-        //TODO вот тут удаляем админа из базы
+        deleteAdmin(props.email)
+            .then(res => {
+                if (res.status === 200) {
+                    // TODO: что делаем?
+                }
+            });
         props.deleteAdmin?.(admins => admins.filter(a => a.email !== props.email));
     }, [props]);
 
@@ -183,9 +188,16 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         let newAdminName = document.querySelector('#new-admin-name') as HTMLInputElement;
         let newAdminEmail = document.querySelector('#new-admin-email') as HTMLInputElement;
         if (newAdminEmail.value !== '') {
-            setAdmins(admins => [...admins, {name: newAdminName.value, email: newAdminEmail.value}]);
-            setNewAdmin(null);
-            setIsEmailInvalid(false);
+            addAdmin(newAdminEmail.value, newAdminName.value)
+                .then(res => {
+                    if (res.status === 200) {
+                        setAdmins(admins => [...admins, {name: newAdminName.value, email: newAdminEmail.value}]);
+                        setNewAdmin(null);
+                        setIsEmailInvalid(false);
+                    } else {
+                        setIsEmailInvalid(true);
+                    }
+                })
         } else {
             setIsEmailInvalid(true);
         }
