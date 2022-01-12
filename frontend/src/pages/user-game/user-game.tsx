@@ -258,7 +258,7 @@ const UserGame: FC<UserGameProps> = props => {
                     <div className={classes.gameStartContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                        <div className={classes.pageText}>{gameName} скоро начнется</div>
+                        <div className={classes.pageText}>«{gameName}» скоро начнется</div>
                         <div className={classes.pageText}>Подождите</div>
                     </div>
                 </PageWrapper>
@@ -284,7 +284,7 @@ const UserGame: FC<UserGameProps> = props => {
         return (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={false}>
-                    <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                    <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
                     <Link to={`/game-answers/${gameId}`}
                           className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 

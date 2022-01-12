@@ -22,6 +22,7 @@ import {AppAction} from './redux/reducers/app-reducer/app-reducer.interfaces';
 import {authorizeUserWithRole, checkToken as testToken} from './redux/actions/app-actions/app-actions';
 import StartGame from './pages/admin-start-game/admin-start-game';
 import {adminRoles, userRoles} from './entities/common/common.constants';
+import Rating from './pages/rating/rating';
 
 const App: FC<AppProps> = props => {
     useEffect(() => {
@@ -109,6 +110,12 @@ const App: FC<AppProps> = props => {
                     <StartGame/>
                 </ProtectedRoute>
 
+                <ProtectedRoute path='/admin/rating/:gameId' exact
+                                neededRole={adminRoles}
+                                redirectPath={'/admin'}>
+                    <Rating isAdmin={true} />
+                </ProtectedRoute>
+
                 <ProtectedRoute path="/start-screen" exact neededRole={userRoles} redirectPath="/auth">
                     <UserStartScreen/>
                 </ProtectedRoute>
@@ -129,8 +136,12 @@ const App: FC<AppProps> = props => {
                     <UserGame/>
                 </ProtectedRoute>
 
-                <ProtectedRoute path="/game-answers/:gameId" exact neededRole={userRoles} redirectPath={'/auth'}>
+                <ProtectedRoute path="/game-answers/:gameId" exact neededRole={userRoles} redirectPath='/auth'>
                     <UserAnswersPage/>
+                </ProtectedRoute>
+
+                <ProtectedRoute path='/rating/:gameId' exact neededRole={userRoles} redirectPath='/auth'>
+                    <Rating isAdmin={false} />
                 </ProtectedRoute>
 
                 {/*<Redirect from="*" to="/"/>*/}

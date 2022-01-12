@@ -287,7 +287,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <Link to={`admin/game/:${gameId}`} className={classes.menuLink}>Рейтинг</Link>
+                <Link to={`admin/rating/:${gameId}`} className={classes.menuLink}>Рейтинг</Link>
 
                 <div className={classes.gameName}>{gameName}</div>
             </Header>
