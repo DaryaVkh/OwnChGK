@@ -5,7 +5,7 @@ import Header from '../../components/header/header';
 import {Link, useParams} from 'react-router-dom';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
-import {AdminGameProps} from '../../entities/admin-game/admin-game.interfaces';
+import {AdminGameProps, TourProps} from '../../entities/admin-game/admin-game.interfaces';
 import PauseIcon from '@mui/icons-material/Pause';
 import CircleOutlinedIcon from '@mui/icons-material/Circle';
 import {getGame} from '../../server-api/server-api';
@@ -123,37 +123,53 @@ const AdminGame: FC<AdminGameProps> = props => {
         };
     }, []);
 
+    const Tour: FC<TourProps> = props => {
+        const handleTourClick = () => {
+            setChosenTourNumber(() => {
+                if (activeTourNumber === props.tourNumber) {
+                    conn.send(JSON.stringify({
+                        'cookie': getCookie('authorization'),
+                        'action': 'getQuestionNumber'
+                    }));
+                }
+
+                return props.tourNumber;
+            });
+            setActiveQuestion('none');
+
+            /*conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'changeQuestion',
+                'questionNumber': 1,
+                'tourNumber': +clickedTour.id,
+            }));*/
+
+            //handleStopClick(); // Прошлый вопрос остановится!
+        };
+
+        if (chosenTourNumber === undefined) {
+            return null;
+        }
+
+        return (
+            <div className={`${classes.tour} ${props.tourNumber === chosenTourNumber ? classes.activeTour : ''}`} id={`${props.tourNumber}`}
+                 onClick={handleTourClick} key={`tour_${props.tourNumber}`}>
+                <div style={{position: 'relative'}}>
+                    {
+                        typeof activeTourNumber === 'number' && props.tourNumber === activeTourNumber
+                            ? <span style={{position: 'absolute', left: '-40%'}}>&#9654;</span>
+                            : ''
+                    }
+                    Тур {props.tourNumber}
+                </div>
+            </div>
+        );
+    }
+
     const parseTimer = (time:number) => {
         const minutes = Math.floor(time / 1000 / 60).toString().padStart(1, '0');
         const sec = Math.floor(time / 1000 % 60).toString().padStart(2, '0');
         return `${minutes}:${sec}`;
-    };
-
-    const handleTourClick = (event: React.SyntheticEvent) => {
-        const activeTour = document.querySelector(`.${classes.activeTour}`) as HTMLDivElement;
-        const clickedTour = event.target as HTMLDivElement;
-        activeTour.classList.remove(classes.activeTour);
-        clickedTour.classList.add(classes.activeTour);
-        setChosenTourNumber(() => {
-            if (activeTourNumber === +clickedTour.id) {
-                conn.send(JSON.stringify({
-                    'cookie': getCookie('authorization'),
-                    'action': 'getQuestionNumber'
-                }));
-            }
-
-            return +clickedTour.id
-        });
-        setActiveQuestion('none');
-
-        /*conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'changeQuestion',
-            'questionNumber': 1,
-            'tourNumber': +clickedTour.id,
-        }));*/
-
-        //handleStopClick(); // Прошлый вопрос остановится!
     };
 
     const handleQuestionClick = (event: React.SyntheticEvent) => {
@@ -226,10 +242,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             return null;
         }
 
-        return Array.from(Array(toursCount).keys()).map(i => {
-            return <div className={`${classes.tour} ${i === chosenTourNumber - 1 ? classes.activeTour : ''}`} id={`${i + 1}`}
-                        onClick={handleTourClick} key={`tour_${i + 1}`}>{typeof activeTourNumber === 'number' && i === activeTourNumber - 1 ? '->': ''}Тур {i + 1}</div>;
-        });
+        return Array.from(Array(toursCount).keys()).map(i =>  <Tour tourNumber={i + 1} />);
     };
 
     const renderQuestions = () => {
@@ -287,7 +300,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <Link to={`admin/rating/:${gameId}`} className={classes.menuLink}>Рейтинг</Link>
+                <Link to={`/admin/rating/${gameId}`} className={classes.menuLink}>Рейтинг</Link>
 
                 <div className={classes.gameName}>{gameName}</div>
             </Header>
