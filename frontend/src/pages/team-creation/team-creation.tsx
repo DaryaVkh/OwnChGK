@@ -4,7 +4,7 @@ import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
 import {TeamCreatorProps} from '../../entities/team-creation/team-creation.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
-import {Alert, Autocomplete, TextField} from '@mui/material';
+import {Alert, Autocomplete, Skeleton, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
 import {useLocation, Redirect} from 'react-router-dom';
@@ -12,10 +12,10 @@ import NavBar from '../../components/nav-bar/nav-bar';
 import {store} from '../../index';
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
-    const [usersFromDB, setUsersFromDB] = useState<string[]>([]);
+    const [usersFromDB, setUsersFromDB] = useState<string[]>();
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
     const [isNameInvalid, setIsNameInvalid] = useState(false);
-    const [oldCaptain, setOldCaptain] = useState<string | undefined>(undefined);
+    const [oldCaptain, setOldCaptain] = useState<string | undefined>();
     const location = useLocation<{ name: string }>();
     const oldTeamName = props.mode === 'edit' ? location.state.name : '';
     const [teamName, setTeamName] = useState(props.mode === 'edit' ? location.state.name : '');
@@ -105,21 +105,26 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                 color: 'white'
                             }
                         }}>Такая команда уже существует</Alert> : null}
-                        <CustomInput type="text" id="teamName" name="teamName" placeholder="Название"
-                                     value={teamName}
-                                     defaultValue={teamName}
-                                     onChange={handleInputChange} isInvalid={isNameInvalid}/>
+
+                        {
+                            usersFromDB && (props.mode === 'edit' && oldCaptain || props.mode === 'creation') || !props.isAdmin
+                                ? <CustomInput type='text' id='teamName' name='teamName' placeholder='Название'
+                                      value={teamName}
+                                      defaultValue={teamName}
+                                      onChange={handleInputChange} isInvalid={isNameInvalid}/>
+                                : <Skeleton variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '3%'}} />
+                        }
 
                         {
                             !props.isAdmin && captain !== undefined
                                 ? <CustomInput type='text' id='captain' name='captain' placeholder='Капитан' value={captain} readonly={true} />
                                 :
                                 (
-                                    props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation'
+                                    usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation')
                                         ? <Autocomplete disablePortal
                                                         fullWidth
                                                         id="captain"
-                                                        options={usersFromDB}
+                                                        options={usersFromDB || []}
                                                         defaultValue={oldCaptain}
                                                         onChange={handleAutocompleteChange}
                                                         sx={{
@@ -154,13 +159,13 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                                         }}
                                                         renderInput={(params) => <TextField {...params} placeholder="Капитан"/>}
                                         />
-                                        : null
+                                        : <Skeleton variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '3%'}} />
                                 )
                         }
 
                     </div>
 
-                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
+                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={props.isAdmin && !(usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation'))}
                                 style={{
                                     padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
                                     filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'

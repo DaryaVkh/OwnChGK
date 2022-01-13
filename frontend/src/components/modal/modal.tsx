@@ -23,7 +23,7 @@ const Modal: FC<ModalProps> = props => {
     };
 
     const handleDelete = useCallback(e => {
-        props.deleteElement?.(arr => arr.filter(el => el.name !== props.itemForDeleteName));
+        props.deleteElement?.(arr => arr?.filter(el => el.name !== props.itemForDeleteName));
         if (props.type === 'game') {
             deleteGame(props.itemForDeleteName as string);
         } else {

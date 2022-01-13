@@ -79,7 +79,6 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
         } else {
             setIsRepeatedPasswordInvalid(false);
             // TODO тут записываем новый пароль newPassword в базу
-            console.log(props.isAdmin);
             changePasswordByCode(email, newPassword, code, props.isAdmin).then(res => {
                 if (res.status === 200) {
                     setIsSuccess(true);
@@ -137,9 +136,11 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
             case 'second':
                 return (
                     <div className={classes.stepWrapper}>
-                        <p className={classes.instructionsParagraph}
-                           style={{margin: '17vh 0 8vh', textAlign: 'center'}}>
+                        <p className={classes.instructionsParagraph} style={{marginTop: '13vh', marginBottom: '2vh'}}>
                             Код отправлен на <b>{email}</b>
+                        </p>
+                        <p className={classes.instructionsParagraph} style={{marginBottom: '8vh'}}>
+                            Если письмо не приходит, загляните в папку "Спам" и проверьте правильность введенного E-mail
                         </p>
 
                         <div className={classes.secondStepForm}>

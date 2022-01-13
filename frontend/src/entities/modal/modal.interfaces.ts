@@ -4,7 +4,7 @@ import {Game, Team} from '../../pages/admin-start-screen/admin-start-screen';
 export interface ModalProps {
     modalType: 'delete' | 'break';
     closeModal: Dispatch<SetStateAction<boolean>>;
-    deleteElement?: Dispatch<SetStateAction<Game[] | Team[]>>;
+    deleteElement?: Dispatch<SetStateAction<Game[] | Team[] | undefined>>;
     itemForDeleteName?: string;
     type?: 'team' | 'game';
     startBreak?: Dispatch<SetStateAction<boolean>>;

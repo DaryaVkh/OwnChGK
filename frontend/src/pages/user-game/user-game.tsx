@@ -10,6 +10,7 @@ import {getGame} from '../../server-api/server-api';
 import {store} from '../../index';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import NavBar from '../../components/nav-bar/nav-bar';
+import Loader from '../../components/loader/loader';
 
 let progressBar: any;
 let interval: any;
@@ -17,7 +18,7 @@ let interval: any;
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [answer, setAnswer] = useState('');
-    const [gameName, setGameName] = useState('');
+    const [gameName, setGameName] = useState();
     const [questionNumber, setQuestionNumber] = useState(1);
     const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const [timeForAnswer, setTimeForAnswer] = useState(70);
@@ -327,7 +328,7 @@ const UserGame: FC<UserGameProps> = props => {
         );
     }
 
-    return renderPage();
+    return !gameName ? <Loader /> : renderPage();
 };
 
 export default UserGame;

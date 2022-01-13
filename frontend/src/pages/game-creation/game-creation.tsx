@@ -11,16 +11,17 @@ import {getAll, getGame, createGame, editGame} from '../../server-api/server-api
 import {Redirect, useLocation} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
 import {Team} from '../admin-start-screen/admin-start-screen';
+import {Skeleton} from '@mui/material';
 
 const GameCreator: FC<GameCreatorProps> = props => {
-    const [teamsFromDB, setTeamsFromDB] = useState<Team[]>([]);
-    const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
+    const [teamsFromDB, setTeamsFromDB] = useState<Team[]>();
+    const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState<boolean>(false);
     const location = useLocation<{ id: string, name: string }>();
     const oldGameId = props.mode === 'edit' ? location.state.id : '';
     const [gameName, setGameName] = useState(props.mode === 'edit' ? location.state.name : '');
-    const [questionsCount, setQuestionsCount] = useState(0);
-    const [toursCount, setToursCount] = useState(0);
-    const [chosenTeams, setChosenTeams] = useState<string[] | undefined>(undefined);
+    const [questionsCount, setQuestionsCount] = useState<number>(0);
+    const [toursCount, setToursCount] = useState<number>(0);
+    const [chosenTeams, setChosenTeams] = useState<string[]>();
 
     useEffect(() => {
         getAll('/teams/').then(res => {
@@ -76,8 +77,8 @@ const GameCreator: FC<GameCreatorProps> = props => {
     };
 
     const renderTeams = () => {
-        if (props.mode === 'edit' && chosenTeams === undefined) {
-            return;
+        if (props.mode === 'edit' && !chosenTeams || !teamsFromDB) {
+            return Array.from(Array(5).keys()).map(i => <Skeleton key={`team_skeleton_${i}`} variant='rectangular' width='90%' height='5vh' sx={{margin: '0 0.4vw 1.3vh 1.4vw'}} />);
         }
 
         return teamsFromDB.map((team, index) => {
@@ -86,6 +87,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                 : <CustomCheckbox name={team.name} key={index} onChange={handleCheckboxChange}/>;
         });
     };
+
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
         if (props.mode === 'creation') {
@@ -135,38 +137,53 @@ const GameCreator: FC<GameCreatorProps> = props => {
                     <form className={classes.gameCreationForm} onSubmit={handleSubmit}>
                         <div className={classes.contentWrapper}>
                             <div className={classes.gameParametersWrapper}>
-                                <CustomInput type="text" id="gameName"
-                                             name="gameName"
-                                             placeholder="Название игры"
-                                             value={gameName}
-                                             defaultValue={gameName}
-                                             onChange={handleGameNameChange}/>
 
-                                <div className={classes.toursCountWrapper}>
-                                    <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество
-                                        туров</label>
-                                    <input className={classes.toursCountInput}
-                                           type="number"
-                                           id="toursCount"
-                                           name="toursCount"
-                                           value={toursCount || ''}
-                                           defaultValue={toursCount || ''}
-                                           required={true}
-                                           onChange={handleToursCountChange}/>
-                                </div>
+                                {
+                                    (props.mode !== 'edit' || (props.mode === 'edit' && chosenTeams)) && teamsFromDB
+                                        ? (
+                                            <>
+                                                <CustomInput type='text' id='gameName'
+                                                           name='gameName'
+                                                           placeholder='Название игры'
+                                                           value={gameName}
+                                                           defaultValue={gameName}
+                                                           onChange={handleGameNameChange} />
 
-                                <div className={classes.questionsCountWrapper}>
-                                    <label htmlFor="questionsCount" className={classes.questionsCountLabel}>Вопросов в
-                                        туре</label>
-                                    <input className={classes.questionsCountInput}
-                                           type="number"
-                                           id="questionsCount"
-                                           name="questionsCount"
-                                           value={questionsCount || ''}
-                                           defaultValue={questionsCount || ''}
-                                           required={true}
-                                           onChange={handleQuestionsCountChange}/>
-                                </div>
+                                                <div className={classes.toursCountWrapper}>
+                                                    <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество
+                                                        туров</label>
+                                                    <input className={classes.toursCountInput}
+                                                           type="number"
+                                                           id="toursCount"
+                                                           name="toursCount"
+                                                           value={toursCount || ''}
+                                                           defaultValue={toursCount || ''}
+                                                           required={true}
+                                                           onChange={handleToursCountChange}/>
+                                                </div>
+
+                                                <div className={classes.questionsCountWrapper}>
+                                                    <label htmlFor="questionsCount" className={classes.questionsCountLabel}>Вопросов в
+                                                        туре</label>
+                                                    <input className={classes.questionsCountInput}
+                                                           type="number"
+                                                           id="questionsCount"
+                                                           name="questionsCount"
+                                                           value={questionsCount || ''}
+                                                           defaultValue={questionsCount || ''}
+                                                           required={true}
+                                                           onChange={handleQuestionsCountChange}/>
+                                                </div>
+                                            </>
+                                        )
+                                        : (
+                                            <>
+                                                <Skeleton variant='rectangular' width='100%' height='7vh' style={{marginBottom: '3%'}} />
+                                                <Skeleton variant='rectangular' width='100%' height='7vh' style={{marginBottom: '3%'}} />
+                                                <Skeleton variant='rectangular' width='100%' height='7vh' style={{marginBottom: '3%'}} />
+                                            </>
+                                        )
+                                }
                             </div>
 
                             <div className={classes.teamsWrapper}>
@@ -190,7 +207,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                             </div>
                         </div>
 
-                        <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'}
+                        <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={teamsFromDB === undefined}
                                     style={{
                                         padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
                                         filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'

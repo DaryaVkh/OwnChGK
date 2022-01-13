@@ -12,6 +12,7 @@ import {getGame} from '../../server-api/server-api';
 import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Modal from '../../components/modal/modal';
+import Loader from '../../components/loader/loader';
 
 let interval: any;
 let breakInterval: any;
@@ -21,9 +22,9 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [chosenTourNumber, setChosenTourNumber] = useState<number>();
     const [activeTourNumber, setActiveTour] = useState<number | 'none'>();
     const [activeQuestionNumber, setActiveQuestion] = useState<number | 'none'>();
-    const [toursCount, setToursCount] = useState(0);
-    const [questionsCount, setQuestionsCount] = useState(0);
-    const [gameName, setGameName] = useState('');
+    const [toursCount, setToursCount] = useState();
+    const [questionsCount, setQuestionsCount] = useState();
+    const [gameName, setGameName] = useState();
     const {gameId} = useParams<{ gameId: string }>();
     const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const [timer, setTimer] = useState(70000);
@@ -238,15 +239,15 @@ const AdminGame: FC<AdminGameProps> = props => {
     };
 
     const renderTours = () => {
-        if (activeTourNumber === undefined || chosenTourNumber === undefined) {
+        if (!activeTourNumber || !chosenTourNumber) {
             return null;
         }
 
-        return Array.from(Array(toursCount).keys()).map(i =>  <Tour tourNumber={i + 1} />);
+        return Array.from(Array(toursCount).keys()).map(i => <Tour tourNumber={i + 1} />);
     };
 
     const renderQuestions = () => {
-        if (activeTourNumber === undefined || activeQuestionNumber === undefined || chosenTourNumber === undefined) {
+        if (!activeTourNumber || !activeQuestionNumber || !chosenTourNumber || !questionsCount) {
             return null;
         }
 
@@ -295,6 +296,10 @@ const AdminGame: FC<AdminGameProps> = props => {
             'cookie': getCookie('authorization'),
             'action': 'stopBreak'
         }))
+    }
+
+    if (!gameName || !toursCount || !questionsCount) {
+        return <Loader />;
     }
 
     return (

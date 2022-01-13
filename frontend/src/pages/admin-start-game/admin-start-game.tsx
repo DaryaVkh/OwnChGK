@@ -5,9 +5,10 @@ import {Redirect, useParams} from 'react-router-dom';
 import {getGame} from '../../server-api/server-api';
 import Header from '../../components/header/header';
 import NavBar from '../../components/nav-bar/nav-bar';
+import Loader from '../../components/loader/loader';
 
 const StartGame: FC = () => {
-    const [gameName, setGameName] = useState('');
+    const [gameName, setGameName] = useState();
     const {gameId} = useParams<{ gameId: string }>();
     const [isGameStart, setIsGameStart] = useState(false);
 
@@ -40,6 +41,10 @@ const StartGame: FC = () => {
                 }
             });
     };
+
+    if (!gameName) {
+        return <Loader />;
+    }
 
     return isGameStart ? <Redirect to={`/admin/game/${gameId}`}/> : (
         <PageWrapper>

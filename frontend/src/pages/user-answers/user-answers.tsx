@@ -9,11 +9,12 @@ import Scrollbar from '../../components/scrollbar/scrollbar';
 import {store} from '../../index';
 import {getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
+import Loader from '../../components/loader/loader';
 
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const {gameId} = useParams<{ gameId: string }>();
-    const [gameName, setGameName] = useState<string>('');
+    const [gameName, setGameName] = useState<string>();
     const [teamName, setTeamName] = useState<string>(store.getState().appReducer.user.team);
     const [answers, setAnswers] = useState<Answer[]>([]);
 
@@ -58,6 +59,10 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
             );
         });
     };
+
+    if (!gameName) {
+        return <Loader />;
+    }
 
     return (
         <PageWrapper>
