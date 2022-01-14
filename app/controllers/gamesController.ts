@@ -235,6 +235,9 @@ export class GamesController {
             }
 
             const answer = {
+                gameId,
+                roundsCount: games[gameId].rounds.length,
+                questionsCount: games[gameId].rounds[0].questionsCount,
                 totalScoreForAllTeams: games[gameId].getScoreTable(),
             };
 

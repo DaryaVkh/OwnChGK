@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './rating.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {GameParams, RatingProps, TeamResult, Tour} from '../../entities/rating/rating.interfaces';
@@ -7,41 +7,43 @@ import {Scrollbars} from 'rc-scrollbars';
 import {Table, TableBody, TableCell, tableCellClasses, TableHead, TableRow} from '@mui/material';
 import {TeamTableRow, TourHeaderCell} from '../../components/table/table';
 import {useParams} from 'react-router-dom';
+import {getResultTable, getResultTableFormat} from '../../server-api/server-api';
 
 const Rating: FC<RatingProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [gameParams, setGameParams] = useState<GameParams>({toursCount: 3, questionsCount: 10}); // TODO получаем с сервака как то по gameId
-    const [teams, setTeams] = useState<TeamResult[]>(
-        [
-            {
-                teamName: 'Сахара опять не будет',
-                toursWithResults: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
-            },
-            {
-                teamName: 'Забаненные в гугле',
-                toursWithResults: [[1, 1, 1, 0, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1], [1, 1, 1, 1, 0, 0, 0, 1, 1, 1]]
-            },
-            {
-                teamName: 'Не грози Южному автовокзалу',
-                toursWithResults: [[1, 1, 1, 1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 0, 1, 1, 0, 1, 0], [0, 0, 1, 1, 1, 1, 1, 1, 1, 0]]
-            },
-            {
-                teamName: 'ГУ ЧГК-шки ниндзя',
-                toursWithResults: [[1, 1, 1, 1, 1, 0, 1, 0, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
-            },
-            {
-                teamName: 'Ума палата №6',
-                toursWithResults: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 1, 1, 0]]
-            }
-        ]
-    ); // TODO а тут наверное как то по сокетам
-    const [expandedTours, setExpandedTours] = useState<boolean[]>([false, false, false]); // TODO когда пришли toursCount, нужно заполнять этот массив false-ами в количестве toursCount
+    const [gameParams, setGameParams] = useState<GameParams>({toursCount: 3, questionsCount: 10});
+    const [teams, setTeams] = useState<TeamResult[]>([]);
+    const [expandedTours, setExpandedTours] = useState<boolean[]>([false, false, false]);
 
     const headerTableCellStyles = {
         color: 'white',
         fontSize: '1.5vw',
         fontWeight: '700',
     };
+
+    useEffect(() => {
+        getResultTable(gameId).then(res => {
+            if (res.status === 200) {
+                res.json().then(({
+                                     roundsCount,
+                                     questionsCount,
+                                     totalScoreForAllTeams
+                                 }) => {
+                    setGameParams({toursCount: roundsCount, questionsCount: questionsCount});
+                    setExpandedTours(new Array(roundsCount).fill(false));
+                    const result = [];
+                    const teams = Object.keys(totalScoreForAllTeams);
+                    for (const team of teams) {
+                        result.push({
+                            teamName: team,
+                            toursWithResults: totalScoreForAllTeams[team]
+                        })
+                    }
+                    setTeams(result);
+                });
+            }
+        })
+    }, []);
 
     const renderTourHeaders = () => {
         return Array.from(Array(gameParams.toursCount).keys()).map(i => <TourHeaderCell tourNumber={i + 1}
@@ -77,7 +79,55 @@ const Rating: FC<RatingProps> = props => {
     }
 
     const downloadResults = () => {
+        getResultTableFormat(gameId).then(res => {
+            if (res.status === 200) {
+                res.json().then(({totalTable}) => {
+                    const element = document.createElement('a');
+                    element.setAttribute('href', 'data:text/plain;charset=cp1251,' + encodeCP1251(totalTable));
+                    element.setAttribute('download', `game-${gameId}-result.csv`);
+
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
+
+                    element.click();
+
+                    document.body.removeChild(element);
+                });
+            }
+        })
         // TODO скачивайте результаты
+    }
+
+    function decodeCP1251(text: string){
+        function decodeChar(s: string, p: number) {
+            const cp1251 = 'ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏђ‘’“”•–—�™љ›њќћџ ЎўЈ¤Ґ¦§Ё©Є«¬*®Ї°±Ііґµ¶·\
+ё№є»јЅѕїАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя';
+            p = parseInt(p.toString(), 16);
+            return p < 128 ? String.fromCharCode(p) : cp1251[p - 128];
+        }
+        return text.replace(/%(..)/g,decodeChar);
+    }
+
+    const encodeCP1251 = function (text: string) {
+        function encodeChar(c: string) {
+            const isKyr = function (str: string) {
+                return /[а-я]/i.test(str);
+            }
+            const cp1251 = 'ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏђ‘’“”•–—�™љ›њќћџ ЎўЈ¤Ґ¦§Ё©Є«¬*®Ї°±Ііґµ¶·\
+ё№є»јЅѕїАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя';
+            const p = isKyr(c) ? (cp1251.indexOf(c) + 128) : c.charCodeAt(0);
+            let h = p.toString(16);
+            if (h == 'a') {
+                h = '0A';
+            }
+            return '%' + h;
+        }
+
+        let res = '';
+        for (let i = 0; i < text.length; i++) {
+            res += encodeChar(text.charAt(i))
+        }
+        return res;
     }
 
     return (
@@ -90,7 +140,8 @@ const Rating: FC<RatingProps> = props => {
                 <div className={classes.buttonsWrapper}>
                     {
                         props.isAdmin
-                            ? <button className={`${classes.button} ${classes.intrigueButton}`} onClick={turnOnIntrigue}>Включить «Интригу»</button>
+                            ? <button className={`${classes.button} ${classes.intrigueButton}`}
+                                      onClick={turnOnIntrigue}>Включить «Интригу»</button>
                             : null
                     }
                     <button className={classes.button} onClick={downloadResults}>Скачать результаты</button>
@@ -130,11 +181,11 @@ const Rating: FC<RatingProps> = props => {
                             }}>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell sx={headerTableCellStyles} align='center' variant='head'
+                                    <TableCell sx={headerTableCellStyles} align="center" variant="head"
                                                style={{minWidth: '8vw', maxWidth: '8vw'}}>Место</TableCell>
-                                    <TableCell sx={headerTableCellStyles} align='left' variant='head'
+                                    <TableCell sx={headerTableCellStyles} align="left" variant="head"
                                                style={{minWidth: '16vw', maxWidth: '16vw'}}>Команда</TableCell>
-                                    <TableCell sx={headerTableCellStyles} align='center' variant='head'
+                                    <TableCell sx={headerTableCellStyles} align="center" variant="head"
                                                style={{minWidth: '8vw', maxWidth: '8vw'}}>Сумма</TableCell>
                                     {renderTourHeaders()}
                                 </TableRow>
