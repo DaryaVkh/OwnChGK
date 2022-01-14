@@ -28,6 +28,9 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const {email, password} = req.body;
             const user = await getCustomRepository(UserRepository).findByEmail(email);
+            if (!user) {
+                return res.status(404).json({message: 'email invalid'});
+            }
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
                 const token = generateAccessToken(user.id, user.email,"user", null, null);
@@ -177,7 +180,7 @@ export class UsersController { // TODO: дописать смену имени �
             }
             const {email, password, code} = req.body;
             if (!email) {
-                res.status(400).json({message: 'email invalid'})
+                return res.status(400).json({message: 'email invalid'})
             }
             const hashedPassword = await hash(password, 10);
             let user = await getCustomRepository(UserRepository).findByEmail(email);
@@ -186,13 +189,13 @@ export class UsersController { // TODO: дописать смену имени �
                     user.password = hashedPassword;
                     user.temporary_code = null;
                     await user.save();
+                    res.status(200).json({});
                 } else {
                     res.status(403).json({'message': 'code invalid'});
                 }
             } else {
                 res.status(400).json({'message': 'email invalid'});
             }
-            res.status(200).json({});
         } catch (error: any) {
             res.status(400).json({'message': error.message});
         }
@@ -202,7 +205,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const {email} = req.body;
             if (!email) {
-                res.status(400).json({'message': 'email is invalid'});
+                return res.status(400).json({'message': 'email is invalid'});
             }
             const code = makeTemporaryPassword(8);
             SendMailWithTemporaryPassword(transporter, email, code);
@@ -224,8 +227,9 @@ export class UsersController { // TODO: дописать смену имени �
             const {email, code} = req.body;
             let user = await getCustomRepository(UserRepository).findByEmail(email);
             if (!user) {
-                res.status(404).json({});
+                return res.status(404).json({});
             }
+
             if (user.temporary_code === code) {
                 res.status(200).json({});
             } else {

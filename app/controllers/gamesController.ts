@@ -120,8 +120,7 @@ export class GamesController {
             const {gameId} = req.params;
             const game = await getCustomRepository(GameRepository).findOne(gameId, {relations: ['teams', 'rounds']});
             if (!game) {
-                res.status(404).json({});
-                return;
+                return res.status(404).json({});
             }
             const answer = {
                 name: game.name,
@@ -146,8 +145,7 @@ export class GamesController {
             const {gameId} = req.params;
             const game = await getCustomRepository(GameRepository).findOne(+gameId, {relations: ['teams', 'rounds']});
             if (!game) {
-                res.status(404).json({});
-                return;
+                return res.status(404).json({});
             }
             const answer = {
                 name: game.name,
@@ -209,8 +207,7 @@ export class GamesController {
             }
             const {gameId} = req.params;
             if (!games[gameId]) {
-                res.status(404).json({'message': 'Игра не началась'});
-                return;
+                return res.status(404).json({'message': 'Игра не началась'});
             }
             const totalScore = games[gameId].getTotalScoreForAllTeams();
             const answer = {
@@ -230,8 +227,7 @@ export class GamesController {
             }
             const {gameId} = req.params;
             if (!games[gameId]) {
-                res.status(404).json({'message': 'Игра не началась'});
-                return;
+                return res.status(404).json({'message': 'Игра не началась'});
             }
 
             const answer = {
@@ -255,8 +251,7 @@ export class GamesController {
             }
             const {gameId} = req.params;
             if (!games[gameId]) {
-                res.status(404).json({'message': 'Игра не началась'});
-                return;
+                return res.status(404).json({'message': 'Игра не началась'});
             }
             const headersList = ['Название команды', 'Сумма'];
             for (let i = 1; i <= games[gameId].rounds.length; i++) {
