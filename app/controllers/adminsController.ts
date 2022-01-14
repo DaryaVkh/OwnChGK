@@ -28,7 +28,7 @@ export class AdminsController {
             const {email, password} = req.body;
             const admin = await getCustomRepository(AdminRepository).findByEmail(email);
             if (!admin) {
-                res.status(404).json({message: 'email invalid'});
+                return res.status(404).json({message: 'email invalid'});
             }
             const isPasswordMatching = await compare(password, admin.password);
             if (isPasswordMatching) {
@@ -78,7 +78,7 @@ export class AdminsController {
         try {
             const {email} = req.body;
             if (!email) {
-                res.status(400).json({'message': 'email is invalid'});
+                return res.status(400).json({'message': 'email is invalid'});
             }
             const code = makeTemporaryPassword(8);
             SendMailWithTemporaryPassword(transporter, email, code);
@@ -100,7 +100,7 @@ export class AdminsController {
             const {email, code} = req.body;
             let admin = await getCustomRepository(AdminRepository).findByEmail(email);
             if (!admin) {
-                res.status(404).json({});
+                return res.status(404).json({});
             }
             if (admin.temporary_code === code) {
                 res.status(200).json({});
@@ -183,7 +183,7 @@ export class AdminsController {
             }
             const {email, password, code} = req.body;
             if (!email) {
-                res.status(400).json({message: 'email invalid'})
+                return res.status(400).json({message: 'email invalid'})
             }
             const hashedPassword = await hash(password, 10);
             let admin = await getCustomRepository(AdminRepository).findByEmail(email);

@@ -14,6 +14,10 @@ export const getResultTable = async (gameId: string) => {
     return await fetch(`/games/${gameId}/resultTable`);
 };
 
+export const getResultTableFormat = async (gameId: string) => {
+    return await fetch(`/games/${gameId}/resultTable/format`);
+};
+
 export const getUsersWithoutTeam = async () => {
     return await fetch(`/users/?withoutTeam=true`);
 };
