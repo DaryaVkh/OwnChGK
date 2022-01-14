@@ -22,12 +22,12 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [chosenTourNumber, setChosenTourNumber] = useState<number>();
     const [activeTourNumber, setActiveTour] = useState<number | 'none'>();
     const [activeQuestionNumber, setActiveQuestion] = useState<number | 'none'>();
-    const [toursCount, setToursCount] = useState();
-    const [questionsCount, setQuestionsCount] = useState();
-    const [gameName, setGameName] = useState();
+    const [toursCount, setToursCount] = useState<number>();
+    const [questionsCount, setQuestionsCount] = useState<number>();
+    const [gameName, setGameName] = useState<string>();
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
-    const [timer, setTimer] = useState(70000);
+    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
+    const [timer, setTimer] = useState<number>(70000);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0); // в секундах
     const [isBreak, setIsBreak] = useState<boolean>(false);

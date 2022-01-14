@@ -5,6 +5,7 @@ import classes from './modal.module.scss';
 import {ModalProps} from '../../entities/modal/modal.interfaces';
 import {deleteGame, deleteTeam} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from "../../commonFunctions";
+import {createPortal} from 'react-dom';
 
 const Modal: FC<ModalProps> = props => {
     const [minutes, setMinutes] = useState<number>(0);
@@ -52,7 +53,7 @@ const Modal: FC<ModalProps> = props => {
         handleCloseModal(e);
     }
 
-    return (
+    return createPortal(
         <React.Fragment>
             <div className={classes.modal}>
                 <div className={classes.closeButtonWrapper}>
@@ -89,8 +90,8 @@ const Modal: FC<ModalProps> = props => {
                 </div>
             </div>
             <div className={classes.overlay}/>
-        </React.Fragment>
-    );
+        </React.Fragment>,
+        document.getElementById('root') as HTMLElement);
 };
 
 export default Modal;

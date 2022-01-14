@@ -18,11 +18,11 @@ import {Game, Team} from '../admin-start-screen/admin-start-screen';
 import Scrollbar from '../../components/scrollbar/scrollbar';
 
 const UserStartScreen: FC<UserStartScreenProps> = () => {
-    const [page, setPage] = useState('teams');
+    const [page, setPage] = useState<string>('teams');
     const [gamesFromDB, setGamesFromDB] = useState<Game[]>();
     const [teamsFromDB, setTeamsFromDB] = useState<Team[]>();
-    const [userTeam, setUserTeam] = useState('');
-    const [gameId, setGameId] = useState('');
+    const [userTeam, setUserTeam] = useState<string>('');
+    const [gameId, setGameId] = useState<string>('');
     let location = useLocation<{ page: string }>();
 
     useEffect(() => {

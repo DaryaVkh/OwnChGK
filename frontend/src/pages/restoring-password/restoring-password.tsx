@@ -8,6 +8,7 @@ import {RestoringPasswordProps} from '../../entities/restoring-password/restorin
 import {Alert} from '@mui/material';
 import {FormButton} from '../../components/form-button/form-button';
 import {changePasswordByCode, checkTemporaryPassword, sendTemporaryPassword} from '../../server-api/server-api';
+import PageBackdrop from '../../components/backdrop/backdrop';
 
 const RestoringPassword: FC<RestoringPasswordProps> = props => {
     const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
@@ -19,6 +20,8 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
     const [repeatedPassword, setRepeatedPassword] = useState<string>('');
     const [step, setStep] = useState<'first' | 'second' | 'third'>('first');
     const [isSuccess, setIsSuccess] = useState<boolean>(false);
+    const [isError, setIsError] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     //TODO проверять в базе наличие email, написать обработчик отправки
 
@@ -31,6 +34,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
     }
 
     const handleSendCode = () => {
+        setIsLoading(true);
         // TODO тут отправляем код на почту email и меняем шаг на 'second' (setStep('second')) или говорим, что такого имейла в базе нет и ставим isEmailInvalid в false
         sendTemporaryPassword(email, props.isAdmin).then(res => {
             if (res.status === 200) {
@@ -38,10 +42,12 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
             } else {
                 setIsEmailInvalid(false);
             }
+            setIsLoading(false);
         })
     }
 
     const handleResendCode = () => {
+        setIsLoading(true);
         // TODO тут отправляем новый код на почту email, ибо прошлый юзер продолбал
         sendTemporaryPassword(email, props.isAdmin).then(res => {
             if (res.status === 200) {
@@ -49,10 +55,12 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
             } else {
                 setIsEmailInvalid(false);
             }
+            setIsLoading(false);
         })
     }
 
     const handleCheckCode = () => {
+        setIsLoading(true);
         // TODO тут проверяем, что код верный и меняем шаг на 'third' (setStep('third')) или говорим, что код не верный и ставим isCodeInvalid в false
         checkTemporaryPassword(email, code, props.isAdmin).then(res => {
             if (res.status === 200) {
@@ -60,7 +68,8 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
             } else {
                 setIsCodeInvalid(true);
             }
-        })
+            setIsLoading(false);
+        });
     }
 
     const handleChangeNewPassword = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,17 +82,21 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
 
     const handleSubmitNewPassword = (event: React.SyntheticEvent) => {
         event.preventDefault();
+        setIsError(false);
         if (newPassword !== repeatedPassword) {
             setIsRepeatedPasswordInvalid(true);
             return false;
         } else {
             setIsRepeatedPasswordInvalid(false);
+            setIsLoading(true);
             // TODO тут записываем новый пароль newPassword в базу
             changePasswordByCode(email, newPassword, code, props.isAdmin).then(res => {
                 if (res.status === 200) {
                     setIsSuccess(true);
                 } else {
+                    setIsLoading(false);
                     setIsSuccess(false);
+                    setIsError(true);
                 }
             })
         }
@@ -168,7 +181,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
 
                         <form className={classes.newPasswordsForm} onSubmit={handleSubmitNewPassword}>
                             {
-                                isRepeatedPasswordInvalid
+                                isRepeatedPasswordInvalid || isError
                                     ?
                                     <Alert severity="error" sx={
                                         {
@@ -181,7 +194,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                                             }
                                         }
                                     }>
-                                        Пароли не совпадают
+                                        {isRepeatedPasswordInvalid ? 'Пароли не совпадают' : 'Что-то пошло не так, попробуйте снова'}
                                     </Alert>
                                     : null
                             }
@@ -222,6 +235,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                             </div>
                     }
                 </div>
+                <PageBackdrop isOpen={isLoading} />
             </PageWrapper>
         );
 };

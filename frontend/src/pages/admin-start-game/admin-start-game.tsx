@@ -8,9 +8,9 @@ import NavBar from '../../components/nav-bar/nav-bar';
 import Loader from '../../components/loader/loader';
 
 const StartGame: FC = () => {
-    const [gameName, setGameName] = useState();
+    const [gameName, setGameName] = useState<string>();
     const {gameId} = useParams<{ gameId: string }>();
-    const [isGameStart, setIsGameStart] = useState(false);
+    const [isGameStart, setIsGameStart] = useState<boolean>(false);
 
     useEffect(() => {
         getGame(gameId).then((res) => {

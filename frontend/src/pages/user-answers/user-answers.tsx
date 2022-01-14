@@ -12,7 +12,7 @@ import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
 
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
+    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
     const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>();
     const [teamName, setTeamName] = useState<string>(store.getState().appReducer.user.team);

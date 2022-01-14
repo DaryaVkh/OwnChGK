@@ -17,11 +17,11 @@ let interval: any;
 
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [answer, setAnswer] = useState('');
-    const [gameName, setGameName] = useState();
-    const [questionNumber, setQuestionNumber] = useState(1);
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
-    const [timeForAnswer, setTimeForAnswer] = useState(70);
+    const [answer, setAnswer] = useState<string>('');
+    const [gameName, setGameName] = useState<string>();
+    const [questionNumber, setQuestionNumber] = useState<number>(1);
+    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
+    const [timeForAnswer, setTimeForAnswer] = useState<number>(70);
     const [flags, setFlags] = useState<{
         isSnackbarOpen: boolean,
         isAnswerAccepted: boolean
@@ -30,7 +30,7 @@ const UserGame: FC<UserGameProps> = props => {
         isAnswerAccepted: false
     });
     const [isBreak, setIsBreak] = useState<boolean>(false);
-    const [breakTime, setBreakTime] = useState(0);
+    const [breakTime, setBreakTime] = useState<number>(0);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
 
     useEffect(() => {

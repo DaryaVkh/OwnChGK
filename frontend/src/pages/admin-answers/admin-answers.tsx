@@ -12,7 +12,7 @@ import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
 const AdminAnswersPage: FC = () => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
+    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
     const {tour, question} = useParams<{ tour: string, question: string }>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');

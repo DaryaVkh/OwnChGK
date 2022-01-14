@@ -12,16 +12,18 @@ import {Redirect, useLocation} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
 import {Team} from '../admin-start-screen/admin-start-screen';
 import {Skeleton} from '@mui/material';
+import PageBackdrop from '../../components/backdrop/backdrop';
 
 const GameCreator: FC<GameCreatorProps> = props => {
     const [teamsFromDB, setTeamsFromDB] = useState<Team[]>();
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState<boolean>(false);
     const location = useLocation<{ id: string, name: string }>();
-    const oldGameId = props.mode === 'edit' ? location.state.id : '';
-    const [gameName, setGameName] = useState(props.mode === 'edit' ? location.state.name : '');
+    const [gameName, setGameName] = useState<string>(props.mode === 'edit' ? location.state.name : '');
     const [questionsCount, setQuestionsCount] = useState<number>(0);
     const [toursCount, setToursCount] = useState<number>(0);
     const [chosenTeams, setChosenTeams] = useState<string[]>();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const oldGameId = props.mode === 'edit' ? location.state.id : '';
 
     useEffect(() => {
         getAll('/teams/').then(res => {
@@ -90,11 +92,14 @@ const GameCreator: FC<GameCreatorProps> = props => {
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
+        setIsLoading(true);
         if (props.mode === 'creation') {
             await createGame(gameName, toursCount, questionsCount, chosenTeams ?? [])
                 .then(res => {
                     if (res.status === 200) {
                         setIsCreatedSuccessfully(true);
+                    } else {
+                        setIsLoading(false);
                     }
                 });
         } else {
@@ -102,6 +107,8 @@ const GameCreator: FC<GameCreatorProps> = props => {
                 .then(res => {
                     if (res.status === 200) {
                         setIsCreatedSuccessfully(true);
+                    } else {
+                        setIsLoading(false);
                     }
                 });
         }
@@ -214,6 +221,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                     }}/>
                     </form>
                 </div>
+                <PageBackdrop isOpen={isLoading} />
             </PageWrapper>
         );
 };

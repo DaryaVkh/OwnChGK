@@ -16,27 +16,17 @@ import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces
 import {Dispatch} from 'redux';
 import {authorizeUserWithRole, checkToken as testToken} from '../../redux/actions/app-actions/app-actions';
 import {AppState} from '../../entities/app/app.interfaces';
-import {checkToken} from '../../server-api/server-api';
+import PageBackdrop from '../../components/backdrop/backdrop';
 
 const Authorization: FC<AuthorizationProps> = props => {
-    const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState(false);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
-    useEffect(() => {
-        checkToken().then((res) => {
-            if (res.status === 200) {
-                res.json().then(({role, team, email, name}) => {
-                    props.onAuthorizeUserWithRole(role, team, email, name);
-                });
-            } else {
-                props.onCheckToken();
-            }
-        });
-    }, []);
+    const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState<boolean>(false);
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
+        setIsLoading(true);
         await fetch(props.isAdmin ? 'admins/login' : 'users/login', {
             method: 'POST',
             headers: {
@@ -53,6 +43,7 @@ const Authorization: FC<AuthorizationProps> = props => {
                     props.onAuthorizeUserWithRole(role, team, email, name);
                 });
             } else {
+                setIsLoading(false);
                 setWrongEmailOrPassword(true);
             }
         });
@@ -74,10 +65,7 @@ const Authorization: FC<AuthorizationProps> = props => {
     };
 
     return props.isLoggedIn ? (
-        <Redirect to={props.user.role ===
-        'admin' ||
-        props.user.role ===
-        'superadmin' ? '/admin/start-screen' : '/start-screen'}/>
+        <Redirect to={props.user.role === 'admin' || props.user.role === 'superadmin' ? '/admin/start-screen' : '/start-screen'}/>
     ) : (
         <PageWrapper>
             <Header isAuthorized={false}/>
@@ -122,6 +110,7 @@ const Authorization: FC<AuthorizationProps> = props => {
                         </div>
                 }
             </div>
+            <PageBackdrop isOpen={isLoading} />
         </PageWrapper>
     );
 };

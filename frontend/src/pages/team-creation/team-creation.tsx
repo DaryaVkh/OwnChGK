@@ -10,16 +10,18 @@ import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-a
 import {useLocation, Redirect} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
 import {store} from '../../index';
+import PageBackdrop from '../../components/backdrop/backdrop';
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>();
-    const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState(false);
-    const [isNameInvalid, setIsNameInvalid] = useState(false);
+    const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState<boolean>(false);
+    const [isNameInvalid, setIsNameInvalid] = useState<boolean>(false);
     const [oldCaptain, setOldCaptain] = useState<string | undefined>();
     const location = useLocation<{ name: string }>();
+    const [teamName, setTeamName] = useState<string>(props.mode === 'edit' ? location.state.name : '');
+    const [captain, setCaptain] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const oldTeamName = props.mode === 'edit' ? location.state.name : '';
-    const [teamName, setTeamName] = useState(props.mode === 'edit' ? location.state.name : '');
-    const [captain, setCaptain] = useState('');
 
     useEffect(() => {
         if (!props.isAdmin) {
@@ -60,11 +62,13 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
+        setIsLoading(true);
         if (props.mode === 'creation') {
             createTeam(teamName, captain).then(res => {
                 if (res.status === 200) {
                     setIsCreatedSuccessfully(true);
                 } else {
+                    setIsLoading(false);
                     setIsNameInvalid(true);
                 }
             });
@@ -73,6 +77,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                 if (res.status === 200) {
                     setIsCreatedSuccessfully(true);
                 } else {
+                    setIsLoading(false);
                     setIsNameInvalid(true);
                 }
             });
@@ -171,6 +176,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                     filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
                                 }}/>
                 </form>
+                <PageBackdrop isOpen={isLoading} />
             </PageWrapper>
         );
 };
