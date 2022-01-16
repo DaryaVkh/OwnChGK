@@ -10,9 +10,10 @@ import {AnswerType, Opposition, Page} from '../../entities/admin-answers-page/ad
 import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
+const conn = new WebSocket(getUrlForSocket());
+
 const AdminAnswersPage: FC = () => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
     const {tour, question} = useParams<{ tour: string, question: string }>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');
@@ -44,21 +45,19 @@ const AdminAnswersPage: FC = () => {
 
         window.addEventListener('resize', handleWindowResize);
 
-        conn.onopen = function () {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getAnswers',
-                'roundNumber': +tour,
-                'questionNumber': +question,
-            }));
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'getAnswers',
+            'roundNumber': +tour,
+            'questionNumber': +question,
+        }));
 
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getAppealsByNumber',
-                'roundNumber': +tour,
-                'questionNumber': +question,
-            }));
-        };
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'getAppealsByNumber',
+            'roundNumber': +tour,
+            'questionNumber': +question,
+        }));
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);

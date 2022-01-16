@@ -16,6 +16,7 @@ import Loader from '../../components/loader/loader';
 
 let interval: any;
 let breakInterval: any;
+const conn = new WebSocket(getUrlForSocket());
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
@@ -26,7 +27,6 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [questionsCount, setQuestionsCount] = useState<number>();
     const [gameName, setGameName] = useState<string>();
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
     const [timer, setTimer] = useState<number>(70000);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0); // в секундах
@@ -51,24 +51,22 @@ const AdminGame: FC<AdminGameProps> = props => {
             }
         });
 
-        conn.onopen = function () {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'time'
-            }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getAllAppeals'
-            }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'isOnBreak'
-            }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getQuestionNumber'
-            }));
-        };
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'time'
+        }));
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'getAllAppeals'
+        }));
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'isOnBreak'
+        }));
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'getQuestionNumber'
+        }));
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
@@ -260,7 +258,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                     </div>
 
                     <Link className={classes.answersButtonLink}
-                          to={`/admin/game/${gameId}/answers/${activeTourNumber}/${i + 1}`}>
+                          to={`/admin/game/${gameId}/answers/${chosenTourNumber}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {

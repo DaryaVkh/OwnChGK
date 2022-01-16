@@ -4,10 +4,11 @@ import {TextareaAutosize} from '@mui/material';
 import {UserAnswerProps} from '../../entities/user-answer/user-answer.interfaces';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
+const conn = new WebSocket(getUrlForSocket());
+
 const UserAnswer: FC<UserAnswerProps> = props => {
     const [isOppositionClicked, setIsOppositionClicked] = useState<boolean>(false);
     const [opposition, setOpposition] = useState<string>('');
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
     const [answerStatus, setAnswerStatus] = useState<'success' | 'error' | 'opposition'>(props.status);
 
     const handleOppositionButtonClick = () => {

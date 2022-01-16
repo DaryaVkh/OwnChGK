@@ -11,8 +11,9 @@ import {getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
 
+const conn = new WebSocket(getUrlForSocket());
+
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
-    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
     const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>();
     const [teamName, setTeamName] = useState<string>(store.getState().appReducer.user.team);
@@ -29,12 +30,10 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
             }
         });
 
-        conn.onopen = function () {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getTeamAnswers'
-            }));
-        };
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'getTeamAnswers'
+        }));
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);

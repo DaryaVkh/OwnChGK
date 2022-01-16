@@ -7,9 +7,10 @@ import {deleteGame, deleteTeam} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from "../../commonFunctions";
 import {createPortal} from 'react-dom';
 
+const conn = new WebSocket(getUrlForSocket());
+
 const Modal: FC<ModalProps> = props => {
     const [minutes, setMinutes] = useState<number>(0);
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
 
     const handleMinutesCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMinutes(+event.target.value);

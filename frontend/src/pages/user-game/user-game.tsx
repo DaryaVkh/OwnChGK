@@ -14,13 +14,13 @@ import Loader from '../../components/loader/loader';
 
 let progressBar: any;
 let interval: any;
+const conn = new WebSocket(getUrlForSocket());
 
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [answer, setAnswer] = useState<string>('');
     const [gameName, setGameName] = useState<string>();
     const [questionNumber, setQuestionNumber] = useState<number>(1);
-    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
     const [timeForAnswer, setTimeForAnswer] = useState<number>(70);
     const [flags, setFlags] = useState<{
         isSnackbarOpen: boolean,
@@ -45,20 +45,18 @@ const UserGame: FC<UserGameProps> = props => {
             }
         });
 
-        conn.onopen = function () {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getQuestionNumber'
-            }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'time'
-            }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'isOnBreak'
-            }));
-        };
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'getQuestionNumber'
+        }));
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'time'
+        }));
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'isOnBreak'
+        }));
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
