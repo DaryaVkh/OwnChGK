@@ -26,9 +26,9 @@ const Modal: FC<ModalProps> = props => {
     const handleDelete = useCallback(e => {
         props.deleteElement?.(arr => arr?.filter(el => el.name !== props.itemForDeleteName));
         if (props.type === 'game') {
-            deleteGame(props.itemForDeleteName as string);
+            deleteGame(props.itemForDeleteId as string);
         } else {
-            deleteTeam(props.itemForDeleteName as string);
+            deleteTeam(props.itemForDeleteId as string);
         }
         //TODO а если ответ не 200?
     }, [props]);

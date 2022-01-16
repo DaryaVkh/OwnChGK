@@ -10,13 +10,7 @@ import {logOut} from '../../redux/actions/app-actions/app-actions';
 
 const Header: FC<HeaderProps> = props => {
     const handleLogout = async () => {
-        await fetch('/users/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Accept': 'application/json'
-            }
-        });
+        logOut();
         props.onLogOut();
     };
 

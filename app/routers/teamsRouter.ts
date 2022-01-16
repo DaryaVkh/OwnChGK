@@ -10,11 +10,11 @@ export const teamsRouter = () => {
     const teamsController = new TeamsController();
 
     router.get('/', middleware, teamsController.getAll);
-    router.get('/:teamName', middleware, teamsController.getTeam);
-    router.get('/:teamName/games', middleware, teamsController.getAllGames);
-    router.patch('/:teamName/change', middleware, teamsController.editTeam);
-    router.patch('/:teamName/changeCaptain', middleware, teamsController.editTeamCaptainByCurrentUser);
-    router.delete('/:teamName', roleMiddleware(adminAccess), teamsController.deleteTeam);
+    router.get('/:teamId', middleware, teamsController.getTeam);
+    //router.get('/:teamName/games', middleware, teamsController.getAllGames); // кажется, что такой метод есть в /games
+    router.patch('/:teamId/change', middleware, teamsController.editTeam);
+    router.patch('/:teamId/changeCaptain', middleware, teamsController.editTeamCaptainByCurrentUser);
+    router.delete('/:teamId', roleMiddleware(adminAccess), teamsController.deleteTeam);
 
     router.post('/', middleware, teamsController.insertTeam);
 

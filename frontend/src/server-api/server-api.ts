@@ -42,6 +42,58 @@ export const createGame = async (gameName: string, roundCount: number, questionC
     });
 };
 
+export const createUser = async (email: string, password: string) => {
+    return await fetch('/users/insert', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+            password
+        })
+    });
+};
+
+export const login = async (email: string, password: string, isAdmin: boolean) => {
+    return await fetch(isAdmin ? 'admins/login' : 'users/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email,
+            password
+        })
+    });
+}
+
+export const logout = async () => {
+    return await fetch('/users/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+}
+
+export const changeToken = async (gameId: string) => {
+    return fetch(`/users/${gameId}/changeToken`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+}
+
+export const startGame = async (gameId: string) => {
+    return fetch(`/games/${gameId}/start`);
+}
+
 export const editGame = async (gameId: string, newGameName: string, roundCount: number, questionCount: number, teams: string[]) => {
     return await fetch(`/games/${gameId}/change`, {
         method: 'PATCH',
@@ -58,20 +110,20 @@ export const editGame = async (gameId: string, newGameName: string, roundCount: 
     });
 };
 
-export const deleteGame = async (gameName: string) => {
-    return await fetch(`/games/${gameName}`, {
+export const deleteGame = async (gameId: string) => {
+    return await fetch(`/games/${gameId}`, {
         method: 'DELETE'
     });
 };
 
-export const deleteTeam = async (teamName: string) => {
-    return await fetch(`/teams/${teamName}`, {
+export const deleteTeam = async (teamId: string) => {
+    return await fetch(`/teams/${teamId}`, {
         method: 'DELETE'
     });
 };
 
-export const getTeam = async (teamName: string) => {
-    return await fetch(`/teams/${teamName}`);
+export const getTeam = async (teamId: string) => {
+    return await fetch(`/teams/${teamId}`);
 };
 
 export const createTeam = async (teamName: string, captain: string) => {
@@ -88,8 +140,8 @@ export const createTeam = async (teamName: string, captain: string) => {
     });
 };
 
-export const editTeam = async (teamName: string, newTeamName: string, captain: string) => {
-    return await fetch(`/teams/${teamName}/change`, {
+export const editTeam = async (teamId: string, newTeamName: string, captain: string) => {
+    return await fetch(`/teams/${teamId}/change`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -102,8 +154,8 @@ export const editTeam = async (teamName: string, newTeamName: string, captain: s
     });
 };
 
-export const editTeamCaptainByCurrentUser = async (teamName: string) => {
-    return await fetch(`/teams/${teamName}/changeCaptain`, {
+export const editTeamCaptainByCurrentUser = async (teamId: string) => { // TODO: дописать, потому что вызывается оно всё ещё с name
+    return await fetch(`/teams/${teamId}/changeCaptain`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -151,7 +203,7 @@ export const checkTemporaryPassword = async (email: string, code: string, isAdmi
     });
 }
 
-export const changePassword = async (email: string, password: string, oldPassword: string, isAdmin=false) => {
+export const changePassword = async (email: string, password: string, oldPassword: string, isAdmin = false) => {
     return await fetch(`/${isAdmin ? 'admins' : 'users'}/changePassword`, {
         method: 'PATCH',
         headers: {
@@ -207,7 +259,7 @@ export const deleteAdmin = async (adminEmail: string) => {
     });
 }
 
-export const addAdmin = async (adminEmail: string, adminName='') => {
+export const addAdmin = async (adminEmail: string, adminName = '') => {
     return await fetch(`/admins/insert`, {
         method: 'POST',
         headers: {

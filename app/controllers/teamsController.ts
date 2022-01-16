@@ -52,8 +52,11 @@ export class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {teamName} = req.params;
-            await getCustomRepository(TeamRepository).deleteByName(teamName);
+            const {teamId} = req.params;
+            if (!teamId) {
+                return res.status(400).json({message: 'teamId is invalid'});
+            }
+            await getCustomRepository(TeamRepository).delete(teamId);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -66,9 +69,12 @@ export class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {teamName} = req.params;
+            const {teamId} = req.params;
+            if (!teamId) {
+                return res.status(400).json({message: 'teamId is invalid'});
+            }
             const {newTeamName, captain} = req.body;
-            await getCustomRepository(TeamRepository).updateByParams(teamName, newTeamName, captain);
+            await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -81,10 +87,13 @@ export class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {teamName} = req.params;
+            const {teamId} = req.params;
+            if (!teamId) {
+                return res.status(400).json({message: 'teamId is invalid'});
+            }
             const token = req.cookies['authorization'];
             const {id: userId} = jwt.verify(token, secret) as jwt.JwtPayload;
-            await getCustomRepository(TeamRepository).updateEmptyTeamByNameAndUserEmail(teamName, userId);
+            await getCustomRepository(TeamRepository).updateEmptyTeamByIdAndUserEmail(teamId, userId);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -97,8 +106,14 @@ export class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {teamName} = req.params;
-            const team = await getCustomRepository(TeamRepository).findByName(teamName);
+            const {teamId} = req.params;
+            if (!teamId) {
+                return res.status(400).json({message: 'teamId is invalid'})
+            }
+            const team = await getCustomRepository(TeamRepository).findOne(teamId, {relations: ['captain']});
+            if (!team) {
+                return res.status(404).json({message: 'team not found'});
+            }
             return res.status(200).json({
                 name: team.name,
                 captain: team.captain === null ? null : team.captain.email
