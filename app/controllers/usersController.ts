@@ -33,7 +33,7 @@ export class UsersController { // TODO: дописать смену имени �
             }
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.id, user.email,"user", null, null);
+                const token = generateAccessToken(user.id, user.email,"user", null, null, user.name);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     //httpOnly: true,
@@ -89,11 +89,11 @@ export class UsersController { // TODO: дописать смену имени �
             }
             const {gameId} = req.params;
             const oldToken = req.cookies['authorization'];
-            const {id: userId, email: email, roles: userRoles} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            const {id: userId, email: email, roles: userRoles, name: name} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
             const user = await getCustomRepository(UserRepository).findOne(userId, {relations:['team']});
 
             if (user.team !== null) {
-                const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId);
+                const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId, name);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
                     //httpOnly: true,

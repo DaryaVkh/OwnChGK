@@ -35,7 +35,7 @@ export class AdminsController {
             }
             const isPasswordMatching = await compare(password, admin.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(admin.id, admin.email, admin.role, null, null);
+                const token = generateAccessToken(admin.id, admin.email, admin.role, null, null, admin.name);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
                     //httpOnly: true,
