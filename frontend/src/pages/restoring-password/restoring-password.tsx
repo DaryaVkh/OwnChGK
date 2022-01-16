@@ -41,7 +41,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
         sendTemporaryPassword(email, props.isAdmin).then(res => {
             if (res.status === 200) {
                 setStep('second');
-            } else if (res.status === 404) {
+            } else if (res.status === 404 || res.status === 400) {
                 setIsEmailInvalid(true);
             } else if (res.status === 500) {
                 setIsResendCodeInvalid(true);
