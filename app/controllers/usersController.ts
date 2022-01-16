@@ -7,6 +7,7 @@ import {generateAccessToken, secret} from '../jwtToken';
 import jwt from 'jsonwebtoken';
 import {makeTemporaryPassword, SendMailWithTemporaryPassword, validateEmail} from '../email';
 import {transporter} from "../socket";
+import {AdminRepository} from '../db/repositories/adminRepository';
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
@@ -278,14 +279,26 @@ export class UsersController { // TODO: дописать смену имени �
             const {id: userId, email: email, roles: userRoles, name: name} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
 
             if (userId !== undefined && email !== undefined && userRoles !== undefined) {
-                const user = await getCustomRepository(UserRepository).findOne(+userId, {relations: ['team']})
-                return res.status(200).json({
-                    id: userId,
-                    email,
-                    name,
-                    role: userRoles,
-                    team: user.team?.name ?? ''
-                })
+                if (userRoles === 'user') {
+                    const user = await getCustomRepository(UserRepository).findOne(+userId, {relations: ['team']})
+                    return res.status(200).json({
+                        id: userId,
+                        email,
+                        name,
+                        role: userRoles,
+                        team: user?.team?.name ?? ''
+                    })
+                } else if (userRoles === 'admin' || userRoles === 'superadmin') {
+                    console.log('admin');
+                    return res.status(200).json({
+                        id: userId,
+                        email,
+                        name,
+                        role: userRoles,
+                    })
+                } else {
+                    return res.status(400).json({});
+                }
             } else {
                 return res.status(404).json({});
             }
