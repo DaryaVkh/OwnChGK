@@ -14,7 +14,7 @@ import Loader from '../../components/loader/loader';
 
 let progressBar: any;
 let interval: any;
-const conn = new WebSocket(getUrlForSocket());
+let conn: WebSocket;
 
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -45,18 +45,22 @@ const UserGame: FC<UserGameProps> = props => {
             }
         });
 
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'getQuestionNumber'
-        }));
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'time'
-        }));
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'isOnBreak'
-        }));
+        conn = new WebSocket(getUrlForSocket());
+
+        conn.onopen = () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'time'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'isOnBreak'
+            }));
+        }
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);

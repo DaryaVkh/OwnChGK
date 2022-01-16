@@ -10,7 +10,7 @@ import {AnswerType, Opposition, Page} from '../../entities/admin-answers-page/ad
 import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
-const conn = new WebSocket(getUrlForSocket());
+let conn: WebSocket;
 
 const AdminAnswersPage: FC = () => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -45,19 +45,23 @@ const AdminAnswersPage: FC = () => {
 
         window.addEventListener('resize', handleWindowResize);
 
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'getAnswers',
-            'roundNumber': +tour,
-            'questionNumber': +question,
-        }));
+        conn = new WebSocket(getUrlForSocket());
 
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'getAppealsByNumber',
-            'roundNumber': +tour,
-            'questionNumber': +question,
-        }));
+        conn.onopen = () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getAnswers',
+                'roundNumber': +tour,
+                'questionNumber': +question,
+            }));
+
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getAppealsByNumber',
+                'roundNumber': +tour,
+                'questionNumber': +question,
+            }));
+        }
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);

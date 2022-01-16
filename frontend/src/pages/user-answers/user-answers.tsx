@@ -11,7 +11,7 @@ import {getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
 
-const conn = new WebSocket(getUrlForSocket());
+let conn: WebSocket;
 
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -30,10 +30,14 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
             }
         });
 
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'getTeamAnswers'
-        }));
+        conn = new WebSocket(getUrlForSocket());
+
+        conn.onopen = () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getTeamAnswers'
+            }));
+        }
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);

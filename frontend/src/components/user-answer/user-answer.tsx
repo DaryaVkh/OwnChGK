@@ -4,7 +4,7 @@ import {TextareaAutosize} from '@mui/material';
 import {UserAnswerProps} from '../../entities/user-answer/user-answer.interfaces';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
-const conn = new WebSocket(getUrlForSocket());
+let conn: WebSocket;
 
 const UserAnswer: FC<UserAnswerProps> = props => {
     const [isOppositionClicked, setIsOppositionClicked] = useState<boolean>(false);
@@ -22,13 +22,16 @@ const UserAnswer: FC<UserAnswerProps> = props => {
     const handleSendOpposition = () => {
         if (opposition !== '') {
             setAnswerStatus('opposition');
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'appeal',
-                'number': props.order,
-                'appeal': opposition,
-                'answer': props.answer
-            }));
+            conn = new WebSocket(getUrlForSocket());
+            conn.onopen = () => {
+                conn.send(JSON.stringify({
+                    'cookie': getCookie('authorization'),
+                    'action': 'appeal',
+                    'number': props.order,
+                    'appeal': opposition,
+                    'answer': props.answer
+                }));
+            }
             // TODO тут отправляем апелляцию на сервак или куда там
         }
         setIsOppositionClicked(false);

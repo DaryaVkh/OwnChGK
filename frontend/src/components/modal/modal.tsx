@@ -7,7 +7,7 @@ import {deleteGame, deleteTeam} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from "../../commonFunctions";
 import {createPortal} from 'react-dom';
 
-const conn = new WebSocket(getUrlForSocket());
+let conn: WebSocket;
 
 const Modal: FC<ModalProps> = props => {
     const [minutes, setMinutes] = useState<number>(0);
@@ -43,13 +43,16 @@ const Modal: FC<ModalProps> = props => {
         if (minutes !== 0) {
             props.setBreakTime?.(minutes);
             props.startBreak?.(true);
-            conn.send(JSON.stringify({
-                        'cookie': getCookie('authorization'),
-                        'action': 'breakTime',
-                        'time': minutes * 60
-                    }
+            conn = new WebSocket(getUrlForSocket());
+            conn.onopen = () => {
+                conn.send(JSON.stringify({
+                            'cookie': getCookie('authorization'),
+                            'action': 'breakTime',
+                            'time': minutes * 60
+                        }
+                    )
                 )
-            )
+            }
         }
         handleCloseModal(e);
     }

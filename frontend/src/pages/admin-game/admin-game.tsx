@@ -16,7 +16,7 @@ import Loader from '../../components/loader/loader';
 
 let interval: any;
 let breakInterval: any;
-const conn = new WebSocket(getUrlForSocket());
+let conn: WebSocket;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
@@ -51,22 +51,26 @@ const AdminGame: FC<AdminGameProps> = props => {
             }
         });
 
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'time'
-        }));
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'getAllAppeals'
-        }));
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'isOnBreak'
-        }));
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'getQuestionNumber'
-        }));
+        conn = new WebSocket(getUrlForSocket());
+
+        conn.onopen = () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'time'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getAllAppeals'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'isOnBreak'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber'
+            }));
+        }
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
