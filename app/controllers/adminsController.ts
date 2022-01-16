@@ -22,7 +22,7 @@ export class AdminsController {
                 }))
             });
         } catch (error) {
-            return res.status(400).json({message: 'Error'}).send(error);
+            return res.status(400).json({message: error.message});
         }
     }
 
@@ -88,10 +88,10 @@ export class AdminsController {
                 return res.status(400).json({'message': 'email is invalid'});
             }
 
-            const code = makeTemporaryPassword(8);
-            SendMailWithTemporaryPassword(transporter, email, code);
             let admin = await getCustomRepository(AdminRepository).findByEmail(email);
             if (admin) {
+                const code = makeTemporaryPassword(8);
+                SendMailWithTemporaryPassword(transporter, email, code);
                 admin.temporary_code = code;
                 await admin.save();
                 return res.status(200).json({});
@@ -99,7 +99,7 @@ export class AdminsController {
                 return res.status(404).json({});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({'message': error.message});
         }
     }
 
@@ -117,7 +117,7 @@ export class AdminsController {
                 return res.status(403).json({});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({'message': error.message});
         }
     }
 

@@ -7,10 +7,11 @@ import {AppState} from '../../entities/app/app.interfaces';
 import {Dispatch} from 'redux';
 import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
 import {logOut} from '../../redux/actions/app-actions/app-actions';
+import {logout} from '../../server-api/server-api';
 
 const Header: FC<HeaderProps> = props => {
     const handleLogout = async () => {
-        logOut();
+        logout().then(() => {});
         props.onLogOut();
     };
 
