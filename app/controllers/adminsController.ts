@@ -4,22 +4,25 @@ import {compare, hash} from 'bcrypt';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {generateAccessToken, secret} from '../jwtToken';
-import {makeTemporaryPassword, SendMailWithTemporaryPassword, SendMailWithTemporaryPasswordToAdmin} from '../email';
+import {
+    makeTemporaryPassword, SendMailWithTemporaryPassword, SendMailWithTemporaryPasswordToAdmin,
+    validateEmail
+} from '../email';
 import {transporter} from '../socket';
 import jwt from 'jsonwebtoken';
 
 export class AdminsController {
     public async getAll(req: Request, res: Response) {
         try {
-            const admins = await getCustomRepository(AdminRepository).find(); // TODO: а мейби суперадминов не надо?
-            res.status(200).json({
+            const admins = await getCustomRepository(AdminRepository).find();
+            return res.status(200).json({
                 admins: admins.map(value => ({
                     email: value.email,
                     name: value.name
                 }))
             });
         } catch (error) {
-            res.status(400).json({message: 'Error'}).send(error);
+            return res.status(400).json({message: 'Error'}).send(error);
         }
     }
 
@@ -28,7 +31,7 @@ export class AdminsController {
             const {email, password} = req.body;
             const admin = await getCustomRepository(AdminRepository).findByEmail(email);
             if (!admin) {
-                return res.status(404).json({message: 'email invalid'});
+                return res.status(404).json({message: 'admin not found'});
             }
             const isPasswordMatching = await compare(password, admin.password);
             if (isPasswordMatching) {
@@ -38,17 +41,17 @@ export class AdminsController {
                     //httpOnly: true,
                     secure: true
                 });
-                res.status(200).json({
+                return res.status(200).json({
                     id: admin.id,
                     email: admin.email,
                     name: admin.name,
                     role: admin.role
                 });
             } else {
-                res.status(400).json({message: 'Not your password'});
+                return res.status(400).json({message: 'Not your password'});
             }
         } catch (error) {
-            res.status(400).json({message: error.message});
+            return res.status(400).json({message: error.message});
         }
     }
 
@@ -59,6 +62,10 @@ export class AdminsController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {email, name, password} = req.body;
+            if (!validateEmail(email)) {
+                return res.status(400).json({message: 'email is invalid'});
+            }
+
             if (password) {
                 const hashedPassword = await hash(password, 10);
                 await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword, name);
@@ -68,30 +75,31 @@ export class AdminsController {
                 await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword, name);
                 SendMailWithTemporaryPasswordToAdmin(transporter, email, pass)
             }
-            res.status(200).json({});
+            return res.status(200).json({});
         } catch (error: any) {
-            res.status(400).json({'message': error.message});
+            return res.status(400).json({'message': error.message});
         }
     }
 
     public async sendPasswordWithTemporaryPassword(req: Request, res: Response) {
         try {
             const {email} = req.body;
-            if (!email) {
+            if (!validateEmail(email)) {
                 return res.status(400).json({'message': 'email is invalid'});
             }
+
             const code = makeTemporaryPassword(8);
             SendMailWithTemporaryPassword(transporter, email, code);
             let admin = await getCustomRepository(AdminRepository).findByEmail(email);
             if (admin) {
                 admin.temporary_code = code;
                 await admin.save();
-                res.status(200).json({});
+                return res.status(200).json({});
             } else {
-                res.status(404).json({});
+                return res.status(404).json({});
             }
         } catch (error: any) {
-            res.status(400).json({'message': error.message});
+            return res.status(400).json({'message': error.message});
         }
     }
 
@@ -100,15 +108,16 @@ export class AdminsController {
             const {email, code} = req.body;
             let admin = await getCustomRepository(AdminRepository).findByEmail(email);
             if (!admin) {
-                return res.status(404).json({});
+                return res.status(404).json({'message': 'admin not found'});
             }
+
             if (admin.temporary_code === code) {
-                res.status(200).json({});
+                return res.status(200).json({});
             } else {
-                res.status(403).json({});
+                return res.status(403).json({});
             }
         } catch (error: any) {
-            res.status(400).json({'message': error.message});
+            return res.status(400).json({'message': error.message});
         }
     }
 
@@ -136,13 +145,13 @@ export class AdminsController {
                         //httpOnly: true,
                         secure: true
                     });
-                    res.status(200).json({});
+                    return res.status(200).json({});
                 } else {
-                    res.status(404).json({});
+                    return res.status(404).json({});
                 }
             }
         } catch (error: any) {
-            res.status(400).json({'message': error.message});
+            return res.status(400).json({'message': error.message});
         }
     }
 
@@ -153,8 +162,8 @@ export class AdminsController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {email, password, oldPassword} = req.body;
-            if (!email) {
-                return res.status(400).json({message: 'email invalid'})
+            if (!validateEmail(email)) {
+                return res.status(400).json({message: 'email is invalid'})
             }
 
             const hashedPassword = await hash(password, 10);
@@ -163,15 +172,15 @@ export class AdminsController {
                 if (await compare(oldPassword, admin.password)) {
                     admin.password = hashedPassword;
                     await admin.save();
-                    res.status(200).json({});
+                    return res.status(200).json({});
                 } else {
-                    res.status(403).json({message: 'oldPassword invalid'})
+                    return res.status(403).json({message: 'oldPassword invalid'})
                 }
             } else {
-                res.status(404).json({message: 'email invalid'});
+                return res.status(404).json({message: 'email is invalid'});
             }
         } catch (error: any) {
-            res.status(400).json({'message': error.message});
+            return res.status(400).json({'message': error.message});
         }
     }
 
@@ -182,7 +191,7 @@ export class AdminsController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {email, password, code} = req.body;
-            if (!email) {
+            if (!validateEmail(email)) {
                 return res.status(400).json({message: 'email invalid'})
             }
             const hashedPassword = await hash(password, 10);
@@ -193,14 +202,14 @@ export class AdminsController {
                     admin.temporary_code = null;
                     await admin.save();
                 } else {
-                    res.status(403).json({'message': 'code invalid'});
+                    return res.status(403).json({'message': 'code invalid'});
                 }
             } else {
-                res.status(400).json({'message': 'email invalid'});
+                return res.status(400).json({'message': 'email invalid'});
             }
-            res.status(200).json({});
+            return res.status(200).json({});
         } catch (error: any) {
-            res.status(400).json({'message': error.message});
+            return res.status(400).json({'message': error.message});
         }
     }
 
@@ -215,9 +224,9 @@ export class AdminsController {
                 //httpOnly: true,
                 secure: true
             });
-            res.status(200).json({});
+            return res.status(200).json({});
         } catch (error: any) {
-            res.status(400).json({'message': error.message});
+            return res.status(400).json({'message': error.message});
         }
     }
 
@@ -229,9 +238,9 @@ export class AdminsController {
             }
             const {email} = req.body;
             await getCustomRepository(AdminRepository).delete({email});
-            res.status(200).json({});
+            return res.status(200).json({});
         } catch (error: any) {
-            res.status(400).json({'message': error.message});
+            return res.status(400).json({'message': error.message});
         }
     }
 }
