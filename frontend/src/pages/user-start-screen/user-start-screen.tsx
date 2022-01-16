@@ -66,8 +66,10 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
 
     const handleChooseTeam = (event: React.SyntheticEvent) => {
         if (userTeam === '') {
-            setUserTeam((event.currentTarget as HTMLDivElement).innerText);
-            editTeamCaptainByCurrentUser((event.currentTarget as HTMLDivElement).innerText)
+            const element = event.currentTarget as HTMLDivElement;
+            const dataset = element.dataset as {teamName: string, teamId: string};
+            setUserTeam(dataset.teamName);
+            editTeamCaptainByCurrentUser(dataset.teamId)
                 .then(res => {
                     // TODO: код не 200, что делать?
                 });
@@ -109,7 +111,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                 <CheckCircleOutlinedIcon color="success" sx={{fontSize: '1.5vw', cursor: 'default'}}/>
             </div>
             :
-            teamsFromDB.map((team, index) => <div key={index} className={classes.gameOrTeam}
+            teamsFromDB.map((team, index) => <div key={index} data-team-id={team.id} data-team-name={team.name} className={classes.gameOrTeam}
                                                   onClick={handleChooseTeam}>{team.name}</div>);
     };
 

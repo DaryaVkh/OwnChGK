@@ -158,7 +158,8 @@ function mapStateToProps(state: AppState): AppStateProps {
     return {
         user: state.appReducer.user,
         isLoggedIn: state.appReducer.isLoggedIn,
-        isTokenChecked: state.appReducer.isTokenChecked
+        isTokenChecked: true
+        // isTokenChecked: state.appReducer.isTokenChecked
     };
 }
 
