@@ -12,7 +12,7 @@ import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
 const AdminAnswersPage: FC = () => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
+    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
     const {tour, question} = useParams<{ tour: string, question: string }>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('accepted');
@@ -54,7 +54,7 @@ const AdminAnswersPage: FC = () => {
 
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': 'getAppeals',
+                'action': 'getAppealsByNumber',
                 'roundNumber': +tour,
                 'questionNumber': +question,
             }));
@@ -67,7 +67,7 @@ const AdminAnswersPage: FC = () => {
                 setRejectedAnswers(jsonMessage.rejectedAnswers);
                 setUncheckedAnswers(jsonMessage.uncheckedAnswers);
                 setGameAnswers([...jsonMessage.acceptedAnswers, ...jsonMessage.rejectedAnswers, ...jsonMessage.uncheckedAnswers]);
-            } else if (jsonMessage.action === 'appeals') {
+            } else if (jsonMessage.action === 'appealsByNumber') {
                 console.log(jsonMessage.appeals);
                 setAppeals(jsonMessage.appeals);
             }

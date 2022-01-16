@@ -9,11 +9,12 @@ import Scrollbar from '../../components/scrollbar/scrollbar';
 import {store} from '../../index';
 import {getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
+import Loader from '../../components/loader/loader';
 
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
+    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
     const {gameId} = useParams<{ gameId: string }>();
-    const [gameName, setGameName] = useState<string>('');
+    const [gameName, setGameName] = useState<string>();
     const [teamName, setTeamName] = useState<string>(store.getState().appReducer.user.team);
     const [answers, setAnswers] = useState<Answer[]>([]);
 
@@ -38,10 +39,11 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'teamAnswers') {
-                setAnswers(jsonMessage.answers.map((ans: { answer: string; status: number; }) => {
+                setAnswers(jsonMessage.answers.map((ans: { answer: string; status: number; number: number}) => {
                     return {
                         answer: ans.answer,
-                        status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition')
+                        status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
+                        number: ans.number
                     };
                 }));
             }
@@ -49,13 +51,18 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     }, []);
 
     const renderAnswers = () => {
-        return answers.map((answer, index) => {
+        return answers.sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
+            .map((answer, index) => {
             return (
                 <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                            order={index + 1}/>
+                            order={answer.number}/>
             );
         });
     };
+
+    if (!gameName) {
+        return <Loader />;
+    }
 
     return (
         <PageWrapper>

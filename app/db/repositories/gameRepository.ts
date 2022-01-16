@@ -77,14 +77,14 @@ export class GameRepository extends Repository<Game> {
         return this.delete({name});
     }
 
-    updateByNames(name: string, newName: string) {
-        return this.update({name}, {'name': newName});
+    updateById(gameId: string, newName: string) {
+        return this.update(gameId, {'name': newName});
     }
 
-    updateByNameAndAdminEmail(name: string, newAdminEmail: string) {
+    updateByIdAndAdminEmail(gameId: string, newAdminEmail: string) {
         return this.manager.transaction(manager => {
             return manager.findOne(Admin, {'email': newAdminEmail})
-                .then(admin => manager.update(Game, {name}, {'admin': admin}));
+                .then(admin => manager.update(Game, gameId, {'admin': admin}));
         });
     }
 

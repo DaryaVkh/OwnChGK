@@ -4,12 +4,12 @@ import Header from '../../components/header/header';
 import NavBar from '../../components/nav-bar/nav-bar';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {AdminStartScreenProps} from '../../entities/admin-start-screen/admin-start-screen.interfaces';
-import {IconButton, OutlinedInput, Button} from '@mui/material';
+import {IconButton, OutlinedInput, Button, Skeleton} from '@mui/material';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import {Scrollbars} from 'rc-scrollbars';
 import {Link, useLocation} from 'react-router-dom';
 import InputWithAdornment from '../../components/input-with-adornment/input-with-adornment';
-import {getAll} from '../../server-api/server-api';
+import {addAdmin, deleteAdmin, getAll} from '../../server-api/server-api';
 import Modal from '../../components/modal/modal';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -36,14 +36,19 @@ interface Admin {
 interface AdminProps {
     name: string;
     email: string;
-    deleteAdmin?: Dispatch<SetStateAction<Admin[]>>;
+    deleteAdmin?: Dispatch<SetStateAction<Admin[] | undefined>>;
     isSuperAdmin: boolean;
 }
 
 const AdminComponent: FC<AdminProps> = props => {
     const handleDelete = useCallback(e => {
-        //TODO вот тут удаляем админа из базы
-        props.deleteAdmin?.(admins => admins.filter(a => a.email !== props.email));
+        deleteAdmin(props.email)
+            .then(res => {
+                if (res.status === 200) {
+                    // TODO: что делаем?
+                }
+            });
+        props.deleteAdmin?.(admins => admins?.filter(a => a.email !== props.email));
     }, [props]);
 
     const handleDeleteClick = (e: React.SyntheticEvent) => {
@@ -78,14 +83,15 @@ export interface Team {
 }
 
 const AdminStartScreen: FC<AdminStartScreenProps> = props => {
-    const [page, setPage] = useState('games');
-    const [teams, setTeams] = useState<Team[]>([]);
-    const [games, setGames] = useState<Game[]>([]);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [deletedItemName, setDeletedItemName] = useState('');
-    const [admins, setAdmins] = useState<Admin[]>([]);
+    const [page, setPage] = useState<string>('games');
+    const [teams, setTeams] = useState<Team[]>();
+    const [games, setGames] = useState<Game[]>();
+    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+    const [deletedItemName, setDeletedItemName] = useState<string>('');
+    const [deletedItemId, setDeletedItemId] = useState<string>('');
+    const [admins, setAdmins] = useState<Admin[]>();
     const [newAdmin, setNewAdmin] = useState<Admin | null>(null);
-    const [isEmailInvalid, setIsEmailInvalid] = useState(false);
+    const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
     const scrollbars = useRef<Scrollbars>(null);
     let location = useLocation<{ page: string }>();
 
@@ -145,18 +151,45 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     }, []);
 
     const renderTeams = () => {
+        if (!teams) {
+            return Array.from(Array(5).keys()).map(i => <Skeleton key={`team_skeleton_${i}`} variant="rectangular"
+                                                                  width="100%" height="7vh"
+                                                                  sx={{marginBottom: '2.5vh'}}/>);
+        }
         return teams.map((team, index) => <InputWithAdornment name={team.name} id={team.id} key={index} type="team"
                                                               openModal={setIsModalVisible}
-                                                              setItemForDeleteName={setDeletedItemName}/>);
+                                                              setItemForDeleteName={setDeletedItemName}
+                                                              setItemForDeleteId={setDeletedItemId}/>);
     };
 
     const renderGames = () => {
+        if (!games) {
+            return Array.from(Array(5).keys()).map(i => <Skeleton key={`game_skeleton_${i}`} variant="rectangular"
+                                                                  width="100%" height="7vh"
+                                                                  sx={{marginBottom: '2.5vh'}}/>);
+        }
         return games.map((game, index) => <InputWithAdornment name={game.name} id={game.id} key={index} type="game"
                                                               openModal={setIsModalVisible}
-                                                              setItemForDeleteName={setDeletedItemName}/>);
+                                                              setItemForDeleteName={setDeletedItemName}
+                                                              setItemForDeleteId={setDeletedItemId}/>);
     };
 
     const renderAdmins = () => {
+        if (!admins) {
+            return Array.from(Array(5).keys()).map(i =>
+                (
+                    <div key={`admin_skeleton_${i}`}
+                         className={props.isSuperAdmin ? classes.superAdminInfoWrapper : classes.adminInfoWrapper}>
+                        <Skeleton variant="rectangular" width="38%" height="7vh" sx={{marginBottom: '2vh'}}/>
+                        <Skeleton variant="rectangular" width="52%" height="7vh" sx={{marginBottom: '2vh'}}/>
+                        {
+                            props.isSuperAdmin
+                                ? <Skeleton variant="rectangular" width="7%" height="7vh" sx={{marginBottom: '2vh'}}/>
+                                : null
+                        }
+                    </div>
+                ));
+        }
         let adminsForRender = [];
         for (let admin of admins) {
             adminsForRender.push(<AdminComponent key={admins.indexOf(admin)} name={admin.name} email={admin.email}
@@ -183,9 +216,19 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         let newAdminName = document.querySelector('#new-admin-name') as HTMLInputElement;
         let newAdminEmail = document.querySelector('#new-admin-email') as HTMLInputElement;
         if (newAdminEmail.value !== '') {
-            setAdmins(admins => [...admins, {name: newAdminName.value, email: newAdminEmail.value}]);
-            setNewAdmin(null);
-            setIsEmailInvalid(false);
+            addAdmin(newAdminEmail.value, newAdminName.value)
+                .then(res => {
+                    if (res.status === 200) {
+                        setAdmins(admins => [...(admins ? admins : []), {
+                            name: newAdminName.value,
+                            email: newAdminEmail.value
+                        }]);
+                        setNewAdmin(null);
+                        setIsEmailInvalid(false);
+                    } else {
+                        setIsEmailInvalid(true);
+                    }
+                })
         } else {
             setIsEmailInvalid(true);
         }
@@ -295,15 +338,17 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
-                <NavBar isAdmin={true} page={location.state !== undefined ? location.state.page : page} onLinkChange={setPage}/>
+                <NavBar isAdmin={true} page={location.state !== undefined ? location.state.page : page}
+                        onLinkChange={setPage}/>
             </Header>
 
             {
                 isModalVisible
-                    ? <Modal modalType='delete'
+                    ? <Modal modalType="delete"
                              deleteElement={page === 'teams' ? setTeams : setGames}
                              closeModal={setIsModalVisible}
                              itemForDeleteName={deletedItemName}
+                             itemForDeleteId={deletedItemId}
                              type={page === 'teams' ? 'team' : 'game'}/>
                     : null
             }

@@ -12,12 +12,15 @@ export const gamesRouter = () => {
     router.get('/', middleware, gamesController.getAll);
     router.get('/:gameId', middleware, gamesController.getGame);
     router.get('/:gameId/start', roleMiddleware(adminAccess), gamesController.startGame);
-    router.get('/:gameName/teams', middleware, gamesController.getAllTeams);
+    //router.get('/:gameName/teams', middleware, gamesController.getAllTeams); // не используется, teams есть в getGame
     router.patch('/:gameId/change', roleMiddleware(adminAccess), gamesController.changeGame)
-    router.patch('/:gameName/changeStatus', roleMiddleware(adminAccess), gamesController.changeGameStatus);
-    router.patch('/:gameName/changeName', roleMiddleware(adminAccess), gamesController.editGameName);
-    router.patch('/:gameName/changeAdmin', roleMiddleware(adminAccess), gamesController.editGameAdmin);
-    router.delete('/:gameName', roleMiddleware(adminAccess), gamesController.deleteGame);
+    router.patch('/:gameId/changeStatus', roleMiddleware(adminAccess), gamesController.changeGameStatus);
+    router.patch('/:gameId/changeName', roleMiddleware(adminAccess), gamesController.editGameName);
+    router.patch('/:gameId/changeAdmin', roleMiddleware(adminAccess), gamesController.editGameAdmin);
+    router.delete('/:gameId', roleMiddleware(adminAccess), gamesController.deleteGame);
+    router.get('/:gameId/result', middleware, gamesController.getGameResult);
+    router.get('/:gameId/resultTable', middleware, gamesController.getGameResultScoreTable);
+    router.get('/:gameId/resultTable/format', middleware, gamesController.getResultWithFormat);
 
     router.post('/', roleMiddleware(adminAccess), gamesController.insertGame);
 

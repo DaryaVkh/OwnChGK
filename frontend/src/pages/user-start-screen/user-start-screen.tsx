@@ -6,9 +6,10 @@ import Header from '../../components/header/header';
 import {UserStartScreenProps} from '../../entities/user-start-screen/user-start-screen.interfaces';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import {Link, Redirect, useLocation} from 'react-router-dom';
-import {IconButton} from '@mui/material';
+import {IconButton, Skeleton} from '@mui/material';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import {
+    changeToken,
     editTeamCaptainByCurrentUser,
     getAmIParticipateGames,
     getTeamByCurrentUser,
@@ -18,11 +19,11 @@ import {Game, Team} from '../admin-start-screen/admin-start-screen';
 import Scrollbar from '../../components/scrollbar/scrollbar';
 
 const UserStartScreen: FC<UserStartScreenProps> = () => {
-    const [page, setPage] = useState('teams');
-    const [gamesFromDB, setGamesFromDB] = useState<Game[]>([]);
-    const [teamsFromDB, setTeamsFromDB] = useState<Team[]>([]);
-    const [userTeam, setUserTeam] = useState('');
-    const [gameId, setGameId] = useState('');
+    const [page, setPage] = useState<string>('teams');
+    const [gamesFromDB, setGamesFromDB] = useState<Game[]>();
+    const [teamsFromDB, setTeamsFromDB] = useState<Team[]>();
+    const [userTeam, setUserTeam] = useState<string>('');
+    const [gameId, setGameId] = useState<string>('');
     let location = useLocation<{ page: string }>();
 
     useEffect(() => {
@@ -66,8 +67,10 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
 
     const handleChooseTeam = (event: React.SyntheticEvent) => {
         if (userTeam === '') {
-            setUserTeam((event.currentTarget as HTMLDivElement).innerText);
-            editTeamCaptainByCurrentUser((event.currentTarget as HTMLDivElement).innerText)
+            const element = event.currentTarget as HTMLDivElement;
+            const dataset = element.dataset as {teamName: string, teamId: string};
+            setUserTeam(dataset.teamName);
+            editTeamCaptainByCurrentUser(dataset.teamId)
                 .then(res => {
                     // TODO: код не 200, что делать?
                 });
@@ -76,13 +79,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     };
 
     const handleClick = (id: string) => {
-        fetch(`/users/${id}/changeToken`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Accept': 'application/json'
-            }
-        }).then((res) => {
+        changeToken(id).then((res) => {
             if (res.status === 200) {
                 setGameId(id);
             }
@@ -90,11 +87,17 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     };
 
     const renderGames = () => {
+        if (!gamesFromDB) {
+            return Array.from(Array(5).keys()).map(i => <Skeleton key={`game_skeleton_${i}`} variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '2.5vh'}} />);
+        }
         return gamesFromDB.map((game, index) =>
             <div key={index} className={classes.gameOrTeam} onClick={() => handleClick(game.id)}>{game.name}</div>);
     };
 
     const renderTeams = () => {
+        if (!teamsFromDB) {
+            return Array.from(Array(5).keys()).map(i => <Skeleton key={`team_skeleton_${i}`} variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '2.5vh'}} />);
+        }
         return userTeam !== ''
             ?
             <div key={userTeam} className={classes.gameOrTeam}>
@@ -103,7 +106,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                 <CheckCircleOutlinedIcon color="success" sx={{fontSize: '1.5vw', cursor: 'default'}}/>
             </div>
             :
-            teamsFromDB.map((team, index) => <div key={index} className={classes.gameOrTeam}
+            teamsFromDB.map((team, index) => <div key={index} data-team-id={team.id} data-team-name={team.name} className={classes.gameOrTeam}
                                                   onClick={handleChooseTeam}>{team.name}</div>);
     };
 

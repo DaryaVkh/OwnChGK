@@ -7,8 +7,11 @@ export class AdminRepository extends Repository<Admin> {
         return this.findOne({email});
     }
 
-    insertByEmailAndPassword(email: string, password: string) {
-        return this.insert({email, password});
+    insertByEmailAndPassword(email: string, password: string, name: string=null) {
+        if (!name) {
+            name = null;
+        }
+        return this.insert({email, password, name});
     }
 
     updateByEmailAndPassword(email: string, password: string) {

@@ -2,36 +2,31 @@ import React, {FC, useEffect, useState} from 'react';
 import classes from './admin-start-game.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Redirect, useParams} from 'react-router-dom';
-import {getGame} from '../../server-api/server-api';
+import {changeToken, getGame, startGame} from '../../server-api/server-api';
 import Header from '../../components/header/header';
 import NavBar from '../../components/nav-bar/nav-bar';
+import Loader from '../../components/loader/loader';
 
 const StartGame: FC = () => {
-    const [gameName, setGameName] = useState('');
+    const [gameName, setGameName] = useState<string>();
     const {gameId} = useParams<{ gameId: string }>();
-    const [isGameStart, setIsGameStart] = useState(false);
+    const [isGameStart, setIsGameStart] = useState<boolean>(false);
 
     useEffect(() => {
         getGame(gameId).then((res) => {
             if (res.status === 200) {
-                res.json().then(({name}) => {
+                res.json().then(({name, isStarted}) => {
                     setGameName(name);
+                    setIsGameStart(isStarted);
                 });
             }
         });
     }, []);
 
     const handleStart = async () => {
-        fetch(`/games/${gameId}/start`)
-            .then((res) => {
+        startGame(gameId).then((res) => {
                 if (res.status === 200) {
-                    fetch(`/users/${gameId}/changeToken`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json;charset=utf-8',
-                            'Accept': 'application/json'
-                        }
-                    }).then((res) => {
+                    changeToken(gameId).then((res) => {
                         if (res.status === 200) {
                             setIsGameStart(true);
                         }
@@ -39,6 +34,10 @@ const StartGame: FC = () => {
                 }
             });
     };
+
+    if (!gameName) {
+        return <Loader />;
+    }
 
     return isGameStart ? <Redirect to={`/admin/game/${gameId}`}/> : (
         <PageWrapper>

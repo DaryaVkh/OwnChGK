@@ -6,4 +6,5 @@ export interface InputWithAdornmentProps {
     type: 'game' | 'team';
     openModal: Dispatch<SetStateAction<boolean>>;
     setItemForDeleteName: Dispatch<SetStateAction<string>>;
+    setItemForDeleteId: Dispatch<SetStateAction<string>>;
 }

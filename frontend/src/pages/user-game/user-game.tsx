@@ -10,16 +10,18 @@ import {getGame} from '../../server-api/server-api';
 import {store} from '../../index';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import NavBar from '../../components/nav-bar/nav-bar';
+import Loader from '../../components/loader/loader';
 
 let progressBar: any;
+let interval: any;
 
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [answer, setAnswer] = useState('');
-    const [gameName, setGameName] = useState('');
-    const [questionNumber, setQuestionNumber] = useState(1);
-    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
-    const [timeForAnswer, setTimeForAnswer] = useState(70);
+    const [answer, setAnswer] = useState<string>('');
+    const [gameName, setGameName] = useState<string>();
+    const [questionNumber, setQuestionNumber] = useState<number>(1);
+    const [conn, setConn] = useState<WebSocket>(new WebSocket(getUrlForSocket()));
+    const [timeForAnswer, setTimeForAnswer] = useState<number>(70);
     const [flags, setFlags] = useState<{
         isSnackbarOpen: boolean,
         isAnswerAccepted: boolean
@@ -28,7 +30,7 @@ const UserGame: FC<UserGameProps> = props => {
         isAnswerAccepted: false
     });
     const [isBreak, setIsBreak] = useState<boolean>(false);
-    const [breakTime, setBreakTime] = useState('5:15');
+    const [breakTime, setBreakTime] = useState<number>(0);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
 
     useEffect(() => {
@@ -51,6 +53,10 @@ const UserGame: FC<UserGameProps> = props => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'time'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'isOnBreak'
             }));
         };
 
@@ -97,14 +103,16 @@ const UserGame: FC<UserGameProps> = props => {
                 console.log('p');
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
-                progressBar.style.width = '100%';
+                let progress = document.querySelector('#progress-bar') as HTMLDivElement;
+                progress.style.width = '100%';
             } else if (jsonMessage.action === 'changeQuestionNumber') {
                 console.log('e');
                 console.log(jsonMessage.time);
                 setQuestionNumber(+jsonMessage.number);
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
-                progressBar.style.width = '100%';
+                let progress = document.querySelector('#progress-bar') as HTMLDivElement;
+                progress.style.width = '100%';
             } else if (jsonMessage.action === 'statusAnswer') {
                 if (jsonMessage.isAccepted) {
                     setFlags({
@@ -117,13 +125,37 @@ const UserGame: FC<UserGameProps> = props => {
                         isSnackbarOpen: true
                     });
                 }
-                setTimeout(() => setFlags({
-                    isSnackbarOpen: false,
-                    isAnswerAccepted: false
+                setTimeout(() => setFlags(flags => {
+                    return {
+                        isSnackbarOpen: false,
+                        isAnswerAccepted: flags.isAnswerAccepted
+                    }
                 }), 5000);
+            } else if (jsonMessage.action === 'isOnBreak') {
+                if (jsonMessage.status) {
+                    setIsBreak(true);
+                    setBreakTime(jsonMessage.time);
+                    interval = setInterval(() => setBreakTime((time) => {
+                        if (time - 1 <= 0) {
+                            clearInterval(interval);
+                            setIsBreak(false);
+                        }
+                        return time - 1 > 0 ? time - 1 : 0;
+                    }), 1000)
+                } else {
+                    setIsBreak(false);
+                    setBreakTime(0);
+                    clearInterval(interval);
+                }
             }
         };
     }, []);
+
+    const parseTimer = () => {
+        const minutes = Math.floor(breakTime / 60).toString().padStart(1, '0');
+        const sec = Math.floor(breakTime % 60).toString().padStart(2, '0');
+        return `${minutes}:${sec}`;
+    };
 
     const changeColor = (progressBar: HTMLDivElement) => {
         if (progressBar.style.width) {
@@ -195,18 +227,24 @@ const UserGame: FC<UserGameProps> = props => {
         console.log('click');
         setTimeout(() => {
             setFlags(flags => {
-                let result = {
+                const res = {
                     isSnackbarOpen: true,
-                    isAnswerAccepted: flags.isAnswerAccepted
+                    isAnswerAccepted: false
                 };
-                console.log('из таймаута', result);
-                return result;
-            });
 
-            setTimeout(() => setFlags({
-                isSnackbarOpen: false,
-                isAnswerAccepted: false
-            }), 5000);
+                console.log(flags);
+                if (!flags.isSnackbarOpen) {
+                    setTimeout(() => setFlags(flags => {
+                        return {
+                            isSnackbarOpen: false,
+                            isAnswerAccepted: flags.isAnswerAccepted
+                        }
+                    }), 5000);
+                    return res;
+                }
+
+                return flags;
+            });
         }, 1000);
     };
 
@@ -215,13 +253,13 @@ const UserGame: FC<UserGameProps> = props => {
             return (
                 <PageWrapper>
                     <Header isAuthorized={true} isAdmin={false}>
-                        <NavBar isAdmin={false} page=''/>
+                        <NavBar isAdmin={false} page=""/>
                     </Header>
 
                     <div className={classes.gameStartContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                        <div className={classes.pageText}>Игра скоро начнется</div>
+                        <div className={classes.pageText}>«{gameName}» скоро начнется</div>
                         <div className={classes.pageText}>Подождите</div>
                     </div>
                 </PageWrapper>
@@ -238,7 +276,7 @@ const UserGame: FC<UserGameProps> = props => {
                     <div className={classes.breakContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                        <div className={classes.breakTime}>{breakTime}</div>
+                        <div className={classes.breakTime}>{parseTimer()}</div>
                     </div>
                 </PageWrapper>
             );
@@ -247,7 +285,7 @@ const UserGame: FC<UserGameProps> = props => {
         return (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={false}>
-                    <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                    <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
                     <Link to={`/game-answers/${gameId}`}
                           className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
@@ -290,7 +328,7 @@ const UserGame: FC<UserGameProps> = props => {
         );
     }
 
-    return renderPage();
+    return !gameName ? <Loader /> : renderPage();
 };
 
 export default UserGame;

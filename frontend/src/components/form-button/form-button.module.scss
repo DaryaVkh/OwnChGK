@@ -34,3 +34,11 @@
 .signUpButton {
   width: 16vw;
 }
+
+.disabled {
+  border: 2px solid #242424;
+
+  &:hover {
+    box-shadow: none;
+  }
+}

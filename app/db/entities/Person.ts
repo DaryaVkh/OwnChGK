@@ -18,5 +18,5 @@ export abstract class Person extends BaseEntity {
     @Column({
         nullable: true
     })
-    temporaryCode: string;
+    temporary_code: string;
 }

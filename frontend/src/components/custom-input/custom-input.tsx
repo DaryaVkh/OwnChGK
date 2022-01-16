@@ -49,6 +49,7 @@ export const CustomInput: FC<InputProps> = props => {
     return (
         <OutlinedInput className={cls.join(' ')}
                        fullWidth={true}
+                       autoComplete={props.type === 'password' ? 'new-password' : 'off'}
                        type={values.showPassword && props.type === 'password' ? 'text' : props.type}
                        id={props.id}
                        error={props.isInvalid}

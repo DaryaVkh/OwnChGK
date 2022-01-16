@@ -6,69 +6,62 @@ import {secret} from './jwtToken';
 import * as WebSocket from 'ws';
 
 export const games: { [id: string]: Game; } = {};
-export const gamesCurrentAnswer: { [id: string]: [number, number]; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
 export const gameUsers: { [id: string]: any; } = {};
-export const gameIsTimerStart: { [id: string]: boolean; } = {};
-const addedTime: { [id: string]: number } = {};
 
 export const transporter = CreateTransporter('ownchgk@gmail.com', '6ownchgkgoogle');
 
-export const timers: { [id: string]: any; } = {};
-export const timesWhenPauseClick: { [id: string]: number; } = {};
-export const timesIsOnPause: { [id: string]: boolean; } = {};
-
-const seconds70PerQuestion = 70000;
-const extra10Seconds = 10000;
+export const seconds70PerQuestion = 70000;
+export const extra10Seconds = 10000;
 
 function GiveAddedTime(gameId: number) {
-    if (timesIsOnPause[gameId]) {
-        timesWhenPauseClick[gameId] += extra10Seconds;
-        console.log('added time is' + timesWhenPauseClick[gameId]);
+    if (games[gameId].timeIsOnPause) {
+        games[gameId].leftTime += extra10Seconds;
+        games[gameId].maxTime += extra10Seconds;
+        console.log('added time is' + games[gameId].leftTime);
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'addTime',
-                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
-                'time': timesWhenPauseClick[gameId],
+                'maxTime': games[gameId].maxTime,
+                'time': games[gameId].leftTime,
                 'isStarted': false,
             }));
         }
     } else {
-        if (!gameIsTimerStart[gameId]) {
-            addedTime[gameId] = addedTime[gameId] ? addedTime[gameId] + 10000 : 10000;
+        if (!games[gameId].isTimerStart) {
+            games[gameId].leftTime += extra10Seconds;
+            games[gameId].maxTime += extra10Seconds;
             for (let user of gameUsers[gameId]) {
                 user.send(JSON.stringify({
                     'action': 'addTime',
-                    'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
-                    'time': seconds70PerQuestion + addedTime[gameId],
+                    'maxTime': games[gameId].maxTime,
+                    'time': games[gameId].leftTime,
                     'isStarted': false,
                 }));
             }
-            return;
-        }
-
-        const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
-        const initialDelay = timers[gameId]._idleTimeout;
-        clearTimeout(timers[gameId]);
-        gameIsTimerStart[gameId] = true;
-        let t;
-        if (initialDelay - pastDelay < 0) {
-            t = extra10Seconds;
-        } else t = initialDelay - pastDelay + extra10Seconds;
-        addedTime[gameId] = addedTime[gameId] ? addedTime[gameId] + 10000 : 10000;
-        timers[gameId] = setTimeout(() => {
-            console.log('added time end');
-            gameIsTimerStart[gameId] = false;
-            addedTime[gameId] = 0;
-        }, t); // может быть косяк с очисткой таймаута, но хз. пока не косячило
-        console.log('t' + t);
-        for (let user of gameUsers[gameId]) {
-            user.send(JSON.stringify({
-                'action': 'addTime',
-                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
-                'time': t,
-                'isStarted': true,
-            }));
+        } else {
+            const pastDelay = Math.floor(process.uptime() * 1000 - games[gameId].timer._idleStart);
+            const initialDelay = games[gameId].timer._idleTimeout;
+            clearTimeout(games[gameId].timer);
+            games[gameId].isTimerStart = true;
+            if (initialDelay - pastDelay < 0) {
+                games[gameId].leftTime = extra10Seconds;
+            } else games[gameId].leftTime = initialDelay - pastDelay + extra10Seconds;
+            games[gameId].maxTime += extra10Seconds;
+            games[gameId].timer = setTimeout(() => {
+                console.log('added time end');
+                games[gameId].isTimerStart = false;
+                games[gameId].leftTime = 0;
+            }, games[gameId].leftTime);
+            console.log('t' + games[gameId].leftTime);
+            for (let user of gameUsers[gameId]) {
+                user.send(JSON.stringify({
+                    'action': 'addTime',
+                    'maxTime': games[gameId].maxTime,
+                    'time': games[gameId].leftTime,
+                    'isStarted': true,
+                }));
+            }
         }
     }
 }
@@ -83,39 +76,37 @@ function ChangeQuestionNumber(gameId: number, questionNumber: number, roundNumbe
 }
 
 function StartTimer(gameId: number) {
-    if (!timesIsOnPause[gameId]) {
+    if (!games[gameId].timeIsOnPause) {
         console.log('start')
-        gameIsTimerStart[gameId] = true;
-        timers[gameId] = setTimeout(() => {
-            gameIsTimerStart[gameId] = false;
-            addedTime[gameId] = 0;
+        games[gameId].isTimerStart = true;
+        games[gameId].timer = setTimeout(() => {
+            games[gameId].isTimerStart = false;
+            games[gameId].leftTime = 0;
             console.log('stop')
-        }, seconds70PerQuestion + (addedTime[gameId] ?? 0));
+        }, games[gameId].leftTime);
 
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
-                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
-                'time': seconds70PerQuestion + (addedTime[gameId] ?? 0)
+                'maxTime': games[gameId].maxTime,
+                'time': games[gameId].leftTime
             }));
         }
     } else {
         console.log('startFromPause')
-        gameIsTimerStart[gameId] = true;
-        timesIsOnPause[gameId] = false;
-        const t = timesWhenPauseClick[gameId];
-        //timesWhenPauseClick[gameId] = 70000;
-        timers[gameId] = setTimeout(() => {
-            gameIsTimerStart[gameId] = false;
+        games[gameId].isTimerStart = true;
+        games[gameId].timeIsOnPause = false;
+        games[gameId].timer = setTimeout(() => {
+            games[gameId].isTimerStart = false;
             console.log('stop after pause')
-            addedTime[gameId] = 0;
-        }, t);
-        console.log(t + 'added time to resp');
+            games[gameId].leftTime = 0
+        }, games[gameId].leftTime);
+        console.log(games[gameId].leftTime + 'added time to resp');
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
-                'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
-                'time': t
+                'maxTime': games[gameId].maxTime,
+                'time': games[gameId].leftTime
             }));
         }
     }
@@ -123,11 +114,11 @@ function StartTimer(gameId: number) {
 
 function StopTimer(gameId: number) {
     console.log('stop')
-    gameIsTimerStart[gameId] = false;
-    clearTimeout(timers[gameId]);
-    timesIsOnPause[gameId] = false;
-    timesWhenPauseClick[gameId] = 70000;
-    addedTime[gameId] = 0;
+    games[gameId].isTimerStart = false;
+    clearTimeout(games[gameId].timer);
+    games[gameId].timeIsOnPause = false;
+    games[gameId].leftTime = seconds70PerQuestion;
+    games[gameId].maxTime = seconds70PerQuestion;
     for (let user of gameUsers[gameId]) {
         user.send(JSON.stringify({
             'action': 'stop'
@@ -136,13 +127,12 @@ function StopTimer(gameId: number) {
 }
 
 function PauseTimer(gameId: number) {
-    if (gameIsTimerStart[gameId]) {
+    if (games[gameId].isTimerStart) {
         console.log('pause')
-        gameIsTimerStart[gameId] = false;
-        timesIsOnPause[gameId] = true;
-        //addedTime[gameId] = 0;
-        timesWhenPauseClick[gameId] = (timesWhenPauseClick[gameId] ?? seconds70PerQuestion + (addedTime[gameId] ?? 0)) - Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
-        clearTimeout(timers[gameId]);
+        games[gameId].isTimerStart = false;
+        games[gameId].timeIsOnPause = true;
+        games[gameId].leftTime -= Math.floor(process.uptime() * 1000 - games[gameId].timer._idleStart);
+        clearTimeout(games[gameId].timer);
 
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
@@ -154,8 +144,8 @@ function PauseTimer(gameId: number) {
 
 function GetAnswer(answer: string, teamId: number, gameId: number) {
     console.log('received: %s', answer, teamId);
-    const roundNumber = gamesCurrentAnswer[gameId][0] - 1;
-    const questionNumber = gamesCurrentAnswer[gameId][1] - 1;
+    const roundNumber = games[gameId].currentQuestion[0] - 1;
+    const questionNumber = games[gameId].currentQuestion[1] - 1;
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);
 }
 
@@ -164,7 +154,7 @@ function GetAppeal(appeal: string, teamId: number, gameId: number, number: numbe
     const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount);
     let questionNumber = number - (roundNumber - 1) * games[gameId].rounds[0].questionsCount;
     console.log(roundNumber, questionNumber);
-    games[gameId].rounds[roundNumber-1].questions[questionNumber-1].giveAppeal(teamId, appeal, answer);
+    games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].giveAppeal(teamId, appeal, answer);
 }
 
 function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
@@ -205,7 +195,7 @@ function GetAllTeamsAnswers(gameId: number, roundNumber: number, questionNumber:
     }));
 }
 
-function GetAllTeamsAppeals(gameId: number, roundNumber: number, questionNumber: number, ws) {
+function GetAppealsByNumber(gameId: number, roundNumber: number, questionNumber: number, ws) {
     const appeals = games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].appeals
         .filter(value => value.status === Status.UnChecked)
         .map(appeal => {
@@ -215,9 +205,26 @@ function GetAllTeamsAppeals(gameId: number, roundNumber: number, questionNumber:
                 answer: games[gameId].teams[appeal.teamNumber].getAnswer(roundNumber, questionNumber).text
             }
         });
+
+    console.log('APPEALS', appeals);
     ws.send(JSON.stringify({
-        'action': 'appeals',
+        'action': 'appealsByNumber',
         appeals
+    }));
+}
+
+function GetAllAppeals(gameId: number, ws) {
+    const res = [];
+    for (let roundNumber = 0; roundNumber < games[gameId].rounds.length; roundNumber++) {
+        for (let questionNumber = 0; questionNumber < games[gameId].rounds[roundNumber].questions.length; questionNumber++) {
+            if (games[gameId].rounds[roundNumber].questions[questionNumber].appeals
+                .filter(a => a.status === Status.UnChecked).length > 0)
+                res.push(roundNumber * games[gameId].rounds[roundNumber].questions.length + (questionNumber + 1));
+        }
+    }
+    ws.send(JSON.stringify({
+        action: 'appeals',
+        appealByQuestionNumber: res
     }));
 }
 
@@ -239,42 +246,40 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
         }
 
         if (jsonMessage.action == 'time') {
-            if (timers[gameId]) {
-                const pastDelay = Math.floor(process.uptime() * 1000 - timers[gameId]._idleStart);
-                const initialDelay = timers[gameId]._idleTimeout;
+            if (games[gameId].timer) {
+                const pastDelay = Math.floor(process.uptime() * 1000 - games[gameId].timer._idleStart);
+                const initialDelay = games[gameId].timer._idleTimeout;
                 let result = 0;
-                if (gameIsTimerStart[gameId]) {
+                if (games[gameId].isTimerStart) {
                     result = initialDelay - pastDelay;
-                } else if (timesIsOnPause[gameId]) {
-                    result = timesWhenPauseClick[gameId];
                 } else {
-                    result = seconds70PerQuestion + (addedTime[gameId] ?? 0);
+                    result = games[gameId].leftTime;
                 }
                 ws.send(JSON.stringify({
                     'action': 'time',
-                    'isStarted': gameIsTimerStart[gameId],
-                    'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
+                    'isStarted': games[gameId].isTimerStart,
+                    'maxTime': games[gameId].maxTime,
                     'time': result
                 }));
                 console.log(result);
             } else {
-                console.log('addedTime:', addedTime[gameId]);
                 ws.send(JSON.stringify({
                     'action': 'time',
-                    'isStarted': gameIsTimerStart[gameId],
-                    'maxTime': seconds70PerQuestion + (addedTime[gameId] ?? 0),
-                    'time': seconds70PerQuestion + (addedTime[gameId] ?? 0)
+                    'isStarted': games[gameId].isTimerStart,
+                    'maxTime': games[gameId].maxTime,
+                    'time': games[gameId].leftTime
                 }));
             }
         } else if (jsonMessage.action == 'changeQuestion') {
-            gamesCurrentAnswer[gameId] = [jsonMessage.tourNumber, jsonMessage.questionNumber];
+            console.log('changeQuestion', jsonMessage.tourNumber, jsonMessage.questionNumber);
+            games[gameId].currentQuestion = [jsonMessage.tourNumber, jsonMessage.questionNumber];
             ChangeQuestionNumber(gameId, jsonMessage.questionNumber, jsonMessage.tourNumber);
-        } else if (jsonMessage.action == 'getQuestionNumber') {
-            const result = games[gameId].rounds[0].questionsCount * (gamesCurrentAnswer[gameId][0] - 1) + gamesCurrentAnswer[gameId][1];
+        } else if (jsonMessage.action == 'isOnBreak') {
             ws.send(JSON.stringify({
-                'action': 'changeQuestionNumber',
-                'number': result,
-            }));
+                action: 'isOnBreak',
+                status: !games[gameId].status, //не статус = на паузе
+                time: games[gameId].breakTime
+            }))
         }
         if (userRoles == 'admin' || userRoles == 'superadmin') {
             gameAdmins[gameId].add(ws);
@@ -297,8 +302,43 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
             } else if (jsonMessage.action == 'getAnswers') {
                 GetAllTeamsAnswers(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
-            } else if (jsonMessage.action == 'getAppeals') {
-                GetAllTeamsAppeals(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
+            } else if (jsonMessage.action == 'getAppealsByNumber') {
+                GetAppealsByNumber(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, ws);
+            } else if (jsonMessage.action == 'getAllAppeals') {
+                GetAllAppeals(gameId, ws);
+            } else if (jsonMessage.action == 'breakTime') {
+                games[gameId].startBreak(jsonMessage.time);
+                for (const adminWs of gameAdmins[gameId]) {
+                    adminWs.send(JSON.stringify({
+                        action: 'isOnBreak',
+                        status: true,
+                        time: jsonMessage.time
+                    }));
+                }
+                for (const userWs of gameUsers[gameId]) {
+                    userWs.send(JSON.stringify({
+                        action: 'isOnBreak',
+                        status: true,
+                        time: jsonMessage.time
+                    }));
+                }
+            } else if (jsonMessage.action == 'stopBreak') {
+                games[gameId].stopBreak();
+                for (const userWs of gameUsers[gameId]) {
+                    userWs.send(JSON.stringify({
+                        action: 'isOnBreak',
+                        status: false,
+                        time: 0
+                    }))
+                }
+            } else if (jsonMessage.action == 'getQuestionNumber') {
+                console.log('tour ' + games[gameId].currentQuestion[0]);
+                console.log('question ' + games[gameId].currentQuestion[1]);
+                ws.send(JSON.stringify({
+                    'action': 'changeQuestionNumber',
+                    'round': games[gameId].currentQuestion[0],
+                    'question': games[gameId].currentQuestion[1]
+                }));
             }
         } else {
             if (!games[gameId]) {
@@ -309,34 +349,39 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 return;
             }
             gameUsers[gameId].add(ws);
-            console.log('USERS SOCKETS:', gameUsers[gameId]);
-            if (gameIsTimerStart[gameId] && jsonMessage.action == 'Answer') {
-                GetAnswer(jsonMessage.answer, teamId, gameId); // TODO: отправить мол приняли ответ, а в юзерке выводить плашку, иначе красную
+            if (games[gameId].isTimerStart && jsonMessage.action == 'Answer') {
+                GetAnswer(jsonMessage.answer, teamId, gameId);
                 ws.send(JSON.stringify({
                     'action': 'statusAnswer',
                     'isAccepted': true
                 }));
-            } else if (jsonMessage.action == 'Appeal') {
-                for (let ws of gameAdmins[gameId])
-                    ws.send('Appeal'); // TODO: какой вопрос, тур? Отправлять в сообщении и брать оттуда
-
+            } else if (jsonMessage.action == 'appeal') {
+                console.log(jsonMessage);
                 GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
+                for (let ws of gameAdmins[gameId])
+                    ws.send(JSON.stringify({
+                        action: 'appeal',
+                        questionNumber: jsonMessage.number
+                    }));
             } else if (jsonMessage.action == 'getTeamAnswers') {
-                const result = [];
-                const answers = games[gameId].teams[teamId].answers;
-                for (let i = 1; i < answers.length; i++) {
-                    for (let j = 1; j < answers[i].length; j++) {
-                        result.push({
-                            number: (i - 1) * answers[i].length + j,
-                            answer: answers[i][j].text,
-                            status: answers[i][j].status
-                        })
+                const answers = games[gameId].teams[teamId].getAnswers();
+                const result = answers.map((ans) => {
+                    return {
+                        number: (ans.roundNumber - 1) * games[gameId].rounds[0].questionsCount + ans.questionNumber,
+                        answer: ans.text,
+                        status: ans.status
                     }
-                }
+                })
                 ws.send(JSON.stringify({
                     'action': 'teamAnswers',
                     'answers': result
                 }))
+            } else if (jsonMessage.action == 'getQuestionNumber') {
+                const result = games[gameId].rounds[0].questionsCount * (games[gameId].currentQuestion[0] - 1) + games[gameId].currentQuestion[1];
+                ws.send(JSON.stringify({
+                    'action': 'changeQuestionNumber',
+                    'number': result,
+                }));
             }
         }
     }

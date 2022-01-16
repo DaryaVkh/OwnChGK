@@ -4,9 +4,12 @@ import React, {FC, useCallback, useState} from 'react';
 import classes from './modal.module.scss';
 import {ModalProps} from '../../entities/modal/modal.interfaces';
 import {deleteGame, deleteTeam} from '../../server-api/server-api';
+import {getCookie, getUrlForSocket} from "../../commonFunctions";
+import {createPortal} from 'react-dom';
 
 const Modal: FC<ModalProps> = props => {
     const [minutes, setMinutes] = useState<number>(0);
+    const [conn, setConn] = useState(new WebSocket(getUrlForSocket()));
 
     const handleMinutesCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setMinutes(+event.target.value);
@@ -21,11 +24,11 @@ const Modal: FC<ModalProps> = props => {
     };
 
     const handleDelete = useCallback(e => {
-        props.deleteElement?.(arr => arr.filter(el => el.name !== props.itemForDeleteName));
+        props.deleteElement?.(arr => arr?.filter(el => el.name !== props.itemForDeleteName));
         if (props.type === 'game') {
-            deleteGame(props.itemForDeleteName as string);
+            deleteGame(props.itemForDeleteId as string);
         } else {
-            deleteTeam(props.itemForDeleteName as string);
+            deleteTeam(props.itemForDeleteId as string);
         }
         //TODO а если ответ не 200?
     }, [props]);
@@ -39,11 +42,18 @@ const Modal: FC<ModalProps> = props => {
         if (minutes !== 0) {
             props.setBreakTime?.(minutes);
             props.startBreak?.(true);
+            conn.send(JSON.stringify({
+                        'cookie': getCookie('authorization'),
+                        'action': 'breakTime',
+                        'time': minutes * 60
+                    }
+                )
+            )
         }
         handleCloseModal(e);
     }
 
-    return (
+    return createPortal(
         <React.Fragment>
             <div className={classes.modal}>
                 <div className={classes.closeButtonWrapper}>
@@ -80,8 +90,8 @@ const Modal: FC<ModalProps> = props => {
                 </div>
             </div>
             <div className={classes.overlay}/>
-        </React.Fragment>
-    );
+        </React.Fragment>,
+        document.getElementById('root') as HTMLElement);
 };
 
 export default Modal;

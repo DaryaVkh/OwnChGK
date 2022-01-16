@@ -24,9 +24,9 @@ export class TeamRepository extends Repository<Team> {
         return this.delete({name});
     }
 
-    updateByParams(name: string, newName: string, captainEmail: string) {
+    updateByParams(teamId: string, newName: string, captainEmail: string) {
         return this.manager.transaction(manager => {
-            return manager.findOne(Team, {'name': name})
+            return manager.findOne(Team, teamId)
                 .then(team => manager.findOne(User, {'email': captainEmail})
                     .then(user => {
                         team.name = newName;
@@ -47,9 +47,9 @@ export class TeamRepository extends Repository<Team> {
         });
     }
 
-    updateEmptyTeamByNameAndUserEmail(name: string, userId: string) {
+    updateEmptyTeamByIdAndUserEmail(teamId: string, userId: string) {
         return this.manager.transaction(manager =>
-            manager.findOne(Team, {name}, {relations: ['captain']})
+            manager.findOne(Team, teamId, {relations: ['captain']})
                 .then(team => {
                         if (team.captain !== null) {
                             throw new Error('Команда уже с капитаном');
