@@ -5,7 +5,7 @@ import Header from '../../components/header/header';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {Link, Redirect} from 'react-router-dom';
 import {RestoringPasswordProps} from '../../entities/restoring-password/restoring-password.interfaces';
-import {Alert} from '@mui/material';
+import {Alert, Snackbar} from '@mui/material';
 import {FormButton} from '../../components/form-button/form-button';
 import {changePasswordByCode, checkTemporaryPassword, sendTemporaryPassword} from '../../server-api/server-api';
 import PageBackdrop from '../../components/backdrop/backdrop';
@@ -19,6 +19,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
     const [newPassword, setNewPassword] = useState<string>('');
     const [repeatedPassword, setRepeatedPassword] = useState<string>('');
     const [step, setStep] = useState<'first' | 'second' | 'third'>('first');
+    const [isResendCodeInvalid, setIsResendCodeInvalid] = useState<boolean>(false);
     const [isSuccess, setIsSuccess] = useState<boolean>(false);
     const [isError, setIsError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -33,14 +34,17 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
         setCode(event.target.value);
     }
 
-    const handleSendCode = () => {
+    const handleSendCode = (event: React.SyntheticEvent) => {
+        event.preventDefault();
         setIsLoading(true);
         // TODO тут отправляем код на почту email и меняем шаг на 'second' (setStep('second')) или говорим, что такого имейла в базе нет и ставим isEmailInvalid в false
         sendTemporaryPassword(email, props.isAdmin).then(res => {
             if (res.status === 200) {
                 setStep('second');
-            } else {
-                setIsEmailInvalid(false);
+            } else if (res.status === 404) {
+                setIsEmailInvalid(true);
+            } else if (res.status === 500) {
+                setIsResendCodeInvalid(true);
             }
             setIsLoading(false);
         })
@@ -50,10 +54,8 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
         setIsLoading(true);
         // TODO тут отправляем новый код на почту email, ибо прошлый юзер продолбал
         sendTemporaryPassword(email, props.isAdmin).then(res => {
-            if (res.status === 200) {
-                setStep('second');
-            } else {
-                setIsEmailInvalid(false);
+            if (res.status === 500) {
+                setIsResendCodeInvalid(true);
             }
             setIsLoading(false);
         })
@@ -79,6 +81,14 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
     const handleChangeRepeatedPassword = (event: React.ChangeEvent<HTMLInputElement>) => {
         setRepeatedPassword(event.target.value);
     }
+
+    const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setIsResendCodeInvalid(false);
+    };
 
     const handleSubmitNewPassword = (event: React.SyntheticEvent) => {
         event.preventDefault();
@@ -106,7 +116,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
         switch (step) {
             case 'first':
                 return (
-                    <div className={classes.stepWrapper}>
+                    <form className={classes.stepWrapper} onSubmit={handleSendCode}>
                         <p className={classes.instructionsParagraph} style={{marginTop: '17vh', marginBottom: '2vh'}}>
                             Для восстановления пароля введите E-mail, указанный при регистрации
                         </p>
@@ -118,7 +128,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                             <CustomInput type="email" placeholder="E-mail" name="email" id="email" value={email}
                                          style={{width: '65%'}}
                                          onChange={handleEmailChange} isInvalid={isEmailInvalid}/>
-                            <button className={classes.sendButton} type="submit" onClick={handleSendCode}>Отправить
+                            <button className={classes.sendButton} type="submit">Отправить
                             </button>
                         </div>
 
@@ -144,7 +154,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                             <Link className={classes.linkToSignIn} to={props.isAdmin ? '/admin' : '/auth'}>Вспомнил
                                 пароль</Link>
                         </div>
-                    </div>
+                    </form>
                 );
             case 'second':
                 return (
@@ -235,6 +245,11 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                             </div>
                     }
                 </div>
+                <Snackbar sx={{marginTop: '8vh'}} open={isResendCodeInvalid} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000} onClose={handleSnackbarClose}>
+                    <Alert severity='error' sx={{width: '100%'}}>
+                        Не удалось отправить код. Повторите попытку
+                    </Alert>
+                </Snackbar>
                 <PageBackdrop isOpen={isLoading} />
             </PageWrapper>
         );

@@ -2,7 +2,7 @@ import React, {FC, useState, useEffect} from 'react';
 import classes from './team-creation.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
-import {TeamCreatorProps} from '../../entities/team-creation/team-creation.interfaces';
+import {TeamCreatorDispatchProps, TeamCreatorProps} from '../../entities/team-creation/team-creation.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Alert, Autocomplete, Skeleton, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
@@ -11,6 +11,10 @@ import {useLocation, Redirect} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
 import {store} from '../../index';
 import PageBackdrop from '../../components/backdrop/backdrop';
+import {Dispatch} from 'redux';
+import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
+import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
+import {connect} from 'react-redux';
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>();
@@ -67,6 +71,9 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
             createTeam(teamName, captain).then(res => {
                 if (res.status === 200) {
                     setIsCreatedSuccessfully(true);
+                    if (!props.isAdmin) {
+                        props.onAddUserTeam(teamName);
+                    }
                 } else {
                     setIsLoading(false);
                     setIsNameInvalid(true);
@@ -112,7 +119,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                         }}>Такая команда уже существует</Alert> : null}
 
                         {
-                            usersFromDB && (props.mode === 'edit' && oldCaptain || props.mode === 'creation') || !props.isAdmin
+                            usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation') || !props.isAdmin
                                 ? <CustomInput type='text' id='teamName' name='teamName' placeholder='Название'
                                       value={teamName}
                                       defaultValue={teamName}
@@ -181,4 +188,10 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
         );
 };
 
-export default TeamCreator;
+function mapDispatchToProps(dispatch: Dispatch<AppAction>): TeamCreatorDispatchProps {
+    return {
+        onAddUserTeam: (team: string) => dispatch(addUserTeam(team))
+    };
+}
+
+export default connect(null, mapDispatchToProps)(TeamCreator);
