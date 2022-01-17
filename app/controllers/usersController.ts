@@ -6,8 +6,7 @@ import {Request, Response} from 'express';
 import {generateAccessToken, secret} from '../jwtToken';
 import jwt from 'jsonwebtoken';
 import {makeTemporaryPassword, SendMailWithTemporaryPassword, validateEmail} from '../email';
-import {transporter} from "../socket";
-import {AdminRepository} from '../db/repositories/adminRepository';
+import {transporter} from '../socket';
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
@@ -34,7 +33,7 @@ export class UsersController { // TODO: дописать смену имени �
             }
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.id, user.email,"user", null, null, user.name);
+                const token = generateAccessToken(user.id, user.email, 'user', null, null, user.name);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     //httpOnly: true,
@@ -44,7 +43,7 @@ export class UsersController { // TODO: дописать смену имени �
                     id: user.id,
                     email: user.email,
                     name: user.name,
-                    role: "user",
+                    role: 'user',
                     team: user.team?.name ?? ''
                 });
             } else {
@@ -69,7 +68,7 @@ export class UsersController { // TODO: дописать смену имени �
             const hashedPassword = await hash(password, 10);
             const insertResult = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
             const userId = insertResult.identifiers[0].id;
-            const token = generateAccessToken(userId, email, "user", null, null);
+            const token = generateAccessToken(userId, email, 'user', null, null);
             res.cookie('authorization', token, {
                 maxAge: 24 * 60 * 60 * 1000,
                 //httpOnly: true,
@@ -90,24 +89,34 @@ export class UsersController { // TODO: дописать смену имени �
             }
             const {gameId} = req.params;
             const oldToken = req.cookies['authorization'];
-            const {id: userId, email: email, roles: userRoles, name: name} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
-            const user = await getCustomRepository(UserRepository).findOne(userId, {relations:['team']});
+            const {
+                id: userId,
+                email: email,
+                roles: userRoles,
+                name: name
+            } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            if (userRoles === 'user') {
+                const user = await getCustomRepository(UserRepository).findOne(userId, {relations: ['team']});
 
-            if (user.team !== null) {
-                const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId, name);
+                if (user?.team !== null) {
+                    const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId, name);
+                    res.cookie('authorization', token, {
+                        maxAge: 24 * 60 * 60 * 1000,
+                        //httpOnly: true,
+                        secure: true
+                    });
+                    return res.status(200).json({});
+                }
+            } else if (userRoles === 'admin' || userRoles === 'superadmin') {
+                const token = generateAccessToken(userId, email, userRoles, null, +gameId, name);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
                     //httpOnly: true,
                     secure: true
                 });
-                return res.status(200).json({
-                    name: user.team.name,
-                    id: user.team.id,
-                    captainId: user.id,
-                    captainEmail: user.email,
-                });
-            } else {
                 return res.status(200).json({});
+            } else {
+                return res.status(400).json({});
             }
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -252,7 +261,7 @@ export class UsersController { // TODO: дописать смену имени �
             }
             const oldToken = req.cookies['authorization'];
             const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
-            const user = await getCustomRepository(UserRepository).findOne(userId, {relations:['team']});
+            const user = await getCustomRepository(UserRepository).findOne(userId, {relations: ['team']});
 
             if (user.team !== null) {
                 return res.status(200).json({
@@ -276,7 +285,12 @@ export class UsersController { // TODO: дописать смену имени �
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const oldToken = req.cookies['authorization'];
-            const {id: userId, email: email, roles: userRoles, name: name} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            const {
+                id: userId,
+                email: email,
+                roles: userRoles,
+                name: name
+            } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
 
             if (userId !== undefined && email !== undefined && userRoles !== undefined) {
                 if (userRoles === 'user') {
@@ -289,7 +303,6 @@ export class UsersController { // TODO: дописать смену имени �
                         team: user?.team?.name ?? ''
                     })
                 } else if (userRoles === 'admin' || userRoles === 'superadmin') {
-                    console.log('admin');
                     return res.status(200).json({
                         id: userId,
                         email,
