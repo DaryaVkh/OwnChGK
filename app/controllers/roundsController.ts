@@ -53,8 +53,8 @@ export class RoundsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {gameName, number} = req.params;
-            await getCustomRepository(RoundRepository).deleteByGameNameAndNumber(gameName, +number);
+            const {gameId, number} = req.params;
+            await getCustomRepository(RoundRepository).deleteByGameNameAndNumber(gameId, +number);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -67,13 +67,13 @@ export class RoundsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {gameName, number} = req.params;
+            const {gameId, number} = req.params;
             const {
                 newQuestionCount,
                 newQuestionCost,
                 newQuestionTime
             } = req.body;
-            await getCustomRepository(RoundRepository).updateByParams(+number, gameName, newQuestionCount, newQuestionCost, newQuestionTime);
+            await getCustomRepository(RoundRepository).updateByParams(+number, gameId, newQuestionCount, newQuestionCost, newQuestionTime);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});

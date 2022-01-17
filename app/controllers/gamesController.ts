@@ -82,8 +82,12 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {gameName} = req.params;
-            await getCustomRepository(GameRepository).deleteByName(gameName);
+            const {gameId} = req.params;
+            if (!gameId) {
+                return res.status(400).json({message: 'gameId is invalid'});
+            }
+
+            await getCustomRepository(GameRepository).delete(gameId);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -96,9 +100,9 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {gameName} = req.params;
+            const {gameId} = req.params;
             const {newGameName} = req.body;
-            await getCustomRepository(GameRepository).updateByNames(gameName, newGameName);
+            await getCustomRepository(GameRepository).updateById(gameId, newGameName);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -111,9 +115,9 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {gameName} = req.params;
+            const {gameId} = req.params;
             const {admin} = req.body;
-            await getCustomRepository(GameRepository).updateByNameAndAdminEmail(gameName, admin);
+            await getCustomRepository(GameRepository).updateByIdAndAdminEmail(gameId, admin);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -320,9 +324,9 @@ export class GamesController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
 
-            const {gameName} = req.params;
+            const {gameId} = req.params;
             const {status} = req.body;
-            await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameName, status);
+            await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, status);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});

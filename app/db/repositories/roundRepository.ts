@@ -22,20 +22,20 @@ export class RoundRepository extends Repository<Round> {
         });
     }
 
-    deleteByGameNameAndNumber(gameName: string, number: number) {
+    deleteByGameNameAndNumber(gameId: string, number: number) {
         return this.manager.transaction(manager => {
-            return manager.findOne(Game, {'name': gameName})
+            return manager.findOne(Game, gameId)
                 .then(game => manager.delete(Round, {game, number}));
         });
     }
 
     updateByParams(number: number,
-                   gameName: string,
+                   gameId: string,
                    newQuestionNumber: number,
                    newQuestionCost: number,
                    newQuestionTime: number) {
         return this.manager.transaction(manager => {
-            return manager.findOne(Game, {'name': gameName})
+            return manager.findOne(Game, gameId)
                 .then(game => manager.update(Round,
                     {game, number},
                     {

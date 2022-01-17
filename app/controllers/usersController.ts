@@ -210,18 +210,18 @@ export class UsersController { // TODO: дописать смену имени �
             if (!validateEmail(email)) {
                 return res.status(400).json({'message': 'email is invalid'});
             }
-            const code = makeTemporaryPassword(8);
-            SendMailWithTemporaryPassword(transporter, email, code);
             let user = await getCustomRepository(UserRepository).findByEmail(email);
             if (user) {
+                const code = makeTemporaryPassword(8);
+                SendMailWithTemporaryPassword(transporter, email, code);
                 user.temporary_code = code;
                 await user.save();
                 return res.status(200).json({});
             } else {
-                return res.status(404).json({});
+                return res.status(404).json({message: 'user not found'});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({'message': error.message});
         }
     }
 
@@ -239,7 +239,7 @@ export class UsersController { // TODO: дописать смену имени �
                 return res.status(403).json({});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({'message': error.message});
         }
     }
 

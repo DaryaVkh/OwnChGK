@@ -17,6 +17,7 @@ import {Dispatch} from 'redux';
 import {authorizeUserWithRole, checkToken as testToken} from '../../redux/actions/app-actions/app-actions';
 import {AppState} from '../../entities/app/app.interfaces';
 import PageBackdrop from '../../components/backdrop/backdrop';
+import {login} from '../../server-api/server-api';
 
 const Authorization: FC<AuthorizationProps> = props => {
     const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState<boolean>(false);
@@ -27,17 +28,7 @@ const Authorization: FC<AuthorizationProps> = props => {
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
         setIsLoading(true);
-        await fetch(props.isAdmin ? 'admins/login' : 'users/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                email,
-                password
-            })
-        }).then(response => {
+        login(email, password, !!props.isAdmin).then(response => {
             if (response.status === 200) {
                 response.json().then(({role, team, email, name}) => {
                     props.onAuthorizeUserWithRole(role, team, email, name);

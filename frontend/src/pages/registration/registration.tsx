@@ -12,6 +12,7 @@ import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces
 import {authorizeUserWithRole} from '../../redux/actions/app-actions/app-actions';
 import {connect} from 'react-redux';
 import PageBackdrop from '../../components/backdrop/backdrop';
+import {createUser} from '../../server-api/server-api';
 
 const Registration: FC<RegistrationProps> = props => {
     const [isRepeatedPasswordInvalid, setIsRepeatedPasswordInvalid] = useState<boolean>(false);
@@ -52,17 +53,7 @@ const Registration: FC<RegistrationProps> = props => {
             return false;
         } else {
             setIsLoading(true);
-            await fetch('/users/insert', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json;charset=utf-8',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
-            }).then(response => {
+            createUser(email, password).then(response => {
                 if (response.status === 200) {
                     props.onAuthorizeUserWithRole('user', '', email, '');
                     setLoggedIn(true);

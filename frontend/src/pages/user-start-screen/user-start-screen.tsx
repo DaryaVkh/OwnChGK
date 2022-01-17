@@ -9,6 +9,7 @@ import {Link, Redirect, useLocation} from 'react-router-dom';
 import {IconButton, Skeleton} from '@mui/material';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import {
+    changeToken,
     editTeamCaptainByCurrentUser,
     getAmIParticipateGames,
     getTeamByCurrentUser,
@@ -78,13 +79,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     };
 
     const handleClick = (id: string) => {
-        fetch(`/users/${id}/changeToken`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Accept': 'application/json'
-            }
-        }).then((res) => {
+        changeToken(id).then((res) => {
             if (res.status === 200) {
                 setGameId(id);
             }

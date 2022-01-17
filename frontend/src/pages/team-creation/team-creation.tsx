@@ -21,7 +21,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     const [isCreatedSuccessfully, setIsCreatedSuccessfully] = useState<boolean>(false);
     const [isNameInvalid, setIsNameInvalid] = useState<boolean>(false);
     const [oldCaptain, setOldCaptain] = useState<string | undefined>();
-    const location = useLocation<{ name: string }>();
+    const location = useLocation<{ id: string, name: string }>();
     const [teamName, setTeamName] = useState<string>(props.mode === 'edit' ? location.state.name : '');
     const [captain, setCaptain] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,7 +36,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                     res.json().then(({users}) => {
                         setUsersFromDB([...users]);
                         if (props.mode === 'edit') {
-                            getTeam(teamName).then(res => {
+                            getTeam(location.state.id).then(res => {
                                 if (res.status === 200) {
                                     res.json().then(data => {
                                         setCaptain(data.captain);
@@ -80,7 +80,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                 }
             });
         } else {
-            editTeam(oldTeamName, teamName, captain).then(res => {
+            editTeam(location.state.id, teamName, captain).then(res => {
                 if (res.status === 200) {
                     setIsCreatedSuccessfully(true);
                 } else {

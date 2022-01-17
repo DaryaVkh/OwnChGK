@@ -2,7 +2,7 @@ import React, {FC, useEffect, useState} from 'react';
 import classes from './admin-start-game.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Redirect, useParams} from 'react-router-dom';
-import {getGame} from '../../server-api/server-api';
+import {changeToken, getGame, startGame} from '../../server-api/server-api';
 import Header from '../../components/header/header';
 import NavBar from '../../components/nav-bar/nav-bar';
 import Loader from '../../components/loader/loader';
@@ -24,16 +24,9 @@ const StartGame: FC = () => {
     }, []);
 
     const handleStart = async () => {
-        fetch(`/games/${gameId}/start`)
-            .then((res) => {
+        startGame(gameId).then((res) => {
                 if (res.status === 200) {
-                    fetch(`/users/${gameId}/changeToken`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json;charset=utf-8',
-                            'Accept': 'application/json'
-                        }
-                    }).then((res) => {
+                    changeToken(gameId).then((res) => {
                         if (res.status === 200) {
                             setIsGameStart(true);
                         }

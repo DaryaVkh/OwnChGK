@@ -6,6 +6,7 @@ export interface ModalProps {
     closeModal: Dispatch<SetStateAction<boolean>>;
     deleteElement?: Dispatch<SetStateAction<Game[] | Team[] | undefined>>;
     itemForDeleteName?: string;
+    itemForDeleteId?: string;
     type?: 'team' | 'game';
     startBreak?: Dispatch<SetStateAction<boolean>>;
     setBreakTime?: Dispatch<SetStateAction<number>>;

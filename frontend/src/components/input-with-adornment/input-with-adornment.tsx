@@ -48,6 +48,7 @@ const InputWithAdornment: FC<InputWithAdornmentProps> = props => {
 
     const setItemName = useCallback(e => {
         props.setItemForDeleteName(props.name);
+        props.setItemForDeleteId(props.id as string);
     }, [props]);
 
     const handleOpenModal = useCallback(e => {
