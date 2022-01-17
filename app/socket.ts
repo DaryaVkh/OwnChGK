@@ -235,6 +235,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
         ws.send(JSON.stringify({
             'action': 'pong'
         }));
+        return;
     }
     if (jsonMessage.cookie === null) {
         console.log('не авторизован');
