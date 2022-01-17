@@ -61,6 +61,12 @@ const AdminAnswersPage: FC = () => {
                 'roundNumber': +tour,
                 'questionNumber': +question,
             }));
+
+            setInterval(() => {
+                conn.send(JSON.stringify({
+                    'action': 'ping'
+                }));
+            }, 30000);
         }
 
         conn.onmessage = function (event) {

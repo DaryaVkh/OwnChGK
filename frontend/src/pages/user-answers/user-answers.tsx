@@ -37,6 +37,12 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
                 'cookie': getCookie('authorization'),
                 'action': 'getTeamAnswers'
             }));
+
+            setInterval(() => {
+                conn.send(JSON.stringify({
+                    'action': 'ping'
+                }));
+            }, 30000);
         }
 
         conn.onmessage = function (event) {

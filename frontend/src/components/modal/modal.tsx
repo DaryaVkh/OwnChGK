@@ -41,7 +41,7 @@ const Modal: FC<ModalProps> = props => {
 
     const handleStartBreak = (e: React.SyntheticEvent) => {
         if (minutes !== 0) {
-            props.setBreakTime?.(minutes);
+            props.setBreakTime?.(minutes * 60);
             props.startBreak?.(true);
             conn = new WebSocket(getUrlForSocket());
             conn.onopen = () => {

@@ -70,6 +70,12 @@ const AdminGame: FC<AdminGameProps> = props => {
                 'cookie': getCookie('authorization'),
                 'action': 'getQuestionNumber'
             }));
+
+            setInterval(() => {
+                conn.send(JSON.stringify({
+                    'action': 'ping'
+                }));
+            }, 30000);
         }
 
         conn.onmessage = function (event) {
@@ -139,15 +145,6 @@ const AdminGame: FC<AdminGameProps> = props => {
                 return props.tourNumber;
             });
             setActiveQuestion('none');
-
-            /*conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'changeQuestion',
-                'questionNumber': 1,
-                'tourNumber': +clickedTour.id,
-            }));*/
-
-            //handleStopClick(); // Прошлый вопрос остановится!
         };
 
         if (chosenTourNumber === undefined) {

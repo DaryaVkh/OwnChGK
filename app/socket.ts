@@ -231,6 +231,11 @@ function GetAllAppeals(gameId: number, ws) {
 export function HandlerWebsocket(ws: WebSocket, message: string) {
     message += '';
     const jsonMessage = JSON.parse(message);
+    if (jsonMessage.action === 'ping') {
+        ws.send(JSON.stringify({
+            'action': 'pong'
+        }));
+    }
     if (jsonMessage.cookie === null) {
         console.log('не авторизован');
     } else {

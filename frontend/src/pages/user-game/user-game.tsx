@@ -60,6 +60,12 @@ const UserGame: FC<UserGameProps> = props => {
                 'cookie': getCookie('authorization'),
                 'action': 'isOnBreak'
             }));
+
+            setInterval(() => {
+                conn.send(JSON.stringify({
+                    'action': 'ping'
+                }));
+            }, 30000);
         }
 
         conn.onmessage = function (event) {
