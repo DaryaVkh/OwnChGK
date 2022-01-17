@@ -151,15 +151,14 @@ const App: FC<AppProps> = props => {
                 </Switch>
             </Wrapper>
         </Suspense>
-    ) : null; // TODO: загрузка
+    ) : null;
 };
 
 function mapStateToProps(state: AppState): AppStateProps {
     return {
         user: state.appReducer.user,
         isLoggedIn: state.appReducer.isLoggedIn,
-        isTokenChecked: true
-        // isTokenChecked: state.appReducer.isTokenChecked
+        isTokenChecked: state.appReducer.isTokenChecked
     };
 }
 

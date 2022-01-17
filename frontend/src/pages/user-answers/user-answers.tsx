@@ -67,7 +67,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
-                <Link to="#" className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
                 <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В
                     игру</Link> {/* TODO тут написать нормальный урлик, потому что я не помню, какой нормальный*/}
 
