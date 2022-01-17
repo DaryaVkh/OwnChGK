@@ -122,7 +122,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         getAll('/teams/').then(res => {
             if (res.status === 200) {
                 res.json().then(({teams}) => {
-                    setTeams(teams.sort((team1: Team, team2: Team) => team1.name > team2.name ? 1 : -1));
+                    setTeams(teams.sort((team1: Team, team2: Team) => team1.name.toLowerCase() > team2.name.toLowerCase() ? 1 : -1));
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -132,7 +132,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         getAll('/games/').then(res => {
             if (res.status === 200) {
                 res.json().then(({games}) => {
-                    setGames(games.sort((game1: Game, game2: Game) => game1.name > game2.name ? 1 : -1));
+                    setGames(games.sort((game1: Game, game2: Game) => game1.name.toLowerCase() > game2.name.toLowerCase() ? 1 : -1));
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -142,7 +142,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         getAll('/admins/').then(res => {
             if (res.status === 200) {
                 res.json().then(({admins}) => {
-                    setAdmins(admins);
+                    setAdmins(admins.sort((admin1: Admin, admin2: Admin) => admin1.email.toLowerCase() > admin2.email.toLowerCase() ? 1 : -1));
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?

@@ -61,6 +61,17 @@ const UserGame: FC<UserGameProps> = props => {
                 'action': 'isOnBreak'
             }));
 
+            const checkStart = setInterval(() => {
+                if (!isGameStarted) {
+                    conn.send(JSON.stringify({
+                        'action': 'checkStart',
+                        'cookie': getCookie('authorization'),
+                    }));
+                } else {
+                    clearInterval(checkStart);
+                }
+            }, 5000);
+
             setInterval(() => {
                 conn.send(JSON.stringify({
                     'action': 'ping'
@@ -79,7 +90,9 @@ const UserGame: FC<UserGameProps> = props => {
                 setIsGameStarted(true);
             }
 
-            if (jsonMessage.action === 'time') {
+            if (jsonMessage.action === 'startGame') {
+                setIsGameStarted(true);
+            } else if (jsonMessage.action === 'time') {
                 console.log('a');
                 console.log(jsonMessage.time);
                 console.log('maxTime:', jsonMessage.maxTime);
@@ -113,6 +126,7 @@ const UserGame: FC<UserGameProps> = props => {
                 setTimeForAnswer(70000 / 1000);
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
                 progress.style.width = '100%';
+                changeColor(progress);
             } else if (jsonMessage.action === 'changeQuestionNumber') {
                 console.log('e');
                 console.log(jsonMessage.time);
@@ -121,6 +135,7 @@ const UserGame: FC<UserGameProps> = props => {
                 setTimeForAnswer(70000 / 1000);
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
                 progress.style.width = '100%';
+                changeColor(progress);
             } else if (jsonMessage.action === 'statusAnswer') {
                 if (jsonMessage.isAccepted) {
                     setFlags({

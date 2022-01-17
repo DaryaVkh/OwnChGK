@@ -43,7 +43,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
                         getTeamsWithoutUser().then(res => {
                             if (res.status === 200) {
                                 res.json().then(({teams}) => {
-                                    setTeamsFromDB(teams.sort((team1: Team, team2: Team) => team1.name > team2.name ? 1 : -1));
+                                    setTeamsFromDB(teams.sort((team1: Team, team2: Team) => team1.name.toLowerCase() > team2.name.toLowerCase() ? 1 : -1));
                                 });
                             } else {
                                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -57,7 +57,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
         getAmIParticipateGames().then(res => { // TODO: игры, в которых я состою
             if (res.status === 200) {
                 res.json().then(({games}) => {
-                    setGamesFromDB(games.sort((game1: Game, game2: Game) => game1.name > game2.name ? 1 : -1));
+                    setGamesFromDB(games.sort((game1: Game, game2: Game) => game1.name.toLowerCase() > game2.name.toLowerCase() ? 1 : -1));
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?

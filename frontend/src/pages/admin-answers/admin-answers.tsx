@@ -16,7 +16,7 @@ const AdminAnswersPage: FC = () => {
     const {gameId} = useParams<{ gameId: string }>();
     const {tour, question} = useParams<{ tour: string, question: string }>();
     const [page, setPage] = useState<Page>('answers');
-    const [answersType, setAnswersType] = useState<AnswerType>('accepted');
+    const [answersType, setAnswersType] = useState<AnswerType>('unchecked');
     const [gameAnswers, setGameAnswers] = useState<string[]>([]); // Это accept + unchecked + rejected, нужно, чтобы считать
     const [acceptedAnswers, setAcceptedAnswers] = useState<string[]>([]);
     const [uncheckedAnswers, setUncheckedAnswers] = useState<string[]>([]);

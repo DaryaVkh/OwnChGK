@@ -13,6 +13,7 @@ import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Modal from '../../components/modal/modal';
 import Loader from '../../components/loader/loader';
+import {Alert, Snackbar} from '@mui/material';
 
 let interval: any;
 let breakInterval: any;
@@ -32,6 +33,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [breakTime, setBreakTime] = useState<number>(0); // в секундах
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
+    const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
     //TODO дописать уже какую-то игровую логику
 
@@ -76,6 +78,14 @@ const AdminGame: FC<AdminGameProps> = props => {
                     'action': 'ping'
                 }));
             }, 30000);
+        }
+
+        conn.onclose = () => {
+            setIsConnectionError(true);
+        }
+
+        conn.onerror = () => {
+            setIsConnectionError(true);
         }
 
         conn.onmessage = function (event) {
@@ -358,6 +368,11 @@ const AdminGame: FC<AdminGameProps> = props => {
                         : null
                 }
             </div>
+            <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+                <Alert severity='error' sx={{width: '100%'}}>
+                    Ошибка соединения. Обновите страницу
+                </Alert>
+            </Snackbar>
         </PageWrapper>
     );
 };

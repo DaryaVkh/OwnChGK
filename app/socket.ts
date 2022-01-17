@@ -9,7 +9,7 @@ export const games: { [id: string]: Game; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
 export const gameUsers: { [id: string]: any; } = {};
 
-export const transporter = CreateTransporter('ownchgk@gmail.com', '6ownchgkgoogle');
+export const transporter = CreateTransporter(process.env.LOGIN, process.env.PASSWORD);
 
 export const seconds70PerQuestion = 70000;
 export const extra10Seconds = 10000;
@@ -113,7 +113,7 @@ function StartTimer(gameId: number) {
 }
 
 function StopTimer(gameId: number) {
-    console.log('stop')
+    console.log('STOP')
     games[gameId].isTimerStart = false;
     clearTimeout(games[gameId].timer);
     games[gameId].timeIsOnPause = false;
@@ -286,6 +286,12 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 status: !games[gameId].status, //не статус = на паузе
                 time: games[gameId].breakTime
             }))
+        } else if (jsonMessage.action == 'checkStart') {
+            if (games[gameId]) {
+                ws.send(JSON.stringify({
+                    'action': 'startGame'
+                }));
+            }
         }
         if (userRoles == 'admin' || userRoles == 'superadmin') {
             gameAdmins[gameId].add(ws);
