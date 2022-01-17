@@ -151,7 +151,7 @@ const App: FC<AppProps> = props => {
                 </Switch>
             </Wrapper>
         </Suspense>
-    ) : null; // TODO: загрузка
+    ) : null;
 };
 
 function mapStateToProps(state: AppState): AppStateProps {
