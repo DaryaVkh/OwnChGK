@@ -130,6 +130,7 @@ const UserGame: FC<UserGameProps> = props => {
                 setQuestionNumber(+jsonMessage.number);
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
+                setAnswer('');
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
                 progress.style.width = '100%';
                 changeColor(progress);
