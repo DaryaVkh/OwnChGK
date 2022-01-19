@@ -2,7 +2,7 @@ import React, {FC, useEffect, Suspense} from 'react';
 import Wrapper from './wrapper';
 import Authorization from './pages/authorization/authorization';
 import Registration from './pages/registration/registration';
-import {Route, Switch} from 'react-router-dom';
+import {Redirect, Route, Switch} from 'react-router-dom';
 import RestoringPassword from './pages/restoring-password/restoring-password';
 import {connect} from 'react-redux';
 import ProtectedRoute from './components/private-route/private-route';
@@ -147,7 +147,7 @@ const App: FC<AppProps> = props => {
                         <Rating isAdmin={false} />
                     </ProtectedRoute>
 
-                    {/*<Redirect from="*" to="/"/>*/}
+                    <Redirect from="*" to="/"/>
                 </Switch>
             </Wrapper>
         </Suspense>
