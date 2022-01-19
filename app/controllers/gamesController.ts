@@ -58,7 +58,9 @@ export class GamesController {
             if (!gameName
                 || !roundCount
                 || !questionCount
-                || !teams) {
+                || !teams
+                || roundCount < 0
+                || questionCount < 0) {
                 return res.status(400).json({message: 'params is invalid'});
             }
 
