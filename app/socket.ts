@@ -247,7 +247,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
         const {roles: userRoles, teamId: teamId, gameId: gameId} =
             jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload;
 
-        if (!games[gameId]) {
+        if (!games[gameId] || (userRoles === 'user' && !games[gameId].teams[teamId])) {
             ws.send(JSON.stringify({
                 'action': 'gameNotStarted'
             }));
@@ -296,6 +296,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 }));
             }
         }
+
         if (userRoles == 'admin' || userRoles == 'superadmin') {
             gameAdmins[gameId].add(ws);
             if (jsonMessage.action == '+10sec') {
