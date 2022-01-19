@@ -15,6 +15,7 @@ import Loader from '../../components/loader/loader';
 let progressBar: any;
 let interval: any;
 let checkStart: any;
+let ping: any;
 let conn: WebSocket;
 
 const UserGame: FC<UserGameProps> = props => {
@@ -73,7 +74,7 @@ const UserGame: FC<UserGameProps> = props => {
                 }
             }, 5000);
 
-            setInterval(() => {
+            ping = setInterval(() => {
                 conn.send(JSON.stringify({
                     'action': 'ping'
                 }));
@@ -168,6 +169,8 @@ const UserGame: FC<UserGameProps> = props => {
                 }
             }
         };
+
+        return () => clearInterval(ping);
     }, []);
 
     const parseTimer = () => {

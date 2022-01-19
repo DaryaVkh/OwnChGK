@@ -12,6 +12,7 @@ import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
 
 let conn: WebSocket;
+let ping: any;
 
 const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -38,7 +39,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
                 'action': 'getTeamAnswers'
             }));
 
-            setInterval(() => {
+            ping = setInterval(() => {
                 conn.send(JSON.stringify({
                     'action': 'ping'
                 }));
@@ -57,6 +58,8 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
                 }));
             }
         };
+
+        return () => clearInterval(ping);
     }, []);
 
     const renderAnswers = () => {

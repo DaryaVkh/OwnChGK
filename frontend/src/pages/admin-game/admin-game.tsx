@@ -18,6 +18,7 @@ import {Alert, Snackbar} from '@mui/material';
 let interval: any;
 let breakInterval: any;
 let conn: WebSocket;
+let ping: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
@@ -73,7 +74,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                 'action': 'getQuestionNumber'
             }));
 
-            setInterval(() => {
+            ping = setInterval(() => {
                 conn.send(JSON.stringify({
                     'action': 'ping'
                 }));
@@ -140,6 +141,8 @@ const AdminGame: FC<AdminGameProps> = props => {
                 setActiveQuestion(jsonMessage.question);
             }
         };
+
+        return () => clearInterval(ping);
     }, []);
 
     const Tour: FC<TourProps> = props => {

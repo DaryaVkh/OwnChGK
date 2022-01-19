@@ -11,6 +11,7 @@ import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
 let conn: WebSocket;
+let ping: any;
 
 const AdminAnswersPage: FC = () => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -62,7 +63,7 @@ const AdminAnswersPage: FC = () => {
                 'questionNumber': +question,
             }));
 
-            setInterval(() => {
+            ping = setInterval(() => {
                 conn.send(JSON.stringify({
                     'action': 'ping'
                 }));
@@ -83,6 +84,7 @@ const AdminAnswersPage: FC = () => {
         };
 
         return () => {
+            clearInterval(ping);
             window.removeEventListener('resize', handleWindowResize);
         };
     }, []);
