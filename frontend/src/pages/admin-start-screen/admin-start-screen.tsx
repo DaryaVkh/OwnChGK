@@ -45,10 +45,11 @@ const AdminComponent: FC<AdminProps> = props => {
         deleteAdmin(props.email)
             .then(res => {
                 if (res.status === 200) {
-                    // TODO: что делаем?
+                    props.deleteAdmin?.(admins => admins?.filter(a => a.email !== props.email));
+                } else {
+                    // TODO: а если не получилось?
                 }
             });
-        props.deleteAdmin?.(admins => admins?.filter(a => a.email !== props.email));
     }, [props]);
 
     const handleDeleteClick = (e: React.SyntheticEvent) => {
@@ -192,7 +193,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         }
         let adminsForRender = [];
         for (let admin of admins) {
-            adminsForRender.push(<AdminComponent key={admins.indexOf(admin)} name={admin.name} email={admin.email}
+            adminsForRender.push(<AdminComponent key={admin.email + admin.name} name={admin.name} email={admin.email}
                                                  deleteAdmin={setAdmins} isSuperAdmin={props.isSuperAdmin}/>);
         }
         return adminsForRender;
