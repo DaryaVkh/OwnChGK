@@ -62,6 +62,10 @@ const UserGame: FC<UserGameProps> = props => {
                 'cookie': getCookie('authorization'),
                 'action': 'isOnBreak'
             }));
+            conn.send(JSON.stringify({
+                'action': 'checkStart',
+                'cookie': getCookie('authorization'),
+            }));
 
             checkStart = setInterval(() => {
                 if (!isGameStarted) {
