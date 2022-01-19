@@ -14,6 +14,7 @@ import Loader from '../../components/loader/loader';
 
 let progressBar: any;
 let interval: any;
+let checkStart: any;
 let conn: WebSocket;
 
 const UserGame: FC<UserGameProps> = props => {
@@ -61,7 +62,7 @@ const UserGame: FC<UserGameProps> = props => {
                 'action': 'isOnBreak'
             }));
 
-            const checkStart = setInterval(() => {
+            checkStart = setInterval(() => {
                 if (!isGameStarted) {
                     conn.send(JSON.stringify({
                         'action': 'checkStart',
@@ -81,17 +82,12 @@ const UserGame: FC<UserGameProps> = props => {
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
-            if (jsonMessage.action === 'error') {
-                if (!jsonMessage.gameIsStarted) {
-                    setIsGameStarted(false);
-                    return;
-                }
-            } else {
+            if (jsonMessage.action === 'gameNotStarted') {
+                setIsGameStarted(false);
+                return;
+            } else if (jsonMessage.action === 'startGame') {
                 setIsGameStarted(true);
-            }
-
-            if (jsonMessage.action === 'startGame') {
-                setIsGameStarted(true);
+                clearInterval(checkStart);
             } else if (jsonMessage.action === 'time') {
                 console.log('a');
                 console.log(jsonMessage.time);

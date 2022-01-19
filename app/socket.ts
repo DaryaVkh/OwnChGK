@@ -237,7 +237,11 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
         }));
         return;
     }
-    if (jsonMessage.cookie === null) {
+    if (!jsonMessage || !jsonMessage.cookie) {
+        ws.send(JSON.stringify({
+            'action': 'notAuthorized'
+        }));
+
         console.log('не авторизован');
     } else {
         const {roles: userRoles, teamId: teamId, gameId: gameId} =
@@ -245,8 +249,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
 
         if (!games[gameId]) {
             ws.send(JSON.stringify({
-                'action': 'error',
-                'gameIsStarted': games[gameId]
+                'action': 'gameNotStarted'
             }));
             return;
         }

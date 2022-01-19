@@ -71,7 +71,14 @@ export class Server {
             const wss = new WSServer({server});
             wss.on('connection', (ws) => {
                 ws.on('message', (message: string) => {
-                    HandlerWebsocket(ws, message);
+                    try {
+                        HandlerWebsocket(ws, message);
+                    } catch (error: any) {
+                        ws.send(JSON.stringify({
+                            'action': 'ERROR'
+                        }));
+                        console.log(error);
+                    }
                 });
             });
         });

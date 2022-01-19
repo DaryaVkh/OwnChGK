@@ -16,7 +16,7 @@ export class Team extends BaseEntity {
         () => User,
         user => user.team,
         {
-            onDelete: 'RESTRICT',
+            onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
         })
     @JoinColumn({
