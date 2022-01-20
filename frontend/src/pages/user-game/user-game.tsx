@@ -178,6 +178,31 @@ const UserGame: FC<UserGameProps> = props => {
         return () => clearInterval(ping);
     }, []);
 
+    const getGameName = () => {
+        if ((gameName as string).length > 34) {
+            return (gameName as string).substr(0, 34) + '\u2026';
+        } else {
+            return gameName;
+        }
+    }
+
+    const getTeamName = () => {
+        let teamName = store.getState().appReducer.user.team;
+        if (teamName.length > 45) {
+            return teamName.substr(0, 45) + '\u2026';
+        } else {
+            return teamName;
+        }
+    }
+
+    const getGameNameForWaitingScreen = () => {
+        if ((gameName as string).length > 52) {
+            return `«${(gameName as string).substr(0, 52)}\u2026»`;
+        } else {
+            return `«${gameName}»`;
+        }
+    }
+
     const parseTimer = () => {
         const minutes = Math.floor(breakTime / 60).toString().padStart(1, '0');
         const sec = Math.floor(breakTime % 60).toString().padStart(2, '0');
@@ -286,7 +311,7 @@ const UserGame: FC<UserGameProps> = props => {
                     <div className={classes.gameStartContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                        <div className={classes.pageText}>«{gameName}» скоро начнется</div>
+                        <div className={classes.pageText}>{getGameNameForWaitingScreen()}<br /> скоро начнется</div>
                         <div className={classes.pageText}>Подождите</div>
                     </div>
                 </PageWrapper>
@@ -297,6 +322,9 @@ const UserGame: FC<UserGameProps> = props => {
             return (
                 <PageWrapper>
                     <Header isAuthorized={true} isAdmin={false}>
+                        <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                        <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+
                         <div className={classes.breakHeader}>Перерыв</div>
                     </Header>
 
@@ -313,16 +341,17 @@ const UserGame: FC<UserGameProps> = props => {
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={false}>
                     <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                    <Link to={`/game-answers/${gameId}`}
-                          className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                    <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
 
-                    <div className={classes.gameName}>{gameName}</div>
+                    <div className={classes.gameName}>
+                        <p>{getGameName()}</p>
+                    </div>
                 </Header>
 
                 <div className={classes.contentWrapper}>
                     <div className={classes.teamWrapper}>
                         <div className={classes.team}>Команда</div>
-                        <div className={classes.teamName}>{store.getState().appReducer.user.team}</div>
+                        <div className={classes.teamName}>{getTeamName()}</div>
                     </div>
 
                     <div className={classes.answerWrapper}>

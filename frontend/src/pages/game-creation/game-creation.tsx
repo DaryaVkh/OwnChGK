@@ -23,6 +23,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const [toursCount, setToursCount] = useState<number>(0);
     const [chosenTeams, setChosenTeams] = useState<string[]>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isGameNameInvalid, setIsGameNameInvalid] = useState<boolean>(false);
     const oldGameId = props.mode === 'edit' ? location.state.id : '';
 
     useEffect(() => {
@@ -99,6 +100,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                     if (res.status === 200) {
                         setIsCreatedSuccessfully(true);
                     } else {
+                        setIsGameNameInvalid(true);
                         setIsLoading(false);
                     }
                 });
@@ -108,6 +110,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                     if (res.status === 200) {
                         setIsCreatedSuccessfully(true);
                     } else {
+                        setIsGameNameInvalid(true);
                         setIsLoading(false);
                     }
                 });
@@ -119,11 +122,15 @@ const GameCreator: FC<GameCreatorProps> = props => {
     };
 
     const handleToursCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setToursCount(+event.target.value);
+        if (+event.target.value <= 99) {
+            setToursCount(+event.target.value);
+        }
     };
 
     const handleQuestionsCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setQuestionsCount(+event.target.value);
+        if (+event.target.value <= 99) {
+            setQuestionsCount(+event.target.value);
+        }
     };
 
     return isCreatedSuccessfully
@@ -150,17 +157,19 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                         ? (
                                             <>
                                                 <CustomInput type='text' id='gameName'
-                                                           name='gameName'
-                                                           placeholder='Название игры'
-                                                           value={gameName}
-                                                           defaultValue={gameName}
-                                                           onChange={handleGameNameChange} />
+                                                             name='gameName'
+                                                             placeholder='Название игры'
+                                                             value={gameName}
+                                                             defaultValue={gameName}
+                                                             isInvalid={isGameNameInvalid}
+                                                             errorHelperText='Игра с таким названием уже существует'
+                                                             onChange={handleGameNameChange} />
 
                                                 <div className={classes.toursCountWrapper}>
                                                     <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество
                                                         туров</label>
                                                     <input className={classes.toursCountInput}
-                                                           type="number"
+                                                           type="text"
                                                            id="toursCount"
                                                            name="toursCount"
                                                            value={toursCount || ''}
@@ -173,7 +182,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                                     <label htmlFor="questionsCount" className={classes.questionsCountLabel}>Вопросов в
                                                         туре</label>
                                                     <input className={classes.questionsCountInput}
-                                                           type="number"
+                                                           type="text"
                                                            id="questionsCount"
                                                            name="questionsCount"
                                                            value={questionsCount || ''}

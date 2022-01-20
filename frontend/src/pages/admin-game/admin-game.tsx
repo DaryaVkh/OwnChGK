@@ -179,6 +179,14 @@ const AdminGame: FC<AdminGameProps> = props => {
         );
     }
 
+    const getGameName = () => {
+        if ((gameName as string).length > 34) {
+            return (gameName as string).substr(0, 34) + '\u2026';
+        } else {
+            return gameName;
+        }
+    }
+
     const parseTimer = (time:number) => {
         const minutes = Math.floor(time / 1000 / 60).toString().padStart(1, '0');
         const sec = Math.floor(time / 1000 % 60).toString().padStart(2, '0');
@@ -319,7 +327,9 @@ const AdminGame: FC<AdminGameProps> = props => {
             <Header isAuthorized={true} isAdmin={true}>
                 <Link to={`/admin/rating/${gameId}`} className={classes.menuLink}>Рейтинг</Link>
 
-                <div className={classes.gameName}>{gameName}</div>
+                <div className={classes.gameName}>
+                    <p>{getGameName()}</p>
+                </div>
             </Header>
 
             {

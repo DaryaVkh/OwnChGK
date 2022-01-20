@@ -40,6 +40,12 @@
   &:hover {
     cursor: pointer;
   }
+
+  .teamName,
+  .gameName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .box {

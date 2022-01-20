@@ -17,12 +17,16 @@
 
 .gameName {
   position: absolute;
-  right: 20%;
+  right: 0;
+  top: 0;
+  bottom: 0;
   font-size: 2.5vmax;
-  color: white;
+  width: 75%;
+  color: #fff;
   display: flex;
   text-align: center;
-  align-self: center;
+  align-items: center;
+  justify-content: center;
   font-weight: 300;
 }
 
@@ -76,6 +80,7 @@
 
   .team {
     color: white;
+    margin-right: 1vw;
   }
 
   .teamName {

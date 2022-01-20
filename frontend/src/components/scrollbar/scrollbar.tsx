@@ -10,7 +10,7 @@ const Scrollbar: FC = props => {
                         <div style={{backgroundColor: 'white', borderRadius: '4px', cursor: 'pointer'}}/>
                     }
                     renderTrackHorizontal={props => <div {...props} style={{display: 'none'}}/>}
-                    classes={{view: classes.scrollbarView}}>
+                    classes={{view: classes.scrollbarView, trackVertical: classes.verticalTrack}}>
             {props.children}
         </Scrollbars>
     );

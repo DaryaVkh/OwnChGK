@@ -1,7 +1,7 @@
 import React, {FC, useState} from 'react';
 import classes from './custom-input.module.scss';
 import {InputProps} from '../../entities/custom-input/custom-input.interfaces';
-import {IconButton, InputAdornment, OutlinedInput} from '@mui/material';
+import {FormControl, FormHelperText, IconButton, InputAdornment, OutlinedInput, TextField} from '@mui/material';
 import {Visibility, VisibilityOff} from '@mui/icons-material';
 
 export const CustomInput: FC<InputProps> = props => {
@@ -47,42 +47,52 @@ export const CustomInput: FC<InputProps> = props => {
     };
 
     return (
-        <OutlinedInput className={cls.join(' ')}
-                       fullWidth={true}
-                       autoComplete={props.type === 'password' ? 'new-password' : 'off'}
-                       type={values.showPassword && props.type === 'password' ? 'text' : props.type}
-                       id={props.id}
-                       error={props.isInvalid}
-                       name={props.name}
-                       placeholder={props.placeholder}
-                       defaultValue={props.defaultValue}
-                       value={props.value}
-                       onBlur={props.onBlur}
-                       onChange={props.onChange}
-                       style={props.style}
-                       required={required}
-                       onFocus={props.onFocus}
-                       readOnly={props.readonly}
-                       sx={styles}
-                       endAdornment={
-                           props.type === 'password'
-                               ?
-                               <InputAdornment position="end">
-                                   <IconButton
-                                       onClick={handleClickShowPassword}
-                                       edge="end"
-                                       sx={{
-                                           '& .MuiSvgIcon-root': {
-                                               color: 'var(--background-color)'
-                                           }
-                                       }}
-                                   >
-                                       {values.showPassword ? <VisibilityOff/> : <Visibility/>}
-                                   </IconButton>
-                               </InputAdornment>
-                               :
-                               null
-                       }
-        />
+        <FormControl variant='outlined' sx={{marginBottom: '3%'}} fullWidth={true} style={props.style}>
+            <OutlinedInput className={cls.join(' ')}
+                           fullWidth={true}
+                           autoComplete={props.type === 'password' ? 'new-password' : 'off'}
+                           type={values.showPassword && props.type === 'password' ? 'text' : props.type}
+                           id={props.id}
+                           error={props.isInvalid}
+                           name={props.name}
+                           placeholder={props.placeholder}
+                           defaultValue={props.defaultValue}
+                           value={props.value}
+                           onBlur={props.onBlur}
+                           onChange={props.onChange}
+                           // style={props.style}
+                           required={required}
+                           onFocus={props.onFocus}
+                           readOnly={props.readonly}
+                           sx={styles}
+                           endAdornment={
+                               props.type === 'password'
+                                   ?
+                                   <InputAdornment position="end">
+                                       <IconButton
+                                           onClick={handleClickShowPassword}
+                                           edge="end"
+                                           sx={{
+                                               '& .MuiSvgIcon-root': {
+                                                   color: 'var(--background-color)'
+                                               }
+                                           }}
+                                       >
+                                           {values.showPassword ? <VisibilityOff/> : <Visibility/>}
+                                       </IconButton>
+                                   </InputAdornment>
+                                   :
+                                   null
+                           }
+            />
+            {
+                props.isInvalid && props.errorHelperText
+                    ?
+                    <FormHelperText sx={{marginLeft: '0 !important', fontSize: '1vmax', color: '#FF0000'}}>
+                        {props.errorHelperText}
+                    </FormHelperText>
+                    : null
+            }
+        </FormControl>
     );
 };

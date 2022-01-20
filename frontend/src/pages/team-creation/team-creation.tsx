@@ -25,7 +25,6 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     const [teamName, setTeamName] = useState<string>(props.mode === 'edit' ? location.state.name : '');
     const [captain, setCaptain] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const oldTeamName = props.mode === 'edit' ? location.state.name : '';
 
     useEffect(() => {
         if (!props.isAdmin) {
@@ -108,22 +107,13 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                 ? <div className={classes.pageTitle}>Создание команды</div>
                                 : <div className={classes.pageTitle}>Редактирование</div>
                         }
-                        {isNameInvalid ? <Alert severity="error" sx={{
-                            width: '90%',
-                            color: 'white',
-                            backgroundColor: '#F44336',
-                            marginBottom: '2vh',
-                            '& .MuiAlert-icon': {
-                                color: 'white'
-                            }
-                        }}>Такая команда уже существует</Alert> : null}
 
                         {
-                            usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation') || !props.isAdmin
+                            (usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation')) || !props.isAdmin
                                 ? <CustomInput type='text' id='teamName' name='teamName' placeholder='Название'
                                       value={teamName}
                                       defaultValue={teamName}
-                                      onChange={handleInputChange} isInvalid={isNameInvalid}/>
+                                      onChange={handleInputChange} isInvalid={isNameInvalid} errorHelperText={'Команда с таким названием уже существует'}/>
                                 : <Skeleton variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '3%'}} />
                         }
 

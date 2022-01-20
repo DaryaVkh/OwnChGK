@@ -31,6 +31,14 @@ const StartGame: FC = () => {
         });
     }, []);
 
+    const getGameName = () => {
+        if ((gameName as string).length > 55) {
+            return (gameName as string).substr(0, 55) + '\u2026';
+        } else {
+            return gameName;
+        }
+    }
+
     const handleStart = async () => {
         startGame(gameId).then((res) => {
                 if (res.status === 200) {
@@ -56,7 +64,7 @@ const StartGame: FC = () => {
             <div className={classes.contentWrapper}>
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                <div className={classes.gameName}>{gameName}</div>
+                <div className={classes.gameName}>{getGameName()}</div>
 
                 <button className={classes.button} onClick={handleStart}>Запустить игру</button>
             </div>

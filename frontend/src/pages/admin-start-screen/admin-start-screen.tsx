@@ -96,10 +96,6 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     const scrollbars = useRef<Scrollbars>(null);
     let location = useLocation<{ page: string }>();
 
-    // const [teams, setTeams] = useState<Team[]>([{name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}, {name: 'My Best Team', id: '1'}]);
-    // const [admins, setAdmins] = useState<Admin[]>([{name: 'Павел Булгаков', email: 'parasite@comcast.net'}, {name: 'Владислав Сергеев', email: 'olaf.greenholt@larkin.com'}, {name: 'Василиса Суворова', email: 'cebileprei@yopmail.com'}, {name: 'Ульяна Королева', email: 'jeuquoutren@yopmail.com'}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}, {name: '', email: ''}]);
-    // const [games, setGames] = useState<Game[]>([{name: 'Игра 1', id: '1'}, {name: 'Игра 2', id: '2'}, {name: 'Игра 3', id: '3'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}, {name: 'Игра 4', id: '4'}]);
-
     const emailStyles = {
         '& .MuiOutlinedInput-notchedOutline': {
             border: isEmailInvalid ? '2px solid #FF0000 !important' : '2px solid var(--foreground-color) !important',
@@ -181,8 +177,8 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                 (
                     <div key={`admin_skeleton_${i}`}
                          className={props.isSuperAdmin ? classes.superAdminInfoWrapper : classes.adminInfoWrapper}>
-                        <Skeleton variant="rectangular" width="38%" height="7vh" sx={{marginBottom: '2vh'}}/>
-                        <Skeleton variant="rectangular" width="52%" height="7vh" sx={{marginBottom: '2vh'}}/>
+                        <Skeleton variant="rectangular" width="38%" height="7vh" sx={{marginBottom: '2vh', marginRight: !props.isSuperAdmin ? '2%' : 0}}/>
+                        <Skeleton variant="rectangular" width="52%" height="7vh" sx={{marginBottom: '2vh', marginRight: !props.isSuperAdmin ? '2%' : 0}}/>
                         {
                             props.isSuperAdmin
                                 ? <Skeleton variant="rectangular" width="7%" height="7vh" sx={{marginBottom: '2vh'}}/>
@@ -304,12 +300,12 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                                     {
                                         newAdmin !== null
                                             ?
-                                            <div className={classes.superAdminInfoWrapper}>
+                                            <div className={classes.superAdminNewAdminInfoWrapper}>
                                                 <OutlinedInput id="new-admin-name" sx={inputStyles}
-                                                               className={`${classes.adminName} ${classes.adminInput}`}
+                                                               className={`${classes.adminName} ${classes.adminInput} ${classes.newAdmin}`}
                                                                placeholder="Имя"/>
                                                 <OutlinedInput id="new-admin-email" type="email" sx={emailStyles}
-                                                               className={`${classes.adminEmail} ${classes.adminInput}`}
+                                                               className={`${classes.adminEmail} ${classes.adminInput} ${classes.newAdmin}`}
                                                                placeholder="Email*"/>
                                                 <Button className={classes.adminButton} onClick={handleAddNewAdmin}>
                                                     <AddIcon sx={{color: 'green', fontSize: '5vmin'}}/>

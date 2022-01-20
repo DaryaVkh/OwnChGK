@@ -13,7 +13,9 @@ const Modal: FC<ModalProps> = props => {
     const [minutes, setMinutes] = useState<number>(0);
 
     const handleMinutesCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setMinutes(+event.target.value);
+        if (+event.target.value <= 99) {
+            setMinutes(+event.target.value);
+        }
     };
 
     const handleCloseModal = useCallback(e => {
@@ -77,7 +79,7 @@ const Modal: FC<ModalProps> = props => {
                             <p className={`${classes.modalText} ${classes.breakModalText}`}>
                                 Перерыв
                                 <input className={classes.minutesInput}
-                                       type="number"
+                                       type="text"
                                        id="minutes"
                                        name="minutes"
                                        value={minutes || ''}

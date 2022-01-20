@@ -6,14 +6,15 @@ import Header from '../../components/header/header';
 import {Scrollbars} from 'rc-scrollbars';
 import {Table, TableBody, TableCell, tableCellClasses, TableHead, TableRow} from '@mui/material';
 import {TeamTableRow, TourHeaderCell} from '../../components/table/table';
-import {useParams} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import {getResultTable, getResultTableFormat} from '../../server-api/server-api';
+import Loader from '../../components/loader/loader';
 
 const Rating: FC<RatingProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [gameParams, setGameParams] = useState<GameParams>({toursCount: 3, questionsCount: 10});
-    const [teams, setTeams] = useState<TeamResult[]>([]);
-    const [expandedTours, setExpandedTours] = useState<boolean[]>([false, false, false]);
+    const [gameParams, setGameParams] = useState<GameParams>();
+    const [teams, setTeams] = useState<TeamResult[]>();
+    const [expandedTours, setExpandedTours] = useState<boolean[]>([]);
 
     const headerTableCellStyles = {
         color: 'white',
@@ -46,6 +47,9 @@ const Rating: FC<RatingProps> = props => {
     }, []);
 
     const renderTourHeaders = () => {
+        if (!gameParams || !expandedTours) {
+            return;
+        }
         return Array.from(Array(gameParams.toursCount).keys()).map(i => <TourHeaderCell tourNumber={i + 1}
                                                                                         questionsCount={gameParams.questionsCount}
                                                                                         key={`tourTableCell_${i}`}
@@ -62,6 +66,9 @@ const Rating: FC<RatingProps> = props => {
     };
 
     const renderTeams = () => {
+        if (!teams) {
+            return;
+        }
         teams.sort((a, b) => {
             const firstSum = countSums(a.toursWithResults).reduce((x, y) => x + y);
             const secondSum = countSums(b.toursWithResults).reduce((x, y) => x + y);
@@ -130,9 +137,15 @@ const Rating: FC<RatingProps> = props => {
         return res;
     }
 
+    if (!teams || !expandedTours || !gameParams) {
+        return <Loader />;
+    }
+
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={props.isAdmin}>
+                <Link to={props.isAdmin ? `/admin/game/${gameId}` : `/game/${gameId}`} className={classes.menuLink}>В игру</Link>
+
                 <div className={classes.pageTitle}>Рейтинг</div>
             </Header>
 

@@ -91,7 +91,9 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
             return Array.from(Array(5).keys()).map(i => <Skeleton key={`game_skeleton_${i}`} variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '2.5vh'}} />);
         }
         return gamesFromDB.map((game, index) =>
-            <div key={index} className={classes.gameOrTeam} onClick={() => handleClick(game.id)}>{game.name}</div>);
+            <div key={index} className={classes.gameOrTeam} onClick={() => handleClick(game.id)}>
+                <p className={classes.gameName}>{game.name}</p>
+            </div>);
     };
 
     const renderTeams = () => {
@@ -100,14 +102,16 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
         }
         return userTeam !== ''
             ?
-            <div key={userTeam} className={classes.gameOrTeam}>
-                {userTeam}
+            <div key={userTeam} className={classes.gameOrTeam} style={{cursor: 'default'}}>
+                <p className={classes.teamName}>{userTeam}</p>
 
                 <CheckCircleOutlinedIcon color="success" sx={{fontSize: '1.5vw', cursor: 'default'}}/>
             </div>
             :
-            teamsFromDB.map((team, index) => <div key={index} data-team-id={team.id} data-team-name={team.name} className={classes.gameOrTeam}
-                                                  onClick={handleChooseTeam}>{team.name}</div>);
+            teamsFromDB.map((team, index) =>
+                <div key={index} data-team-id={team.id} data-team-name={team.name} className={classes.gameOrTeam} onClick={handleChooseTeam}>
+                    <p className={classes.teamName}>{team.name}</p>
+                </div>);
     };
 
     const renderPage = (page: string) => {
