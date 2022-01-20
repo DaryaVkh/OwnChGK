@@ -246,6 +246,19 @@ export const changeName = async (newName: string, isAdmin: boolean) => {
     });
 };
 
+export const changeIntrigueGameStatus = async (gameId: string, isIntrigue: boolean) => {
+    return await fetch(`/games/${gameId}/changeIntrigueStatus`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            isIntrigue
+        })
+    });
+}
+
 export const deleteAdmin = async (adminEmail: string) => {
     return await fetch(`/admins/delete`, {
         method: 'POST',
