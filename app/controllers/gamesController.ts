@@ -228,6 +228,27 @@ export class GamesController {
         }
     }
 
+    public async changeIntrigueStatus(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+            const {gameId} = req.params;
+            const {isIntrigue} = req.body;
+
+            if (!games[gameId]) {
+                return res.status(404).json({'message': 'Игра не началась'});
+            }
+
+            games[gameId].isIntrigue = isIntrigue;
+            isIntrigue ? console.log('intrigue started') : console.log('intrigue finished');
+            return res.status(200).json({});
+        } catch (error: any) {
+            return res.status(400).json({'message': error.message});
+        }
+    }
+
     public async getGameResult(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
@@ -259,11 +280,20 @@ export class GamesController {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
 
+            const token = req.cookies['authorization'];
+            const {roles, teamId} = jwt.verify(token, secret) as jwt.JwtPayload;
+
+            if (roles === 'user' && !teamId) {
+                return res.status(400).json({message: 'user without team'});
+            }
+
             const answer = {
                 gameId,
+                isIntrigue: games[gameId].isIntrigue,
                 roundsCount: games[gameId].rounds.length,
                 questionsCount: games[gameId].rounds[0].questionsCount,
-                totalScoreForAllTeams: games[gameId].getScoreTable(),
+                totalScoreForAllTeams: roles === 'user' && teamId && games[gameId].isIntrigue ?
+                    games[gameId].getScoreTableForTeam(teamId) : games[gameId].getScoreTable(),
             };
 
             return res.status(200).json(answer);
@@ -282,6 +312,14 @@ export class GamesController {
             if (!games[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
+
+            const token = req.cookies['authorization'];
+            const {roles, teamId} = jwt.verify(token, secret) as jwt.JwtPayload;
+
+            if (roles === 'user' && !teamId) {
+                return res.status(400).json({message: 'user without team'});
+            }
+
             const headersList = ['Название команды', 'Сумма'];
             for (let i = 1; i <= games[gameId].rounds.length; i++) {
                 headersList.push('Тур ' + i);
@@ -291,7 +329,8 @@ export class GamesController {
             }
             const teamRows = [];
             const totalScoreForAllTeams = games[gameId].getTotalScoreForAllTeams();
-            const scoreTable = games[gameId].getScoreTable();
+            const scoreTable = roles === 'user' && teamId && games[gameId].isIntrigue ?
+                    games[gameId].getScoreTableForTeam(teamId) : games[gameId].getScoreTable();
             let roundsResultList = [];
             for (const team in scoreTable) {
                 let roundSum = 0;

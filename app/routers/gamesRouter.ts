@@ -15,6 +15,7 @@ export const gamesRouter = () => {
     //router.get('/:gameName/teams', middleware, gamesController.getAllTeams); // не используется, teams есть в getGame
     router.patch('/:gameId/change', roleMiddleware(adminAccess), gamesController.changeGame)
     router.patch('/:gameId/changeStatus', roleMiddleware(adminAccess), gamesController.changeGameStatus);
+    router.patch('/:gameId/changeIntrigueStatus', roleMiddleware(adminAccess), gamesController.changeIntrigueStatus);
     router.patch('/:gameId/changeName', roleMiddleware(adminAccess), gamesController.editGameName);
     router.patch('/:gameId/changeAdmin', roleMiddleware(adminAccess), gamesController.editGameAdmin);
     router.delete('/:gameId', roleMiddleware(adminAccess), gamesController.deleteGame);

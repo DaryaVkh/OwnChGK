@@ -7,13 +7,14 @@ import {Scrollbars} from 'rc-scrollbars';
 import {Table, TableBody, TableCell, tableCellClasses, TableHead, TableRow} from '@mui/material';
 import {TeamTableRow, TourHeaderCell} from '../../components/table/table';
 import {useParams} from 'react-router-dom';
-import {getResultTable, getResultTableFormat} from '../../server-api/server-api';
+import {changeIntrigueGameStatus, getResultTable, getResultTableFormat} from '../../server-api/server-api';
 
 const Rating: FC<RatingProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [gameParams, setGameParams] = useState<GameParams>({toursCount: 3, questionsCount: 10});
     const [teams, setTeams] = useState<TeamResult[]>([]);
     const [expandedTours, setExpandedTours] = useState<boolean[]>([false, false, false]);
+    const [isIntrigue, setIsIntrigue] = useState(false);
 
     const headerTableCellStyles = {
         color: 'white',
@@ -25,10 +26,12 @@ const Rating: FC<RatingProps> = props => {
         getResultTable(gameId).then(res => {
             if (res.status === 200) {
                 res.json().then(({
+                                     isIntrigue,
                                      roundsCount,
                                      questionsCount,
                                      totalScoreForAllTeams
                                  }) => {
+                    setIsIntrigue(isIntrigue);
                     setGameParams({toursCount: roundsCount, questionsCount: questionsCount});
                     setExpandedTours(new Array(roundsCount).fill(false));
                     const result = [];
@@ -75,7 +78,19 @@ const Rating: FC<RatingProps> = props => {
     };
 
     const turnOnIntrigue = () => {
-        //TODO включайте интригу
+        if (!isIntrigue) {
+            changeIntrigueGameStatus(gameId, true).then(res => {
+                if (res.status === 200) {
+                    setIsIntrigue(true);
+                }
+            })
+        } else {
+            changeIntrigueGameStatus(gameId, false).then(res => {
+                if (res.status === 200) {
+                    setIsIntrigue(false);
+                }
+            })
+        }
     }
 
     const downloadResults = () => {
@@ -141,7 +156,7 @@ const Rating: FC<RatingProps> = props => {
                     {
                         props.isAdmin
                             ? <button className={`${classes.button} ${classes.intrigueButton}`}
-                                      onClick={turnOnIntrigue}>Включить «Интригу»</button>
+                                      onClick={turnOnIntrigue}>{isIntrigue ? 'Выключить «Интригу»' : 'Включить «Интригу»'}</button>
                             : null
                     }
                     <button className={classes.button} onClick={downloadResults}>Скачать результаты</button>

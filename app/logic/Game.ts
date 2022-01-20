@@ -42,6 +42,7 @@ export class Game {
     private interval: any;
     public currentQuestion: [number, number];
     public isTimerStart: boolean;
+    public isIntrigue: boolean;
 
     public timer: any;
     public leftTime: number;
@@ -102,6 +103,23 @@ export class Game {
             for (let answer of teamAnswers) {
                 table[this.teams[teamId].name][answer.roundNumber - 1][answer.questionNumber - 1] = answer.score;
             }
+        }
+        // @ts-ignore
+        return table;
+    }
+
+    getScoreTableForTeam(teamId: number): { name: string, scoreTable: number[][] } {
+        let table = {};
+        const roundsCount = this.rounds.length;
+        const questionsCount = this.rounds[0].questions.length;
+
+        table[this.teams[teamId].name] = new Array(roundsCount);
+        for (let round = 0; round < roundsCount; round++) {
+            table[this.teams[teamId].name][round] = new Array(questionsCount).fill(0);
+        }
+        const teamAnswers = this.teams[teamId].getAnswers();
+        for (let answer of teamAnswers) {
+            table[this.teams[teamId].name][answer.roundNumber - 1][answer.questionNumber - 1] = answer.score;
         }
         // @ts-ignore
         return table;
