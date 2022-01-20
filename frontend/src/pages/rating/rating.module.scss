@@ -72,3 +72,16 @@
 .scrollbarView {
     padding: 0 0.5vw 0.5vw 0;
 }
+
+.userTopPanelWrapper {
+    justify-content: space-between;
+}
+
+.intrigueParagraph {
+    color: white;
+    font-size: 1.3vw;
+    display: flex;
+    flex-direction: column;
+    height: 6vh;
+    justify-content: center;
+}

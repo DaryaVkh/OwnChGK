@@ -72,6 +72,7 @@ const Rating: FC<RatingProps> = props => {
         if (!teams) {
             return;
         }
+
         teams.sort((a, b) => {
             const firstSum = countSums(a.toursWithResults).reduce((x, y) => x + y);
             const secondSum = countSums(b.toursWithResults).reduce((x, y) => x + y);
@@ -79,7 +80,7 @@ const Rating: FC<RatingProps> = props => {
         });
 
         return teams.map((teamResult, i) => {
-            return <TeamTableRow key={teamResult.teamName} place={i + 1} teamName={teamResult.teamName}
+            return <TeamTableRow key={teamResult.teamName} place={isIntrigue && !props.isAdmin ? '-' : i + 1} teamName={teamResult.teamName}
                                  toursWithResults={teamResult.toursWithResults} isExpanded={expandedTours}/>;
         });
     };
@@ -165,14 +166,21 @@ const Rating: FC<RatingProps> = props => {
             </Header>
 
             <div className={classes.contentWrapper}>
-                <div className={classes.buttonsWrapper}>
+                <div className={`${classes.buttonsWrapper} ${!props.isAdmin ? classes.userTopPanelWrapper : ''}`}>
                     {
                         props.isAdmin
                             ? <button className={`${classes.button} ${classes.intrigueButton}`}
                                       onClick={turnOnIntrigue}>{isIntrigue ? 'Выключить «Интригу»' : 'Включить «Интригу»'}</button>
                             : null
                     }
+
                     <button className={classes.button} onClick={downloadResults}>Скачать результаты</button>
+
+                    {
+                        isIntrigue && !props.isAdmin
+                            ? <p className={classes.intrigueParagraph}>Включен режим «Интрига»</p>
+                            : null
+                    }
                 </div>
 
                 <div className={classes.tableWrapper}>

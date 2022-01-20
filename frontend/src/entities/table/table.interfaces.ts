@@ -9,7 +9,7 @@ export interface TourHeaderCellProps {
 }
 
 export interface TeamTableRowProps {
-    place: number;
+    place: number | string;
     teamName: string;
     toursWithResults: Tour[];
     isExpanded: boolean[];

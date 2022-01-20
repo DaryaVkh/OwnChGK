@@ -23,8 +23,8 @@ export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
                            variant='head'
                            key={`header_tour_${i}`}
                            style={{
-                               minWidth: '2vw',
-                               maxWidth: '2vw'
+                               minWidth: '2.5vw',
+                               maxWidth: '2.5vw'
                            }}>
                     {i + 1}
                 </TableCell>
