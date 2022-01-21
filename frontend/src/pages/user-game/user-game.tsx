@@ -24,7 +24,7 @@ const UserGame: FC<UserGameProps> = props => {
     const [answer, setAnswer] = useState<string>('');
     const [gameName, setGameName] = useState<string>();
     const [questionNumber, setQuestionNumber] = useState<number>(1);
-    const [timeForAnswer, setTimeForAnswer] = useState<number>();
+    const [timeForAnswer, setTimeForAnswer] = useState<number>(70);
     const [flags, setFlags] = useState<{
         isSnackbarOpen: boolean,
         isAnswerAccepted: boolean
@@ -35,6 +35,7 @@ const UserGame: FC<UserGameProps> = props => {
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+    const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
 
     useEffect(() => {
         // TODO: Проверить, что игра началась (остальное продолжить только когда началась)
@@ -74,6 +75,14 @@ const UserGame: FC<UserGameProps> = props => {
             }, 30000);
         }
 
+        conn.onclose = () => {
+            setIsConnectionError(true);
+        };
+
+        conn.onerror = () => {
+            setIsConnectionError(true);
+        }
+
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'gameNotStarted') {
@@ -86,7 +95,19 @@ const UserGame: FC<UserGameProps> = props => {
                 console.log('a');
                 console.log(jsonMessage.time);
                 console.log('maxTime:', jsonMessage.maxTime);
-                setTimeForAnswer(jsonMessage.time / 1000);
+                setTimeForAnswer(() => {
+                    const progress = document.querySelector('#progress-bar') as HTMLDivElement;
+                    const width = Math.ceil(100 * jsonMessage.time / jsonMessage.maxTime);
+                    if (!progress) {
+                        setIsConnectionError(true);
+                    } else {
+                        progress.style.width = width + '%';
+                        changeColor(progress);
+                        console.log('FROM TIME width:', width);
+                        console.log('FROM TIME backgroundColor:', progress.style.backgroundColor);
+                    }
+                    return jsonMessage.time / 1000;
+                });
                 if (jsonMessage.isStarted) {
                     console.log('a move');
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
@@ -244,6 +265,10 @@ const UserGame: FC<UserGameProps> = props => {
 
     const moveProgressBar = (time: number, maxTime: number) => {
         const progressBar = document.querySelector('#progress-bar') as HTMLDivElement;
+        if (!progressBar) {
+            setIsConnectionError(true);
+            return;
+        }
 
         const frame = () => {
             if (width <= 0) {
@@ -324,6 +349,11 @@ const UserGame: FC<UserGameProps> = props => {
                         <div className={classes.pageText}>{getGameNameForWaitingScreen()}<br /> скоро начнется</div>
                         <div className={classes.pageText}>Подождите</div>
                     </div>
+                    <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+                        <Alert severity='error' sx={{width: '100%'}}>
+                            Ошибка соединения. Обновите страницу
+                        </Alert>
+                    </Snackbar>
                 </PageWrapper>
             )
         }
@@ -343,6 +373,11 @@ const UserGame: FC<UserGameProps> = props => {
 
                         <div className={classes.breakTime}>{parseTimer()}</div>
                     </div>
+                    <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+                        <Alert severity='error' sx={{width: '100%'}}>
+                            Ошибка соединения. Обновите страницу
+                        </Alert>
+                    </Snackbar>
                 </PageWrapper>
             );
         }
@@ -390,11 +425,16 @@ const UserGame: FC<UserGameProps> = props => {
                         </Alert>
                     </Snackbar>
                 </div>
+                <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+                    <Alert severity='error' sx={{width: '100%'}}>
+                        Ошибка соединения. Обновите страницу
+                    </Alert>
+                </Snackbar>
             </PageWrapper>
         );
     }
 
-    return !gameName || (isGameStarted && timeForAnswer === undefined) ? <Loader /> : renderPage();
+    return !gameName ? <Loader /> : renderPage();
 };
 
 function mapStateToProps(state: AppState) {
