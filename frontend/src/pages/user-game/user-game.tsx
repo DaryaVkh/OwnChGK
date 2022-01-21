@@ -7,10 +7,11 @@ import {CustomInput} from '../../components/custom-input/custom-input';
 import {Alert, Snackbar} from '@mui/material';
 import {UserGameProps} from '../../entities/user-game/user-game.interfaces';
 import {getGame} from '../../server-api/server-api';
-import {store} from '../../index';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import NavBar from '../../components/nav-bar/nav-bar';
 import Loader from '../../components/loader/loader';
+import {AppState} from '../../entities/app/app.interfaces';
+import {connect} from 'react-redux';
 
 let progressBar: any;
 let interval: any;
@@ -187,7 +188,7 @@ const UserGame: FC<UserGameProps> = props => {
     }
 
     const getTeamName = () => {
-        let teamName = store.getState().appReducer.user.team;
+        let teamName = props.userTeam;
         if (teamName.length > 45) {
             return teamName.substr(0, 45) + '\u2026';
         } else {
@@ -387,4 +388,11 @@ const UserGame: FC<UserGameProps> = props => {
     return !gameName ? <Loader /> : renderPage();
 };
 
-export default UserGame;
+function mapStateToProps(state: AppState) {
+    return {
+        userTeam: state.appReducer.user.team
+    };
+}
+
+
+export default connect(mapStateToProps)(UserGame);

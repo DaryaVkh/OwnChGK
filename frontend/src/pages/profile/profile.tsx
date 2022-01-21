@@ -1,24 +1,25 @@
 import React, {FC, useState} from 'react';
 import classes from './profile.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
-import {ProfileProps} from '../../entities/profile/profile.interfaces';
+import {ProfileProps, ProfileStateProps} from '../../entities/profile/profile.interfaces';
 import Header from '../../components/header/header';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {Alert, Snackbar} from '@mui/material';
-import {store} from '../../index';
 import {changeName, changePassword} from '../../server-api/server-api';
 import PageBackdrop from '../../components/backdrop/backdrop';
+import {AppState} from '../../entities/app/app.interfaces';
+import {connect} from 'react-redux';
 
 const Profile: FC<ProfileProps> = props => {
-    const [userName, setUserName] = useState<string>(store.getState().appReducer.user.name);
+    const [userName, setUserName] = useState<string>(props.userName);
     const [userPassword, setUserPassword] = useState<string>('');
     const [userOldPassword, setUserOldPassword] = useState<string>('');
     const [repeatedPassword, setRepeatedPassword] = useState<string>('');
     const [isRepeatedPasswordInvalid, setIsRepeatedPasswordInvalid] = useState<boolean>(false);
     const [isOldPasswordInvalid, setIsOldPasswordInvalid] = useState<boolean>(false);
     const [flags, setFlags] = useState<{isSuccess: boolean, isSnackbarOpen: boolean, isLoading: boolean}>({isSuccess: true, isSnackbarOpen: false, isLoading: false});
-    const userTeam = store.getState().appReducer.user.team;
-    const userEmail = store.getState().appReducer.user.email;
+    const userTeam = props.userTeam;
+    const userEmail = props.userEmail;
 
     const checkRepeatedPassword = () => {
         if (userPassword !== repeatedPassword) {
@@ -206,4 +207,12 @@ const Profile: FC<ProfileProps> = props => {
         );
 };
 
-export default Profile;
+function mapStateToProps(state: AppState): ProfileStateProps {
+    return {
+        userName: state.appReducer.user.name,
+        userEmail: state.appReducer.user.email,
+        userTeam: state.appReducer.user.team
+    };
+}
+
+export default connect(mapStateToProps)(Profile);

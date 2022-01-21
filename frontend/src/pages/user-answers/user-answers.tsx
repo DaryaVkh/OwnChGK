@@ -10,14 +10,16 @@ import {store} from '../../index';
 import {getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
+import {AppState} from '../../entities/app/app.interfaces';
+import {connect} from 'react-redux';
 
 let conn: WebSocket;
 let ping: any;
 
-const UserAnswersPage: FC<UserAnswersPageProps> = () => {
+const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>();
-    const [teamName, setTeamName] = useState<string>(store.getState().appReducer.user.team);
+    const [teamName, setTeamName] = useState<string>(props.userTeam);
     const [answers, setAnswers] = useState<Answer[]>([]);
 
     useEffect(() => {
@@ -102,4 +104,10 @@ const UserAnswersPage: FC<UserAnswersPageProps> = () => {
     );
 };
 
-export default UserAnswersPage;
+function mapStateToProps(state: AppState) {
+    return {
+        userTeam: state.appReducer.user.team
+    };
+}
+
+export default connect(mapStateToProps)(UserAnswersPage);

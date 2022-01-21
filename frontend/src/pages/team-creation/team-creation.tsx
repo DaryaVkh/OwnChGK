@@ -2,19 +2,23 @@ import React, {FC, useState, useEffect} from 'react';
 import classes from './team-creation.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
-import {TeamCreatorDispatchProps, TeamCreatorProps} from '../../entities/team-creation/team-creation.interfaces';
+import {
+    TeamCreatorDispatchProps,
+    TeamCreatorProps,
+    TeamCreatorStateProps
+} from '../../entities/team-creation/team-creation.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
-import {Alert, Autocomplete, Skeleton, TextField} from '@mui/material';
+import {Autocomplete, Skeleton, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
 import {useLocation, Redirect} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
-import {store} from '../../index';
 import PageBackdrop from '../../components/backdrop/backdrop';
 import {Dispatch} from 'redux';
 import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
 import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
 import {connect} from 'react-redux';
+import {AppState} from '../../entities/app/app.interfaces';
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>();
@@ -28,7 +32,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
     useEffect(() => {
         if (!props.isAdmin) {
-            setCaptain(store.getState().appReducer.user.email);
+            setCaptain(props.userEmail);
         } else {
             getUsersWithoutTeam().then(res => {
                 if (res.status === 200) {
@@ -178,10 +182,16 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
         );
 };
 
+function mapStateToProps(state: AppState): TeamCreatorStateProps {
+    return {
+        userEmail: state.appReducer.user.email
+    };
+}
+
 function mapDispatchToProps(dispatch: Dispatch<AppAction>): TeamCreatorDispatchProps {
     return {
         onAddUserTeam: (team: string) => dispatch(addUserTeam(team))
     };
 }
 
-export default connect(null, mapDispatchToProps)(TeamCreator);
+export default connect(mapStateToProps, mapDispatchToProps)(TeamCreator);

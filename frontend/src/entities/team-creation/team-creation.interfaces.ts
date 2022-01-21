@@ -5,8 +5,12 @@ export interface TeamCreatorOwnProps {
     isAdmin: boolean;
 }
 
+export interface TeamCreatorStateProps {
+    userEmail: string;
+}
+
 export interface TeamCreatorDispatchProps {
     onAddUserTeam: (team: string) => AppAction;
 }
 
-export type TeamCreatorProps = TeamCreatorOwnProps & TeamCreatorDispatchProps;
+export type TeamCreatorProps = TeamCreatorOwnProps & TeamCreatorStateProps & TeamCreatorDispatchProps;

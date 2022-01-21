@@ -59,48 +59,56 @@ const App: FC<AppProps> = props => {
                     </Route>
 
                     <ProtectedRoute path="/admin/start-screen" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath={'/admin'}>
                         <AdminStartScreen isSuperAdmin={props.user.role === 'superadmin'}/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path="/admin/profile" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">
                         <Profile isAdmin={true}/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path="/admin/game-creation" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">
                         <GameCreator mode="creation" isAdmin={true}/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path="/admin/game-creation/edit" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">
                         <GameCreator mode="edit" isAdmin={true}/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path="/admin/team-creation" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">
                         <TeamCreator mode="creation" isAdmin={true}/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path="/admin/team-creation/edit" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">
                         <TeamCreator mode="edit" isAdmin={true}/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path="/admin/game/:gameId" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">
                         <AdminGame/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path="/admin/game/:gameId/answers/:tour/:question" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">
                         <AdminAnswersPage/>
@@ -108,42 +116,44 @@ const App: FC<AppProps> = props => {
 
 
                     <ProtectedRoute path="/admin/start-game/:gameId" exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">
                         <StartGame/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path='/admin/rating/:gameId' exact
+                                    currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath={'/admin'}>
                         <Rating isAdmin={true} />
                     </ProtectedRoute>
 
-                    <ProtectedRoute path="/start-screen" exact neededRole={userRoles} redirectPath="/auth">
+                    <ProtectedRoute path="/start-screen" exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath="/auth">
                         <UserStartScreen/>
                     </ProtectedRoute>
 
-                    <ProtectedRoute path="/profile" exact neededRole={userRoles} redirectPath="/auth">
+                    <ProtectedRoute path="/profile" exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath="/auth">
                         <Profile isAdmin={false}/>
                     </ProtectedRoute>
 
-                    <ProtectedRoute path="/team-creation" exact neededRole={userRoles} redirectPath="/auth">
+                    <ProtectedRoute path="/team-creation" exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath="/auth">
                         <TeamCreator mode="creation" isAdmin={false}/>
                     </ProtectedRoute>
 
-                    <ProtectedRoute path="/team-creation/edit" exact neededRole={userRoles} redirectPath="/auth">
+                    <ProtectedRoute path="/team-creation/edit" exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath="/auth">
                         <TeamCreator mode="edit" isAdmin={false}/>
                     </ProtectedRoute>
 
-                    <ProtectedRoute path="/game/:gameId" exact neededRole={userRoles} redirectPath="/auth">
+                    <ProtectedRoute path="/game/:gameId" exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath="/auth">
                         <UserGame/>
                     </ProtectedRoute>
 
-                    <ProtectedRoute path="/game-answers/:gameId" exact neededRole={userRoles} redirectPath='/auth'>
+                    <ProtectedRoute path="/game-answers/:gameId" exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath='/auth'>
                         <UserAnswersPage/>
                     </ProtectedRoute>
 
-                    <ProtectedRoute path='/rating/:gameId' exact neededRole={userRoles} redirectPath='/auth'>
+                    <ProtectedRoute path='/rating/:gameId' exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath='/auth'>
                         <Rating isAdmin={false} />
                     </ProtectedRoute>
 

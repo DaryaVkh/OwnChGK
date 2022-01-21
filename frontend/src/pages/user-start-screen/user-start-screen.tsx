@@ -3,7 +3,10 @@ import classes from './user-start-screen.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import NavBar from '../../components/nav-bar/nav-bar';
 import Header from '../../components/header/header';
-import {UserStartScreenProps} from '../../entities/user-start-screen/user-start-screen.interfaces';
+import {
+    UserStartScreenDispatchProps,
+    UserStartScreenProps
+} from '../../entities/user-start-screen/user-start-screen.interfaces';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import {Link, Redirect, useLocation} from 'react-router-dom';
 import {IconButton, Skeleton} from '@mui/material';
@@ -17,8 +20,12 @@ import {
 } from '../../server-api/server-api';
 import {Game, Team} from '../admin-start-screen/admin-start-screen';
 import Scrollbar from '../../components/scrollbar/scrollbar';
+import {Dispatch} from 'redux';
+import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
+import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
+import {connect} from 'react-redux';
 
-const UserStartScreen: FC<UserStartScreenProps> = () => {
+const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [page, setPage] = useState<string>('teams');
     const [gamesFromDB, setGamesFromDB] = useState<Game[]>();
     const [teamsFromDB, setTeamsFromDB] = useState<Team[]>();
@@ -70,6 +77,7 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
             const element = event.currentTarget as HTMLDivElement;
             const dataset = element.dataset as {teamName: string, teamId: string};
             setUserTeam(dataset.teamName);
+            props.onAddUserTeam(dataset.teamName);
             editTeamCaptainByCurrentUser(dataset.teamId)
                 .then(res => {
                     // TODO: код не 200, что делать?
@@ -172,4 +180,10 @@ const UserStartScreen: FC<UserStartScreenProps> = () => {
     );
 };
 
-export default UserStartScreen;
+function mapDispatchToProps(dispatch: Dispatch<AppAction>): UserStartScreenDispatchProps {
+    return {
+        onAddUserTeam: (team: string) => dispatch(addUserTeam(team))
+    };
+}
+
+export default connect(null, mapDispatchToProps)(UserStartScreen);
