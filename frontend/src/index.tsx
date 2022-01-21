@@ -15,7 +15,7 @@ export interface AppStore {
     appReducer: AppReducerState;
 }
 
-export const store: Store<AppStore> = createStore(rootReducer, composeEnhancers(applyMiddleware()));
+const store: Store<AppStore> = createStore(rootReducer, composeEnhancers(applyMiddleware()));
 
 ReactDOM.render(
     <Provider store={store}>

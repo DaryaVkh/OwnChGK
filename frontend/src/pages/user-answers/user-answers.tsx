@@ -6,7 +6,6 @@ import Header from '../../components/header/header';
 import {Answer, UserAnswersPageProps} from '../../entities/user-answers/user-answers.interfaces';
 import UserAnswer from '../../components/user-answer/user-answer';
 import Scrollbar from '../../components/scrollbar/scrollbar';
-import {store} from '../../index';
 import {getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
