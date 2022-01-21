@@ -18,7 +18,6 @@ let ping: any;
 const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>();
-    const [teamName, setTeamName] = useState<string>(props.userTeam);
     const [answers, setAnswers] = useState<Answer[]>([]);
 
     useEffect(() => {
@@ -63,6 +62,14 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         return () => clearInterval(ping);
     }, []);
 
+    const getGameName = () => {
+        if ((gameName as string).length > 34) {
+            return (gameName as string).substr(0, 34) + '\u2026';
+        } else {
+            return gameName;
+        }
+    }
+
     const renderAnswers = () => {
         return answers.sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
             .map((answer, index) => {
@@ -84,13 +91,15 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                 <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В
                     игру</Link> {/* TODO тут написать нормальный урлик, потому что я не помню, какой нормальный*/}
 
-                <div className={classes.gameName}>{gameName}</div>
+                <div className={classes.gameName}>
+                    <p>{getGameName()}</p>
+                </div>
             </Header>
 
             <div className={classes.contentWrapper}>
                 <div className={classes.teamWrapper}>
                     <div className={classes.team}>Команда</div>
-                    <div className={classes.teamName}>{teamName}</div>
+                    <div className={classes.teamName}>{props.userTeam}</div>
                 </div>
 
                 <div className={classes.answersWrapper}>
