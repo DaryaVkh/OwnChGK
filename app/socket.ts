@@ -395,7 +395,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
             } else if (jsonMessage.action == 'getQuestionNumber') {
                 const result = games[gameId].rounds[0].questionsCount * (games[gameId].currentQuestion[0] - 1) + games[gameId].currentQuestion[1];
                 ws.send(JSON.stringify({
-                    'action': 'changeQuestionNumber',
+                    'action': 'currentQuestionNumber',
                     'number': result,
                 }));
             }

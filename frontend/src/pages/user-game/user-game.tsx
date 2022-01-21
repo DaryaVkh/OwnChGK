@@ -24,7 +24,7 @@ const UserGame: FC<UserGameProps> = props => {
     const [answer, setAnswer] = useState<string>('');
     const [gameName, setGameName] = useState<string>();
     const [questionNumber, setQuestionNumber] = useState<number>(1);
-    const [timeForAnswer, setTimeForAnswer] = useState<number>(70);
+    const [timeForAnswer, setTimeForAnswer] = useState<number>();
     const [flags, setFlags] = useState<{
         isSnackbarOpen: boolean,
         isAnswerAccepted: boolean
@@ -51,18 +51,6 @@ const UserGame: FC<UserGameProps> = props => {
         conn = new WebSocket(getUrlForSocket());
 
         conn.onopen = () => {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getQuestionNumber'
-            }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'time'
-            }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'isOnBreak'
-            }));
             conn.send(JSON.stringify({
                 'action': 'checkStart',
                 'cookie': getCookie('authorization'),
@@ -114,7 +102,7 @@ const UserGame: FC<UserGameProps> = props => {
                 console.log(jsonMessage.time);
                 console.log('maxTime:', jsonMessage.maxTime);
                 clearInterval(progressBar);
-                setTimeForAnswer(t => t + 10);
+                setTimeForAnswer(t => (t ?? 0) + 10);
                 if (jsonMessage.isStarted) {
                     console.log('c move');
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
@@ -127,6 +115,7 @@ const UserGame: FC<UserGameProps> = props => {
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
+                console.log('stop - PROGRESS BAR 100');
                 progress.style.width = '100%';
                 changeColor(progress);
             } else if (jsonMessage.action === 'changeQuestionNumber') {
@@ -137,8 +126,11 @@ const UserGame: FC<UserGameProps> = props => {
                 setTimeForAnswer(70000 / 1000);
                 setAnswer('');
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
+                console.log('changeQuestionNumber - PROGRESS BAR 100');
                 progress.style.width = '100%';
                 changeColor(progress);
+            } else if (jsonMessage.action === 'currentQuestionNumber') {
+                setQuestionNumber(+jsonMessage.number);
             } else if (jsonMessage.action === 'statusAnswer') {
                 if (jsonMessage.isAccepted) {
                     setFlags({
@@ -178,6 +170,23 @@ const UserGame: FC<UserGameProps> = props => {
 
         return () => clearInterval(ping);
     }, []);
+
+    useEffect(() => {
+        if (isGameStarted) {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'time'
+            }));
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'isOnBreak'
+            }));
+        }
+    }, [isGameStarted]);
 
     const getGameName = () => {
         if ((gameName as string).length > 34) {
@@ -242,15 +251,15 @@ const UserGame: FC<UserGameProps> = props => {
             } else {
                 changeColor(progressBar);
                 setTimeForAnswer(t => {
-                    width = Math.ceil(100 * t / (maxTime / 1000));
+                    width = Math.ceil(100 * (t ?? 0) / (maxTime / 1000));
                     progressBar.style.width = width + '%';
-                    return t - 1;
+                    return (t ?? 0) - 1;
                 });
             }
         };
 
-        console.log('fromMove:', maxTime);
         let width = Math.ceil(100 * time / maxTime);
+        console.log('width from Move', width);
         const id = setInterval(frame, 1000); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
         return id;
     };
@@ -357,8 +366,8 @@ const UserGame: FC<UserGameProps> = props => {
 
                     <div className={classes.answerWrapper}>
                         <div
-                            className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer) >=
-                        0 ? Math.ceil(timeForAnswer) : 0} сек.
+                            className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >=
+                        0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
                         </div>
 
                         <div className={classes.progressBar} id="progress-bar"/>
@@ -385,7 +394,7 @@ const UserGame: FC<UserGameProps> = props => {
         );
     }
 
-    return !gameName ? <Loader /> : renderPage();
+    return !gameName || (isGameStarted && timeForAnswer === undefined) ? <Loader /> : renderPage();
 };
 
 function mapStateToProps(state: AppState) {
