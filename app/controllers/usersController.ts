@@ -36,7 +36,6 @@ export class UsersController { // TODO: дописать смену имени �
                 const token = generateAccessToken(user.id, user.email, 'user', null, null, user.name);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
-                    //httpOnly: true,
                     secure: true
                 });
                 return res.status(200).json({
@@ -71,7 +70,6 @@ export class UsersController { // TODO: дописать смену имени �
             const token = generateAccessToken(userId, email, 'user', null, null);
             res.cookie('authorization', token, {
                 maxAge: 24 * 60 * 60 * 1000,
-                //httpOnly: true,
                 secure: true
             });
             return res.status(200).json({});
@@ -102,7 +100,6 @@ export class UsersController { // TODO: дописать смену имени �
                     const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId, name);
                     res.cookie('authorization', token, {
                         maxAge: 24 * 60 * 60 * 1000,
-                        //httpOnly: true,
                         secure: true
                     });
                     return res.status(200).json({});
@@ -111,7 +108,6 @@ export class UsersController { // TODO: дописать смену имени �
                 const token = generateAccessToken(userId, email, userRoles, null, +gameId, name);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
-                    //httpOnly: true,
                     secure: true
                 });
                 return res.status(200).json({});
@@ -144,7 +140,6 @@ export class UsersController { // TODO: дописать смену имени �
                     const newToken = generateAccessToken(payload.id, payload.email, payload.roles, payload.teamId, payload.gameId, newName);
                     res.cookie('authorization', newToken, {
                         maxAge: 24 * 60 * 60 * 1000,
-                        //httpOnly: true,
                         secure: true
                     });
                     return res.status(200).json({});
@@ -331,7 +326,6 @@ export class UsersController { // TODO: дописать смену имени �
             }
             res.cookie('authorization', '', {
                 maxAge: -1,
-                //httpOnly: true,
                 secure: true
             });
             return res.status(200).json({});
