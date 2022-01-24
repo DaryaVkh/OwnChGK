@@ -1,0 +1,14 @@
+.Input {
+  border: none;
+  font-size: 1.5vw !important;
+  height: 7vh;
+  border-radius: 8px !important;
+  background-color: white;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+  min-height: 26px;
+
+  &.invalid {
+    border-color: #FF0000;
+    background-color: #FFF6F6;
+  }
+}

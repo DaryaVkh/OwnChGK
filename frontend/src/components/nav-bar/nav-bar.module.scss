@@ -1,0 +1,50 @@
+.nav {
+  display: inline-flex;
+  overflow: hidden;
+  background-color: transparent;
+  height: 100%;
+  width: 40%;
+  justify-content: space-evenly;
+  margin: auto;
+}
+
+.nav-admin {
+  width: 65%;
+}
+
+.nav-user {
+  width: 50%;
+}
+
+.nav-item {
+  color: white;
+  font-size: 2vmin;
+  text-decoration: none;
+  transition: 0.3s;
+  z-index: 1;
+  font-weight: 300;
+  position: relative;
+  text-align: center;
+  padding-top: 5vh;
+}
+
+.nav-item-admin {
+  width: calc(100% / 3);
+}
+
+.nav-item-user {
+  width: calc(100% / 2);
+}
+
+.nav-item:not(.is-active):hover {
+  color: gray;
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 30%;
+  bottom: 0;
+  transition: 0.4s;
+  height: 1px;
+  z-index: 1;
+}

@@ -1,0 +1,66 @@
+.Header {
+  width: 100vw;
+  height: 9%;
+  position: fixed;
+  top: 0;
+  background-color: var(--background-color);
+  filter: drop-shadow(0 1vh 1vh rgba(50, 130, 184, 0.25));
+  display: flex;
+  justify-content: center;
+  user-select: none;
+}
+
+.logo {
+  height: 6vmin;
+  position: fixed;
+  //left: 15vmin;
+  left: 10%;
+  user-select: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.logoLink {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.Profile {
+  height: 4vmin;
+  position: fixed;
+  right: 24vmin;
+  align-self: center;
+  user-select: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.LogOut {
+  height: 4vmin;
+  position: fixed;
+  right: 15vmin;
+  align-self: center;
+  user-select: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.childrenWrapper {
+  display: flex;
+  align-self: center;
+  position: relative;
+  width: 60%;
+  height: 100%;
+}
+
+@media only screen and (min-width: 1400px) {
+
+}
