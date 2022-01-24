@@ -53,14 +53,11 @@ export class Question {
     }
 
     acceptAppeal(answer: string, comment: string = ""): void {
-        console.log('appeals:', this.appeals);
         const appeals = this.appeals.filter((value, index, obj) =>
             value.wrongAnswer === answer);
-        console.log('appeal:', appeals);
 
         for (const appeal of appeals) {
             appeal.accept(comment);
-            console.log('newAppeal:', appeal);
         }
 
         this.acceptAnswers(answer);

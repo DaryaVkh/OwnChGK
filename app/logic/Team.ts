@@ -12,10 +12,8 @@ export class Team {
     }
 
     addAnswer(answer: Answer): void {
-        console.log('current answer', answer);
         this.answers = this.answers.filter((ans:Answer) => ans.roundNumber != answer.roundNumber ||
                                         ans.questionNumber != answer.questionNumber);
-        console.log('this answers', this.answers);
         this.answers.push(answer);
     }
 

@@ -17,16 +17,14 @@ export class GamesController {
             if (amIParticipate) {
                 const oldToken = req.cookies['authorization'];
                 const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
-                console.log(userId);
+                console.log('user = ', userId, 'try to getAllGames');
                 if (!userId) {
-                    console.log('true');
                     return res.status(400).json({message: 'userId is undefined'});
                 }
                 games = await getCustomRepository(GameRepository).findAmIParticipate(userId); // TODO: ломается?
             } else {
                 games = await getCustomRepository(GameRepository).find();
             }
-            //games = await getCustomRepository(GameRepository).find();
             return res.status(200).json({
                 'games': games.map(value => new GameDTO(value))
             });
@@ -175,7 +173,7 @@ export class GamesController {
                 delete games[gameId];
                 delete gameUsers[gameId];
                 delete gameAdmins[gameId];
-                console.log('all: ', gameAdmins, gameUsers, games);
+                console.log('delete game ', games[gameId]);
             }, 1000 * 60 * 60 * 24 * 3);
             for (let i = 0; i < game.rounds.length; i++) {
                 games[game.id].addRound(new Round(i + 1, answer.questionCount, 60, 1));
@@ -215,7 +213,7 @@ export class GamesController {
                 return res.status(404).json({message: 'game not found'});
             }
             if (typeof payLoad !== 'string') {
-                console.log('ChangeGame:', teams);
+                console.log('ChangeGame: ', gameId, ' teams is: ', teams);
                 await getCustomRepository(GameRepository).updateByParams(
                     gameId, newGameName, roundCount, questionCount, 1, 60, teams
                 );
@@ -351,7 +349,7 @@ export class GamesController {
             const answer = {
                 totalTable: headers + '\n' + value,
             };
-            console.log(answer.totalTable);
+            console.log(answer.totalTable, 'gameId = ', gameId);
             return res.status(200).json(answer);
         } catch (error: any) {
             return res.status(400).json({'message': error.message});

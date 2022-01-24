@@ -11,7 +11,6 @@ export default function ProtectedRoute({neededRole, redirectPath, currentUserRol
     if (neededRole.includes(currentUserRole)) {
         return <Route {...routeProps} />;
     } else {
-        //return null; // TODO: 404
         return <Redirect to={{pathname: redirectPath}}/>;
     }
 };

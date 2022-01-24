@@ -47,7 +47,7 @@ const AdminComponent: FC<AdminProps> = props => {
                 if (res.status === 200) {
                     props.deleteAdmin?.(admins => admins?.filter(a => a.email !== props.email));
                 } else {
-                    // TODO: а если не получилось?
+                    // TODO: код не 200, мейби всплывашку, что что-то не так?
                 }
             });
     }, [props]);

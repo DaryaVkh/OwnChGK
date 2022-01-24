@@ -89,7 +89,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             <Header isAuthorized={true} isAdmin={false}>
                 <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
                 <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В
-                    игру</Link> {/* TODO тут написать нормальный урлик, потому что я не помню, какой нормальный*/}
+                    игру</Link>
 
                 <div className={classes.gameName}>
                     <p>{getGameName()}</p>

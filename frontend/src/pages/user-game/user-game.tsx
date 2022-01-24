@@ -264,7 +264,7 @@ const UserGame: FC<UserGameProps> = props => {
         };
 
         let width = Math.ceil(100 * time / maxTime);
-        const id = setInterval(frame, 1000); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
+        const id = setInterval(frame, 1000);
         return id;
     };
 

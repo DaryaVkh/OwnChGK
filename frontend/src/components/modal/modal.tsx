@@ -33,7 +33,6 @@ const Modal: FC<ModalProps> = props => {
         } else {
             deleteTeam(props.itemForDeleteId as string);
         }
-        //TODO а если ответ не 200?
     }, [props]);
 
     const handleDeleteClick = (e: React.SyntheticEvent) => {
