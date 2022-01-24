@@ -32,7 +32,6 @@ const UserAnswer: FC<UserAnswerProps> = props => {
                     'answer': props.answer
                 }));
             }
-            // TODO тут отправляем апелляцию на сервак или куда там
         }
         setIsOppositionClicked(false);
     };

@@ -35,8 +35,6 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
-    //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
-    //TODO дописать уже какую-то игровую логику
 
     useEffect(() => {
         getGame(gameId).then((res) => {

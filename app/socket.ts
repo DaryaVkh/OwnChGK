@@ -165,7 +165,7 @@ function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: numbe
 
 function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
     for (const answer of answers) {
-        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(answer, ''); // TODO: переписать, acceptAppeal должен принимать ответ, а не команду
+        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(answer, '');
     }
 }
 

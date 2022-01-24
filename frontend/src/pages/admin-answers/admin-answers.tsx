@@ -163,7 +163,7 @@ const AdminAnswersPage: FC = () => {
                     'action': 'RejectAnswer',
                     'roundNumber': tour,
                     'questionNumber': question,
-                    'answers': currentHandledAnswers // TODO: как енто работаит? Вроде ок, но проверить
+                    'answers': currentHandledAnswers
                 }));
                 setRejectedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setAcceptedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));

@@ -38,7 +38,6 @@ const UserGame: FC<UserGameProps> = props => {
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
 
     useEffect(() => {
-        // TODO: Проверить, что игра началась (остальное продолжить только когда началась)
         getGame(gameId).then((res) => {
             if (res.status === 200) {
                 res.json().then(({

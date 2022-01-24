@@ -5,7 +5,7 @@ import {seconds70PerQuestion} from '../socket';
 
 export class Round {
     public readonly number: number;
-    public readonly questions: Question[]; // TODO: public?
+    public readonly questions: Question[];
     public readonly questionsCount: number;
     public readonly questionTime: number;
     public readonly questionCost: number;

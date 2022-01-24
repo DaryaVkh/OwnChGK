@@ -118,7 +118,6 @@ const Rating: FC<RatingProps> = props => {
                 });
             }
         })
-        // TODO скачивайте результаты
     }
 
     function decodeCP1251(text: string){
