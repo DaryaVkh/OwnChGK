@@ -8,9 +8,6 @@ import * as WebSocket from 'ws';
 export const games: { [id: string]: Game; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
 export const gameUsers: { [id: string]: any; } = {};
-
-export const transporter = CreateTransporter(process.env.LOGIN, process.env.PASSWORD);
-
 export const seconds70PerQuestion = 70000;
 export const extra10Seconds = 10000;
 

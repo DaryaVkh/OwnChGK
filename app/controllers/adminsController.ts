@@ -8,7 +8,7 @@ import {
     makeTemporaryPassword, SendMailWithTemporaryPassword, SendMailWithTemporaryPasswordToAdmin,
     validateEmail
 } from '../email';
-import {transporter} from '../socket';
+import {transporter} from '../email';
 import jwt from 'jsonwebtoken';
 
 export class AdminsController {
