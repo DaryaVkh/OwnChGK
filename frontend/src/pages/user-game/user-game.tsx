@@ -92,9 +92,6 @@ const UserGame: FC<UserGameProps> = props => {
                 setIsGameStarted(true);
                 clearInterval(checkStart);
             } else if (jsonMessage.action === 'time') {
-                console.log('a');
-                console.log(jsonMessage.time);
-                console.log('maxTime:', jsonMessage.maxTime);
                 setTimeForAnswer(() => {
                     const progress = document.querySelector('#progress-bar') as HTMLDivElement;
                     const width = Math.ceil(100 * jsonMessage.time / jsonMessage.maxTime);
@@ -103,51 +100,35 @@ const UserGame: FC<UserGameProps> = props => {
                     } else {
                         progress.style.width = width + '%';
                         changeColor(progress);
-                        console.log('FROM TIME width:', width);
-                        console.log('FROM TIME backgroundColor:', progress.style.backgroundColor);
                     }
                     return jsonMessage.time / 1000;
                 });
                 if (jsonMessage.isStarted) {
-                    console.log('a move');
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 }
             } else if (jsonMessage.action === 'start') {
-                console.log('b');
-                console.log(jsonMessage.time);
                 setTimeForAnswer(jsonMessage.time / 1000);
-                console.log('maxTime:', jsonMessage.maxTime);
                 progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
             } else if (jsonMessage.action === 'addTime') {
-                console.log('c');
-                console.log(jsonMessage.time);
-                console.log('maxTime:', jsonMessage.maxTime);
                 clearInterval(progressBar);
                 setTimeForAnswer(t => (t ?? 0) + 10);
                 if (jsonMessage.isStarted) {
-                    console.log('c move');
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 }
             } else if (jsonMessage.action === 'pause') {
-                console.log('d');
                 clearInterval(progressBar);
             } else if (jsonMessage.action === 'stop') {
-                console.log('p');
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
-                console.log('stop - PROGRESS BAR 100');
                 progress.style.width = '100%';
                 changeColor(progress);
             } else if (jsonMessage.action === 'changeQuestionNumber') {
-                console.log('e');
-                console.log(jsonMessage.time);
                 setQuestionNumber(+jsonMessage.number);
                 clearInterval(progressBar);
                 setTimeForAnswer(70000 / 1000);
                 setAnswer('');
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
-                console.log('changeQuestionNumber - PROGRESS BAR 100');
                 progress.style.width = '100%';
                 changeColor(progress);
             } else if (jsonMessage.action === 'currentQuestionNumber') {
@@ -284,7 +265,6 @@ const UserGame: FC<UserGameProps> = props => {
         };
 
         let width = Math.ceil(100 * time / maxTime);
-        console.log('width from Move', width);
         const id = setInterval(frame, 1000); // TODO тут время, если оно не всегда 60 секунд, надо будет подставлять переменную
         return id;
     };
@@ -311,7 +291,6 @@ const UserGame: FC<UserGameProps> = props => {
             'answer': answer
         }));
 
-        console.log('click');
         setTimeout(() => {
             setFlags(flags => {
                 const res = {
@@ -319,7 +298,6 @@ const UserGame: FC<UserGameProps> = props => {
                     isAnswerAccepted: false
                 };
 
-                console.log(flags);
                 if (!flags.isSnackbarOpen) {
                     setTimeout(() => setFlags(flags => {
                         return {
