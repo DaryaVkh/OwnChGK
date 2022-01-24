@@ -81,6 +81,8 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                     if (res.status === 200) {
                         setUserTeam(dataset.teamName);
                         props.onAddUserTeam(dataset.teamName);
+                    } else {
+                        setTeamsFromDB(arr => arr?.filter(x => x.id != dataset.teamId));
                     }
                 });
         }
