@@ -1,7 +1,7 @@
 import React, {FC, useState} from 'react';
 import classes from './profile.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
-import {ProfileProps, ProfileStateProps} from '../../entities/profile/profile.interfaces';
+import {ProfileDispatchProps, ProfileProps, ProfileStateProps} from '../../entities/profile/profile.interfaces';
 import Header from '../../components/header/header';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {Alert, Snackbar} from '@mui/material';
@@ -9,6 +9,9 @@ import {changeName, changePassword} from '../../server-api/server-api';
 import PageBackdrop from '../../components/backdrop/backdrop';
 import {AppState} from '../../entities/app/app.interfaces';
 import {connect} from 'react-redux';
+import {Dispatch} from 'redux';
+import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
+import {addUserName} from '../../redux/actions/app-actions/app-actions';
 
 const Profile: FC<ProfileProps> = props => {
     const [userName, setUserName] = useState<string>(props.userName);
@@ -56,6 +59,7 @@ const Profile: FC<ProfileProps> = props => {
                 .then(res => {
                     if (res.status === 200) {
                         setFlags({isSuccess: true, isSnackbarOpen: true, isLoading: false});
+                        props.onAddUserName(userName);
                     } else {
                         setFlags({isSuccess: false, isSnackbarOpen: true, isLoading: false});
                     }
@@ -87,6 +91,7 @@ const Profile: FC<ProfileProps> = props => {
                             changeName(userName, props.isAdmin)
                                 .then(res => {
                                     if (res.status === 200) {
+                                        props.onAddUserName(userName);
                                         return 'success';
                                     } else {
                                         return 'fail';
@@ -215,4 +220,10 @@ function mapStateToProps(state: AppState): ProfileStateProps {
     };
 }
 
-export default connect(mapStateToProps)(Profile);
+function mapDispatchToProps(dispatch: Dispatch<AppAction>): ProfileDispatchProps {
+    return {
+        onAddUserName: (name: string) => dispatch(addUserName(name))
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);

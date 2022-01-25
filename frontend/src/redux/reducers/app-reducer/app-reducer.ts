@@ -4,7 +4,8 @@ import {
     AUTHORIZE_USER_WITH_ROLE,
     LOG_OUT,
     CHECK_TOKEN,
-    ADD_USER_TEAM
+    ADD_USER_TEAM,
+    ADD_USER_NAME
 } from '../../actions/app-actions/app-action-types';
 
 const initialState: AppReducerState = {
@@ -56,6 +57,14 @@ export const appReducer: Reducer<AppReducerState, AppAction> = (state: AppReduce
                 user: {
                     ...state.user,
                     team: action.payload
+                }
+            }
+        case ADD_USER_NAME:
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    name: action.payload
                 }
             }
         default:
