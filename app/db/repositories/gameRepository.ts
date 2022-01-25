@@ -16,21 +16,8 @@ export class GameRepository extends Repository<Game> {
             .leftJoinAndSelect("teams.captain", "users")
             .where('teams.captain.id = :id', {id: userId})
             .getMany().then(ans => {
-                console.log(ans);
                 return ans;
             })
-        /*return this.manager.transaction(manager => manager.findOne(User, userId)
-            .then(user => {
-                return manager.findOne(Team, {captain: user}, {relations: ['captain']})
-            })
-                .then(team => {
-                    console.log(team);
-                    return manager.find(Game, {relations: ['teams']})
-                        .then(games => games.filter(game => {
-                            console.log(game);
-                            let res = game.teams.some(t => t.id === team.id);
-                        console.log(res);
-                        return res;}))}));*/
     }
 
     insertByParams(name: string,

@@ -131,8 +131,6 @@ const Profile: FC<ProfileProps> = props => {
         setUserName(event.target.value);
     };
 
-    console.log(flags.isSnackbarOpen);
-
     return (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={props.isAdmin}>

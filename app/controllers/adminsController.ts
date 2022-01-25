@@ -8,7 +8,7 @@ import {
     makeTemporaryPassword, SendMailWithTemporaryPassword, SendMailWithTemporaryPasswordToAdmin,
     validateEmail
 } from '../email';
-import {transporter} from '../socket';
+import {transporter} from '../email';
 import jwt from 'jsonwebtoken';
 
 export class AdminsController {
@@ -38,7 +38,6 @@ export class AdminsController {
                 const token = generateAccessToken(admin.id, admin.email, admin.role, null, null, admin.name);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
-                    //httpOnly: true,
                     secure: true
                 });
                 return res.status(200).json({
@@ -142,7 +141,6 @@ export class AdminsController {
                     const newToken = generateAccessToken(payload.id, payload.email, payload.roles, payload.teamId, payload.gameId, newName);
                     res.cookie('authorization', newToken, {
                         maxAge: 24 * 60 * 60 * 1000,
-                        //httpOnly: true,
                         secure: true
                     });
                     return res.status(200).json({});
@@ -221,7 +219,6 @@ export class AdminsController {
             }
             res.cookie('authorization', '', {
                 maxAge: -1,
-                //httpOnly: true,
                 secure: true
             });
             return res.status(200).json({});

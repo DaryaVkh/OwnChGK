@@ -78,7 +78,6 @@ const AdminAnswersPage: FC = () => {
                 setUncheckedAnswers(jsonMessage.uncheckedAnswers);
                 setGameAnswers([...jsonMessage.acceptedAnswers, ...jsonMessage.rejectedAnswers, ...jsonMessage.uncheckedAnswers]);
             } else if (jsonMessage.action === 'appealsByNumber') {
-                console.log(jsonMessage.appeals);
                 setAppeals(jsonMessage.appeals);
             }
         };
@@ -159,19 +158,17 @@ const AdminAnswersPage: FC = () => {
     const handleSaveButtonClick = () => {
         switch (answersType) {
             case 'accepted':
-                console.log(currentHandledAnswers + 'accepted');
                 conn.send(JSON.stringify({
                     'cookie': getCookie('authorization'),
                     'action': 'RejectAnswer',
                     'roundNumber': tour,
                     'questionNumber': question,
-                    'answers': currentHandledAnswers // TODO: как енто работаит? Вроде ок, но проверить
+                    'answers': currentHandledAnswers
                 }));
                 setRejectedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setAcceptedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
                 break;
             case 'unchecked':
-                console.log(currentHandledAnswers + 'unchecked'); // Это работает
                 conn.send(JSON.stringify({
                     'cookie': getCookie('authorization'),
                     'action': 'AcceptAnswer',
@@ -191,7 +188,6 @@ const AdminAnswersPage: FC = () => {
                 setUncheckedAnswers([]);
                 break;
             case 'rejected':
-                console.log(currentHandledAnswers + 'rejected');
                 conn.send(JSON.stringify({
                     'cookie': getCookie('authorization'),
                     'action': 'AcceptAnswer',
@@ -233,7 +229,6 @@ const AdminAnswersPage: FC = () => {
 
     const handleSaveOppositionButtonClick = () => {
         setAppeals([]);
-        console.log(currentHandledAppeals);
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'AcceptAppeals',

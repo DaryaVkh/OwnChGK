@@ -35,8 +35,6 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
-    //TODO по имени игры, которая приходит в пропсе, достать из бд количество туров и вопросов
-    //TODO дописать уже какую-то игровую логику
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -92,7 +90,6 @@ const AdminGame: FC<AdminGameProps> = props => {
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'time') {
-                console.log(jsonMessage.time);
                 setTimer(jsonMessage.time);
                 if (jsonMessage.isStarted) {
                     setPlayOrPause('pause');
@@ -112,8 +109,6 @@ const AdminGame: FC<AdminGameProps> = props => {
                     return appealsCopy;
                 })
             } else if (jsonMessage.action === 'appeals') {
-                console.log('appeals');
-                console.log(jsonMessage.appealByQuestionNumber);
                 setIsAppeal(appeals => {
                     const appealsCopy = new Array(appeals.length).fill(false)
                     for (const number of jsonMessage.appealByQuestionNumber) {
@@ -134,8 +129,6 @@ const AdminGame: FC<AdminGameProps> = props => {
                     }), 1000)
                 }
             } else if (jsonMessage.action == 'changeQuestionNumber') {
-                console.log(jsonMessage.round);
-                console.log(jsonMessage.question);
                 setChosenTourNumber(jsonMessage.round);
                 setActiveTour(jsonMessage.round);
                 setActiveQuestion(jsonMessage.question);

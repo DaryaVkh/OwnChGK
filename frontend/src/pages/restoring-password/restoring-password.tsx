@@ -24,8 +24,6 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
     const [isError, setIsError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    //TODO проверять в базе наличие email, написать обработчик отправки
-
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
     }
@@ -37,7 +35,6 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
     const handleSendCode = (event: React.SyntheticEvent) => {
         event.preventDefault();
         setIsLoading(true);
-        // TODO тут отправляем код на почту email и меняем шаг на 'second' (setStep('second')) или говорим, что такого имейла в базе нет и ставим isEmailInvalid в false
         sendTemporaryPassword(email, props.isAdmin).then(res => {
             if (res.status === 200) {
                 setStep('second');
@@ -52,7 +49,6 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
 
     const handleResendCode = () => {
         setIsLoading(true);
-        // TODO тут отправляем новый код на почту email, ибо прошлый юзер продолбал
         sendTemporaryPassword(email, props.isAdmin).then(res => {
             if (res.status === 500) {
                 setIsResendCodeInvalid(true);
@@ -63,7 +59,6 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
 
     const handleCheckCode = () => {
         setIsLoading(true);
-        // TODO тут проверяем, что код верный и меняем шаг на 'third' (setStep('third')) или говорим, что код не верный и ставим isCodeInvalid в false
         checkTemporaryPassword(email, code, props.isAdmin).then(res => {
             if (res.status === 200) {
                 setStep('third');
@@ -99,7 +94,6 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
         } else {
             setIsRepeatedPasswordInvalid(false);
             setIsLoading(true);
-            // TODO тут записываем новый пароль newPassword в базу
             changePasswordByCode(email, newPassword, code, props.isAdmin).then(res => {
                 if (res.status === 200) {
                     setIsSuccess(true);

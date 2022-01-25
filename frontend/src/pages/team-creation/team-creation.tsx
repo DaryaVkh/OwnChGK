@@ -92,7 +92,6 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                 }
             });
         }
-        //TODO если тут ошибка, меняем isNameInvalid на true и делаем return false, иначе все ок, устанавливаем isCreatedSuccessfully в true и редиректимся
     };
 
     return isCreatedSuccessfully

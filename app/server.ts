@@ -34,7 +34,7 @@ export class Server {
                 type: 'postgres',
                 url: process.env.DATABASE_URL,
                 entities: [User, Admin, Team, Game, Round],
-                synchronize: true, // Не оч безопасно,
+                synchronize: true,
                 ssl: {rejectUnauthorized:false} // для хероку
             }).then(() => {
                 console.log('Connected to Postgres')

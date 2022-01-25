@@ -3,7 +3,7 @@ import {Answer, Appeal} from './AnswerAndAppeal';
 export class Team {
     public readonly name: string;
     public id: number;
-    private answers: Answer[]; // TODO: public?
+    private answers: Answer[];
 
     constructor(name: string, id: number) {
         this.name = name
@@ -12,10 +12,8 @@ export class Team {
     }
 
     addAnswer(answer: Answer): void {
-        console.log('current answer', answer);
         this.answers = this.answers.filter((ans:Answer) => ans.roundNumber != answer.roundNumber ||
                                         ans.questionNumber != answer.questionNumber);
-        console.log('this answers', this.answers);
         this.answers.push(answer);
     }
 

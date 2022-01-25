@@ -6,8 +6,8 @@ export class Question {
     public readonly number: number;
     public readonly time: number;
     public readonly roundNumber: number;
-    public readonly answers: Answer[]; // TODO: public? Сейчас непонятно, как получить ответы
-    public readonly appeals: Appeal[]; // TODO: public? Сейчас непонятно, как получить апелляции
+    public readonly answers: Answer[];
+    public readonly appeals: Appeal[];
 
     constructor(cost: number, roundNumber: number, number: number, time: number) {
         this.cost = cost;
@@ -53,14 +53,11 @@ export class Question {
     }
 
     acceptAppeal(answer: string, comment: string = ""): void {
-        console.log('appeals:', this.appeals);
         const appeals = this.appeals.filter((value, index, obj) =>
             value.wrongAnswer === answer);
-        console.log('appeal:', appeals);
 
         for (const appeal of appeals) {
             appeal.accept(comment);
-            console.log('newAppeal:', appeal);
         }
 
         this.acceptAnswers(answer);
@@ -69,7 +66,6 @@ export class Question {
     rejectAppeal(answer: string, comment: string = ""): void {
         const appeals = this.appeals.filter((value, index, obj) =>
             value.wrongAnswer === answer);
-//Todo: проверить поведение, когда у нас есть несколько одинаковых апелляций
         for (const appeal of appeals) {
             appeal.reject(comment);
         }

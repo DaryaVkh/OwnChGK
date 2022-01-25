@@ -5,7 +5,7 @@ import {seconds70PerQuestion} from '../socket';
 
 export class Round {
     public readonly number: number;
-    public readonly questions: Question[]; // TODO: public?
+    public readonly questions: Question[];
     public readonly questionsCount: number;
     public readonly questionTime: number;
     public readonly questionCost: number;
@@ -35,8 +35,8 @@ export enum GameStatus {
 export class Game {
     public readonly id: number;
     public readonly name: string;
-    public readonly rounds: Round[]; // TODO: public?
-    public readonly teams: { [name: number]: Team }; // TODO: public?
+    public readonly rounds: Round[];
+    public readonly teams: { [number: number]: Team };
     public status: GameStatus;
     public breakTime: number;
     private interval: any;

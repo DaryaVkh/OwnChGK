@@ -8,9 +8,6 @@ import * as WebSocket from 'ws';
 export const games: { [id: string]: Game; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
 export const gameUsers: { [id: string]: any; } = {};
-
-export const transporter = CreateTransporter(process.env.LOGIN, process.env.PASSWORD);
-
 export const seconds70PerQuestion = 70000;
 export const extra10Seconds = 10000;
 
@@ -18,7 +15,7 @@ function GiveAddedTime(gameId: number) {
     if (games[gameId].timeIsOnPause) {
         games[gameId].leftTime += extra10Seconds;
         games[gameId].maxTime += extra10Seconds;
-        console.log('added time is' + games[gameId].leftTime);
+        console.log('added time is ',  games[gameId].leftTime);
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'addTime',
@@ -49,11 +46,10 @@ function GiveAddedTime(gameId: number) {
             } else games[gameId].leftTime = initialDelay - pastDelay + extra10Seconds;
             games[gameId].maxTime += extra10Seconds;
             games[gameId].timer = setTimeout(() => {
-                console.log('added time end');
+                console.log('added time end, gameId = ', gameId);
                 games[gameId].isTimerStart = false;
                 games[gameId].leftTime = 0;
             }, games[gameId].leftTime);
-            console.log('t' + games[gameId].leftTime);
             for (let user of gameUsers[gameId]) {
                 user.send(JSON.stringify({
                     'action': 'addTime',
@@ -77,12 +73,12 @@ function ChangeQuestionNumber(gameId: number, questionNumber: number, roundNumbe
 
 function StartTimer(gameId: number) {
     if (!games[gameId].timeIsOnPause) {
-        console.log('start')
+        console.log('start gameId = ', gameId);
         games[gameId].isTimerStart = true;
         games[gameId].timer = setTimeout(() => {
             games[gameId].isTimerStart = false;
             games[gameId].leftTime = 0;
-            console.log('stop')
+            console.log('stop gameId = ', gameId);
         }, games[gameId].leftTime);
 
         for (let user of gameUsers[gameId]) {
@@ -93,15 +89,15 @@ function StartTimer(gameId: number) {
             }));
         }
     } else {
-        console.log('startFromPause')
+        console.log('startFromPause gameId = ', gameId);
         games[gameId].isTimerStart = true;
         games[gameId].timeIsOnPause = false;
         games[gameId].timer = setTimeout(() => {
             games[gameId].isTimerStart = false;
-            console.log('stop after pause')
+            console.log('stop after pause gameId = ', gameId);
             games[gameId].leftTime = 0
         }, games[gameId].leftTime);
-        console.log(games[gameId].leftTime + 'added time to resp');
+        console.log(games[gameId].leftTime, 'added time to resp gameId = ', gameId);
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
@@ -113,7 +109,7 @@ function StartTimer(gameId: number) {
 }
 
 function StopTimer(gameId: number) {
-    console.log('STOP')
+    console.log('STOP gameId = ', gameId);
     games[gameId].isTimerStart = false;
     clearTimeout(games[gameId].timer);
     games[gameId].timeIsOnPause = false;
@@ -128,7 +124,7 @@ function StopTimer(gameId: number) {
 
 function PauseTimer(gameId: number) {
     if (games[gameId].isTimerStart) {
-        console.log('pause')
+        console.log('pause gameId = ', gameId);
         games[gameId].isTimerStart = false;
         games[gameId].timeIsOnPause = true;
         games[gameId].leftTime -= Math.floor(process.uptime() * 1000 - games[gameId].timer._idleStart);
@@ -153,7 +149,6 @@ function GetAppeal(appeal: string, teamId: number, gameId: number, number: numbe
     console.log('received: %s', appeal, teamId);
     const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount);
     let questionNumber = number - (roundNumber - 1) * games[gameId].rounds[0].questionsCount;
-    console.log(roundNumber, questionNumber);
     games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].giveAppeal(teamId, appeal, answer);
 }
 
@@ -165,7 +160,7 @@ function AcceptAnswer(gameId: number, roundNumber: number, questionNumber: numbe
 
 function AcceptAppeal(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
     for (const answer of answers) {
-        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(answer, ''); // TODO: переписать, acceptAppeal должен принимать ответ, а не команду
+        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(answer, '');
     }
 }
 
@@ -183,7 +178,6 @@ function RejectAnswer(gameId: number, roundNumber: number, questionNumber: numbe
 
 function GetAllTeamsAnswers(gameId: number, roundNumber: number, questionNumber: number, ws) {
     const answers = games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].answers;
-    console.log(answers);
     const acceptedAnswers = answers.filter(ans => ans.status === 0).map(ans => ans.text);
     const rejectedAnswers = answers.filter(ans => ans.status === 1 || ans.status === 3).map(ans => ans.text);
     const uncheckedAnswers = answers.filter(ans => ans.status === 2).map(ans => ans.text);
@@ -206,7 +200,7 @@ function GetAppealsByNumber(gameId: number, roundNumber: number, questionNumber:
             }
         });
 
-    console.log('APPEALS', appeals);
+    console.log('appeals', appeals, 'In game = ', gameId);
     ws.send(JSON.stringify({
         'action': 'appealsByNumber',
         appeals
@@ -241,8 +235,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
         ws.send(JSON.stringify({
             'action': 'notAuthorized'
         }));
-
-        console.log('не авторизован');
+        console.log('not authorized');
     } else {
         const {roles: userRoles, teamId: teamId, gameId: gameId} =
             jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload;
@@ -270,7 +263,6 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                     'maxTime': games[gameId].maxTime,
                     'time': result
                 }));
-                console.log(result);
             } else {
                 ws.send(JSON.stringify({
                     'action': 'time',
@@ -280,7 +272,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 }));
             }
         } else if (jsonMessage.action == 'changeQuestion') {
-            console.log('changeQuestion', jsonMessage.tourNumber, jsonMessage.questionNumber);
+            console.log('changeQuestion ', jsonMessage.tourNumber, jsonMessage.questionNumber, 'with gameId= ', gameId);
             games[gameId].currentQuestion = [jsonMessage.tourNumber, jsonMessage.questionNumber];
             ChangeQuestionNumber(gameId, jsonMessage.questionNumber, jsonMessage.tourNumber);
         } else if (jsonMessage.action == 'isOnBreak') {
@@ -310,7 +302,6 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
             } else if (jsonMessage.action == 'AcceptAnswer') {
                 AcceptAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
             } else if (jsonMessage.action == 'AcceptAppeals') {
-                console.log(jsonMessage.appeals);
                 AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
             } else if (jsonMessage.action == 'RejectAnswer') {
                 RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
@@ -348,8 +339,8 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                     }))
                 }
             } else if (jsonMessage.action == 'getQuestionNumber') {
-                console.log('tour ' + games[gameId].currentQuestion[0]);
-                console.log('question ' + games[gameId].currentQuestion[1]);
+                console.log('tour ' + games[gameId].currentQuestion[0], 'in game = ', gameId);
+                console.log('question ' + games[gameId].currentQuestion[1], 'in game = ', gameId);
                 ws.send(JSON.stringify({
                     'action': 'changeQuestionNumber',
                     'round': games[gameId].currentQuestion[0],
@@ -372,7 +363,6 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                     'isAccepted': true
                 }));
             } else if (jsonMessage.action == 'appeal') {
-                console.log(jsonMessage);
                 GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
                 for (let ws of gameAdmins[gameId])
                     ws.send(JSON.stringify({
@@ -395,7 +385,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
             } else if (jsonMessage.action == 'getQuestionNumber') {
                 const result = games[gameId].rounds[0].questionsCount * (games[gameId].currentQuestion[0] - 1) + games[gameId].currentQuestion[1];
                 ws.send(JSON.stringify({
-                    'action': 'changeQuestionNumber',
+                    'action': 'currentQuestionNumber',
                     'number': result,
                 }));
             }

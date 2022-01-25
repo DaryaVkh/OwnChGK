@@ -61,7 +61,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
             }
         });
 
-        getAmIParticipateGames().then(res => { // TODO: игры, в которых я состою
+        getAmIParticipateGames().then(res => {
             if (res.status === 200) {
                 res.json().then(({games}) => {
                     setGamesFromDB(games.sort((game1: Game, game2: Game) => game1.name.toLowerCase() > game2.name.toLowerCase() ? 1 : -1));
@@ -76,13 +76,15 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
         if (userTeam === '') {
             const element = event.currentTarget as HTMLDivElement;
             const dataset = element.dataset as {teamName: string, teamId: string};
-            setUserTeam(dataset.teamName);
-            props.onAddUserTeam(dataset.teamName);
             editTeamCaptainByCurrentUser(dataset.teamId)
                 .then(res => {
-                    // TODO: код не 200, что делать?
+                    if (res.status === 200) {
+                        setUserTeam(dataset.teamName);
+                        props.onAddUserTeam(dataset.teamName);
+                    } else {
+                        setTeamsFromDB(arr => arr?.filter(x => x.id != dataset.teamId));
+                    }
                 });
-            //TODO установили, отрисовали и отправляем в бд, что этот юзер теперь капитан этой команды
         }
     };
 
