@@ -8,11 +8,16 @@
 Шрейн Ольга - OlgaShreyn
 
 
+## Ссылка на приложение:
+
+### Юзерка: https://ownchgk.herokuapp.com
+### Админка: https://ownchgk.herokuapp.com/admin
+
 ## Установка
 
 1) Склонировать репозиторий
 ```bash
-    git clone git@github.com:prefie/NotBadBar.git
+    git clone https://github.com/DaryaVkh/OwnChGK.git
 ```   
 
 2) Перейти на продакшен ветку (`master`)
@@ -20,9 +25,9 @@
     git checkout master
 ``` 
 
-3) Установить зависимости из файла `package.json`
+3) Запустить сборку приложения
 ```bash
-    npm i
+    npm run build
 ```
 
 ## Запустить приложение
@@ -30,5 +35,5 @@
 Чтобы запустить приложение, нужно запустить локальный сервер в корневой папке
 приложения, выполнив следующую команду
 ```bash
-    npm run start
+    npm start
 ```
