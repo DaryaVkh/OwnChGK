@@ -1,11 +1,11 @@
 # Своя ЧГК
-Вихлянцева Дарья - DaryaVkh
+Вихлянцева Дарья - DaryaVkh (frontend)
 
-Шушарин Николай - prefie
+Шушарин Николай - prefie (fullstack, db)
 
-Кряжев Александр - kryaazh
+Кряжев Александр - kryaazh (design)
 
-Шрейн Ольга - OlgaShreyn
+Шрейн Ольга - OlgaShreyn (backend, testing)
 
 
 ## Ссылка на приложение:
