@@ -1,17 +1,24 @@
+// @ts-ignore
 const webdriver = require('selenium-webdriver')
 const { Builder, By, Key, until } = require('selenium-webdriver');
-let driver;
+const firefox = require('selenium-webdriver/firefox');
+
+let driver: { executeScript: (arg0: string) => any; manage: () => { (): any; new(): any; window: { (): { (): any; new(): any; setSize: { (arg0: number, arg1: number): any; new(): any; }; }; new(): any; }; }; get: (arg0: string) => void; wait: (arg0: any, arg1: number) => any; getCurrentUrl: () => any; findElement: (arg0: any) => { (): any; new(): any; click: { (): any; new(): any; }; sendKeys: { (arg0: string, arg1: any): any; new(): any; }; }; quit: () => any; };
 
 const documentInitialised = () =>
     driver.executeScript('return initialised');
 
 beforeEach(async function () {
     try {
+        //driver = new Builder()
+            //.forBrowser('firefox')
+            //.build();
         driver = await new webdriver.Builder().forBrowser('chrome').build();
         await driver.manage().window().setSize(1600, 900);
         driver.get('https://ownchgk.herokuapp.com');
         await driver.wait(until.elementLocated(By.id('restore')), 10000);
     } catch (ex) {
+        // @ts-ignore
         console.log(ex.stack);
     }
 })

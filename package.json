@@ -37,10 +37,11 @@
     "typeorm": "^0.2.41",
     "typescript": "^4.5.4",
     "utf-8-validate": "^5.0.2",
-    "ws": "^7.2.0"
+    "ws": "^7.2.0",
+    "chromedriver": "^99.0.0"
   },
   "devDependencies": {
-    "chromedriver": "^97.0.0",
+    "chromedriver": "^99.0.0",
     "geckodriver": "^3.0.1",
     "jest": "^27.4.7",
     "selenium-webdriver": "^3.6.0"
