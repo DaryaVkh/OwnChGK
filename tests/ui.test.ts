@@ -2,19 +2,16 @@
 const webdriver = require('selenium-webdriver')
 const { Builder, By, Key, until } = require('selenium-webdriver');
 const firefox = require('selenium-webdriver/firefox');
-
-let driver: { executeScript: (arg0: string) => any; manage: () => { (): any; new(): any; window: { (): { (): any; new(): any; setSize: { (arg0: number, arg1: number): any; new(): any; }; }; new(): any; }; }; get: (arg0: string) => void; wait: (arg0: any, arg1: number) => any; getCurrentUrl: () => any; findElement: (arg0: any) => { (): any; new(): any; click: { (): any; new(): any; }; sendKeys: { (arg0: string, arg1: any): any; new(): any; }; }; quit: () => any; };
+let driver;
 
 const documentInitialised = () =>
     driver.executeScript('return initialised');
 
+
 beforeEach(async function () {
     try {
-        //driver = new Builder()
-            //.forBrowser('firefox')
-            //.build();
-        driver = await new webdriver.Builder().forBrowser('chrome').build();
-        await driver.manage().window().setSize(1600, 900);
+        jest.setTimeout(60000);
+        driver = new webdriver.Builder().forBrowser('firefox').build();
         driver.get('https://ownchgk.herokuapp.com');
         await driver.wait(until.elementLocated(By.id('restore')), 10000);
     } catch (ex) {
@@ -26,13 +23,13 @@ beforeEach(async function () {
 test('Should_open_page', async () => {
     let url = await driver.getCurrentUrl();
     expect(url).toContain('https://ownchgk.herokuapp.com');
-});
+}, 60000);
 
 test('Should_click_reset', async () => {
     await driver.findElement(By.id('restore')).click();
     let url = await driver.getCurrentUrl();
     expect(url).toBe('https://ownchgk.herokuapp.com/restore-password');
-});
+}, 60000);
 
 test('Should_enter_email', async () => {
     let passwordInput = await driver.findElement(By.id('password'));
