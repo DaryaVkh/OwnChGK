@@ -145,7 +145,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                                     }}>Этот E-mail не зарегистрирован</Alert>
                                 </div>
                                 : null}
-                            <Link className={classes.linkToSignIn} to={props.isAdmin ? '/admin' : '/auth'}>Вспомнил
+                            <Link className={classes.linkToSignIn} to={props.isAdmin ? '/admin' : '/auth'} id="remember">Вспомнил
                                 пароль</Link>
                         </div>
                     </form>

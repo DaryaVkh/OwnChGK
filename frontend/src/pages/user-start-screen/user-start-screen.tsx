@@ -152,7 +152,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                                 <div className={classes.addButtonWrapper}>
                                     <Link to="/team-creation"
                                           style={{pointerEvents: userTeam !== '' ? 'none' : 'auto'}}>
-                                        <IconButton disabled={userTeam !== ''} sx={{padding: '13px'}}>
+                                        <IconButton disabled={userTeam !== ''} sx={{padding: '13px'}} id="addTeamButton">
                                             <AddCircleOutlineOutlinedIcon sx={{
                                                 color: userTeam === '' ? 'white' : 'gray',
                                                 fontSize: '9vmin'
