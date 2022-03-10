@@ -70,6 +70,24 @@ test('Should_go_to_team_creation', async () => {
     expect(await captainInput.getAttribute("value")).toBe("qi@ru.ru");
 }, 60000);
 
+test('test which fail', async () => {
+    let a = await fetch('/teams/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json',
+            'Cookie': 'authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAzLCJlbWFpbCI6InFpQHJ1LnJ1Iiwicm9sZXMiOiJ1c2VyIiwidGVhbUlkIjpudWxsLCJnYW1lSWQiOm51bGwsIm5hbWUiOm51bGwsImlhdCI6MTY0Njg1ODU4NywiZXhwIjoxNjQ2OTQ0OTg3fQ.1kBFkQIqzuoU5qCDG1YV8AgWRZ2T3vupdazkohitucA'
+        },
+    }).then(res => {
+        if (res.status === 200) {
+            console.log(true);
+        } else {
+            console.log(false);
+        }
+    });
+    console.log(a);
+})
+
 afterEach(async function () {
     await driver.quit();
 })
