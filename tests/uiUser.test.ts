@@ -1,10 +1,11 @@
 const webdriver = require('selenium-webdriver')
-const { Builder, By, Key, until } = require('selenium-webdriver');
+const {Builder, By, Key, until} = require('selenium-webdriver');
 const firefox = require('selenium-webdriver/firefox');
 let driver;
 
 const port = parseInt(process.env.PORT || '3000');
-const url = 'http://localhost:'+port
+const url = 'http://localhost:' + port
+
 
 beforeEach(async function () {
     try {
@@ -32,7 +33,7 @@ test('Should_click_reset', async () => {
 }, 60000);
 
 test('Should_successful_login', async () => {
-    await login("qi@ru.ru", "12345", "teams")
+    await login(loginUserSecret, passworUserdSecret, "teams")
 
     let url = await driver.getCurrentUrl();
     expect(url).toContain('/start-screen');
@@ -54,7 +55,7 @@ test('Should_go_to_change_password', async () => {
 }, 60000);
 
 test('Should_go_to_team_creation', async () => {
-    await login("qi@ru.ru", "12345", "teams")
+    await login(loginUserSecret, passworUserdSecret, "teams")
 
     let button = await driver.findElement(By.id('addTeamButton'));
     button.click();
@@ -70,29 +71,25 @@ test('Should_go_to_team_creation', async () => {
     expect(await captainInput.getAttribute("value")).toBe("qi@ru.ru");
 }, 60000);
 
-test('test which fail', async () => {
-    let a = await fetch('/teams/', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json;charset=utf-8',
-            'Accept': 'application/json',
-            'Cookie': 'authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAzLCJlbWFpbCI6InFpQHJ1LnJ1Iiwicm9sZXMiOiJ1c2VyIiwidGVhbUlkIjpudWxsLCJnYW1lSWQiOm51bGwsIm5hbWUiOm51bGwsImlhdCI6MTY0Njg1ODU4NywiZXhwIjoxNjQ2OTQ0OTg3fQ.1kBFkQIqzuoU5qCDG1YV8AgWRZ2T3vupdazkohitucA'
-        },
-    }).then(res => {
-        if (res.status === 200) {
-            console.log(true);
-        } else {
-            console.log(false);
-        }
-    });
-    console.log(a);
-})
+test('Should_user_logout', async () => {
+    await login(loginUserSecret, passworUserdSecret, "games")
+    let cookie = await driver.manage().getCookie("authorization");
+    expect(cookie).not.toBeNull();
+
+    const logout = await driver.findElement(By.css('img[alt="LogOut"]'));
+    logout.click();
+
+    let currentUrl = await driver.getCurrentUrl();
+    expect(currentUrl).toContain(url);
+    cookie = await driver.manage().getCookie("authorization");
+    expect(cookie).toBe(null);
+}, 60000);
 
 afterEach(async function () {
     await driver.quit();
 })
 
-async function login(email:String, password:String, elementId:String) {
+async function login(email: String, password: String, elementId: String) {
     await driver.findElement(By.id('password')).sendKeys(password, Key.ENTER);
     await driver.findElement(By.id('email')).sendKeys(email, Key.ENTER);
     await driver.wait(until.elementLocated(By.id(elementId)), 10000);

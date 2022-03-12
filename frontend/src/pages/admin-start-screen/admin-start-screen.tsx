@@ -245,7 +245,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
 
                             <div className={classes.addButtonWrapper}>
                                 <Link to="/admin/game-creation">
-                                    <IconButton sx={{padding: '13px'}}>
+                                    <IconButton sx={{padding: '13px'}} id="addGameButton">
                                         <AddCircleOutlineOutlinedIcon sx={{
                                             color: 'white',
                                             fontSize: '9vmin'
@@ -268,7 +268,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
 
                             <div className={classes.addButtonWrapper}>
                                 <Link to="/admin/team-creation">
-                                    <IconButton sx={{padding: '13px'}}>
+                                    <IconButton sx={{padding: '13px'}} id="addTeamButton">
                                         <AddCircleOutlineOutlinedIcon sx={{
                                             color: 'white',
                                             fontSize: '9vmin'
@@ -307,7 +307,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
                                                 <OutlinedInput id="new-admin-email" type="email" sx={emailStyles}
                                                                className={`${classes.adminEmail} ${classes.adminInput} ${classes.newAdmin}`}
                                                                placeholder="Email*"/>
-                                                <Button className={classes.adminButton} onClick={handleAddNewAdmin}>
+                                                <Button className={classes.adminButton} onClick={handleAddNewAdmin} id="addAdminButton">
                                                     <AddIcon sx={{color: 'green', fontSize: '5vmin'}}/>
                                                 </Button>
                                             </div>
@@ -318,7 +318,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
 
                             {props.isSuperAdmin
                                 ?
-                                <IconButton sx={{padding: '13px'}} onClick={handleAddAdminButton}>
+                                <IconButton sx={{padding: '13px'}} id='addAdmin' onClick={handleAddAdminButton}>
                                     <AddCircleOutlineOutlinedIcon sx={{
                                         color: 'white',
                                         fontSize: '9vmin'
