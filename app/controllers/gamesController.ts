@@ -7,7 +7,9 @@ import {secret} from '../jwtToken';
 import {gameAdmins, games, gameUsers} from '../socket';
 import {Game, Round} from '../logic/Game';
 import {Team} from '../logic/Team';
-import {GameDTO} from '../dto';
+import {GameDto} from "../dtos/gameDto";
+import {TeamDto} from "../dtos/teamDto";
+import {ScoreTableDto} from "../dtos/scoreTableDto";
 
 export class GamesController {
     public async getAll(req: Request, res: Response) {
@@ -21,28 +23,40 @@ export class GamesController {
                 if (!userId) {
                     return res.status(400).json({message: 'userId is undefined'});
                 }
+
                 games = await getCustomRepository(GameRepository).findAmIParticipate(userId); // TODO: ломается?
             } else {
                 games = await getCustomRepository(GameRepository).find();
             }
+
             return res.status(200).json({
-                'games': games.map(value => new GameDTO(value))
+                games: games.map(value => new GameDto(value))
             });
         } catch (error) {
-            return res.status(400).json({message: error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
     public async getAllTeams(req: Request, res: Response) {
         try {
             const {gameName} = req.params;
+
             const game = await getCustomRepository(GameRepository).findByName(gameName);
             if (!game) {
                 return res.status(404).json({message: 'game not found'});
             }
-            return res.status(200).json(game.teams.map(team => team.name));
+
+            return res.status(200).json({
+                teams: game.teams.map(team => new TeamDto(team))
+            })
         } catch (error) {
-            return res.status(400).json({message: 'Error'}).send(error);
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -52,6 +66,7 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameName, roundCount, questionCount, teams} = req.body;
             if (!gameName
                 || !roundCount
@@ -69,10 +84,13 @@ export class GamesController {
                     gameName, payLoad.email, roundCount, questionCount, 1, 60, teams);
                 return res.status(200).json({});
             } else {
-                res.send('You are not admin');
+                res.status(403).json({message: 'You are not admin'});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -82,15 +100,16 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
-            if (!gameId) {
-                return res.status(400).json({message: 'gameId is invalid'});
-            }
 
             await getCustomRepository(GameRepository).delete(gameId);
             return res.status(200).json({});
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -100,12 +119,20 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
             const {newGameName} = req.body;
+            if (!newGameName) {
+                return res.status(400).json({message: 'newGameName is invalid'});
+            }
+
             await getCustomRepository(GameRepository).updateById(gameId, newGameName);
             return res.status(200).json({});
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -115,12 +142,20 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
             const {admin} = req.body;
+            if (!admin) {
+                return res.status(400).json({message: 'admin is invalid'});
+            }
+
             await getCustomRepository(GameRepository).updateByIdAndAdminEmail(gameId, admin);
             return res.status(200).json({});
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -130,22 +165,20 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
+
             const game = await getCustomRepository(GameRepository).findOne(gameId, {relations: ['teams', 'rounds']});
             if (!game) {
                 return res.status(404).json({message: 'game not found'});
             }
-            const answer = {
-                name: game.name,
-                isStarted: !!games[gameId],
-                id: game.id,
-                teams: game.teams.map(value => value.name),
-                roundCount: game.rounds.length,
-                questionCount: game.rounds.length !== 0 ? game.rounds[0].questionCount : 0
-            };
-            return res.status(200).json(answer);
+
+            return res.status(200).json(new GameDto(game));
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -155,36 +188,42 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
+
             const game = await getCustomRepository(GameRepository).findOne(+gameId, {relations: ['teams', 'rounds']});
             if (!game) {
                 return res.status(404).json({message: 'game not found'});
             }
-            const answer = {
-                name: game.name,
-                teams: game.teams.map(value => value.name),
-                roundCount: game.rounds.length,
-                questionCount: game.rounds.length !== 0 ? game.rounds[0].questionCount : 0
-            };
+
+            const answer = new GameDto(game);
+
             gameAdmins[game.id] = new Set();
             gameUsers[game.id] = new Set();
             games[game.id] = new Game(game.name);
+
             setTimeout(() => {
                 delete games[gameId];
                 delete gameUsers[gameId];
                 delete gameAdmins[gameId];
                 console.log('delete game ', games[gameId]);
-            }, 1000 * 60 * 60 * 24 * 3);
+            }, 1000 * 60 * 60 * 24 * 3); // TODO: избавиться
+
             for (let i = 0; i < game.rounds.length; i++) {
                 games[game.id].addRound(new Round(i + 1, answer.questionCount, 60, 1));
             }
+
             for (const team of game.teams) {
                 games[game.id].addTeam(new Team(team.name, team.id));
             }
+
             await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, 'started');
             return res.status(200).json(answer);
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -194,10 +233,9 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
-            if (!gameId) {
-                return res.status(400).json({message: 'gameId is invalid'});
-            }
+
             const {newGameName, roundCount, questionCount, teams} = req.body;
             if (!newGameName
                 || !roundCount
@@ -212,17 +250,22 @@ export class GamesController {
             if (!game) {
                 return res.status(404).json({message: 'game not found'});
             }
+
             if (typeof payLoad !== 'string') {
                 console.log('ChangeGame: ', gameId, ' teams is: ', teams);
                 await getCustomRepository(GameRepository).updateByParams(
                     gameId, newGameName, roundCount, questionCount, 1, 60, teams
                 );
+
                 return res.status(200).json({});
             } else {
-                return res.status(403).json({message:'You are not admin'});
+                return res.status(403).json({message: 'You are not admin'});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -232,8 +275,12 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
             const {isIntrigue} = req.body;
+            if (!isIntrigue) {
+                return res.status(400).json({message: 'isIntrigue is invalid'});
+            }
 
             if (!games[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
@@ -243,7 +290,10 @@ export class GamesController {
             isIntrigue ? console.log('intrigue started') : console.log('intrigue finished');
             return res.status(200).json({});
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -253,17 +303,23 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
+
             if (!games[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
+
             const totalScore = games[gameId].getTotalScoreForAllTeams();
-            const answer = {
+
+            return res.status(200).json({
                 totalScoreForAllTeams: totalScore,
-            };
-            return res.status(200).json(answer);
+            });
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -273,7 +329,9 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
+
             if (!games[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
@@ -285,18 +343,15 @@ export class GamesController {
                 return res.status(400).json({message: 'user without team'});
             }
 
-            const answer = {
-                gameId,
-                isIntrigue: games[gameId].isIntrigue,
-                roundsCount: games[gameId].rounds.length,
-                questionsCount: games[gameId].rounds[0].questionsCount,
-                totalScoreForAllTeams: roles === 'user' && teamId && games[gameId].isIntrigue ?
-                    games[gameId].getScoreTableForTeam(teamId) : games[gameId].getScoreTable(),
-            };
+            const answer = roles === 'user' && teamId && games[gameId].isIntrigue ?
+                new ScoreTableDto(games[gameId]) : new ScoreTableDto(games[gameId], teamId);
 
             return res.status(200).json(answer);
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -306,6 +361,7 @@ export class GamesController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
             if (!games[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
@@ -318,41 +374,20 @@ export class GamesController {
                 return res.status(400).json({message: 'user without team'});
             }
 
-            const headersList = ['Название команды', 'Сумма'];
-            for (let i = 1; i <= games[gameId].rounds.length; i++) {
-                headersList.push('Тур ' + i);
-                for (let j = 1; j <= games[gameId].rounds[i - 1].questionsCount; j++) {
-                    headersList.push('Вопрос ' + j);
-                }
-            }
-            const teamRows = [];
-            const totalScoreForAllTeams = games[gameId].getTotalScoreForAllTeams();
             const scoreTable = roles === 'user' && teamId && games[gameId].isIntrigue ?
-                    games[gameId].getScoreTableForTeam(teamId) : games[gameId].getScoreTable();
-            let roundsResultList = [];
-            for (const team in scoreTable) {
-                let roundSum = 0;
-                for (let i = 0; i < games[gameId].rounds.length; i++) {
-                    for (let j = 0; j < games[gameId].rounds[i].questionsCount; j++) {
-                        roundSum += scoreTable[team][i][j];
-                    }
-                    roundsResultList.push(roundSum);
-                    roundsResultList.push(scoreTable[team][i].join(';'));
-                    roundSum = 0;
-                }
-                teamRows.push(team + ';' + totalScoreForAllTeams[team] + ';' + roundsResultList.join(';'));
-                roundsResultList = [];
-            }
+                games[gameId].getScoreTableForTeam(teamId) : games[gameId].getScoreTable();
 
-            const headers = headersList.join(';');
-            const value = teamRows.join('\n');
             const answer = {
-                totalTable: headers + '\n' + value,
+                totalTable: Game.getScoreTableWithFormat(games[gameId], scoreTable)
             };
+
             console.log(answer.totalTable, 'gameId = ', gameId);
             return res.status(200).json(answer);
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -365,10 +400,17 @@ export class GamesController {
 
             const {gameId} = req.params;
             const {status} = req.body;
+            if (!status) {
+                res.status(400).json({message: 'status is Invalid'})
+            }
+
             await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, status);
             return res.status(200).json({});
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 }

@@ -7,7 +7,7 @@ export class RoundRepository extends Repository<Round> {
     findByGameName(gameName: string) {
         return this.manager.transaction(manager => {
             return manager.findOne(Game, {'name': gameName})
-                .then(game => manager.findOne(Round, {game}));
+                .then(game => manager.find(Round, {game}));
         });
     }
 

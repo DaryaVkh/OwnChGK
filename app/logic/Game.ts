@@ -133,4 +133,37 @@ export class Game {
         // @ts-ignore
         return table;
     }
+
+    static getScoreTableWithFormat(game: Game, scoreTable: { name: string, scoreTable: number[][] }): string {
+        const headersList = ['Название команды', 'Сумма'];
+        for (let i = 1; i <= game.rounds.length; i++) {
+            headersList.push('Тур ' + i);
+            for (let j = 1; j <= game.rounds[i - 1].questionsCount; j++) {
+                headersList.push('Вопрос ' + j);
+            }
+        }
+
+        const teamRows = [];
+        const totalScoreForAllTeams = game.getTotalScoreForAllTeams();
+
+        let roundsResultList = [];
+        for (const team in scoreTable) {
+            let roundSum = 0;
+            for (let i = 0; i < game.rounds.length; i++) {
+                for (let j = 0; j < game.rounds[i].questionsCount; j++) {
+                    roundSum += scoreTable[team][i][j];
+                }
+                roundsResultList.push(roundSum);
+                roundsResultList.push(scoreTable[team][i].join(';'));
+                roundSum = 0;
+            }
+            teamRows.push(team + ';' + totalScoreForAllTeams[team] + ';' + roundsResultList.join(';'));
+            roundsResultList = [];
+        }
+
+        const headers = headersList.join(';');
+        const value = teamRows.join('\n');
+
+        return [headers, value].join('\n');
+    }
 }

@@ -7,6 +7,10 @@ import {generateAccessToken, secret} from '../jwtToken';
 import jwt from 'jsonwebtoken';
 import {makeTemporaryPassword, SendMailWithTemporaryPassword, validateEmail} from '../email';
 import {transporter} from '../email';
+import {UserDto} from "../dtos/userDto";
+import {TeamDto} from "../dtos/teamDto";
+import {AdminRepository} from "../db/repositories/adminRepository";
+import {AdminDto} from "../dtos/adminDto";
 
 export class UsersController { // TODO: дописать смену имени пользователя, удаление
     public async getAll(req: Request, res: Response) {
@@ -15,22 +19,30 @@ export class UsersController { // TODO: дописать смену имени �
             const users = withoutTeam ?
                 await getCustomRepository(UserRepository).findUsersWithoutTeam()
                 : await getCustomRepository(UserRepository).find();
+
             return res.status(200).json({
-                users: users.map(value => value.email)
+                users: users.map(user => new UserDto(user))
             });
         } catch (error) {
-            console.log(error);
-            return res.status(400).json({message: error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
     public async login(req: Request, res: Response) {
         try {
             const {email, password} = req.body;
+            if (!email || !password) {
+                return res.status(400).json({message: 'params is invalid'});
+            }
+
             const user = await getCustomRepository(UserRepository).findByEmail(email);
             if (!user) {
                 return res.status(404).json({message: 'email is invalid'});
             }
+
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
                 const token = generateAccessToken(user.id, user.email, 'user', null, null, user.name);
@@ -38,18 +50,15 @@ export class UsersController { // TODO: дописать смену имени �
                     maxAge: 86400 * 1000,
                     secure: true
                 });
-                return res.status(200).json({
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: 'user',
-                    team: user.team?.name ?? ''
-                });
+                return res.status(200).json(new UserDto(user));
             } else {
                 return res.status(400).json({message: 'Not your password'});
             }
         } catch (error) {
-            return res.status(400).json({message: 'Cant find login'});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -64,6 +73,7 @@ export class UsersController { // TODO: дописать смену имени �
             if (!validateEmail(email)) {
                 return res.status(400).json({message: 'email is invalid'});
             }
+
             const hashedPassword = await hash(password, 10);
             const insertResult = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
             const userId = insertResult.identifiers[0].id;
@@ -72,9 +82,13 @@ export class UsersController { // TODO: дописать смену имени �
                 maxAge: 24 * 60 * 60 * 1000,
                 secure: true
             });
+
             return res.status(200).json({});
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -85,6 +99,7 @@ export class UsersController { // TODO: дописать смену имени �
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {gameId} = req.params;
             const oldToken = req.cookies['authorization'];
             const {
@@ -115,7 +130,10 @@ export class UsersController { // TODO: дописать смену имени �
                 return res.status(400).json({});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -125,9 +143,10 @@ export class UsersController { // TODO: дописать смену имени �
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {newName} = req.body;
             if (!newName) {
-                return res.status(400).json({});
+                return res.status(400).json({message: 'newName is invalid'});
             }
 
             const oldToken = req.cookies['authorization'];
@@ -148,7 +167,10 @@ export class UsersController { // TODO: дописать смену имени �
                 }
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -158,10 +180,12 @@ export class UsersController { // TODO: дописать смену имени �
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {email, password, oldPassword} = req.body;
             if (!validateEmail(email)) {
                 return res.status(400).json({message: 'email is invalid'});
             }
+
             const hashedPassword = await hash(password, 10);
             let user = await getCustomRepository(UserRepository).findByEmail(email);
             if (user) {
@@ -170,13 +194,16 @@ export class UsersController { // TODO: дописать смену имени �
                     await user.save();
                     return res.status(200).json({});
                 } else {
-                    return res.status(403).json({message: 'oldPassword invalid'})
+                    return res.status(403).json({message: 'oldPassword is invalid'})
                 }
             } else {
-                return res.status(404).json({message: 'email invalid'});
+                return res.status(404).json({message: 'user not found'});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -186,10 +213,12 @@ export class UsersController { // TODO: дописать смену имени �
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {email, password, code} = req.body;
             if (!validateEmail(email)) {
                 return res.status(400).json({message: 'email is invalid'})
             }
+
             const hashedPassword = await hash(password, 10);
             let user = await getCustomRepository(UserRepository).findByEmail(email);
             if (user) {
@@ -199,13 +228,16 @@ export class UsersController { // TODO: дописать смену имени �
                     await user.save();
                     return res.status(200).json({});
                 } else {
-                    return res.status(403).json({'message': 'code invalid'});
+                    return res.status(403).json({message: 'code invalid'});
                 }
             } else {
-                return res.status(400).json({'message': 'email invalid'});
+                return res.status(404).json({message: 'user not found'});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -215,6 +247,7 @@ export class UsersController { // TODO: дописать смену имени �
             if (!validateEmail(email)) {
                 return res.status(400).json({'message': 'email is invalid'});
             }
+
             let user = await getCustomRepository(UserRepository).findByEmail(email);
             if (user) {
                 const code = makeTemporaryPassword(8);
@@ -226,7 +259,10 @@ export class UsersController { // TODO: дописать смену имени �
                 return res.status(404).json({message: 'user not found'});
             }
         } catch (error: any) {
-            return res.status(500).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -244,7 +280,10 @@ export class UsersController { // TODO: дописать смену имени �
                 return res.status(403).json({});
             }
         } catch (error: any) {
-            return res.status(500).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -254,22 +293,21 @@ export class UsersController { // TODO: дописать смену имени �
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const oldToken = req.cookies['authorization'];
             const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
             const user = await getCustomRepository(UserRepository).findOne(userId, {relations: ['team']});
 
             if (user.team !== null) {
-                return res.status(200).json({
-                    name: user.team.name,
-                    id: user.team.id,
-                    captainId: user.id,
-                    captainEmail: user.email,
-                });
+                return res.status(200).json(new TeamDto(user.team)); // TODO: может сломаться на фронте, если вызывается
             } else {
                 return res.status(200).json({});
             }
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -279,42 +317,35 @@ export class UsersController { // TODO: дописать смену имени �
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const oldToken = req.cookies['authorization'];
             const {
                 id: userId,
-                email: email,
                 roles: userRoles,
-                name: name
             } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
 
-            if (userId !== undefined && email !== undefined && userRoles !== undefined) {
+            if (userId !== undefined) {
                 if (userRoles === 'user') {
-                    const user = await getCustomRepository(UserRepository).findOne(+userId, {relations: ['team']})
-                    return res.status(200).json({
-                        id: userId,
-                        email,
-                        name,
-                        role: userRoles,
-                        team: user?.team?.name ?? ''
-                    })
+                    const user = await getCustomRepository(UserRepository).findOne(+userId, {relations: ['team']});
+                    return res.status(200).json(new UserDto(user));
                 } else if (userRoles === 'admin' || userRoles === 'superadmin') {
-                    return res.status(200).json({
-                        id: userId,
-                        email,
-                        name,
-                        role: userRoles,
-                    })
+                    const admin = await getCustomRepository(AdminRepository).findOne(+userId);
+                    return res.status(200).json(new AdminDto(admin))
                 } else {
                     return res.status(400).json({});
                 }
             } else {
-                return res.status(404).json({});
+                return res.status(404).json({message: 'user/admin not found'});
             }
         } catch (error: any) {
-            if (error.message === 'jwt must be provided') {
+            if (error.message === 'jwt must be provided') { // TODO: убрать)
                 return res.status(401).json({});
             }
-            return res.status(400).json({'message': error.message});
+
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 
@@ -324,13 +355,18 @@ export class UsersController { // TODO: дописать смену имени �
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             res.cookie('authorization', '', {
                 maxAge: -1,
                 secure: true
             });
+
             return res.status(200).json({});
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 }
