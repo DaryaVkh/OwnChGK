@@ -72,7 +72,7 @@ export class AdminsController {
                 const pass = makeTemporaryPassword(20);
                 const hashedPassword = await hash(pass, 10);
                 await getCustomRepository(AdminRepository).insertByEmailAndPassword(email, hashedPassword, name);
-                SendMailWithTemporaryPasswordToAdmin(transporter, email, pass)
+                await SendMailWithTemporaryPasswordToAdmin(transporter, email, pass)
             }
             return res.status(200).json({});
         } catch (error: any) {
@@ -90,7 +90,7 @@ export class AdminsController {
             let admin = await getCustomRepository(AdminRepository).findByEmail(email);
             if (admin) {
                 const code = makeTemporaryPassword(8);
-                SendMailWithTemporaryPassword(transporter, email, code);
+                await SendMailWithTemporaryPassword(transporter, email, code);
                 admin.temporary_code = code;
                 await admin.save();
                 return res.status(200).json({});
