@@ -6,7 +6,6 @@ import {CustomInput} from '../../components/custom-input/custom-input';
 import {Link, Redirect} from 'react-router-dom';
 import {RestoringPasswordProps} from '../../entities/restoring-password/restoring-password.interfaces';
 import {Alert, Snackbar} from '@mui/material';
-import {FormButton} from '../../components/form-button/form-button';
 import {changePasswordByCode, checkTemporaryPassword, sendTemporaryPassword} from '../../server-api/server-api';
 import PageBackdrop from '../../components/backdrop/backdrop';
 
@@ -23,6 +22,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
     const [isSuccess, setIsSuccess] = useState<boolean>(false);
     const [isError, setIsError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
@@ -111,40 +111,27 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
             case 'first':
                 return (
                     <form className={classes.stepWrapper} onSubmit={handleSendCode}>
-                        <p className={classes.instructionsParagraph} style={{marginTop: '17vh', marginBottom: '2vh'}}>
-                            Для восстановления пароля введите E-mail, указанный при регистрации
+                        <p className={`${classes.instructionsParagraph} ${classes.firstStepUpper}`}>
+                            Для восстановления пароля введите e-mail, указанный при регистрации
                         </p>
-                        <p className={classes.instructionsParagraph} style={{marginBottom: '8vh'}}>
+                        <p className={`${classes.instructionsParagraph} ${classes.firstStepLower}`}>
                             На него будет отправлен код подтверждения
                         </p>
 
                         <div className={classes.form}>
-                            <CustomInput type="email" placeholder="E-mail" name="email" id="email" value={email}
-                                         style={{width: '65%'}}
-                                         onChange={handleEmailChange} isInvalid={isEmailInvalid}/>
+                            <CustomInput type="email" placeholder="Почта" name="email" id="email" value={email}
+                                         style={{width: mediaMatch.matches ? '100%' : '65%'}}
+                                         onChange={handleEmailChange} isInvalid={isEmailInvalid}
+                                         errorHelperText='Эта почта ещё не зарегистрирована'
+                            />
                             <button className={classes.sendButton} type="submit">Отправить
                             </button>
                         </div>
 
                         <div className={classes.linkToSignInWrapper}
-                             style={{justifyContent: isEmailInvalid ? 'space-between' : 'flex-end'}}>
-                            {isEmailInvalid
-                                ?
-                                <div className={classes.alertWrapper}>
-                                    <Alert severity="error" sx={{
-                                        color: 'white',
-                                        fontSize: '1vw',
-                                        backgroundColor: '#F44336',
-                                        '& .MuiAlert-icon': {
-                                            color: 'white'
-                                        },
-                                        '& .MuiAlert-message': {
-                                            display: 'flex',
-                                            justifyContent: 'center'
-                                        }
-                                    }}>Этот E-mail не зарегистрирован</Alert>
-                                </div>
-                                : null}
+                             style={{justifyContent: isEmailInvalid && !mediaMatch.matches
+                                     ? 'space-between'
+                                     : (!isEmailInvalid && !mediaMatch.matches ? 'flex-end' : 'center')}}>
                             <Link className={classes.linkToSignIn} to={props.isAdmin ? '/admin' : '/auth'}>Вспомнил
                                 пароль</Link>
                         </div>
@@ -153,17 +140,17 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
             case 'second':
                 return (
                     <div className={classes.stepWrapper}>
-                        <p className={classes.instructionsParagraph} style={{marginTop: '13vh', marginBottom: '2vh'}}>
+                        <p className={`${classes.instructionsParagraph} ${classes.secondStepUpper}`}>
                             Код отправлен на <b>{email}</b>
                         </p>
-                        <p className={classes.instructionsParagraph} style={{marginBottom: '8vh'}}>
-                            Если письмо не приходит, загляните в папку "Спам" и проверьте правильность введенного E-mail
+                        <p className={`${classes.instructionsParagraph} ${classes.secondStepLower}`}>
+                            Если письмо не приходит, загляните в папку «Спам» и проверьте правильность введенного e-mail
                         </p>
 
                         <div className={classes.secondStepForm}>
                             <CustomInput type="text" placeholder="Введите код" name="code" id="code" value={code}
-                                         style={{width: '35%', marginRight: '1vw'}}
-                                         onChange={handleCodeChange} isInvalid={isCodeInvalid}/>
+                                         style={{width: mediaMatch.matches ? '100%' : '35%', marginRight: '1vw'}}
+                                         onChange={handleCodeChange} isInvalid={isCodeInvalid} errorHelperText='Код неверный'/>
                             <button className={classes.sendButton} type="submit" onClick={handleCheckCode}>Отправить
                             </button>
                         </div>
@@ -178,38 +165,21 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
             case 'third':
                 return (
                     <div className={classes.stepWrapper}>
-                        <p className={classes.instructionsParagraph}
-                           style={{margin: '17vh auto 10vh', textAlign: 'center'}}>
+                        <p className={`${classes.instructionsParagraph} ${classes.thirdStep}`}>
                             Придумайте новый пароль
                         </p>
 
                         <form className={classes.newPasswordsForm} onSubmit={handleSubmitNewPassword}>
-                            {
-                                isRepeatedPasswordInvalid || isError
-                                    ?
-                                    <Alert severity="error" sx={
-                                        {
-                                            color: 'white',
-                                            backgroundColor: '#F44336',
-                                            marginBottom: '2vh',
-                                            marginTop: '-5vh',
-                                            '& .MuiAlert-icon': {
-                                                color: 'white'
-                                            }
-                                        }
-                                    }>
-                                        {isRepeatedPasswordInvalid ? 'Пароли не совпадают' : 'Что-то пошло не так, попробуйте снова'}
-                                    </Alert>
-                                    : null
-                            }
-                            <CustomInput type="password" id="password" name="password" placeholder="Новый пароль"
+                            <CustomInput type="password" id="password" name="password" placeholder="Пароль"
                                          value={newPassword} onChange={handleChangeNewPassword}
-                                         isInvalid={isRepeatedPasswordInvalid}/>
+                                         isInvalid={isRepeatedPasswordInvalid || isError}/>
                             <CustomInput type="password" id="repeatPassword" name="repeatPassword"
-                                         placeholder="Повторите новый пароль"
+                                         placeholder="Повторите пароль"
                                          value={repeatedPassword} onChange={handleChangeRepeatedPassword}
-                                         isInvalid={isRepeatedPasswordInvalid}/>
-                            <FormButton text="Сохранить" style={{padding: '0 2vw'}}/>
+                                         isInvalid={isRepeatedPasswordInvalid || isError}
+                                         errorHelperText={isRepeatedPasswordInvalid ? 'Пароли не совпадают' : 'Что-то пошло не так, попробуйте снова'}
+                            />
+                            <button className={`${classes.sendButton} ${classes.saveButton}`}>Сохранить</button>
                         </form>
                     </div>
                 );

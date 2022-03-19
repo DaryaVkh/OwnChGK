@@ -68,7 +68,30 @@
   }
 }
 
-//.scrollbarView {
-//  overflow-x: hidden !important;
-//  padding: 1vh 1.5vw 1vh 0;
-//}
+@media only screen and (max-width: 768px) {
+  .gameName {
+    width: 100%;
+  }
+
+  .contentWrapper {
+    width: 90%;
+
+    .answersWrapper {
+      width: 100%;
+      height: 60%;
+      padding: 3vh 3vw;
+    }
+
+    .teamWrapper {
+      width: 100%;
+      justify-content: unset;
+      font-size: 2vmax;
+      padding: 7vh 0 3vh;
+
+      .team {
+        margin-left: 10vw;
+        margin-right: 7vw;
+      }
+    }
+  }
+}

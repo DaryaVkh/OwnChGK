@@ -35,16 +35,32 @@
   font-weight: 500;
   display: flex;
   justify-content: space-between;
-  text-align: center;
 
   &:hover {
     cursor: pointer;
+  }
+
+  .userTeamNameWrapper,
+  .teamNameWrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .userTeamNameWrapper {
+    width: 85%;
   }
 
   .teamName,
   .gameName {
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  &:last-of-type {
+    margin-bottom: 0;
   }
 }
 
@@ -67,4 +83,35 @@
   text-align: center;
   font-weight: 300;
   font-size: 2.95vmin;
+}
+
+.selectedIconWrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media only screen and (max-width: 768px) {
+  .contentWrapper {
+    width: 80%;
+  }
+
+  .box {
+    height: 80%;
+  }
+
+  .teamParagraph {
+    font-size: 3.7vmin;
+    margin-top: 0.5vh;
+  }
+
+  .gameOrTeam {
+    border-radius: 7px;
+    height: 5vh;
+    font-size: 2.2vmax;
+    font-weight: 400;
+    padding: 1vh 3vw 1vh 5vw;
+    margin-bottom: 1.5vh;
+  }
 }

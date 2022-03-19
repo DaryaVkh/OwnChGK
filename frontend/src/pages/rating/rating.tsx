@@ -9,6 +9,7 @@ import {TeamTableRow, TourHeaderCell} from '../../components/table/table';
 import {Link, useParams} from 'react-router-dom';
 import {changeIntrigueGameStatus, getResultTable, getResultTableFormat} from '../../server-api/server-api';
 import Loader from '../../components/loader/loader';
+import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
 
 const Rating: FC<RatingProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -16,6 +17,7 @@ const Rating: FC<RatingProps> = props => {
     const [teams, setTeams] = useState<TeamResult[]>();
     const [expandedTours, setExpandedTours] = useState<boolean[]>([]);
     const [isIntrigue, setIsIntrigue] = useState(false);
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     const headerTableCellStyles = {
         color: 'white',
@@ -159,11 +161,20 @@ const Rating: FC<RatingProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={props.isAdmin}>
-                <Link to={props.isAdmin ? `/admin/game/${gameId}` : `/game/${gameId}`} className={classes.menuLink}>В игру</Link>
+                {
+                    !mediaMatch.matches
+                        ? <Link to={props.isAdmin ? `/admin/game/${gameId}` : `/game/${gameId}`} className={classes.menuLink}>В игру</Link>
+                        : null
+                }
 
                 <div className={classes.pageTitle}>Рейтинг</div>
             </Header>
 
+            {
+                mediaMatch.matches
+                    ? <MobileNavbar isGame={true} isAdmin={false} page='' toGame={true} gameId={gameId} />
+                    : null
+            }
             <div className={classes.contentWrapper}>
                 <div className={`${classes.buttonsWrapper} ${!props.isAdmin ? classes.userTopPanelWrapper : ''}`}>
                     {
@@ -217,11 +228,23 @@ const Rating: FC<RatingProps> = props => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell sx={headerTableCellStyles} align="center" variant="head"
-                                               style={{minWidth: '8vw', maxWidth: '8vw'}}>Место</TableCell>
+                                               style={{
+                                                   fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                   minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                                   maxWidth: mediaMatch.matches ? '20vw' : '8vw'
+                                               }}>Место</TableCell>
                                     <TableCell sx={headerTableCellStyles} align="left" variant="head"
-                                               style={{minWidth: '16vw', maxWidth: '16vw'}}>Команда</TableCell>
+                                               style={{
+                                                   fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                   minWidth: mediaMatch.matches ? '40vw' : '16vw',
+                                                   maxWidth: mediaMatch.matches ? '40vw' : '16vw'
+                                               }}>Команда</TableCell>
                                     <TableCell sx={headerTableCellStyles} align="center" variant="head"
-                                               style={{minWidth: '8vw', maxWidth: '8vw'}}>Сумма</TableCell>
+                                               style={{
+                                                   fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                   minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                                   maxWidth: mediaMatch.matches ? '20vw' : '8vw'
+                                               }}>Сумма</TableCell>
                                     {renderTourHeaders()}
                                 </TableRow>
                             </TableHead>

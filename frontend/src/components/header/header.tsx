@@ -10,6 +10,8 @@ import {logOut} from '../../redux/actions/app-actions/app-actions';
 import {logout} from '../../server-api/server-api';
 
 const Header: FC<HeaderProps> = props => {
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
+
     const handleLogout = async () => {
         logout().then(() => {});
         props.onLogOut();
@@ -28,17 +30,25 @@ const Header: FC<HeaderProps> = props => {
             {
                 props.isAuthorized
                     ?
-                    <Fragment>
-                        <Link className={classes.Profile} to={props.isAdmin ? '/admin/profile' : '/profile'}>
-                            <img className={classes.Profile} src={require('../../images/Profile.svg').default}
-                                 alt="Profile"/>
-                        </Link>
-                        <Link className={classes.LogOut}
-                              to={props.isLoggedIn ? '#' : (props.isAdmin ? '/admin' : '/auth')} onClick={handleLogout}>
-                            <img className={classes.LogOut} src={require('../../images/LogOut.svg').default}
-                                 alt="LogOut"/>
-                        </Link>
-                    </Fragment>
+                    (
+                        mediaMatch.matches
+                            ?
+                            <Link className={classes.MenuLink} to={{pathname: '/menu', state: { prevPath: window.location.pathname }}}>
+                                <img className={classes.Menu} src={require('../../images/Menu.svg').default} alt='Menu'/>
+                            </Link>
+                            :
+                            <Fragment>
+                                <Link className={classes.Profile} to={props.isAdmin ? '/admin/profile' : '/profile'}>
+                                    <img className={classes.Profile} src={require('../../images/Profile.svg').default}
+                                         alt="Profile"/>
+                                </Link>
+                                <Link className={classes.LogOut}
+                                      to={props.isLoggedIn ? '#' : (props.isAdmin ? '/admin' : '/auth')} onClick={handleLogout}>
+                                    <img className={classes.LogOut} src={require('../../images/LogOut.svg').default}
+                                         alt="LogOut"/>
+                                </Link>
+                            </Fragment>
+                    )
                     : null
             }
         </header>

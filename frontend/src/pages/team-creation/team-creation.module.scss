@@ -28,3 +28,22 @@
 .link {
   text-decoration: none;
 }
+
+.formButton {
+  padding: 0 2vw;
+  font-size: 1.5vw;
+  height: 7vh;
+  margin-bottom: 2.5vh;
+  filter: drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2));
+}
+
+@media only screen and (max-width: 768px) {
+  .teamCreationForm {
+    width: 80%;
+  }
+
+  .pageTitle {
+    margin: 9vh 0;
+    font-size: 7vmin;
+  }
+}

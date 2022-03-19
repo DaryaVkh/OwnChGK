@@ -24,6 +24,7 @@ import {Dispatch} from 'redux';
 import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
 import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
 import {connect} from 'react-redux';
+import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
 
 const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [page, setPage] = useState<string>('teams');
@@ -32,6 +33,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [userTeam, setUserTeam] = useState<string>('');
     const [gameId, setGameId] = useState<string>('');
     let location = useLocation<{ page: string }>();
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     useEffect(() => {
         if (location.state !== undefined) {
@@ -98,7 +100,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
 
     const renderGames = () => {
         if (!gamesFromDB) {
-            return Array.from(Array(5).keys()).map(i => <Skeleton key={`game_skeleton_${i}`} variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '2.5vh'}} />);
+            return Array.from(Array(5).keys()).map(i => <Skeleton key={`game_skeleton_${i}`} variant='rectangular' width='100%' height={mediaMatch.matches ? '5vh' : '7vh'} sx={{marginBottom: '2.5vh'}} />);
         }
         return gamesFromDB.map((game, index) =>
             <div key={index} className={classes.gameOrTeam} onClick={() => handleClick(game.id)}>
@@ -108,19 +110,25 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
 
     const renderTeams = () => {
         if (!teamsFromDB) {
-            return Array.from(Array(5).keys()).map(i => <Skeleton key={`team_skeleton_${i}`} variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '2.5vh'}} />);
+            return Array.from(Array(5).keys()).map(i => <Skeleton key={`team_skeleton_${i}`} variant='rectangular' width='100%' height={mediaMatch.matches ? '5vh' : '7vh'} sx={{marginBottom: '2.5vh'}} />);
         }
         return userTeam !== ''
             ?
             <div key={userTeam} className={classes.gameOrTeam} style={{cursor: 'default'}}>
-                <p className={classes.teamName}>{userTeam}</p>
+                <div className={classes.userTeamNameWrapper}>
+                    <p className={classes.teamName}>{userTeam}</p>
+                </div>
 
-                <CheckCircleOutlinedIcon color="success" sx={{fontSize: '1.5vw', cursor: 'default'}}/>
+                <div className={classes.selectedIconWrapper}>
+                    <CheckCircleOutlinedIcon color="success" sx={{fontSize: mediaMatch.matches ? '3vmax' : '1.5vw', cursor: 'default'}}/>
+                </div>
             </div>
             :
             teamsFromDB.map((team, index) =>
                 <div key={index} data-team-id={team.id} data-team-name={team.name} className={classes.gameOrTeam} onClick={handleChooseTeam}>
-                    <p className={classes.teamName}>{team.name}</p>
+                    <div className={classes.teamNameWrapper}>
+                        <p className={classes.teamName}>{team.name}</p>
+                    </div>
                 </div>);
     };
 
@@ -129,7 +137,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
             case 'games':
                 return (
                     <div className={classes.contentWrapper}>
-                        <div className={classes.contentBox}>
+                        <div className={classes.contentBox} style={{padding: mediaMatch.matches ? '3vh 9vw' : '5vh 0.5vw 5vh 2vw'}}>
                             <Scrollbar>
                                 {renderGames()}
                             </Scrollbar>
@@ -142,7 +150,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                         <div className={classes.box}>
                             <p className={classes.teamParagraph}>Выбери команду из списка или создай новую</p>
 
-                            <div className={classes.contentBox} style={{height: '92%', padding: '5vh 0.5vw 3vh 2vw'}}>
+                            <div className={classes.contentBox} style={{height: '92%', padding: mediaMatch.matches ? '3vh 9vw 0.5vh' : '5vh 0.5vw 3vh 2vw'}}>
                                 <div className={classes.teamsWrapper}>
                                     <Scrollbar>
                                         {renderTeams()}
@@ -152,10 +160,10 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                                 <div className={classes.addButtonWrapper}>
                                     <Link to="/team-creation"
                                           style={{pointerEvents: userTeam !== '' ? 'none' : 'auto'}}>
-                                        <IconButton disabled={userTeam !== ''} sx={{padding: '13px'}}>
+                                        <IconButton disabled={userTeam !== ''} sx={{padding: mediaMatch.matches ? '0' : '13px'}}>
                                             <AddCircleOutlineOutlinedIcon sx={{
                                                 color: userTeam === '' ? 'white' : 'gray',
-                                                fontSize: '9vmin'
+                                                fontSize: mediaMatch.matches ? '17vmin' : '9vmin'
                                             }}/>
                                         </IconButton>
                                     </Link>
@@ -174,9 +182,19 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
-                <NavBar isAdmin={false} page={location.state !== undefined ? location.state.page : page} onLinkChange={setPage}/>
+                {
+                    !mediaMatch.matches
+                        ? <NavBar isAdmin={false} page={location.state !== undefined ? location.state.page : page}
+                         onLinkChange={setPage}/>
+                        : null
+                }
             </Header>
 
+            {
+                mediaMatch.matches
+                    ? <MobileNavbar isAdmin={false} page={page} onLinkChange={setPage} isGame={false} />
+                    : null
+            }
             {renderPage(page)}
         </PageWrapper>
     );

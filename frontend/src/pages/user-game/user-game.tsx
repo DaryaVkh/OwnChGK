@@ -12,6 +12,7 @@ import NavBar from '../../components/nav-bar/nav-bar';
 import Loader from '../../components/loader/loader';
 import {AppState} from '../../entities/app/app.interfaces';
 import {connect} from 'react-redux';
+import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
 
 let progressBar: any;
 let interval: any;
@@ -36,6 +37,7 @@ const UserGame: FC<UserGameProps> = props => {
     const [breakTime, setBreakTime] = useState<number>(0);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -190,25 +192,28 @@ const UserGame: FC<UserGameProps> = props => {
     }, [isGameStarted]);
 
     const getGameName = () => {
-        if ((gameName as string).length > 34) {
-            return (gameName as string).substr(0, 34) + '\u2026';
+        const maxLength = mediaMatch.matches ? 22 : 34;
+        if ((gameName as string).length > maxLength) {
+            return (gameName as string).substr(0, maxLength) + '\u2026';
         } else {
             return gameName;
         }
     }
 
     const getTeamName = () => {
-        let teamName = props.userTeam;
-        if (teamName.length > 45) {
-            return teamName.substr(0, 45) + '\u2026';
+        const teamName = props.userTeam;
+        const maxLength = mediaMatch.matches ? 25 : 45;
+        if (teamName.length > maxLength) {
+            return teamName.substr(0, maxLength) + '\u2026';
         } else {
             return teamName;
         }
     }
 
     const getGameNameForWaitingScreen = () => {
-        if ((gameName as string).length > 52) {
-            return `«${(gameName as string).substr(0, 52)}\u2026»`;
+        const maxLength = mediaMatch.matches ? 30 : 52;
+        if ((gameName as string).length > maxLength) {
+            return `«${(gameName as string).substr(0, maxLength)}\u2026»`;
         } else {
             return `«${gameName}»`;
         }
@@ -317,9 +322,18 @@ const UserGame: FC<UserGameProps> = props => {
             return (
                 <PageWrapper>
                     <Header isAuthorized={true} isAdmin={false}>
-                        <NavBar isAdmin={false} page=""/>
+                        {
+                            !mediaMatch.matches
+                                ? <NavBar isAdmin={false} page=''/>
+                                : null
+                        }
                     </Header>
 
+                    {
+                        mediaMatch.matches
+                            ? <MobileNavbar isAdmin={false} page='' isGame={false} />
+                            : null
+                    }
                     <div className={classes.gameStartContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
@@ -339,12 +353,25 @@ const UserGame: FC<UserGameProps> = props => {
             return (
                 <PageWrapper>
                     <Header isAuthorized={true} isAdmin={false}>
-                        <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                        <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+
+                        {
+                            !mediaMatch.matches
+                                ?
+                                <>
+                                    <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                                    <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                                </>
+                                : null
+                        }
 
                         <div className={classes.breakHeader}>Перерыв</div>
                     </Header>
 
+                    {
+                        mediaMatch.matches
+                            ? <MobileNavbar isGame={true} isAdmin={false} page={''} toAnswers={true} gameId={gameId}/>
+                            : null
+                    }
                     <div className={classes.breakContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
@@ -362,14 +389,26 @@ const UserGame: FC<UserGameProps> = props => {
         return (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={false}>
-                    <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                    <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                    {
+                        !mediaMatch.matches
+                            ?
+                            <>
+                                <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                                <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                            </>
+                            : null
+                    }
 
                     <div className={classes.gameName}>
                         <p>{getGameName()}</p>
                     </div>
                 </Header>
 
+                {
+                    mediaMatch.matches
+                        ? <MobileNavbar isGame={true} isAdmin={false} page={''} toAnswers={true} gameId={gameId}/>
+                        : null
+                }
                 <div className={classes.contentWrapper}>
                     <div className={classes.teamWrapper}>
                         <div className={classes.team}>Команда</div>
@@ -377,30 +416,34 @@ const UserGame: FC<UserGameProps> = props => {
                     </div>
 
                     <div className={classes.answerWrapper}>
-                        <div
-                            className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >=
+                        <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >=
                         0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
                         </div>
 
-                        <div className={classes.progressBar} id="progress-bar"/>
+                        <div style={{width: mediaMatch.matches ? '98%' : '99%', height: '2%', marginLeft: '4px'}}>
+                            <div className={classes.progressBar} id="progress-bar"/>
+                        </div>
                         <div className={classes.answerBox}>
                             <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
 
                             <div className={classes.answerInputWrapper}>
                                 <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
-                                             style={{width: '79%'}} value={answer} onChange={handleAnswer}/>
+                                             style={{width: mediaMatch.matches ? '100%' : '79%',
+                                                 height: mediaMatch.matches ? '4vh' : '7vh'}} value={answer} onChange={handleAnswer}/>
                                 <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
                                 </button>
                             </div>
+
+                            <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}
+                                      sx={{position: mediaMatch.matches ? 'absolute' : 'fixed',
+                                          bottom: mediaMatch.matches ? '-8vh' : 'unset'}}>
+                                <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
+                                       sx={{width: '100%'}}>
+                                    {flags.isAnswerAccepted ? 'Ответ успешно отправлен' : 'Ответ не отправлен'}
+                                </Alert>
+                            </Snackbar>
                         </div>
                     </div>
-
-                    <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}>
-                        <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
-                               sx={{width: '100%'}}>
-                            {flags.isAnswerAccepted ? 'Ответ успешно отправлен' : 'Ответ не отправлен'}
-                        </Alert>
-                    </Snackbar>
                 </div>
                 <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
                     <Alert severity='error' sx={{width: '100%'}}>

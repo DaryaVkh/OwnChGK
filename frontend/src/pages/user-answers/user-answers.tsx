@@ -11,6 +11,7 @@ import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
 import {AppState} from '../../entities/app/app.interfaces';
 import {connect} from 'react-redux';
+import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
 
 let conn: WebSocket;
 let ping: any;
@@ -19,6 +20,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>();
     const [answers, setAnswers] = useState<Answer[]>([]);
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -63,8 +65,9 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     }, []);
 
     const getGameName = () => {
-        if ((gameName as string).length > 34) {
-            return (gameName as string).substr(0, 34) + '\u2026';
+        const maxLength = mediaMatch.matches ? 22 : 34;
+        if ((gameName as string).length > maxLength) {
+            return (gameName as string).substr(0, maxLength) + '\u2026';
         } else {
             return gameName;
         }
@@ -74,8 +77,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         return answers.sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
             .map((answer, index) => {
             return (
-                <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                            order={answer.number}/>
+                <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status} order={answer.number}/>
             );
         });
     };
@@ -87,15 +89,26 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     return (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={false}>
-                <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В
-                    игру</Link>
+                {
+                    !mediaMatch.matches
+                        ?
+                        <>
+                            <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                            <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В игру</Link>
+                        </>
+                        : null
+                }
 
                 <div className={classes.gameName}>
                     <p>{getGameName()}</p>
                 </div>
             </Header>
 
+            {
+                mediaMatch.matches
+                    ? <MobileNavbar isGame={true} isAdmin={false} page='' toGame={true} gameId={gameId}/>
+                    : null
+            }
             <div className={classes.contentWrapper}>
                 <div className={classes.teamWrapper}>
                     <div className={classes.team}>Команда</div>
