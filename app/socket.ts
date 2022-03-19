@@ -1,5 +1,4 @@
-import {Game} from './logic/Game';
-import {CreateTransporter} from './email';
+import {Game, GameType} from './logic/Game';
 import {Status} from './logic/AnswerAndAppeal';
 import jwt from 'jsonwebtoken';
 import {secret} from './jwtToken';
@@ -15,7 +14,7 @@ function GiveAddedTime(gameId: number) {
     if (games[gameId].timeIsOnPause) {
         games[gameId].leftTime += extra10Seconds;
         games[gameId].maxTime += extra10Seconds;
-        console.log('added time is ',  games[gameId].leftTime);
+        console.log('added time is ', games[gameId].leftTime);
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'addTime',
@@ -138,14 +137,14 @@ function PauseTimer(gameId: number) {
     }
 }
 
-function GetAnswer(answer: string, teamId: number, gameId: number) {
+function GiveAnswer(answer: string, teamId: number, gameId: number) {
     console.log('received: %s', answer, teamId);
     const roundNumber = games[gameId].currentQuestion[0] - 1;
     const questionNumber = games[gameId].currentQuestion[1] - 1;
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);
 }
 
-function GetAppeal(appeal: string, teamId: number, gameId: number, number: number, answer: string) {
+function GiveAppeal(appeal: string, teamId: number, gameId: number, number: number, answer: string) {
     console.log('received: %s', appeal, teamId);
     const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount);
     let questionNumber = number - (roundNumber - 1) * games[gameId].rounds[0].questionsCount;
@@ -170,9 +169,9 @@ function RejectAppeal(gameId: number, roundNumber: number, questionNumber: numbe
     }
 }
 
-function RejectAnswer(gameId: number, roundNumber: number, questionNumber: number, answers: string[]) {
+function RejectAnswer(gameId: number, roundNumber: number, questionNumber: number, answers: string[], isMatrixType = false) {
     for (const answer of answers) {
-        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].rejectAnswers(answer);
+        games[gameId].rounds[roundNumber - 1].questions[questionNumber - 1].rejectAnswers(answer, isMatrixType);
     }
 }
 
@@ -222,6 +221,11 @@ function GetAllAppeals(gameId: number, ws) {
     }));
 }
 
+function GiveAnswerMatrix(answer:string, roundNumber: number, questionNumber: number, teamId: any, gameId: any) {
+    console.log('received: %s', answer, roundNumber, questionNumber, teamId);
+    games[gameId].rounds[roundNumber-1].questions[questionNumber-1].giveAnswer(games[gameId].teams[teamId], answer);
+}
+
 export function HandlerWebsocket(ws: WebSocket, message: string) {
     message += '';
     const jsonMessage = JSON.parse(message);
@@ -239,7 +243,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
     } else {
         const {roles: userRoles, teamId: teamId, gameId: gameId} =
             jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload;
-
+        const gameType = games[gameId].type;
         if (!games[gameId] || (userRoles === 'user' && !games[gameId].teams[teamId])) {
             ws.send(JSON.stringify({
                 'action': 'gameNotStarted'
@@ -304,7 +308,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
             } else if (jsonMessage.action == 'AcceptAppeals') {
                 AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
             } else if (jsonMessage.action == 'RejectAnswer') {
-                RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
+                RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers, gameType === GameType.Matrix);
             } else if (jsonMessage.action == 'RejectAppeals') {
                 RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
             } else if (jsonMessage.action == 'getAnswers') {
@@ -356,14 +360,20 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 return;
             }
             gameUsers[gameId].add(ws);
-            if (games[gameId].isTimerStart && jsonMessage.action == 'Answer') {
-                GetAnswer(jsonMessage.answer, teamId, gameId);
+            if (gameType === GameType.ChGK && games[gameId].isTimerStart && jsonMessage.action == 'Answer' ) {
+                GiveAnswer(jsonMessage.answer, teamId, gameId);
+                ws.send(JSON.stringify({
+                    'action': 'statusAnswer',
+                    'isAccepted': true
+                }));
+            } else if (gameType === GameType.Matrix && jsonMessage.action == 'Answer' ) { //здесь вроде можно не првоерять что таймер запушен, должно быть ок
+                GiveAnswerMatrix(jsonMessage.answer, jsonMessage.round, jsonMessage.question, teamId, gameId);
                 ws.send(JSON.stringify({
                     'action': 'statusAnswer',
                     'isAccepted': true
                 }));
             } else if (jsonMessage.action == 'appeal') {
-                GetAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
+                GiveAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
                 for (let ws of gameAdmins[gameId])
                     ws.send(JSON.stringify({
                         action: 'appeal',

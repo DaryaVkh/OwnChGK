@@ -32,6 +32,11 @@ export enum GameStatus {
     Start
 }
 
+export enum GameType {
+    Matrix,
+    ChGK
+}
+
 export class Game {
     public readonly id: number;
     public readonly name: string;
@@ -43,6 +48,7 @@ export class Game {
     public currentQuestion: [number, number];
     public isTimerStart: boolean;
     public isIntrigue: boolean;
+    public type: GameType;
 
     public timer: any;
     public leftTime: number;

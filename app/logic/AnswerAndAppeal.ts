@@ -28,9 +28,9 @@ export class Answer {
         this._score = score;
     }
 
-    reject(): void {
+    reject(score: number): void {
         this._status = Status.Wrong;
-        this._score = 0;
+        this._score = -score;
     }
 
     onAppeal(): void {

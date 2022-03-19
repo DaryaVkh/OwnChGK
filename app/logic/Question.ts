@@ -44,10 +44,10 @@ export class Question {
         }
     }
 
-    rejectAnswers(wrongAnswer: string): void {
+    rejectAnswers(wrongAnswer: string, isMatrixType=false): void {
         for (let answer of this.answers) {
             if (answer.text === wrongAnswer) {
-                answer.reject();
+                isMatrixType ? answer.reject(this.cost) : answer.reject(0);
             }
         }
     }
