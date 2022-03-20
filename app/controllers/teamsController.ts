@@ -11,13 +11,18 @@ import {GameDto} from "../dtos/gameDto";
 export class TeamsController {
     public async getAll(req: Request, res: Response) {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+
             const {withoutUser} = req.query;
             const teams = withoutUser ?
                 await getCustomRepository(TeamRepository).findTeamsWithoutUser()
                 : await getCustomRepository(TeamRepository).find();
 
             return res.status(200).json({
-                teams: teams.map(value => new TeamDto(value))
+                teams: teams?.map(value => new TeamDto(value))
             });
         } catch (error) {
             return res.status(500).json({
@@ -29,10 +34,15 @@ export class TeamsController {
 
     public async getAllGames(req: Request, res: Response) {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+
             const {teamName} = req.params;
             const team = await getCustomRepository(TeamRepository).findByName(teamName);
             return res.status(200).json({
-                games: team.games.map(game => new GameDto(game))
+                games: team.games?.map(game => new GameDto(game))
             })
 
         } catch (error) {
@@ -51,9 +61,6 @@ export class TeamsController {
             }
 
             const {teamName, captain} = req.body;
-            if (!teamName || !captain) {
-                return res.status(400).json({message: 'params is invalid'});
-            }
 
             await getCustomRepository(TeamRepository).insertByNameAndUserEmail(teamName, captain);
             return res.status(200).json({});
@@ -92,9 +99,6 @@ export class TeamsController {
 
             const {teamId} = req.params;
             const {newTeamName, captain} = req.body;
-            if (!newTeamName || !captain) {
-                return res.status(400).json({message: 'params in invalid'});
-            }
 
             await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain);
             return res.status(200).json({});

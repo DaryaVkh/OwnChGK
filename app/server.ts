@@ -54,11 +54,11 @@ export class Server {
 
     private routerConfig() {
         this.app.use(cookieParser());
-        this.app.use('/users', usersRouter());
-        this.app.use('/admins', adminsRouter());
-        this.app.use('/teams', teamsRouter());
-        this.app.use('/games', gamesRouter());
-        this.app.use('/rounds', roundsRouter());
+        this.app.use('/api/users', usersRouter());
+        this.app.use('/api/admins', adminsRouter());
+        this.app.use('/api/teams', teamsRouter());
+        this.app.use('/api/games', gamesRouter());
+        this.app.use('/api/rounds', roundsRouter());
         this.app.use('/', mainRouter());
     }
 

@@ -8,13 +8,15 @@ import {RoundDto} from "../dtos/roundDto";
 export class RoundsController {
     public async getAll(req: Request, res: Response) {
         try {
-            const {gameName} = req.body;
-            if (!gameName) {
-                return res.status(400).json({message: 'gameName is invalid'});
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
             }
 
+            const {gameName} = req.body;
+
             const rounds = await getCustomRepository(RoundRepository).findByGameName(gameName);
-            return res.status(200).json(rounds.map(round => new RoundDto(round)));
+            return res.status(200).json(rounds?.map(round => new RoundDto(round)));
         } catch (error) {
             return res.status(500).json({
                 message: error.message,
@@ -37,14 +39,6 @@ export class RoundsController {
                 questionCost,
                 questionTime
             } = req.body;
-
-            if (!number ||
-                !gameName ||
-                !questionCount ||
-                !questionCost ||
-                !questionTime) {
-                return res.status(400).json({message: 'params is invalid'});
-            }
 
             await getCustomRepository(RoundRepository).insertByParams(
                 number,
@@ -87,17 +81,11 @@ export class RoundsController {
             }
 
             const {gameId, number} = req.params;
-
             const {
                 newQuestionCount,
                 newQuestionCost,
                 newQuestionTime
             } = req.body;
-            if (!newQuestionCount ||
-                !newQuestionCost ||
-                !newQuestionTime) {
-                return res.status(400).json({message: 'params is invalid'});
-            }
 
             await getCustomRepository(RoundRepository).updateByParams(+number, gameId, newQuestionCount, newQuestionCost, newQuestionTime);
             return res.status(200).json({});

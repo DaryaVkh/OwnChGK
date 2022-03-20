@@ -8,6 +8,7 @@ export function roleMiddleware(roles: Set<string>) {
         if (req.method === 'OPTIONS') {
             next()
         }
+
         try {
             const token = req.cookies['authorization'];
             if (!token) {

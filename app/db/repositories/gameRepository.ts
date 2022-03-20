@@ -1,5 +1,5 @@
 import {EntityRepository, In, Repository} from 'typeorm';
-import {Game} from '../entities/Game';
+import {Game, GameStatus} from '../entities/Game';
 import {Team} from '../entities/Team';
 import {Admin} from '../entities/Admin';
 import {Round} from '../entities/Round';
@@ -75,7 +75,7 @@ export class GameRepository extends Repository<Game> {
         });
     }
 
-    updateByGameIdAndStatus(gameId: string, newStatus: string) {
+    updateByGameIdAndStatus(gameId: string, newStatus: GameStatus) {
         return this.update(gameId, {'status': newStatus});
     }
 }

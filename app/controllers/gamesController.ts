@@ -10,10 +10,16 @@ import {Team} from '../logic/Team';
 import {GameDto} from "../dtos/gameDto";
 import {TeamDto} from "../dtos/teamDto";
 import {ScoreTableDto} from "../dtos/scoreTableDto";
+import {GameStatus} from "../db/entities/Game";
 
 export class GamesController {
     public async getAll(req: Request, res: Response) {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+
             const {amIParticipate} = req.query;
             let games: any;
             if (amIParticipate) {
@@ -21,16 +27,16 @@ export class GamesController {
                 const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
                 console.log('user = ', userId, 'try to getAllGames');
                 if (!userId) {
-                    return res.status(400).json({message: 'userId is undefined'});
+                    return res.status(400).json({message: 'userId is undefined'}); // вроде лишнее, ведь если он прошёл через middleware, то id у него точно есть
                 }
 
-                games = await getCustomRepository(GameRepository).findAmIParticipate(userId); // TODO: ломается?
+                games = await getCustomRepository(GameRepository).findAmIParticipate(userId);
             } else {
                 games = await getCustomRepository(GameRepository).find();
             }
 
             return res.status(200).json({
-                games: games.map(value => new GameDto(value))
+                games: games?.map(value => new GameDto(value))
             });
         } catch (error) {
             return res.status(500).json({
@@ -42,6 +48,11 @@ export class GamesController {
 
     public async getAllTeams(req: Request, res: Response) {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+
             const {gameName} = req.params;
 
             const game = await getCustomRepository(GameRepository).findByName(gameName);
@@ -50,7 +61,7 @@ export class GamesController {
             }
 
             return res.status(200).json({
-                teams: game.teams.map(team => new TeamDto(team))
+                teams: game.teams?.map(team => new TeamDto(team))
             })
         } catch (error) {
             return res.status(500).json({
@@ -68,14 +79,6 @@ export class GamesController {
             }
 
             const {gameName, roundCount, questionCount, teams} = req.body;
-            if (!gameName
-                || !roundCount
-                || !questionCount
-                || !teams
-                || roundCount < 0
-                || questionCount < 0) {
-                return res.status(400).json({message: 'params is invalid'});
-            }
 
             const token = req.cookies['authorization'];
             const payLoad = jwt.verify(token, secret);
@@ -122,9 +125,6 @@ export class GamesController {
 
             const {gameId} = req.params;
             const {newGameName} = req.body;
-            if (!newGameName) {
-                return res.status(400).json({message: 'newGameName is invalid'});
-            }
 
             await getCustomRepository(GameRepository).updateById(gameId, newGameName);
             return res.status(200).json({});
@@ -144,12 +144,9 @@ export class GamesController {
             }
 
             const {gameId} = req.params;
-            const {admin} = req.body;
-            if (!admin) {
-                return res.status(400).json({message: 'admin is invalid'});
-            }
+            const {adminEmail} = req.body;
 
-            await getCustomRepository(GameRepository).updateByIdAndAdminEmail(gameId, admin);
+            await getCustomRepository(GameRepository).updateByIdAndAdminEmail(gameId, adminEmail);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({
@@ -217,7 +214,7 @@ export class GamesController {
                 games[game.id].addTeam(new Team(team.name, team.id));
             }
 
-            await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, 'started');
+            await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, GameStatus.STARTED);
             return res.status(200).json(answer);
         } catch (error: any) {
             return res.status(500).json({
@@ -235,32 +232,19 @@ export class GamesController {
             }
 
             const {gameId} = req.params;
-
             const {newGameName, roundCount, questionCount, teams} = req.body;
-            if (!newGameName
-                || !roundCount
-                || !questionCount
-                || !teams) {
-                return res.status(400).json({message: 'params is invalid'});
-            }
 
-            const token = req.cookies['authorization'];
-            const payLoad = jwt.verify(token, secret);
             const game = await getCustomRepository(GameRepository).findOne(gameId);
             if (!game) {
                 return res.status(404).json({message: 'game not found'});
             }
 
-            if (typeof payLoad !== 'string') {
-                console.log('ChangeGame: ', gameId, ' teams is: ', teams);
-                await getCustomRepository(GameRepository).updateByParams(
-                    gameId, newGameName, roundCount, questionCount, 1, 60, teams
-                );
+            console.log('ChangeGame: ', gameId, ' teams is: ', teams);
+            await getCustomRepository(GameRepository).updateByParams(
+                gameId, newGameName, roundCount, questionCount, 1, 60, teams
+            );
 
-                return res.status(200).json({});
-            } else {
-                return res.status(403).json({message: 'You are not admin'});
-            }
+            return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({
                 message: error.message,
@@ -278,12 +262,9 @@ export class GamesController {
 
             const {gameId} = req.params;
             const {isIntrigue} = req.body;
-            if (!isIntrigue) {
-                return res.status(400).json({message: 'isIntrigue is invalid'});
-            }
 
             if (!games[gameId]) {
-                return res.status(404).json({'message': 'Игра не началась'});
+                return res.status(404).json({message: 'Игра не началась'});
             }
 
             games[gameId].isIntrigue = isIntrigue;
@@ -400,9 +381,6 @@ export class GamesController {
 
             const {gameId} = req.params;
             const {status} = req.body;
-            if (!status) {
-                res.status(400).json({message: 'status is Invalid'})
-            }
 
             await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, status);
             return res.status(200).json({});

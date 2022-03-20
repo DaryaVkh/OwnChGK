@@ -3,26 +3,78 @@ import {roleMiddleware} from '../middleware/roleMiddleware';
 import {middleware} from '../middleware/middleware';
 import {GamesController} from '../controllers/gamesController';
 import {adminAccess} from "./mainRouter";
+import {body, param, query} from 'express-validator';
+import {GameStatus} from "../db/entities/Game";
 
 export const gamesRouter = () => {
     const router = Router();
 
     const gamesController = new GamesController();
 
-    router.get('/', middleware, gamesController.getAll);
-    router.get('/:gameId', middleware, gamesController.getGame);
-    router.get('/:gameId/start', roleMiddleware(adminAccess), gamesController.startGame);
-    router.patch('/:gameId/change', roleMiddleware(adminAccess), gamesController.changeGame)
-    router.patch('/:gameId/changeStatus', roleMiddleware(adminAccess), gamesController.changeGameStatus);
-    router.patch('/:gameId/changeIntrigueStatus', roleMiddleware(adminAccess), gamesController.changeIntrigueStatus);
-    router.patch('/:gameId/changeName', roleMiddleware(adminAccess), gamesController.editGameName);
-    router.patch('/:gameId/changeAdmin', roleMiddleware(adminAccess), gamesController.editGameAdmin);
-    router.delete('/:gameId', roleMiddleware(adminAccess), gamesController.deleteGame);
-    router.get('/:gameId/result', middleware, gamesController.getGameResult);
-    router.get('/:gameId/resultTable', middleware, gamesController.getGameResultScoreTable);
-    router.get('/:gameId/resultTable/format', middleware, gamesController.getResultWithFormat);
+    router.get('/',
+        middleware,
+        query('amIParticipate').isBoolean(), gamesController.getAll);
 
-    router.post('/', roleMiddleware(adminAccess), gamesController.insertGame);
+    router.get('/:gameId',
+        middleware,
+        param('gameId').isInt(), gamesController.getGame);
+
+    router.get('/:gameId/start',
+        roleMiddleware(adminAccess),
+        param('gameId').isInt(), gamesController.startGame);
+
+    router.patch('/:gameId/change',
+        roleMiddleware(adminAccess),
+        param('gameId').isInt(),
+        body('newGameName').isString().notEmpty(),
+        body('roundCount').isInt({min: 0}),
+        body('questionCount').isInt({min: 0}),
+        body('teams').isArray(), gamesController.changeGame)
+
+    router.patch('/:gameId/changeStatus',
+        roleMiddleware(adminAccess),
+        param('gameId').isInt(),
+        body('status').custom(value => {
+            return Object.values(GameStatus).includes(value)
+        }), gamesController.changeGameStatus);
+
+    router.patch('/:gameId/changeIntrigueStatus',
+        roleMiddleware(adminAccess),
+        param('gameId').isInt(),
+        body('isIntrigue').isBoolean(), gamesController.changeIntrigueStatus);
+
+    router.patch('/:gameId/changeName',
+        roleMiddleware(adminAccess),
+        param('gameId').isInt(),
+        body('newGameName').isString().notEmpty(), gamesController.editGameName);
+
+    router.patch('/:gameId/changeAdmin',
+        roleMiddleware(adminAccess),
+        param('gameId').isInt(),
+        body('adminEmail').isEmail(), gamesController.editGameAdmin); // Не используется
+
+    router.delete('/:gameId',
+        roleMiddleware(adminAccess),
+        param('gameId').isInt(), gamesController.deleteGame);
+
+    router.get('/:gameId/result',
+        middleware,
+        param('gameId').isInt(), gamesController.getGameResult);
+
+    router.get('/:gameId/resultTable',
+        middleware,
+        param('gameId').isInt(), gamesController.getGameResultScoreTable);
+
+    router.get('/:gameId/resultTable/format',
+        middleware,
+        param('gameId').isInt(), gamesController.getResultWithFormat);
+
+    router.post('/',
+        roleMiddleware(adminAccess),
+        body('gameName').isString().notEmpty(),
+        body('roundCount').isInt({min: 0}),
+        body('questionCount').isInt({min: 0}),
+        body('teams').isArray(), gamesController.insertGame);
 
     return router;
 }
