@@ -26,6 +26,7 @@ const UserGame: FC<UserGameProps> = props => {
     const [gameName, setGameName] = useState<string>();
     const [questionNumber, setQuestionNumber] = useState<number>(1);
     const [timeForAnswer, setTimeForAnswer] = useState<number>(70);
+    const [maxTime, setMaxTime] = useState<number>(70);
     const [flags, setFlags] = useState<{
         isSnackbarOpen: boolean,
         isAnswerAccepted: boolean
@@ -38,6 +39,10 @@ const UserGame: FC<UserGameProps> = props => {
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     const mediaMatch = window.matchMedia('(max-width: 768px)');
+
+    console.log('timeForAnswer:', timeForAnswer);
+    console.log('maxTime', maxTime);
+    console.log('vir', Math.ceil(100 * (timeForAnswer / maxTime)) + '%');
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -107,15 +112,18 @@ const UserGame: FC<UserGameProps> = props => {
                 if (jsonMessage.isStarted) {
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 }
+                setMaxTime(jsonMessage.maxTime / 1000);
             } else if (jsonMessage.action === 'start') {
                 setTimeForAnswer(jsonMessage.time / 1000);
                 progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
+                setMaxTime(jsonMessage.maxTime / 1000);
             } else if (jsonMessage.action === 'addTime') {
                 clearInterval(progressBar);
                 setTimeForAnswer(t => (t ?? 0) + 10);
                 if (jsonMessage.isStarted) {
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 }
+                setMaxTime(jsonMessage.maxTime / 1000);
             } else if (jsonMessage.action === 'pause') {
                 clearInterval(progressBar);
             } else if (jsonMessage.action === 'stop') {
@@ -166,9 +174,9 @@ const UserGame: FC<UserGameProps> = props => {
                         return time - 1 > 0 ? time - 1 : 0;
                     }), 1000)
                 } else {
+                    clearInterval(interval);
                     setIsBreak(false);
                     setBreakTime(0);
-                    clearInterval(interval);
                 }
             }
         };
@@ -230,25 +238,22 @@ const UserGame: FC<UserGameProps> = props => {
     const changeColor = (progressBar: HTMLDivElement) => {
         if (progressBar.style.width) {
             let width = +(progressBar.style.width).slice(0, -1);
-            switch (true) {
-                case (width <= 10):
-                    progressBar.style.backgroundColor = 'red';
-                    break;
-
-                case (width > 11 && width <= 25):
-                    progressBar.style.backgroundColor = 'orange';
-                    break;
-
-                case (width > 26 && width <= 50):
-                    progressBar.style.backgroundColor = 'yellow';
-                    break;
-
-                case (width > 51 && width <= 100):
-                    progressBar.style.backgroundColor = 'green';
-                    break;
-            }
+            progressBar.style.backgroundColor = chooseColor(width);
         }
     };
+
+    const chooseColor = (width: number) => {
+        switch (true) {
+            case (width <= 10):
+                return 'red';
+            case (width > 11 && width <= 25):
+                return 'orange';
+            case (width > 26 && width <= 50):
+                return 'yellow';
+        }
+
+        return 'green';
+    }
 
     const moveProgressBar = (time: number, maxTime: number) => {
         const progressBar = document.querySelector('#progress-bar') as HTMLDivElement;
@@ -264,8 +269,9 @@ const UserGame: FC<UserGameProps> = props => {
                 changeColor(progressBar);
                 setTimeForAnswer(t => {
                     width = Math.ceil(100 * (t ?? 0) / (maxTime / 1000));
-                    progressBar.style.width = width + '%';
-                    return (t ?? 0) - 1;
+                    const result = (t ?? 0) - 1;
+                    progressBar.style.width = (result <= 0 ? 0 : width) + '%';
+                    return result;
                 });
             }
         };
@@ -388,6 +394,8 @@ const UserGame: FC<UserGameProps> = props => {
             );
         }
 
+        const width = Math.ceil(100 * (timeForAnswer / maxTime));
+
         return (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={false}>
@@ -423,7 +431,8 @@ const UserGame: FC<UserGameProps> = props => {
                         </div>
 
                         <div style={{width: mediaMatch.matches ? '98%' : '99%', height: '2%', marginLeft: '4px'}}>
-                            <div className={classes.progressBar} id="progress-bar"/>
+                            <div className={classes.progressBar} id="progress-bar"
+                                 style={{width: width + '%', backgroundColor: chooseColor(width)}}/>
                         </div>
                         <div className={classes.answerBox}>
                             <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
