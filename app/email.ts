@@ -25,8 +25,8 @@ export function makeTemporaryPassword(length) {
     return result;
 }
 
-export function SendMailWithTemporaryPassword(transporter, email: string, code: string) {
-    transporter.sendMail({
+export async function SendMailWithTemporaryPassword(transporter, email: string, code: string) {
+    await transporter.sendMail({
         from: '"Своя ЧГК" <ownchgk@gmail.com>',
         to: email,
         subject: 'Смена пароля',
@@ -34,8 +34,8 @@ export function SendMailWithTemporaryPassword(transporter, email: string, code: 
     })
 }
 
-export function SendMailWithTemporaryPasswordToAdmin(transporter, email: string, code: string) {
-    transporter.sendMail({
+export async function SendMailWithTemporaryPasswordToAdmin(transporter, email: string, code: string) {
+    await transporter.sendMail({
         from: '"Своя ЧГК" <ownchgk@gmail.com>',
         to: email,
         subject: 'Временный пароль',

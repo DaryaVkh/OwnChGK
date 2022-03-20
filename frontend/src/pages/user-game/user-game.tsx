@@ -132,6 +132,8 @@ const UserGame: FC<UserGameProps> = props => {
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
                 progress.style.width = '100%';
                 changeColor(progress);
+                let answerInput = document.querySelector('#answer') as HTMLInputElement;
+                answerInput.focus();
             } else if (jsonMessage.action === 'currentQuestionNumber') {
                 setQuestionNumber(+jsonMessage.number);
             } else if (jsonMessage.action === 'statusAnswer') {

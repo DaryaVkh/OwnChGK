@@ -1,5 +1,4 @@
 import {Game} from './logic/Game';
-import {CreateTransporter} from './email';
 import {Status} from './logic/AnswerAndAppeal';
 import jwt from 'jsonwebtoken';
 import {secret} from './jwtToken';

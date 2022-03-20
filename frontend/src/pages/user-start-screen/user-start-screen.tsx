@@ -9,7 +9,7 @@ import {
 } from '../../entities/user-start-screen/user-start-screen.interfaces';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import {Link, Redirect, useLocation} from 'react-router-dom';
-import {IconButton, Skeleton} from '@mui/material';
+import {Alert, IconButton, Skeleton, Snackbar} from '@mui/material';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import {
     changeToken,
@@ -32,6 +32,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [teamsFromDB, setTeamsFromDB] = useState<Team[]>();
     const [userTeam, setUserTeam] = useState<string>('');
     const [gameId, setGameId] = useState<string>('');
+    const [isTeamNotFree, setIsTeamNotFree] = useState<boolean>(false);
     let location = useLocation<{ page: string }>();
     const mediaMatch = window.matchMedia('(max-width: 768px)');
 
@@ -82,15 +83,18 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                 .then(res => {
                     if (res.status === 200) {
                         setUserTeam(dataset.teamName);
+                        setIsTeamNotFree(false);
                         props.onAddUserTeam(dataset.teamName);
                     } else {
                         setTeamsFromDB(arr => arr?.filter(x => x.id != dataset.teamId));
+                        setIsTeamNotFree(true);
+                        setTimeout(() => setIsTeamNotFree(false), 5000);
                     }
                 });
         }
     };
 
-    const handleClick = (id: string) => {
+    const handleClickOnGame = (id: string) => {
         changeToken(id).then((res) => {
             if (res.status === 200) {
                 setGameId(id);
@@ -103,7 +107,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
             return Array.from(Array(5).keys()).map(i => <Skeleton key={`game_skeleton_${i}`} variant='rectangular' width='100%' height={mediaMatch.matches ? '5vh' : '7vh'} sx={{marginBottom: '2.5vh'}} />);
         }
         return gamesFromDB.map((game, index) =>
-            <div key={index} className={classes.gameOrTeam} onClick={() => handleClick(game.id)}>
+            <div key={index} className={classes.gameOrTeam} onClick={() => handleClickOnGame(game.id)}>
                 <p className={classes.gameName}>{game.name}</p>
             </div>);
     };
@@ -170,6 +174,11 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                                 </div>
                             </div>
                         </div>
+                        <Snackbar sx={{marginTop: '8vh'}} open={isTeamNotFree} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+                            <Alert severity='error' sx={{width: '100%'}}>
+                                Кто-то уже занял эту команду
+                            </Alert>
+                        </Snackbar>
                     </div>
                 );
         }

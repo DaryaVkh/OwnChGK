@@ -218,7 +218,7 @@ export class UsersController { // TODO: дописать смену имени �
             let user = await getCustomRepository(UserRepository).findByEmail(email);
             if (user) {
                 const code = makeTemporaryPassword(8);
-                SendMailWithTemporaryPassword(transporter, email, code);
+                await SendMailWithTemporaryPassword(transporter, email, code);
                 user.temporary_code = code;
                 await user.save();
                 return res.status(200).json({});
