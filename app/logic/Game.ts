@@ -55,7 +55,7 @@ export class Game {
     public maxTime: number;
     public timeIsOnPause: boolean;
 
-    constructor(name: string) {
+    constructor(name: string, type: GameType) {
         this.id = Math.round(Math.random() * 1000000)
         this.name = name;
         this.rounds = [];
@@ -67,6 +67,7 @@ export class Game {
         this.leftTime = seconds70PerQuestion;
         this.timeIsOnPause = false;
         this.maxTime = seconds70PerQuestion;
+        this.type = type;
     }
 
     startBreak(time: number): void {

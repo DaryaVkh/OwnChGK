@@ -2,12 +2,19 @@ import {Game} from './Game';
 
 
 export class BigGame {
+
+    constructor(name:String, ChGK: Game = null, Matrix: Game = null) {
+        this.Matrix = Matrix;
+        this.ChGK = ChGK;
+        this.name = name;
+    }
+
+    private name: String;
     private ChGK: Game;
     private Matrix: Game;
+    public CurrentGame: Game;
 }
-//прокидывать команды отсюда в кажду их игр,- в трех местах одинаковые списки
-// или сохранять их только там - дублируем в 2 местах
-// или только здесь - тогда в маленькой игре хранить ссылку на большую
+
 
 function addChGK(id: number) {
     this.ChGK = id;

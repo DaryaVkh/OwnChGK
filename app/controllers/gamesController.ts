@@ -4,10 +4,11 @@ import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
-import {gameAdmins, games, gameUsers} from '../socket';
-import {Game, Round} from '../logic/Game';
+import {bigGames, gameAdmins, gameUsers} from '../socket';
+import {Game, GameType, Round} from '../logic/Game';
 import {Team} from '../logic/Team';
 import {GameDTO} from '../dto';
+import {BigGame} from "../logic/BigGame";
 
 export class GamesController {
     public async getAll(req: Request, res: Response) {
@@ -137,7 +138,7 @@ export class GamesController {
             }
             const answer = {
                 name: game.name,
-                isStarted: !!games[gameId],
+                isStarted: !!bigGames[gameId],
                 id: game.id,
                 teams: game.teams.map(value => value.name),
                 roundCount: game.rounds.length,
@@ -156,10 +157,12 @@ export class GamesController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {gameId} = req.params;
+            //todo:тут надо получать bigGame и маленькие games id
             const game = await getCustomRepository(GameRepository).findOne(+gameId, {relations: ['teams', 'rounds']});
             if (!game) {
                 return res.status(404).json({message: 'game not found'});
             }
+            //answer надо подумать roundCount и QuestionCount как отдавать
             const answer = {
                 name: game.name,
                 teams: game.teams.map(value => value.name),
@@ -168,18 +171,21 @@ export class GamesController {
             };
             gameAdmins[game.id] = new Set();
             gameUsers[game.id] = new Set();
-            games[game.id] = new Game(game.name);
+            //тут у каждого своя game должна быть
+            const ChGK = new Game(game.name, GameType.ChGK);
+            const Matrix = new Game(game.name, GameType.Matrix);
+            bigGames[game.id] = new BigGame(game.name, ChGK, Matrix);
             setTimeout(() => {
-                delete games[gameId];
+                delete bigGames[gameId];
                 delete gameUsers[gameId];
                 delete gameAdmins[gameId];
-                console.log('delete game ', games[gameId]);
+                console.log('delete game ', bigGames[gameId]);
             }, 1000 * 60 * 60 * 24 * 3);
             for (let i = 0; i < game.rounds.length; i++) {
-                games[game.id].addRound(new Round(i + 1, answer.questionCount, 60, 1));
+                bigGames[game.id].CurrentGame.addRound(new Round(i + 1, answer.questionCount, 60, 1));
             }
             for (const team of game.teams) {
-                games[game.id].addTeam(new Team(team.name, team.id));
+                bigGames[game.id].CurrentGame.addTeam(new Team(team.name, team.id));
             }
             await getCustomRepository(GameRepository).updateByGameIdAndStatus(gameId, 'started');
             return res.status(200).json(answer);
@@ -235,11 +241,11 @@ export class GamesController {
             const {gameId} = req.params;
             const {isIntrigue} = req.body;
 
-            if (!games[gameId]) {
+            if (!bigGames[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
 
-            games[gameId].isIntrigue = isIntrigue;
+            bigGames[gameId].CurrentGame.isIntrigue = isIntrigue;
             isIntrigue ? console.log('intrigue started') : console.log('intrigue finished');
             return res.status(200).json({});
         } catch (error: any) {
@@ -254,10 +260,10 @@ export class GamesController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {gameId} = req.params;
-            if (!games[gameId]) {
+            if (!bigGames[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
-            const totalScore = games[gameId].getTotalScoreForAllTeams();
+            const totalScore = bigGames[gameId].CurrentGame.getTotalScoreForAllTeams();
             const answer = {
                 totalScoreForAllTeams: totalScore,
             };
@@ -274,7 +280,7 @@ export class GamesController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {gameId} = req.params;
-            if (!games[gameId]) {
+            if (!bigGames[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
 
@@ -287,11 +293,11 @@ export class GamesController {
 
             const answer = {
                 gameId,
-                isIntrigue: games[gameId].isIntrigue,
-                roundsCount: games[gameId].rounds.length,
-                questionsCount: games[gameId].rounds[0].questionsCount,
-                totalScoreForAllTeams: roles === 'user' && teamId && games[gameId].isIntrigue ?
-                    games[gameId].getScoreTableForTeam(teamId) : games[gameId].getScoreTable(),
+                isIntrigue: bigGames[gameId].CurrentGame.isIntrigue,
+                roundsCount: bigGames[gameId].CurrentGame.rounds.length,
+                questionsCount: bigGames[gameId].CurrentGame.rounds[0].questionsCount,
+                totalScoreForAllTeams: roles === 'user' && teamId && bigGames[gameId].CurrentGame.isIntrigue ?
+                    bigGames[gameId].CurrentGame.getScoreTableForTeam(teamId) : bigGames[gameId].CurrentGame.getScoreTable(),
             };
 
             return res.status(200).json(answer);
@@ -307,7 +313,7 @@ export class GamesController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {gameId} = req.params;
-            if (!games[gameId]) {
+            if (!bigGames[gameId]) {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
 
@@ -319,21 +325,21 @@ export class GamesController {
             }
 
             const headersList = ['Название команды', 'Сумма'];
-            for (let i = 1; i <= games[gameId].rounds.length; i++) {
+            for (let i = 1; i <= bigGames[gameId].CurrentGame.rounds.length; i++) {
                 headersList.push('Тур ' + i);
-                for (let j = 1; j <= games[gameId].rounds[i - 1].questionsCount; j++) {
+                for (let j = 1; j <= bigGames[gameId].CurrentGame.rounds[i - 1].questionsCount; j++) {
                     headersList.push('Вопрос ' + j);
                 }
             }
             const teamRows = [];
-            const totalScoreForAllTeams = games[gameId].getTotalScoreForAllTeams();
-            const scoreTable = roles === 'user' && teamId && games[gameId].isIntrigue ?
-                    games[gameId].getScoreTableForTeam(teamId) : games[gameId].getScoreTable();
+            const totalScoreForAllTeams = bigGames[gameId].CurrentGame.getTotalScoreForAllTeams();
+            const scoreTable = roles === 'user' && teamId && bigGames[gameId].CurrentGame.isIntrigue ?
+                    bigGames[gameId].CurrentGame.getScoreTableForTeam(teamId) : bigGames[gameId].CurrentGame.getScoreTable();
             let roundsResultList = [];
             for (const team in scoreTable) {
                 let roundSum = 0;
-                for (let i = 0; i < games[gameId].rounds.length; i++) {
-                    for (let j = 0; j < games[gameId].rounds[i].questionsCount; j++) {
+                for (let i = 0; i < bigGames[gameId].CurrentGame.rounds.length; i++) {
+                    for (let j = 0; j < bigGames[gameId].CurrentGame.rounds[i].questionsCount; j++) {
                         roundSum += scoreTable[team][i][j];
                     }
                     roundsResultList.push(roundSum);
