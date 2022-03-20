@@ -64,6 +64,11 @@ export class UsersController { // TODO: дописать смену имени �
             if (!validateEmail(email)) {
                 return res.status(400).json({message: 'email is invalid'});
             }
+            const user = await getCustomRepository(UserRepository).findOne({'email': email})
+            if (user) {
+                return res.status(409).json({message: 'The user with this email is already registered'})
+            }
+
             const hashedPassword = await hash(password, 10);
             const insertResult = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
             const userId = insertResult.identifiers[0].id;

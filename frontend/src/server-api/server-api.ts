@@ -33,6 +33,7 @@ export const createGame = async (gameName: string, roundCount: number, questionC
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             gameName,
             roundCount,
@@ -49,6 +50,7 @@ export const createUser = async (email: string, password: string) => {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             email,
             password
@@ -63,6 +65,7 @@ export const login = async (email: string, password: string, isAdmin: boolean) =
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             email,
             password
@@ -73,6 +76,7 @@ export const login = async (email: string, password: string, isAdmin: boolean) =
 export const logout = async () => {
     return await fetch('/users/logout', {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
@@ -83,6 +87,7 @@ export const logout = async () => {
 export const changeToken = async (gameId: string) => {
     return fetch(`/users/${gameId}/changeToken`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
@@ -101,6 +106,7 @@ export const editGame = async (gameId: string, newGameName: string, roundCount: 
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             newGameName,
             roundCount,
@@ -133,6 +139,7 @@ export const createTeam = async (teamName: string, captain: string) => {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             teamName,
             captain
@@ -147,6 +154,7 @@ export const editTeam = async (teamId: string, newTeamName: string, captain: str
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             newTeamName,
             captain
@@ -157,6 +165,7 @@ export const editTeam = async (teamId: string, newTeamName: string, captain: str
 export const editTeamCaptainByCurrentUser = async (teamId: string) => { // TODO: дописать, потому что вызывается оно всё ещё с name
     return await fetch(`/teams/${teamId}/changeCaptain`, {
         method: 'PATCH',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
@@ -183,6 +192,7 @@ export const sendTemporaryPassword = async (email: string, isAdmin: boolean) => 
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             email
         })
@@ -196,6 +206,7 @@ export const checkTemporaryPassword = async (email: string, code: string, isAdmi
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             email,
             code
@@ -210,6 +221,7 @@ export const changePassword = async (email: string, password: string, oldPasswor
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             email,
             password,
@@ -225,6 +237,7 @@ export const changePasswordByCode = async (email: string, password: string, code
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             email,
             password,
@@ -240,6 +253,7 @@ export const changeName = async (newName: string, isAdmin: boolean) => {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             newName
         })
@@ -253,6 +267,7 @@ export const changeIntrigueGameStatus = async (gameId: string, isIntrigue: boole
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             isIntrigue
         })
@@ -266,6 +281,7 @@ export const deleteAdmin = async (adminEmail: string) => {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             email: adminEmail
         })
@@ -279,6 +295,7 @@ export const addAdmin = async (adminEmail: string, adminName = '') => {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
             email: adminEmail,
             name: adminName
