@@ -131,7 +131,7 @@ export class UsersController { // TODO: дописать смену имени �
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {newName} = req.body;
-            if (!newName) {
+            if (newName === undefined) {
                 return res.status(400).json({});
             }
 
