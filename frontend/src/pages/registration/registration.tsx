@@ -20,6 +20,7 @@ const Registration: FC<RegistrationProps> = props => {
     const [password, setPassword] = useState<string>('');
     const [repeatedPassword, setRepeatedPassword] = useState<string>('');
     const [isError, setIsError] = useState<boolean>(false);
+    const [isRegisteredAlready, setIsRegisteredAlready] = useState(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const checkRepeatedPassword = () => {
@@ -56,6 +57,9 @@ const Registration: FC<RegistrationProps> = props => {
                 if (response.status === 200) {
                     props.onAuthorizeUserWithRole('user', '', email, '');
                     setLoggedIn(true);
+                } else if (response.status === 409) {
+                    setIsRegisteredAlready(true);
+                    setIsLoading(false);
                 } else {
                     setIsError(true);
                     setIsLoading(false);
@@ -76,7 +80,11 @@ const Registration: FC<RegistrationProps> = props => {
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
                 <form onSubmit={validateForm}>
-                    <CustomInput type="email" id="email" name="email" placeholder="Почта" value={email} onChange={handleEmailChange} isInvalid={isError}/>
+                    <CustomInput type="email" id="email" name="email" placeholder="Почта"
+                                 style={{marginBottom: '9%'}}
+                                 value={email} onChange={handleEmailChange}
+                                 isInvalid={isError || isRegisteredAlready}
+                                 errorHelperText={isRegisteredAlready ? 'Эта почта уже зарегистрирована' : ''}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль" value={password}
                                  isInvalid={isRepeatedPasswordInvalid || isError} onChange={handlePasswordChange}/>
                     <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите пароль" value={repeatedPassword}

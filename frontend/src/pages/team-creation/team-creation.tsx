@@ -1,4 +1,4 @@
-import React, {FC, useState, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './team-creation.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
@@ -11,7 +11,7 @@ import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Autocomplete, Skeleton, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
-import {useLocation, Redirect} from 'react-router-dom';
+import {Redirect, useLocation} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
 import PageBackdrop from '../../components/backdrop/backdrop';
 import {Dispatch} from 'redux';
@@ -132,7 +132,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                                defaultValue={teamName}
                                                onChange={handleInputChange}
                                                isInvalid={isNameInvalid}
-                                               errorHelperText={'Команда с таким названием уже есть'}/>
+                                               errorHelperText={'Такая команда уже существует'}/>
                                 : <Skeleton variant='rectangular' width='100%' height={mediaMatch.matches ? '6vh' : '7vh'} sx={{marginBottom: '3%'}} />
                         }
 
@@ -188,8 +188,8 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
                     <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={props.isAdmin && !(usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation'))}
                                 style={{
-                                    padding: mediaMatch.matches ? '0 13vw' : '0 2vw', fontSize: mediaMatch.matches ? '3vmax' : '1.5vw',
-                                    height: mediaMatch.matches ? '6vh' : '7vh', marginBottom: '2.5vh',
+                                    padding: mediaMatch.matches ? '0 13vw' : '0 2vw', fontSize: mediaMatch.matches ? '6.5vw' : '1.5vw',
+                                    height: mediaMatch.matches ? '13vw' : '7vh', marginBottom: '2.5vh',
                                     borderRadius: '7px',
                                     fontWeight: 700,
                                     filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'

@@ -408,7 +408,7 @@ const UserGame: FC<UserGameProps> = props => {
 
                 {
                     mediaMatch.matches
-                        ? <MobileNavbar isGame={true} isAdmin={false} page={''} toAnswers={true} gameId={gameId}/>
+                        ? <MobileNavbar isGame={true} isAdmin={false} page='' toAnswers={true} gameId={gameId}/>
                         : null
                 }
                 <div className={classes.contentWrapper}>
@@ -431,7 +431,7 @@ const UserGame: FC<UserGameProps> = props => {
                             <div className={classes.answerInputWrapper}>
                                 <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
                                              style={{width: mediaMatch.matches ? '100%' : '79%',
-                                                 height: mediaMatch.matches ? '4vh' : '7vh'}} value={answer} onChange={handleAnswer}/>
+                                                 height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={answer} onChange={handleAnswer}/>
                                 <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
                                 </button>
                             </div>

@@ -37,20 +37,20 @@ const MobileMenu: FC<MobileMenuProps> = props => {
             </Link>
 
             <div className={classes.linksWrapper}>
-                <div className={classes.linkWrapper}>
-                    <Link to='/profile' className={classes.link}>Профиль</Link>
-                </div>
+                <Link to='/profile' className={classes.linkWrapper}>
+                    <p className={classes.link}>Профиль</p>
+                </Link>
                 {
                     gameId !== undefined
                         ?
-                        <div className={classes.linkWrapper}>
-                            <Link className={classes.link} to={`/rating/${gameId}`}>Рейтинг</Link>
-                        </div>
+                        <Link to={`/rating/${gameId}`} className={classes.linkWrapper}>
+                            <p className={classes.link}>Рейтинг</p>
+                        </Link>
                         : null
                 }
-                <div className={classes.linkWrapper}>
-                    <Link className={classes.link} to={props.isLoggedIn ? '#' : '/auth'} onClick={handleLogout}>Выйти</Link>
-                </div>
+                <Link to='/auth' className={classes.linkWrapper} onClick={handleLogout}>
+                    <p className={classes.link}>Выйти</p>
+                </Link>
             </div>
         </div>
     );

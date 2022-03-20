@@ -79,7 +79,7 @@
   width: 35%;
   padding: 5vh 0;
   pointer-events: none;
-  z-index: -1;
+  z-index: 1;
 
   .team {
     color: white;
@@ -206,7 +206,7 @@
 
   .gameName {
     width: 100%;
-    font-size: 2.3vmax;
+    font-size: 4.7vw;
   }
 
   .contentWrapper {
@@ -216,7 +216,7 @@
   .teamWrapper {
     width: 100%;
     justify-content: unset;
-    font-size: 2vmax;
+    font-size: 4.4vw;
     padding: 8vh 0;
 
     .team {
@@ -229,7 +229,7 @@
     width: 100%;
 
     .timeLeft {
-      font-size: 2.5vmax;
+      font-size: 5.5vw;
     }
 
     .answerBox {
@@ -242,14 +242,14 @@
         align-items: flex-end;
 
         .sendAnswerButton {
-          height: 4vh;
+          height: 8.7vw;
           width: 47%;
-          font-size: 2.3vmax;
+          font-size: 5vw;
         }
       }
 
       .answerNumber {
-        font-size: 3vmax;
+        font-size: 6.6vw;
       }
     }
   }

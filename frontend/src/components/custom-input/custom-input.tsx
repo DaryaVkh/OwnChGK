@@ -27,7 +27,9 @@ export const CustomInput: FC<InputProps> = props => {
             padding: '0 !important'
         },
         '& .MuiOutlinedInput-input': {
-            padding: mediaMatch.matches ? '0 0 0 2.5vmax !important' : '0 0 0 1.5vmax !important',
+            padding: mediaMatch.matches
+                ? (props.type === 'password' ? '0 0 0 5.5vw !important' : '0 5.5vw 0 !important')
+                : (props.type === 'password' ? '0 0 0 1.5vmax !important' : '0 1.5vmax 0 !important'),
             color: 'black',
         }
     };
@@ -85,10 +87,10 @@ export const CustomInput: FC<InputProps> = props => {
                     ?
                     <FormHelperText sx={{
                         marginLeft: '0 !important',
-                        fontSize: mediaMatch.matches ? '1.6vmax' : '1vmax',
+                        fontSize: mediaMatch.matches ? '3.5vw' : '1vmax',
                         color: '#FF0000',
                         position: 'absolute',
-                        top: '5.8vh'
+                        top: mediaMatch.matches ? '12.5vw' : '6.7vh'
                     }}>
                         {props.errorHelperText}
                     </FormHelperText>

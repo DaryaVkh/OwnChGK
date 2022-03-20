@@ -71,6 +71,7 @@
 @media only screen and (max-width: 768px) {
   .gameName {
     width: 100%;
+    font-size: 5.5vw;
   }
 
   .contentWrapper {
@@ -79,13 +80,13 @@
     .answersWrapper {
       width: 100%;
       height: 60%;
-      padding: 3vh 3vw;
+      padding: 6.5vw 3vw;
     }
 
     .teamWrapper {
       width: 100%;
       justify-content: unset;
-      font-size: 2vmax;
+      font-size: 4.4vw;
       padding: 7vh 0 3vh;
 
       .team {
