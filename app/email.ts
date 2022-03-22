@@ -5,12 +5,14 @@ const changePasswordMessage = 'Ваш код подтверждения для �
 const adminPasswordMessage = 'Вас назначили администратором проекта Своей ЧГКи. Ваш временный пароль:';
 const ignoreMessage = 'Если вы не запрашивали код, то проигнорируйте это сообщение';
 
-export function CreateTransporter(user: string, password: string) {
+export function CreateTransporter(user: string, pass: string) {
     return nodemailer.createTransport({
-        service: 'Gmail',
+        host: "smtp.yandex.ru",
+        port: 465,
+        secure: true,
         auth: {
-            user: user,
-            pass: password,
+            user,
+            pass,
         }
     });
 }
@@ -27,19 +29,19 @@ export function makeTemporaryPassword(length) {
 
 export async function SendMailWithTemporaryPassword(transporter, email: string, code: string) {
     await transporter.sendMail({
-        from: '"Своя ЧГК" <ownchgk@gmail.com>',
+        from: `"Своя ЧГК" <${process.env.LOGIN}>`,
         to: email,
         subject: 'Смена пароля',
-        text: changePasswordMessage + '\n' +  code + '\n' + ignoreMessage
+        html: `${changePasswordMessage} <b>${code}</b><br>${ignoreMessage}`
     })
 }
 
 export async function SendMailWithTemporaryPasswordToAdmin(transporter, email: string, code: string) {
     await transporter.sendMail({
-        from: '"Своя ЧГК" <ownchgk@gmail.com>',
+        from: `"Своя ЧГК" <${process.env.LOGIN}>`,
         to: email,
         subject: 'Временный пароль',
-        text: adminPasswordMessage + '\n' +  code + '\n' + ignoreMessage
+        html: `${adminPasswordMessage} <b>${code}</b><br>${ignoreMessage}`
     })
 }
 
