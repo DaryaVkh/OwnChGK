@@ -13,6 +13,7 @@ export const teamsRouter = () => {
     router.get('/:teamId', middleware, teamsController.getTeam);
     router.patch('/:teamId/change', middleware, teamsController.editTeam);
     router.patch('/:teamId/changeCaptain', middleware, teamsController.editTeamCaptainByCurrentUser);
+    router.patch('/:teamId/deleteCaptain', middleware, teamsController.editTeamCaptainByDeleteCurrentUser);
     router.delete('/:teamId', roleMiddleware(adminAccess), teamsController.deleteTeam);
 
     router.post('/', middleware, teamsController.insertTeam);

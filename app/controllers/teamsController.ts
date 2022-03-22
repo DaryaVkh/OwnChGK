@@ -3,7 +3,7 @@ import {getCustomRepository} from 'typeorm';
 import {TeamRepository} from '../db/repositories/teamRepository';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
-import {secret} from '../jwtToken';
+import {generateAccessToken, secret} from '../jwtToken';
 import {TeamDTO} from '../dto';
 
 
@@ -120,6 +120,36 @@ export class TeamsController {
             });
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
+        }
+    }
+
+    public async editTeamCaptainByDeleteCurrentUser(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+
+            const {teamId} = req.params;
+            await getCustomRepository(TeamRepository).deleteTeamCaptainByIdAndUserEmail(teamId);
+            // const oldToken = req.cookies['authorization'];
+            // const {
+            //     id: userId,
+            //     email: email,
+            //     roles: userRoles,
+            //     name: name
+            // } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+            // const token = generateAccessToken(userId, email, userRoles, null, null, name);
+            // res.cookie('authorization', token, {
+            //     maxAge: 24 * 60 * 60 * 1000,
+            //     secure: true
+            // });
+            return res.status(200).json({});
+        } catch (error: any) {
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
         }
     }
 }

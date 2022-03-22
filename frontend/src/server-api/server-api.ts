@@ -164,6 +164,16 @@ export const editTeamCaptainByCurrentUser = async (teamId: string) => { // TODO:
     });
 };
 
+export const editTeamCaptainByDeleteCurrentUser = async (teamId: string) => { // TODO: дописать, потому что вызывается оно всё ещё с name
+    return await fetch(`/teams/${teamId}/deleteCaptain`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+};
+
 export const getTeamByCurrentUser = async () => {
     return await fetch('/users/getTeam');
 };
