@@ -154,7 +154,7 @@ export const editTeam = async (teamId: string, newTeamName: string, captain: str
     });
 };
 
-export const editTeamCaptainByCurrentUser = async (teamId: string) => { // TODO: дописать, потому что вызывается оно всё ещё с name
+export const editTeamCaptainByCurrentUser = async (teamId: string) => {
     return await fetch(`/teams/${teamId}/changeCaptain`, {
         method: 'PATCH',
         headers: {
@@ -164,7 +164,7 @@ export const editTeamCaptainByCurrentUser = async (teamId: string) => { // TODO:
     });
 };
 
-export const editTeamCaptainByDeleteCurrentUser = async (teamId: string) => { // TODO: дописать, потому что вызывается оно всё ещё с name
+export const deleteTeamCaptainById = async (teamId: string) => {
     return await fetch(`/teams/${teamId}/deleteCaptain`, {
         method: 'PATCH',
         headers: {
