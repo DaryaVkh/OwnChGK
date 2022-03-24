@@ -20,6 +20,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>();
     const [answers, setAnswers] = useState<Answer[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     useEffect(() => {
@@ -58,6 +59,8 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                         number: ans.number
                     };
                 }));
+
+                setIsLoading(false);
             }
         };
 
@@ -66,7 +69,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
 
     const getGameName = () => {
         const maxLength = mediaMatch.matches ? 22 : 34;
-        if ((gameName as string).length > maxLength) {
+        if ((gameName as string)?.length > maxLength) {
             return (gameName as string).substr(0, maxLength) + '\u2026';
         } else {
             return gameName;
@@ -82,7 +85,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         });
     };
 
-    if (!gameName) {
+    if (!gameName || isLoading) {
         return <Loader />;
     }
 

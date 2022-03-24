@@ -38,11 +38,8 @@ const UserGame: FC<UserGameProps> = props => {
     const [breakTime, setBreakTime] = useState<number>(0);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const mediaMatch = window.matchMedia('(max-width: 768px)');
-
-    console.log('timeForAnswer:', timeForAnswer);
-    console.log('maxTime', maxTime);
-    console.log('vir', Math.ceil(100 * (timeForAnswer / maxTime)) + '%');
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -63,6 +60,7 @@ const UserGame: FC<UserGameProps> = props => {
                 'cookie': getCookie('authorization'),
             }));
 
+            clearInterval(checkStart);
             checkStart = setInterval(() => {
                 if (!isGameStarted) {
                     conn.send(JSON.stringify({
@@ -74,6 +72,7 @@ const UserGame: FC<UserGameProps> = props => {
                 }
             }, 5000);
 
+            clearInterval(ping);
             ping = setInterval(() => {
                 conn.send(JSON.stringify({
                     'action': 'ping'
@@ -93,10 +92,20 @@ const UserGame: FC<UserGameProps> = props => {
             const jsonMessage = JSON.parse(event.data);
             if (jsonMessage.action === 'gameNotStarted') {
                 setIsGameStarted(false);
+                setIsLoading(false);
                 return;
-            } else if (jsonMessage.action === 'startGame') {
-                setIsGameStarted(true);
-                clearInterval(checkStart);
+            } else if (jsonMessage.action === 'gameStatus') {
+                if (jsonMessage.isStarted) {
+                    setIsGameStarted(true);
+                    clearInterval(checkStart);
+
+                    conn.send(JSON.stringify({
+                        'cookie': getCookie('authorization'),
+                        'action': 'isOnBreak'
+                    }));
+                } else {
+                    setIsLoading(false);
+                }
             } else if (jsonMessage.action === 'time') {
                 setTimeForAnswer(() => {
                     const progress = document.querySelector('#progress-bar') as HTMLDivElement;
@@ -110,17 +119,20 @@ const UserGame: FC<UserGameProps> = props => {
                     return jsonMessage.time / 1000;
                 });
                 if (jsonMessage.isStarted) {
+                    clearInterval(progressBar);
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 }
                 setMaxTime(jsonMessage.maxTime / 1000);
             } else if (jsonMessage.action === 'start') {
                 setTimeForAnswer(jsonMessage.time / 1000);
+                clearInterval(progressBar);
                 progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 setMaxTime(jsonMessage.maxTime / 1000);
             } else if (jsonMessage.action === 'addTime') {
                 clearInterval(progressBar);
                 setTimeForAnswer(t => (t ?? 0) + 10);
                 if (jsonMessage.isStarted) {
+                    clearInterval(progressBar);
                     progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
                 }
                 setMaxTime(jsonMessage.maxTime / 1000);
@@ -166,6 +178,7 @@ const UserGame: FC<UserGameProps> = props => {
                 if (jsonMessage.status) {
                     setIsBreak(true);
                     setBreakTime(jsonMessage.time);
+                    clearInterval(interval);
                     interval = setInterval(() => setBreakTime((time) => {
                         if (time - 1 <= 0) {
                             clearInterval(interval);
@@ -178,6 +191,8 @@ const UserGame: FC<UserGameProps> = props => {
                     setIsBreak(false);
                     setBreakTime(0);
                 }
+
+                setIsLoading(false);
             }
         };
 
@@ -185,21 +200,20 @@ const UserGame: FC<UserGameProps> = props => {
     }, []);
 
     useEffect(() => {
-        if (isGameStarted) {
+        if (!isLoading && isGameStarted) {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'getQuestionNumber'
             }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'time'
-            }));
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'isOnBreak'
-            }));
+
+            if (!isBreak) {
+                conn.send(JSON.stringify({
+                    'cookie': getCookie('authorization'),
+                    'action': 'time'
+                }));
+            }
         }
-    }, [isGameStarted]);
+    }, [isLoading, isBreak])
 
     const getGameName = () => {
         const maxLength = mediaMatch.matches ? 22 : 34;
@@ -246,9 +260,9 @@ const UserGame: FC<UserGameProps> = props => {
         switch (true) {
             case (width <= 10):
                 return 'red';
-            case (width > 11 && width <= 25):
+            case (width >= 11 && width <= 25):
                 return 'orange';
-            case (width > 26 && width <= 50):
+            case (width >= 26 && width <= 50):
                 return 'yellow';
         }
 
@@ -264,6 +278,7 @@ const UserGame: FC<UserGameProps> = props => {
 
         const frame = () => {
             if (width <= 0) {
+                progressBar.style.width = 0 + '%';
                 clearInterval(id);
             } else {
                 changeColor(progressBar);
@@ -465,7 +480,7 @@ const UserGame: FC<UserGameProps> = props => {
         );
     }
 
-    return !gameName ? <Loader /> : renderPage();
+    return isLoading || !gameName ? <Loader /> : renderPage();
 };
 
 function mapStateToProps(state: AppState) {

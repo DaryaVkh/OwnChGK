@@ -25,6 +25,7 @@ import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces
 import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
 import {connect} from 'react-redux';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
+import Loader from "../../components/loader/loader";
 
 const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [page, setPage] = useState<string>('teams');
@@ -33,6 +34,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [userTeam, setUserTeam] = useState<string>('');
     const [gameId, setGameId] = useState<string>('');
     const [isTeamNotFree, setIsTeamNotFree] = useState<boolean>(false);
+    const [numberLoading, setNumberLoading] = useState<number>(0);
     let location = useLocation<{ page: string }>();
     const mediaMatch = window.matchMedia('(max-width: 768px)');
 
@@ -49,11 +51,13 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                     if (name !== undefined) {
                         setUserTeam(name);
                         setTeamsFromDB([{name, id}]);
+                        setNumberLoading(prev => Math.min(prev + 1, 2));
                     } else {
                         getTeamsWithoutUser().then(res => {
                             if (res.status === 200) {
                                 res.json().then(({teams}) => {
                                     setTeamsFromDB(teams.sort((team1: Team, team2: Team) => team1.name.toLowerCase() > team2.name.toLowerCase() ? 1 : -1));
+                                    setNumberLoading(prev => Math.min(prev + 1, 2));
                                 });
                             } else {
                                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -68,6 +72,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
             if (res.status === 200) {
                 res.json().then(({games}) => {
                     setGamesFromDB(games.sort((game1: Game, game2: Game) => game1.name.toLowerCase() > game2.name.toLowerCase() ? 1 : -1));
+                    setNumberLoading(prev => Math.min(prev + 1, 2));
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?
@@ -183,6 +188,10 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                 );
         }
     };
+
+    if (numberLoading < 2) {
+        return <Loader />;
+    }
 
     if (gameId) {
         return <Redirect to={`/game/${gameId}`}/>;

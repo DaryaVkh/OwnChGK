@@ -14,6 +14,7 @@ import Modal from '../../components/modal/modal';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import Scrollbar from '../../components/scrollbar/scrollbar';
+import Loader from "../../components/loader/loader";
 
 const inputStyles = {
     '& .MuiOutlinedInput-notchedOutline': {
@@ -93,8 +94,13 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
     const [admins, setAdmins] = useState<Admin[]>();
     const [newAdmin, setNewAdmin] = useState<Admin | null>(null);
     const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const scrollbars = useRef<Scrollbars>(null);
     let location = useLocation<{ page: string }>();
+
+    if (teams && games && admins && isLoading) {
+        setIsLoading(false);
+    }
 
     const emailStyles = {
         '& .MuiOutlinedInput-notchedOutline': {
@@ -332,7 +338,7 @@ const AdminStartScreen: FC<AdminStartScreenProps> = props => {
         }
     };
 
-    return (
+    return isLoading? <Loader /> : (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
                 <NavBar isAdmin={true} page={location.state !== undefined ? location.state.page : page}

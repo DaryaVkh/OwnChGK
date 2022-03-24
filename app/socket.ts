@@ -281,11 +281,10 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 time: games[gameId].breakTime
             }))
         } else if (jsonMessage.action == 'checkStart') {
-            if (games[gameId]) {
-                ws.send(JSON.stringify({
-                    'action': 'startGame'
-                }));
-            }
+            ws.send(JSON.stringify({
+                'action': 'gameStatus',
+                'isStarted': !!games[gameId]
+            }));
         }
 
         if (userRoles == 'admin' || userRoles == 'superadmin') {

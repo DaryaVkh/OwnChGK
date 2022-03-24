@@ -9,6 +9,7 @@ import _ from 'lodash';
 import {AnswerType, Opposition, Page} from '../../entities/admin-answers-page/admin-answers-page.interfaces';
 import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
+import Loader from "../../components/loader/loader";
 
 let conn: WebSocket;
 let ping: any;
@@ -25,6 +26,7 @@ const AdminAnswersPage: FC = () => {
     const [currentHandledAnswers, setCurrentHandledAnswers] = useState<string[]>([]);
     const [appeals, setAppeals] = useState<Opposition[]>([]);
     const [currentHandledAppeals, setCurrentHandledAppeals] = useState<string[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         function handleWindowResize() {
@@ -36,13 +38,6 @@ const AdminAnswersPage: FC = () => {
                 indicator.style.backgroundColor = 'white';
             }
         }
-
-        const indicator = document.querySelector('#indicator') as HTMLSpanElement;
-        const activeItem = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
-
-        indicator.style.width = `${activeItem.offsetWidth}px`;
-        indicator.style.left = `${activeItem.offsetLeft}px`;
-        indicator.style.backgroundColor = 'white';
 
         window.addEventListener('resize', handleWindowResize);
 
@@ -77,6 +72,7 @@ const AdminAnswersPage: FC = () => {
                 setRejectedAnswers(jsonMessage.rejectedAnswers);
                 setUncheckedAnswers(jsonMessage.uncheckedAnswers);
                 setGameAnswers([...jsonMessage.acceptedAnswers, ...jsonMessage.rejectedAnswers, ...jsonMessage.uncheckedAnswers]);
+                setIsLoading(false);
             } else if (jsonMessage.action === 'appealsByNumber') {
                 setAppeals(jsonMessage.appeals);
             }
@@ -87,6 +83,17 @@ const AdminAnswersPage: FC = () => {
             window.removeEventListener('resize', handleWindowResize);
         };
     }, []);
+
+    useEffect(() => {
+        if (!isLoading) {
+            const indicator = document.querySelector('#indicator') as HTMLSpanElement;
+            const activeItem = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
+
+            indicator.style.width = `${activeItem.offsetWidth}px`;
+            indicator.style.left = `${activeItem.offsetLeft}px`;
+            indicator.style.backgroundColor = 'white';
+        }
+    }, [isLoading])
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         const element = event.target as HTMLInputElement;
@@ -306,7 +313,7 @@ const AdminAnswersPage: FC = () => {
         }
     };
 
-    return (
+    return isLoading ? <Loader /> : (
         <PageWrapper>
             <Header isAuthorized={true} isAdmin={true}>
                 <Link to={`/admin/game/${gameId}`} className={classes.toGameLink}>В игру</Link>

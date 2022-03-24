@@ -11,6 +11,7 @@ const StartGame: FC = () => {
     const [gameName, setGameName] = useState<string>();
     const {gameId} = useParams<{ gameId: string }>();
     const [isGameStart, setIsGameStart] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -21,10 +22,12 @@ const StartGame: FC = () => {
                         changeToken(gameId).then((res) => {
                             if (res.status === 200) {
                                 setIsGameStart(true);
+                                setIsLoading(false);
                             }
                         })
                     } else {
                         setIsGameStart(false);
+                        setIsLoading(false);
                     }
                 });
             }
@@ -51,7 +54,7 @@ const StartGame: FC = () => {
             });
     };
 
-    if (!gameName) {
+    if (isLoading) {
         return <Loader />;
     }
 

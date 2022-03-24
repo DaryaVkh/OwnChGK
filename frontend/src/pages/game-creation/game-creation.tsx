@@ -13,6 +13,7 @@ import NavBar from '../../components/nav-bar/nav-bar';
 import {Team} from '../admin-start-screen/admin-start-screen';
 import {Skeleton} from '@mui/material';
 import PageBackdrop from '../../components/backdrop/backdrop';
+import Loader from "../../components/loader/loader";
 
 const GameCreator: FC<GameCreatorProps> = props => {
     const [teamsFromDB, setTeamsFromDB] = useState<Team[]>();
@@ -24,7 +25,12 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const [chosenTeams, setChosenTeams] = useState<string[]>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isGameNameInvalid, setIsGameNameInvalid] = useState<boolean>(false);
+    const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
     const oldGameId = props.mode === 'edit' ? location.state.id : '';
+
+    if (teamsFromDB && (props.mode != 'edit' || chosenTeams) && isPageLoading) {
+        setIsPageLoading(false);
+    }
 
     useEffect(() => {
         getAll('/teams/').then(res => {
@@ -80,11 +86,15 @@ const GameCreator: FC<GameCreatorProps> = props => {
             return Array.from(Array(5).keys()).map(i => <Skeleton key={`team_skeleton_${i}`} variant='rectangular' width='90%' height='5vh' sx={{margin: '0 0.4vw 1.3vh 1.4vw'}} />);
         }
 
-        return teamsFromDB.map((team, index) => {
-            return chosenTeams?.includes(team.name)
-                ? <CustomCheckbox name={team.name} key={index} checked={true} onChange={handleCheckboxChange}/>
-                : <CustomCheckbox name={team.name} key={index} onChange={handleCheckboxChange}/>;
-        });
+        return teamsFromDB
+            .sort((a: Team, b: Team) => chosenTeams?.includes(a.name) && chosenTeams?.includes(b.name) && a.name.toLowerCase() < b.name.toLowerCase()
+                || chosenTeams?.includes(a.name) && !chosenTeams?.includes(b.name)
+                || !chosenTeams?.includes(a.name) && !chosenTeams?.includes(b.name) && a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1)
+            .map((team, index) => {
+                return chosenTeams?.includes(team.name)
+                    ? <CustomCheckbox name={team.name} key={index} checked={true} onChange={handleCheckboxChange}/>
+                    : <CustomCheckbox name={team.name} key={index} onChange={handleCheckboxChange}/>;
+            });
     };
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
@@ -128,6 +138,10 @@ const GameCreator: FC<GameCreatorProps> = props => {
             setQuestionsCount(+event.target.value);
         }
     };
+
+    if (isPageLoading) {
+        return <Loader />;
+    }
 
     return isCreatedSuccessfully
         ? <Redirect to={{pathname: props.isAdmin ? '/admin/start-screen' : '/start-screen', state: {page: 'games'}}}/>

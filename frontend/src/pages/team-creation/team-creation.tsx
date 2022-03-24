@@ -20,6 +20,7 @@ import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
 import {connect} from 'react-redux';
 import {AppState} from '../../entities/app/app.interfaces';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
+import Loader from "../../components/loader/loader";
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>();
@@ -30,11 +31,13 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     const [teamName, setTeamName] = useState<string>(props.mode === 'edit' ? location.state.name : '');
     const [captain, setCaptain] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
     const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     useEffect(() => {
         if (!props.isAdmin) {
             setCaptain(props.userEmail);
+            setIsPageLoading(false);
         } else {
             getUsersWithoutTeam().then(res => {
                 if (res.status === 200) {
@@ -49,9 +52,12 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                         if (data.captain) {
                                             setUsersFromDB([...users, data.captain]);
                                         }
+                                        setIsPageLoading(false);
                                     });
                                 }
                             });
+                        } else {
+                            setIsPageLoading(false);
                         }
                     });
                 } else {
@@ -95,6 +101,10 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
             });
         }
     };
+
+    if (isPageLoading) {
+        return <Loader />;
+    }
 
     return isCreatedSuccessfully
         ? <Redirect to={{pathname: props.isAdmin ? '/admin/start-screen' : '/start-screen', state: {page: 'teams'}}}/>
