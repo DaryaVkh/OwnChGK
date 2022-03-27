@@ -3,6 +3,9 @@ const { Builder, By, Key, until } = require('selenium-webdriver');
 const firefox = require('selenium-webdriver/firefox');
 let driver;
 
+const loginSecret;
+const passwordSecret;
+
 
 const port = parseInt(process.env.PORT || '3000');
 const url = 'http://localhost:'+port + '/admin'

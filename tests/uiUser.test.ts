@@ -4,7 +4,9 @@ const firefox = require('selenium-webdriver/firefox');
 let driver;
 
 const port = parseInt(process.env.PORT || '3000');
-const url = 'http://localhost:' + port
+const url = 'http://localhost:' + port;
+const loginUserSecret;
+const passwordUserSecret;
 
 
 beforeEach(async function () {
@@ -33,7 +35,7 @@ test('Should_click_reset', async () => {
 }, 60000);
 
 test('Should_successful_login', async () => {
-    await login(loginUserSecret, passworUserdSecret, "teams")
+    await login(loginUserSecret, passwordUserSecret, "teams")
 
     let url = await driver.getCurrentUrl();
     expect(url).toContain('/start-screen');
@@ -55,7 +57,7 @@ test('Should_go_to_change_password', async () => {
 }, 60000);
 
 test('Should_go_to_team_creation', async () => {
-    await login(loginUserSecret, passworUserdSecret, "teams")
+    await login(loginUserSecret, passwordUserSecret, "teams")
 
     let button = await driver.findElement(By.id('addTeamButton'));
     button.click();
@@ -68,11 +70,11 @@ test('Should_go_to_team_creation', async () => {
     expect(url).toContain('/team-creation');
     expect(await teamNameInput.getAttribute("placeholder")).toBe("Название")
     expect(await saveTeamButton.getText()).toBe("Создать");
-    expect(await captainInput.getAttribute("value")).toBe("qi@ru.ru");
+    expect(await captainInput.getAttribute("value")).toBe(loginUserSecret);
 }, 60000);
 
 test('Should_user_logout', async () => {
-    await login(loginUserSecret, passworUserdSecret, "games")
+    await login(loginUserSecret, passwordUserSecret, "games")
     let cookie = await driver.manage().getCookie("authorization");
     expect(cookie).not.toBeNull();
 
