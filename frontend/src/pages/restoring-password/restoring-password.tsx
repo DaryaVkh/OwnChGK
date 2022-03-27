@@ -132,7 +132,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                              style={{justifyContent: isEmailInvalid && !mediaMatch.matches
                                      ? 'space-between'
                                      : (!isEmailInvalid && !mediaMatch.matches ? 'flex-end' : 'center')}}>
-                            <Link className={classes.linkToSignIn} to={props.isAdmin ? '/admin' : '/auth'}>Вспомнил
+                            <Link className={classes.linkToSignIn} to={props.isAdmin ? '/admin' : '/auth'} id="remember">Вспомнил
                                 пароль</Link>
                         </div>
                     </form>

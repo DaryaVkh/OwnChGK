@@ -40,12 +40,12 @@ const Header: FC<HeaderProps> = props => {
                             <Fragment>
                                 <Link className={classes.Profile} to={props.isAdmin ? '/admin/profile' : '/profile'}>
                                     <img className={classes.Profile} src={require('../../images/Profile.svg').default}
-                                         alt="Profile"/>
+                                         alt="Profile" id="profile"/>
                                 </Link>
                                 <Link className={classes.LogOut}
                                       to={props.isLoggedIn ? '#' : (props.isAdmin ? '/admin' : '/auth')} onClick={handleLogout}>
                                     <img className={classes.LogOut} src={require('../../images/LogOut.svg').default}
-                                         alt="LogOut"/>
+                                         alt="LogOut" id="logout"/>
                                 </Link>
                             </Fragment>
                     )

@@ -156,7 +156,7 @@ const Profile: FC<ProfileProps> = props => {
 
                             <div className={classes.infoCategoryWrapper} style={{marginTop: '3vh'}}>
                                 <p className={classes.category}>Почта</p>
-                                <p className={classes.userData}>{userEmail}</p>
+                                <p id='email' className={classes.userData}>{userEmail}</p>
                             </div>
                         </div>
 
