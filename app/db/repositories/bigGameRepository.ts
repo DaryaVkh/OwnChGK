@@ -1,10 +1,10 @@
-import {EntityManager, EntityRepository, In, Repository} from 'typeorm';
+import {EntityRepository, getCustomRepository, In, Repository} from 'typeorm';
 import {BigGame} from "../entities/BigGame";
 import {Admin} from "../entities/Admin";
 import {Team} from "../entities/Team";
 import {Game, GameStatus, GameType} from "../entities/Game";
 import {Round} from "../entities/Round";
-import {Question} from "../entities/Questions";
+import {GameRepository} from "./gameRepository";
 
 @EntityRepository(BigGame)
 export class BigGameRepository extends Repository<BigGame> {
@@ -40,7 +40,7 @@ export class BigGameRepository extends Repository<BigGame> {
             const game = await manager.create(Game, {type: GameType.CHGK, bigGame});
             await manager.save(game);
 
-            await BigGameRepository.createRoundsWithQuestions(roundCount, questionCount, manager, game, questionTime, questionCost);
+            await getCustomRepository(GameRepository).createRoundsWithQuestions(roundCount, questionCount, manager, game, questionTime, questionCost);
 
             return bigGame;
         });
@@ -63,23 +63,10 @@ export class BigGameRepository extends Repository<BigGame> {
             const game = bigGame.games.find(game => game.type == GameType.CHGK);
             await manager.delete(Round, {game});
 
-            await BigGameRepository.createRoundsWithQuestions(roundCount, questionCount, manager, game, questionTime, questionCost);
+            await getCustomRepository(GameRepository).createRoundsWithQuestions(roundCount, questionCount, manager, game, questionTime, questionCost);
 
             return bigGame;
         });
-    }
-
-    private static async createRoundsWithQuestions(roundCount: number, questionCount: number, manager: EntityManager,
-                                                   game: Game, questionTime: number, questionCost: number) {
-        for (let i = 1; i <= roundCount; i++) {
-            const round = await manager.create(Round, {number: i, game, questionTime});
-            await manager.save(round);
-
-            for (let j = 1; j <= questionCount; j++) {
-                const question = await manager.create(Question, {cost: questionCost, round});
-                await manager.save(question);
-            }
-        }
     }
 
     updateNameById(bigGameId: string, newName: string) {
@@ -91,7 +78,7 @@ export class BigGameRepository extends Repository<BigGame> {
         });
     }
 
-    updateByIdAndAdminEmail(bigGameId: string, newAdminEmail: string) {
+    updateAdminByIdAndAdminEmail(bigGameId: string, newAdminEmail: string) {
         return this.manager.transaction(async manager => {
             const admin = await manager.findOne(Admin, {email: newAdminEmail});
             const bigGame = await manager.findOne(BigGame, bigGameId);

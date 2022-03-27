@@ -116,7 +116,7 @@ export class GamesController {
             }
             const {gameId} = req.params;
             const {admin} = req.body;
-            await getCustomRepository(BigGameRepository).updateByIdAndAdminEmail(gameId, admin);
+            await getCustomRepository(BigGameRepository).updateAdminByIdAndAdminEmail(gameId, admin);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
