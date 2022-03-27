@@ -1,4 +1,4 @@
-import React, {FC, useState, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './team-creation.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
@@ -11,7 +11,7 @@ import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Autocomplete, Skeleton, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
-import {useLocation, Redirect} from 'react-router-dom';
+import {Redirect, useLocation} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
 import PageBackdrop from '../../components/backdrop/backdrop';
 import {Dispatch} from 'redux';
@@ -19,6 +19,8 @@ import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces
 import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
 import {connect} from 'react-redux';
 import {AppState} from '../../entities/app/app.interfaces';
+import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
+import Loader from "../../components/loader/loader";
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>();
@@ -29,10 +31,13 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     const [teamName, setTeamName] = useState<string>(props.mode === 'edit' ? location.state.name : '');
     const [captain, setCaptain] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     useEffect(() => {
         if (!props.isAdmin) {
             setCaptain(props.userEmail);
+            setIsPageLoading(false);
         } else {
             getUsersWithoutTeam().then(res => {
                 if (res.status === 200) {
@@ -47,9 +52,12 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                         if (data.captain) {
                                             setUsersFromDB([...users, data.captain]);
                                         }
+                                        setIsPageLoading(false);
                                     });
                                 }
                             });
+                        } else {
+                            setIsPageLoading(false);
                         }
                     });
                 } else {
@@ -94,15 +102,28 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
         }
     };
 
+    if (isPageLoading) {
+        return <Loader />;
+    }
+
     return isCreatedSuccessfully
         ? <Redirect to={{pathname: props.isAdmin ? '/admin/start-screen' : '/start-screen', state: {page: 'teams'}}}/>
         :
         (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={true}>
-                    <NavBar isAdmin={props.isAdmin} page=""/>
+                    {
+                        !mediaMatch.matches
+                            ? <NavBar isAdmin={props.isAdmin} page=""/>
+                            : null
+                    }
                 </Header>
 
+                {
+                    mediaMatch.matches
+                        ? <MobileNavbar isAdmin={props.isAdmin} page="" isGame={false}/>
+                        : null
+                }
                 <form className={classes.teamCreationForm} onSubmit={handleSubmit}>
                     <div className={classes.contentWrapper}>
                         {
@@ -113,11 +134,16 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
                         {
                             (usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation')) || !props.isAdmin
-                                ? <CustomInput type='text' id='teamName' name='teamName' placeholder='Название'
-                                      value={teamName}
-                                      defaultValue={teamName}
-                                      onChange={handleInputChange} isInvalid={isNameInvalid} errorHelperText={'Команда с таким названием уже существует'}/>
-                                : <Skeleton variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '3%'}} />
+                                ? <CustomInput type='text' id='teamName'
+                                               name='teamName'
+                                               style={{marginBottom: '9%'}}
+                                               placeholder='Название'
+                                               value={teamName}
+                                               defaultValue={teamName}
+                                               onChange={handleInputChange}
+                                               isInvalid={isNameInvalid}
+                                               errorHelperText={'Такая команда уже существует'}/>
+                                : <Skeleton variant='rectangular' width='100%' height={mediaMatch.matches ? '6vh' : '7vh'} sx={{marginBottom: '3%'}} />
                         }
 
                         {
@@ -164,7 +190,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                                         }}
                                                         renderInput={(params) => <TextField {...params} placeholder="Капитан"/>}
                                         />
-                                        : <Skeleton variant='rectangular' width='100%' height='7vh' sx={{marginBottom: '3%'}} />
+                                        : <Skeleton variant='rectangular' width='100%' height={mediaMatch.matches ? '6vh' : '7vh'} sx={{marginBottom: '3%'}} />
                                 )
                         }
 
@@ -172,7 +198,10 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
                     <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={props.isAdmin && !(usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation'))}
                                 style={{
-                                    padding: '0 2vw', fontSize: '1.5vw', height: '7vh', marginBottom: '2.5vh',
+                                    padding: mediaMatch.matches ? '0 13vw' : '0 2vw', fontSize: mediaMatch.matches ? '6.5vw' : '1.5vw',
+                                    height: mediaMatch.matches ? '13vw' : '7vh', marginBottom: '2.5vh',
+                                    borderRadius: '7px',
+                                    fontWeight: 700,
                                     filter: 'drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2))'
                                 }}/>
                 </form>

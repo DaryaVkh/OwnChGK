@@ -1,6 +1,6 @@
 import {Entity, Column, PrimaryGeneratedColumn, OneToMany} from 'typeorm';
 import {Person} from './Person';
-import {Game} from './Game';
+import {BigGame} from "./BigGame";
 
 export enum AdminRoles {
     ADMIN = 'admin',
@@ -9,8 +9,8 @@ export enum AdminRoles {
 
 @Entity('admins')
 export class Admin extends Person {
-    @PrimaryGeneratedColumn({name: 'admin_id'})
-    id: number;
+    @PrimaryGeneratedColumn('uuid', {name: 'admin_id'})
+    id: string;
 
     @Column({
         type: 'enum',
@@ -20,8 +20,8 @@ export class Admin extends Person {
     role: string;
 
     @OneToMany(
-        () => Game,
+        () => BigGame,
         game => game.admin
     )
-    games: Game[];
+    bigGames: BigGame[];
 }

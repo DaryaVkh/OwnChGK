@@ -9,6 +9,7 @@ export const CustomInput: FC<InputProps> = props => {
         password: '',
         showPassword: false
     });
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     let required: boolean;
     if (props.required !== undefined) {
@@ -21,12 +22,14 @@ export const CustomInput: FC<InputProps> = props => {
     const styles = {
         '& .MuiOutlinedInput-notchedOutline': {
             border: props.isInvalid ? '2px solid #FF0000 !important' : '2px solid var(--foreground-color) !important',
-            borderRadius: '8px',
+            borderRadius: '9px',
             minHeight: '26px',
             padding: '0 !important'
         },
         '& .MuiOutlinedInput-input': {
-            padding: '0 0 0 1.5vw !important',
+            padding: mediaMatch.matches
+                ? (props.type === 'password' ? '0 0 0 5.5vw !important' : '0 5.5vw 0 !important')
+                : (props.type === 'password' ? '0 0 0 1.5vmax !important' : '0 1.5vmax 0 !important'),
             color: 'black',
         }
     };
@@ -47,7 +50,7 @@ export const CustomInput: FC<InputProps> = props => {
     };
 
     return (
-        <FormControl variant='outlined' sx={{marginBottom: '3%'}} fullWidth={true} style={props.style}>
+        <FormControl variant='outlined' sx={{marginBottom: mediaMatch.matches ? '5%' : '3%'}} fullWidth={true} style={props.style}>
             <OutlinedInput className={cls.join(' ')}
                            fullWidth={true}
                            autoComplete={props.type === 'password' ? 'new-password' : 'off'}
@@ -71,11 +74,6 @@ export const CustomInput: FC<InputProps> = props => {
                                        <IconButton
                                            onClick={handleClickShowPassword}
                                            edge="end"
-                                           sx={{
-                                               '& .MuiSvgIcon-root': {
-                                                   color: 'var(--background-color)'
-                                               }
-                                           }}
                                        >
                                            {values.showPassword ? <VisibilityOff/> : <Visibility/>}
                                        </IconButton>
@@ -87,7 +85,13 @@ export const CustomInput: FC<InputProps> = props => {
             {
                 props.isInvalid && props.errorHelperText
                     ?
-                    <FormHelperText sx={{marginLeft: '0 !important', fontSize: '1vmax', color: '#FF0000'}}>
+                    <FormHelperText sx={{
+                        marginLeft: '0 !important',
+                        fontSize: mediaMatch.matches ? '3.5vw' : '1vmax',
+                        color: '#FF0000',
+                        position: 'absolute',
+                        top: mediaMatch.matches ? '12.5vw' : '6.7vh'
+                    }}>
                         {props.errorHelperText}
                     </FormHelperText>
                     : null

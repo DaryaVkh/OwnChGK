@@ -3,12 +3,13 @@ import {TableCell, TableRow} from '@mui/material';
 import {TeamTableRowProps, TourHeaderCellProps} from '../../entities/table/table.interfaces';
 
 export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
     const tableCellStyles = {
         color: 'white',
-        fontSize: '1.5vw',
+        fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
         fontWeight: '700',
-        minWidth: '7vw',
-        maxWidth: '7vw',
+        minWidth: mediaMatch.matches ? '20vw' : '7vw',
+        maxWidth: mediaMatch.matches ? '20vw' : '7vw',
     };
 
     const handleExpandClick = () => {
@@ -23,8 +24,8 @@ export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
                            variant='head'
                            key={`header_tour_${i}`}
                            style={{
-                               minWidth: '2.5vw',
-                               maxWidth: '2.5vw'
+                               minWidth: mediaMatch.matches ? '10vw' : '2.5vw',
+                               maxWidth: mediaMatch.matches ? '10vw' : '2.5vw'
                            }}>
                     {i + 1}
                 </TableCell>
@@ -35,7 +36,7 @@ export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
     return (
         <>
             <TableCell sx={tableCellStyles} align='center' variant='head' onClick={handleExpandClick} style={{
-                width: '7vw',
+                width: mediaMatch.matches ? '20vw' : '7vw',
                 cursor: 'pointer',
             }}>
                 Тур {props.tourNumber} {props.isExpanded ? '←' : '→'}
@@ -46,26 +47,27 @@ export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
 };
 
 const TourCell: FC<{ tourResults: number[], isExpanded: boolean }> = props => {
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
     const styles = {
         color: 'white',
-        fontSize: '1.3vw',
+        fontSize: mediaMatch.matches ? '1.8vmax' : '1.3vw',
         fontWeight: '400',
-        minWidth: '7vw',
-        maxWidth: '7vw'
+        minWidth: mediaMatch.matches ? '20vw' : '7vw',
+        maxWidth: mediaMatch.matches ? '20vw' : '7vw'
     };
     const successResult = {
         color: '#CDFFC9',
-        fontSize: '1.3vw',
+        fontSize: mediaMatch.matches ? '1.8vmax' : '1.3vw',
         fontWeight: '400',
-        minWidth: '2vw',
-        maxWidth: '2vw'
+        minWidth: mediaMatch.matches ? '10vw' : '2vw',
+        maxWidth: mediaMatch.matches ? '10vw' : '2vw'
     };
     const errorResult = {
         color: '#FFC9C9',
-        fontSize: '1.3vw',
+        fontSize: mediaMatch.matches ? '1.8vmax' : '1.3vw',
         fontWeight: '400',
-        minWidth: '2vw',
-        maxWidth: '2vw'
+        minWidth: mediaMatch.matches ? '10vw' : '2vw',
+        maxWidth: mediaMatch.matches ? '10vw' : '2vw'
     };
 
     const renderExpandedResults = () => {
@@ -89,9 +91,10 @@ const TourCell: FC<{ tourResults: number[], isExpanded: boolean }> = props => {
 };
 
 export const TeamTableRow: FC<TeamTableRowProps> = props => {
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
     const bodyTableCellStyles = {
         color: 'white',
-        fontSize: '1.3vw',
+        fontSize: mediaMatch.matches ? '1.8vmax' : '1.3vw',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
     };
@@ -117,11 +120,20 @@ export const TeamTableRow: FC<TeamTableRowProps> = props => {
     return (
         <TableRow>
             <TableCell sx={bodyTableCellStyles} align='center' variant='body'
-                       style={{minWidth: '8vw', maxWidth: '8vw', fontWeight: 700}}>{props.place}</TableCell>
+                       style={{
+                           minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                           maxWidth: mediaMatch.matches ? '20vw' : '8vw',
+                           fontWeight: 700}}>{props.place}</TableCell>
             <TableCell sx={bodyTableCellStyles} align='left' variant='body'
-                       style={{minWidth: '16vw', maxWidth: '16vw', whiteSpace: 'nowrap'}}>{props.teamName}</TableCell>
+                       style={{
+                           minWidth: mediaMatch.matches ? '40vw' : '16vw',
+                           maxWidth: mediaMatch.matches ? '40vw' : '16vw',
+                           whiteSpace: 'nowrap'}}>{props.teamName}</TableCell>
             <TableCell sx={bodyTableCellStyles} align='center' variant='body'
-                       style={{minWidth: '8vw', maxWidth: '8vw', fontWeight: 700}}>{countSums().reduce((a, b) => a +
+                       style={{
+                           minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                           maxWidth: mediaMatch.matches ? '20vw' : '8vw',
+                           fontWeight: 700}}>{countSums().reduce((a, b) => a +
                 b)}</TableCell>
             {renderTourCells()}
         </TableRow>

@@ -35,6 +35,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -132,6 +133,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                 setChosenTourNumber(jsonMessage.round);
                 setActiveTour(jsonMessage.round);
                 setActiveQuestion(jsonMessage.question);
+                setIsLoading(false);
             }
         };
 
@@ -173,7 +175,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     }
 
     const getGameName = () => {
-        if ((gameName as string).length > 34) {
+        if ((gameName as string)?.length > 34) {
             return (gameName as string).substr(0, 34) + '\u2026';
         } else {
             return gameName;
@@ -311,7 +313,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         }))
     }
 
-    if (!gameName || !toursCount || !questionsCount) {
+    if (isLoading || !gameName) {
         return <Loader />;
     }
 
@@ -337,18 +339,18 @@ const AdminGame: FC<AdminGameProps> = props => {
                     <button className={`${classes.button} ${classes.breakButton}`}
                             onClick={isBreak ? stopBreak : openBreakModal}>{isBreak ? 'Остановить перерыв' : 'Перерыв'}</button>
 
-                    <button className={`${classes.button} ${classes.playButton}`} onClick={handlePlayClick}>
+                    <button className={`${classes.button} ${classes.playButton}`} disabled={isBreak} onClick={handlePlayClick}>
                         {playOrPause === 'play'
                             ? <PlayArrowIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
                             : <PauseIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
                         }
                     </button>
 
-                    <button className={`${classes.button} ${classes.stopButton}`} onClick={handleStopClick}>
+                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak} onClick={handleStopClick}>
                         <StopIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
                     </button>
 
-                    <button className={`${classes.button} ${classes.tenSecondsButton}`} onClick={handleAddedTimeClick}>+
+                    <button className={`${classes.button} ${classes.tenSecondsButton}`} disabled={isBreak} onClick={handleAddedTimeClick}>+
                         10 сек.
                     </button>
 

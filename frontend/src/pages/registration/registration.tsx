@@ -5,7 +5,6 @@ import {FormButton} from '../../components/form-button/form-button';
 import {Link, Redirect} from 'react-router-dom';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
-import {Alert} from '@mui/material';
 import {RegistrationDispatchProps, RegistrationProps} from '../../entities/registration/registration.interfaces';
 import {Dispatch} from 'redux';
 import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
@@ -21,6 +20,7 @@ const Registration: FC<RegistrationProps> = props => {
     const [password, setPassword] = useState<string>('');
     const [repeatedPassword, setRepeatedPassword] = useState<string>('');
     const [isError, setIsError] = useState<boolean>(false);
+    const [isRegisteredAlready, setIsRegisteredAlready] = useState(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const checkRepeatedPassword = () => {
@@ -57,6 +57,9 @@ const Registration: FC<RegistrationProps> = props => {
                 if (response.status === 200) {
                     props.onAuthorizeUserWithRole('user', '', email, '');
                     setLoggedIn(true);
+                } else if (response.status === 409) {
+                    setIsRegisteredAlready(true);
+                    setIsLoading(false);
                 } else {
                     setIsError(true);
                     setIsLoading(false);
@@ -77,29 +80,17 @@ const Registration: FC<RegistrationProps> = props => {
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
                 <form onSubmit={validateForm}>
-                    {
-                        isRepeatedPasswordInvalid || isError
-                            ?
-                            <Alert severity="error" sx={
-                                {
-                                    color: 'white',
-                                    backgroundColor: '#F44336',
-                                    marginBottom: '2vh',
-                                    marginTop: '-5vh',
-                                    '& .MuiAlert-icon': {
-                                        color: 'white'
-                                    }
-                                }
-                            }>
-                                {isRepeatedPasswordInvalid ? 'Пароли не совпадают' : 'Ошибка регистрации, попробуйте снова'}
-                            </Alert>
-                            : null
-                    }
-                    <CustomInput type="email" id="email" name="email" placeholder="E-mail" value={email} onChange={handleEmailChange}/>
+                    <CustomInput type="email" id="email" name="email" placeholder="Почта"
+                                 style={{marginBottom: '9%'}}
+                                 value={email} onChange={handleEmailChange}
+                                 isInvalid={isError || isRegisteredAlready}
+                                 errorHelperText={isRegisteredAlready ? 'Эта почта уже зарегистрирована' : ''}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль" value={password}
-                                 isInvalid={isRepeatedPasswordInvalid} onChange={handlePasswordChange}/>
+                                 isInvalid={isRepeatedPasswordInvalid || isError} onChange={handlePasswordChange}/>
                     <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите пароль" value={repeatedPassword}
-                                 isInvalid={isRepeatedPasswordInvalid} onChange={handleRepeatedPasswordChange}/>
+                                 isInvalid={isRepeatedPasswordInvalid || isError} onChange={handleRepeatedPasswordChange}
+                                 errorHelperText={isRepeatedPasswordInvalid ? 'Пароли не совпадают' : 'Ошибка регистрации, попробуйте снова'}
+                    />
 
                     <FormButton type="signUpButton" text="Зарегистрироваться"/>
                 </form>

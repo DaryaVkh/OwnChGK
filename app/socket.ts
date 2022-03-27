@@ -1,4 +1,4 @@
-import {GameType} from './logic/Game';
+import {Game, GameType} from './logic/Game';
 import {Status} from './logic/AnswerAndAppeal';
 import jwt from 'jsonwebtoken';
 import {secret} from './jwtToken';
@@ -138,14 +138,14 @@ function PauseTimer(gameId: number) {
     }
 }
 
-function GiveAnswer(answer: string, teamId: number, gameId: number) {
+function GiveAnswer(answer: string, teamId: string, gameId: number) {
     console.log('received: %s', answer, teamId);
     const roundNumber = bigGames[gameId].CurrentGame.currentQuestion[0] - 1;
     const questionNumber = bigGames[gameId].CurrentGame.currentQuestion[1] - 1;
     bigGames[gameId].CurrentGame.rounds[roundNumber].questions[questionNumber].giveAnswer(bigGames[gameId].CurrentGame.teams[teamId], answer);
 }
 
-function GiveAppeal(appeal: string, teamId: number, gameId: number, number: number, answer: string) {
+function GiveAppeal(appeal: string, teamId: string, gameId: number, number: number, answer: string) {
     console.log('received: %s', appeal, teamId);
     const roundNumber = Math.ceil(number / bigGames[gameId].CurrentGame.rounds[0].questionsCount);
     let questionNumber = number - (roundNumber - 1) * bigGames[gameId].CurrentGame.rounds[0].questionsCount;
@@ -194,7 +194,7 @@ function GetAppealsByNumber(gameId: number, roundNumber: number, questionNumber:
         .filter(value => value.status === Status.UnChecked)
         .map(appeal => {
             return {
-                teamName: bigGames[gameId].CurrentGame.teams[appeal.teamNumber].name,
+                teamName: bigGames[gameId].CurrentGame.teams[appeal.teamId].name,
                 text: appeal.text,
                 answer: bigGames[gameId].CurrentGame.teams[appeal.teamNumber].getAnswer(roundNumber, questionNumber).text
             }
@@ -287,11 +287,12 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 time: bigGames[gameId].CurrentGame.breakTime
             }))
         } else if (jsonMessage.action == 'checkStart') {
-            if (bigGames[gameId].CurrentGame) {
-                ws.send(JSON.stringify({
-                    'action': 'startGame'
-                }));
-            }
+        	if (bigGames[gameId].CurrentGame) {
+	            ws.send(JSON.stringify({
+	                'action': 'gameStatus',
+	                'isStarted': !!games[gameId]
+	            }));
+			}
         }
 
         if (userRoles == 'admin' || userRoles == 'superadmin') {

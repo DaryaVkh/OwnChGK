@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useState} from 'react';
 import classes from './authorization.module.scss';
 import Header from '../../components/header/header';
 import {FormButton} from '../../components/form-button/form-button';
@@ -10,7 +10,6 @@ import {
 } from '../../entities/authorization/authorization.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {CustomInput} from '../../components/custom-input/custom-input';
-import {Alert} from '@mui/material';
 import {connect} from 'react-redux';
 import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces';
 import {Dispatch} from 'redux';
@@ -65,21 +64,12 @@ const Authorization: FC<AuthorizationProps> = props => {
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
                 <form onSubmit={handleSubmit}>
-                    {wrongEmailOrPassword ? <Alert severity="error" sx={{
-                        color: 'white',
-                        backgroundColor: '#F44336',
-                        marginBottom: '2vh',
-                        marginTop: '-3vh',
-                        '& .MuiAlert-icon': {
-                            color: 'white'
-                        }
-                    }}>Неверный логин или пароль</Alert> : null}
-                    <CustomInput type="email" id="email" name="email" placeholder="E-mail" value={email}
+                    <CustomInput type="email" id="email" name="email" placeholder="Почта" value={email}
                                  onChange={handleEmailChange} isInvalid={wrongEmailOrPassword}
                                  onFocus={handleErrorFixes}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль" value={password}
                                  onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword}
-                                 onFocus={handleErrorFixes}/>
+                                 onFocus={handleErrorFixes} errorHelperText='Неверный логин или пароль'/>
 
                     <FormButton type="signInButton" text="Войти"/>
                 </form>

@@ -1,13 +1,13 @@
 export class Answer {
-    public readonly teamNumber: number;
+    public readonly teamId: string;
     public readonly text: string;
     public readonly roundNumber: number;
     public readonly questionNumber: number;
     private _score: number;
     private _status: Status;
 
-    constructor(teamNumber: number, roundNumber: number, questionNumber: number, text: string) {
-        this.teamNumber = teamNumber;
+    constructor(teamId: string, roundNumber: number, questionNumber: number, text: string) {
+        this.teamId = teamId;
         this.roundNumber = roundNumber;
         this.questionNumber = questionNumber;
         this.text = text;
@@ -40,7 +40,7 @@ export class Answer {
 
 
 export class Appeal {
-    public readonly teamNumber: number;
+    public readonly teamId: string;
     public readonly text: string;
     public readonly roundNumber: number;
     public readonly questionNumber: number;
@@ -48,8 +48,8 @@ export class Appeal {
     private _comment: string;
     private _status: Status;
 
-    constructor(teamNumber: number, roundNumber: number, questionNumber: number, text: string, wrongAnswer: string) {
-        this.teamNumber = teamNumber;
+    constructor(teamId: string, roundNumber: number, questionNumber: number, text: string, wrongAnswer: string) {
+        this.teamId = teamId;
         this.roundNumber = roundNumber;
         this.questionNumber = questionNumber;
         this.text = text;

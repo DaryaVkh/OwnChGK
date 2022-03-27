@@ -1,0 +1,39 @@
+.MobileNavBar {
+    width: 100%;
+    height: 13vw;
+    position: fixed;
+    top: 15vw;
+    display: flex;
+    z-index: 1000;
+}
+
+.linkWrapper,
+.gameLinkWrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 0 1.5vh 0.5vh rgba(50, 130, 184, 0.25);
+    background-color: var(--background-color);
+    border: 1px solid transparent;
+}
+
+.linkWrapper {
+    width: 50%;
+}
+
+.gameLinkWrapper {
+    width: 100%;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: white;
+    font-size: 5.5vmin;
+    font-weight: 200;
+    text-align: center;
+}
+
+.is-active {
+    font-weight: 600;
+}

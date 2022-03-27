@@ -85,3 +85,26 @@
     height: 6vh;
     justify-content: center;
 }
+
+@media only screen and (max-width: 768px) {
+    .contentWrapper {
+        width: 90%;
+
+        .buttonsWrapper {
+
+            .button {
+                height: 5vh;
+                font-size: 1.8vmax;
+            }
+        }
+
+        .tableWrapper {
+            padding: 1vh 2vw 1vh 1vw;
+        }
+    }
+
+    .intrigueParagraph {
+        height: 5vh;
+        font-size: 1.5vmax;
+    }
+}

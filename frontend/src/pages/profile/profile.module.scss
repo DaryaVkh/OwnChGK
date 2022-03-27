@@ -81,7 +81,7 @@
   font-weight: 700;
   border: 2px solid var(--foreground-color);
   border-radius: 7px;
-  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 3px 3px rgba(255, 255, 255, .4));
   overflow: hidden;
   user-select: none;
   font-family: Roboto, sans-serif;
@@ -94,5 +94,47 @@
 
   &:active {
     box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .pageTitle {
+    font-size: 6.6vw;
+  }
+
+  .box {
+    width: 80%;
+  }
+
+  .contentWrapper {
+    flex-direction: column;
+    margin-top: 5vh;
+    height: 65%;
+  }
+
+  .infoWrapper {
+    width: 100%;
+  }
+
+  .changePasswordWrapper {
+    width: 100%;
+  }
+
+  .changePasswordParagraph {
+    font-size: 6.6vw;
+  }
+
+  .infoCategoryWrapper {
+    font-size: 4.4vw;
+  }
+
+  .buttonWrapper {
+    width: 65%;
+  }
+
+  .saveButton {
+    height: 13vw;
+    font-size: 6vw;
+    margin-top: 10vh;
   }
 }

@@ -42,10 +42,18 @@
   flex-direction: column;
   margin-bottom: 1vh;
 
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
   .answerWrapper {
     width: 100%;
     display: flex;
     margin-bottom: 1vh;
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
 
     .answerNumber {
       width: 10%;
@@ -101,5 +109,49 @@
       box-sizing: border-box;
       resize: none;
     }
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .userAnswerWrapper {
+    margin-bottom: 1.5vh;
+
+    .answerWrapper {
+      margin-bottom: 1.5vh;
+
+      .answerNumber {
+        font-size: 6vmin;
+        width: 8%;
+      }
+
+      .answer {
+        height: 11vw;
+        font-size: 4.4vw;
+        padding: 0 0 0 3vmin;
+      }
+    }
+
+    .oppositionWrapper {
+      padding-left: 8%;
+
+      .oppositionText {
+        font-size: 3.7vw;
+        padding: 2.6vw 3vmin;
+      }
+    }
+  }
+
+  .oppositionButton {
+    height: 11vw;
+    font-size: 3vmin;
+    padding: 0;
+    width: 22%;
+  }
+
+  .sendOppositionButton {
+    height: 11vw;
+    font-size: 3vmin;
+    width: 22%;
+    padding: 0;
   }
 }

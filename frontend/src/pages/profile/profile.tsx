@@ -166,7 +166,8 @@ const Profile: FC<ProfileProps> = props => {
                             <CustomInput type="password" id="old-password" name="old-password"
                                          placeholder="Введите старый пароль" style={{marginBottom: '3.5vh'}}
                                          isInvalid={isOldPasswordInvalid} required={false} value={userOldPassword}
-                                         onChange={handleUserOldPassportChange}/>
+                                         onChange={handleUserOldPassportChange}
+                                         errorHelperText='Неверный старый пароль'/>
                             <CustomInput type="password" id="new-password" name="new-password"
                                          placeholder="Введите новый пароль" isInvalid={isRepeatedPasswordInvalid}
                                          required={false} value={userPassword}
@@ -174,25 +175,8 @@ const Profile: FC<ProfileProps> = props => {
                             <CustomInput type="password" id="repeat-new-password" name="repeat-new-password"
                                          placeholder="Повторите новый пароль" isInvalid={isRepeatedPasswordInvalid}
                                          value={repeatedPassword} onChange={handleRepeatedPasswordChange}
-                                         onBlur={checkRepeatedPassword} required={false}/>
-
-                            {isOldPasswordInvalid ? <Alert severity="error" sx={{
-                                color: 'white',
-                                backgroundColor: '#F44336',
-                                marginTop: '1vh',
-                                '& .MuiAlert-icon': {
-                                    color: 'white'
-                                }
-                            }}>Неверный старый пароль</Alert> : null}
-
-                            {isRepeatedPasswordInvalid ? <Alert severity="error" sx={{
-                                color: 'white',
-                                backgroundColor: '#F44336',
-                                marginTop: '1vh',
-                                '& .MuiAlert-icon': {
-                                    color: 'white'
-                                }
-                            }}>Пароли не совпадают</Alert> : null}
+                                         onBlur={checkRepeatedPassword} required={false}
+                                         errorHelperText='Пароли не совпадают'/>
                         </div>
                     </div>
 

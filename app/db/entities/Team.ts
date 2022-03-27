@@ -1,11 +1,16 @@
 import {Entity, Column, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn, ManyToMany} from 'typeorm';
 import {User} from './User';
-import {Game} from './Game';
+import {BigGame} from "./BigGame";
+
+export class Participant {
+    name: string;
+    email: string;
+}
 
 @Entity('teams')
 export class Team extends BaseEntity {
-    @PrimaryGeneratedColumn({name: 'team_id'})
-    id: number;
+    @PrimaryGeneratedColumn('uuid', {name: 'team_id'})
+    id: string;
 
     @Column({
         unique: true
@@ -25,7 +30,12 @@ export class Team extends BaseEntity {
     captain: User;
 
     @ManyToMany(
-        () => Game,
+        () => BigGame,
     )
-    games: Game[];
+    bigGames: BigGame[];
+
+    @Column("simple-json", {
+        nullable: true
+    })
+    participants: Participant[]
 }

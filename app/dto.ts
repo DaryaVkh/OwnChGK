@@ -1,11 +1,11 @@
-import {Game} from './db/entities/Game';
 import {Team} from './db/entities/Team';
+import {BigGame} from "./db/entities/BigGame";
 
-export class GameDTO {
+export class BigGameDTO {
     public readonly name: string;
     public readonly id: string;
 
-    constructor(game: Game) {
+    constructor(game: BigGame) {
         this.name = game.name;
         this.id = game.id.toString();
     }

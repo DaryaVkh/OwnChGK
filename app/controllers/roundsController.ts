@@ -9,7 +9,9 @@ export class RoundsController {
         try {
             const {gameName} = req.body;
             const rounds = await getCustomRepository(RoundRepository).findByGameName(gameName);
-            return res.status(200).json(rounds);
+            return res.status(200).json(rounds.map(round => ({
+                number: round.number,
+            })));
         } catch (error) {
             return res.status(400).json({message: 'Error'}).send(error);
         }

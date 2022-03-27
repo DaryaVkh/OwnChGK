@@ -13,6 +13,7 @@ import {AppAction} from './redux/reducers/app-reducer/app-reducer.interfaces';
 import {authorizeUserWithRole, checkToken as testToken} from './redux/actions/app-actions/app-actions';
 import {adminRoles, userRoles} from './entities/common/common.constants';
 import Loader from './components/loader/loader';
+import MobileMenu from './pages/mobile-menu/mobile-menu';
 
 const AdminStartScreen = React.lazy(() => Promise.all([import('./pages/admin-start-screen/admin-start-screen'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
 const GameCreator = React.lazy(() => Promise.all([import('./pages/game-creation/game-creation'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
@@ -27,6 +28,8 @@ const StartGame = React.lazy(() => Promise.all([import('./pages/admin-start-game
 const Rating = React.lazy(() => Promise.all([import('./pages/rating/rating'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
 
 const App: FC<AppProps> = props => {
+    const mediaMatch = window.matchMedia('(max-width: 768px)');
+
     useEffect(() => {
         checkToken().then((res) => {
             if (res.status === 200) {
@@ -155,6 +158,10 @@ const App: FC<AppProps> = props => {
 
                     <ProtectedRoute path='/rating/:gameId' exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath='/auth'>
                         <Rating isAdmin={false} />
+                    </ProtectedRoute>
+
+                    <ProtectedRoute path='/menu' exact neededRole={userRoles} redirectPath='/auth' currentUserRole={props.user.role} extraCondition={mediaMatch.matches}>
+                        <MobileMenu />
                     </ProtectedRoute>
 
                     <Redirect from="*" to="/"/>
