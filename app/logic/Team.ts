@@ -2,10 +2,10 @@ import {Answer, Appeal} from './AnswerAndAppeal';
 
 export class Team {
     public readonly name: string;
-    public id: number;
+    public id: string;
     private answers: Answer[];
 
-    constructor(name: string, id: number) {
+    constructor(name: string, id: string) {
         this.name = name
         this.id = id;
         this.answers = [];

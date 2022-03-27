@@ -34,6 +34,8 @@ export class Team extends BaseEntity {
     )
     bigGames: BigGame[];
 
-    @Column("simple-json")
+    @Column("simple-json", {
+        nullable: true
+    })
     participants: Participant[]
 }

@@ -3,6 +3,9 @@ import {User} from '../entities/User';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
+    findById(userId: string) {
+        return this.findOne(userId, {relations: ['team']});
+    }
     findByEmail(email: string) {
         return this.findOne({email}, {relations: ['team']});
     }
@@ -13,10 +16,19 @@ export class UserRepository extends Repository<User> {
     }
 
     insertByEmailAndPassword(email: string, password: string) {
-        return this.insert({email, password});
+        return this.manager.transaction(async manager => {
+            const user = await manager.create(User, {email, password});
+
+            return manager.save(user);
+        })
     }
 
     updateByEmailAndPassword(email: string, password: string) {
-        return this.update({email}, {password});
+        return this.manager.transaction(async manager => {
+            const user = await manager.findOne(User, {email});
+            user.password = password;
+
+            return manager.save(user);
+        })
     }
 }

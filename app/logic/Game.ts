@@ -33,10 +33,10 @@ export enum GameStatus {
 }
 
 export class Game {
-    public readonly id: number;
+    public readonly id: string;
     public readonly name: string;
     public readonly rounds: Round[];
-    public readonly teams: { [number: number]: Team };
+    public readonly teams: { [teamId: string]: Team };
     public status: GameStatus;
     public breakTime: number;
     private interval: any;
@@ -50,7 +50,7 @@ export class Game {
     public timeIsOnPause: boolean;
 
     constructor(name: string) {
-        this.id = Math.round(Math.random() * 1000000)
+        this.id = Math.round(Math.random() * 1000000).toString() // TODO: принимать из БД
         this.name = name;
         this.rounds = [];
         this.teams = {};
@@ -108,7 +108,7 @@ export class Game {
         return table;
     }
 
-    getScoreTableForTeam(teamId: number): { name: string, scoreTable: number[][] } {
+    getScoreTableForTeam(teamId: string): { name: string, scoreTable: number[][] } {
         let table = {};
         const roundsCount = this.rounds.length;
         const questionsCount = this.rounds[0].questions.length;

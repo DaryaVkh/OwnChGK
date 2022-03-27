@@ -28,13 +28,6 @@ export class Game extends BaseEntity {
 
     @Column({
         type: 'enum',
-        enum: GameStatus,
-        default: GameStatus.NOT_STARTED
-    })
-    status: string;
-
-    @Column({
-        type: 'enum',
         enum: GameType,
         default: GameType.CHGK
     })
@@ -52,7 +45,7 @@ export class Game extends BaseEntity {
         onUpdate: 'CASCADE'
     })
     @JoinColumn({
-        name: 'bigGame_id',
+        name: 'big_game_id',
     })
     bigGame: BigGame
 }

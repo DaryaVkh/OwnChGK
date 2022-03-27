@@ -64,14 +64,14 @@ export class UsersController { // TODO: дописать смену имени �
             if (!validateEmail(email)) {
                 return res.status(400).json({message: 'email is invalid'});
             }
-            const user = await getCustomRepository(UserRepository).findOne({'email': email})
+            const user = await getCustomRepository(UserRepository).findOne({email})
             if (user) {
                 return res.status(409).json({message: 'The user with this email is already registered'})
             }
 
             const hashedPassword = await hash(password, 10);
-            const insertResult = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
-            const userId = insertResult.identifiers[0].id;
+            const userFromDb = await getCustomRepository(UserRepository).insertByEmailAndPassword(email, hashedPassword);
+            const userId = userFromDb.id;
             const token = generateAccessToken(userId, email, 'user', null, null);
             res.cookie('authorization', token, {
                 maxAge: 24 * 60 * 60 * 1000,
@@ -99,10 +99,10 @@ export class UsersController { // TODO: дописать смену имени �
                 name: name
             } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
             if (userRoles === 'user') {
-                const user = await getCustomRepository(UserRepository).findOne(userId, {relations: ['team']});
+                const user = await getCustomRepository(UserRepository).findById(userId);
 
                 if (user?.team !== null) {
-                    const token = generateAccessToken(userId, email, userRoles, user.team.id, +gameId, name);
+                    const token = generateAccessToken(userId, email, userRoles, user.team.id, gameId, name);
                     res.cookie('authorization', token, {
                         maxAge: 24 * 60 * 60 * 1000,
                         secure: true
@@ -110,7 +110,7 @@ export class UsersController { // TODO: дописать смену имени �
                     return res.status(200).json({});
                 }
             } else if (userRoles === 'admin' || userRoles === 'superadmin') {
-                const token = generateAccessToken(userId, email, userRoles, null, +gameId, name);
+                const token = generateAccessToken(userId, email, userRoles, null, gameId, name);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
                     secure: true
@@ -261,7 +261,7 @@ export class UsersController { // TODO: дописать смену имени �
             }
             const oldToken = req.cookies['authorization'];
             const {id: userId} = jwt.verify(oldToken, secret) as jwt.JwtPayload;
-            const user = await getCustomRepository(UserRepository).findOne(userId, {relations: ['team']});
+            const user = await getCustomRepository(UserRepository).findById(userId);
 
             if (user.team !== null) {
                 return res.status(200).json({
@@ -294,7 +294,7 @@ export class UsersController { // TODO: дописать смену имени �
 
             if (userId !== undefined && email !== undefined && userRoles !== undefined) {
                 if (userRoles === 'user') {
-                    const user = await getCustomRepository(UserRepository).findOne(+userId, {relations: ['team']})
+                    const user = await getCustomRepository(UserRepository).findById(userId);
                     return res.status(200).json({
                         id: userId,
                         email,

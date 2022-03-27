@@ -20,7 +20,7 @@ export class Question {
 
     giveAnswer(team: Team, text: string): void {
         const answer = new Answer(team.id, this.roundNumber, this.number, text);
-        const index = this.answers.map(answer => answer.teamNumber).indexOf(team.id);
+        const index = this.answers.map(answer => answer.teamId).indexOf(team.id);
         if (index !== -1) {
             this.answers[index] = answer;
         } else {
@@ -29,10 +29,10 @@ export class Question {
         team.addAnswer(answer);
     }
 
-    giveAppeal(teamNumber: number, text: string, wrongAnswer:string): void {
-        const appeal = new Appeal(teamNumber, this.roundNumber, this.number, text, wrongAnswer);
+    giveAppeal(teamId: string, text: string, wrongAnswer: string): void {
+        const appeal = new Appeal(teamId, this.roundNumber, this.number, text, wrongAnswer);
         this.appeals.push(appeal);
-        const index = this.answers.map(ans => ans.teamNumber).indexOf(teamNumber);
+        const index = this.answers.map(ans => ans.teamId).indexOf(teamId);
         this.answers[index].onAppeal();
     }
 

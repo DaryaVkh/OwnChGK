@@ -26,7 +26,7 @@ export class TeamsController {
         try {
             const {teamName} = req.params;
             const team = await getCustomRepository(TeamRepository).findByName(teamName);
-            return res.status(200).json(team.games.map(game => game.name));
+            return res.status(200).json(team.bigGames.map(game => game.name));
         } catch (error) {
             return res.status(400).json({message: 'Error'}).send(error);
         }

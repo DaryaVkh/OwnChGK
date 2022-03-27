@@ -8,19 +8,26 @@ import {
     JoinColumn,
     ManyToMany, JoinTable
 } from 'typeorm';
-import {Game} from "./Game";
+import {Game, GameStatus} from "./Game";
 import {Admin} from "./Admin";
 import {Team} from "./Team";
 
-@Entity('bigGames')
+@Entity('big_games')
 export class BigGame extends BaseEntity {
-    @PrimaryGeneratedColumn('uuid', {name: 'bigGame_id'})
+    @PrimaryGeneratedColumn('uuid', {name: 'big_game_id'})
     id: string;
 
     @Column({
         unique: true
     })
     name: string;
+
+    @Column({
+        type: 'enum',
+        enum: GameStatus,
+        default: GameStatus.NOT_STARTED
+    })
+    status: string;
 
     @OneToMany(
         () => Game,
@@ -46,9 +53,9 @@ export class BigGame extends BaseEntity {
         }
     )
     @JoinTable({
-        name: 'bigGame_team_links',
+        name: 'big_game_team_links',
         joinColumn: {
-            name: 'bigGame_id',
+            name: 'big_game_id',
             referencedColumnName: 'id'
         },
         inverseJoinColumn: {

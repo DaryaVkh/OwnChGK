@@ -137,14 +137,14 @@ function PauseTimer(gameId: number) {
     }
 }
 
-function GetAnswer(answer: string, teamId: number, gameId: number) {
+function GetAnswer(answer: string, teamId: string, gameId: number) {
     console.log('received: %s', answer, teamId);
     const roundNumber = games[gameId].currentQuestion[0] - 1;
     const questionNumber = games[gameId].currentQuestion[1] - 1;
     games[gameId].rounds[roundNumber].questions[questionNumber].giveAnswer(games[gameId].teams[teamId], answer);
 }
 
-function GetAppeal(appeal: string, teamId: number, gameId: number, number: number, answer: string) {
+function GetAppeal(appeal: string, teamId: string, gameId: number, number: number, answer: string) {
     console.log('received: %s', appeal, teamId);
     const roundNumber = Math.ceil(number / games[gameId].rounds[0].questionsCount);
     let questionNumber = number - (roundNumber - 1) * games[gameId].rounds[0].questionsCount;
@@ -193,9 +193,9 @@ function GetAppealsByNumber(gameId: number, roundNumber: number, questionNumber:
         .filter(value => value.status === Status.UnChecked)
         .map(appeal => {
             return {
-                teamName: games[gameId].teams[appeal.teamNumber].name,
+                teamName: games[gameId].teams[appeal.teamId].name,
                 text: appeal.text,
-                answer: games[gameId].teams[appeal.teamNumber].getAnswer(roundNumber, questionNumber).text
+                answer: games[gameId].teams[appeal.teamId].getAnswer(roundNumber, questionNumber).text
             }
         });
 
