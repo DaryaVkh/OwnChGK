@@ -32,7 +32,7 @@ export enum GameStatus {
     Start
 }
 
-export enum GameType {
+export enum GameTypeLogic {
     Matrix,
     ChGK
 }
@@ -48,14 +48,14 @@ export class Game {
     public currentQuestion: [number, number];
     public isTimerStart: boolean;
     public isIntrigue: boolean;
-    public type: GameType;
+    public type: GameTypeLogic;
 
     public timer: any;
     public leftTime: number;
     public maxTime: number;
     public timeIsOnPause: boolean;
 
-    constructor(name: string) {
+    constructor(name: string, type: GameTypeLogic) {
         this.id = Math.round(Math.random() * 1000000).toString() // TODO: принимать из БД
         this.name = name;
         this.rounds = [];

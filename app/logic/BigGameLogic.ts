@@ -1,12 +1,13 @@
 import {Game} from './Game';
 
 
-export class BigGame {
+export class BigGameLogic {
 
     constructor(name:String, ChGK: Game = null, Matrix: Game = null) {
         this.Matrix = Matrix;
         this.ChGK = ChGK;
         this.name = name;
+        this.CurrentGame = this.ChGK;
     }
 
     private name: String;

@@ -1,11 +1,11 @@
-import {Game, GameType} from './logic/Game';
+import {Game, GameTypeLogic} from './logic/Game';
 import {Status} from './logic/AnswerAndAppeal';
 import jwt from 'jsonwebtoken';
 import {secret} from './jwtToken';
 import * as WebSocket from 'ws';
-import {BigGame} from "./logic/BigGame";
+import {BigGameLogic} from "./logic/BigGameLogic";
 
-export const bigGames: { [id: string]: BigGame; } = {};
+export const bigGames: { [id: string]: BigGameLogic; } = {};
 export const gameAdmins: { [id: string]: any; } = {};
 export const gameUsers: { [id: string]: any; } = {};
 export const seconds70PerQuestion = 70000;
@@ -196,7 +196,7 @@ function GetAppealsByNumber(gameId: number, roundNumber: number, questionNumber:
             return {
                 teamName: bigGames[gameId].CurrentGame.teams[appeal.teamId].name,
                 text: appeal.text,
-                answer: bigGames[gameId].CurrentGame.teams[appeal.teamNumber].getAnswer(roundNumber, questionNumber).text
+                answer: bigGames[gameId].CurrentGame.teams[appeal.teamId].getAnswer(roundNumber, questionNumber).text
             }
         });
 
@@ -290,7 +290,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
         	if (bigGames[gameId].CurrentGame) {
 	            ws.send(JSON.stringify({
 	                'action': 'gameStatus',
-	                'isStarted': !!games[gameId]
+	                'isStarted': !!bigGames[gameId]
 	            }));
 			}
         }
@@ -310,7 +310,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
             } else if (jsonMessage.action == 'AcceptAppeals') {
                 AcceptAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
             } else if (jsonMessage.action == 'RejectAnswer') {
-                RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers, gameType === GameType.Matrix);
+                RejectAnswer(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers, gameType === GameTypeLogic.Matrix);
             } else if (jsonMessage.action == 'RejectAppeals') {
                 RejectAppeal(gameId, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.appeals);
             } else if (jsonMessage.action == 'getAnswers') {
@@ -362,13 +362,13 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 return;
             }
             gameUsers[gameId].add(ws);
-            if (gameType === GameType.ChGK && bigGames[gameId].CurrentGame.isTimerStart && jsonMessage.action == 'Answer' ) {
+            if (gameType === GameTypeLogic.ChGK && bigGames[gameId].CurrentGame.isTimerStart && jsonMessage.action == 'Answer' ) {
                 GiveAnswer(jsonMessage.answer, teamId, gameId);
                 ws.send(JSON.stringify({
                     'action': 'statusAnswer',
                     'isAccepted': true
                 }));
-            } else if (gameType === GameType.Matrix && jsonMessage.action == 'Answer' ) { //здесь вроде можно не првоерять что таймер запушен, должно быть ок
+            } else if (gameType === GameTypeLogic.Matrix && jsonMessage.action == 'Answer' ) { //здесь вроде можно не првоерять что таймер запушен, должно быть ок
                 GiveAnswerMatrix(jsonMessage.answer, jsonMessage.round, jsonMessage.question, teamId, gameId);
                 ws.send(JSON.stringify({
                     'action': 'statusAnswer',
