@@ -244,13 +244,14 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
     } else {
         const {roles: userRoles, teamId: teamId, gameId: gameId} =
             jwt.verify(jsonMessage.cookie, secret) as jwt.JwtPayload;
-        const gameType = bigGames[gameId].CurrentGame.type;
-        if (!bigGames[gameId].CurrentGame || (userRoles === 'user' && !bigGames[gameId].CurrentGame.teams[teamId])) {
+        if (!bigGames[gameId] || (userRoles === 'user' && !bigGames[gameId].CurrentGame.teams[teamId])) {
             ws.send(JSON.stringify({
                 'action': 'gameNotStarted'
             }));
             return;
         }
+
+        const gameType = bigGames[gameId].CurrentGame.type;
 
         if (jsonMessage.action == 'time') {
             if (bigGames[gameId].CurrentGame.timer) {

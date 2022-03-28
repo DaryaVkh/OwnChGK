@@ -133,7 +133,7 @@ export class GamesController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {gameId} = req.params;
-            const game = await getCustomRepository(BigGameRepository).findOne(gameId, {relations: ['teams', 'rounds']});
+            const game = await getCustomRepository(BigGameRepository).findWithAllRelations(gameId);
             if (!game) {
                 return res.status(404).json({message: 'game not found'});
             }
@@ -159,35 +159,35 @@ export class GamesController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {gameId} = req.params;
-            const game = await getCustomRepository(BigGameRepository).findOne(+gameId, {relations: ['teams', 'rounds']});
-            if (!game) {
+            const bigGame = await getCustomRepository(BigGameRepository).findWithAllRelations(gameId);
+            if (!bigGame) {
                 return res.status(404).json({message: 'game not found'});
             }
-            const rounds = game.games.find(game => game.type == GameType.CHGK).rounds;
+            const rounds = bigGame.games.find(game => game.type == GameType.CHGK).rounds;
             const answer = {
-                name: game.name,
-                teams: game.teams.map(value => value.name),
+                name: bigGame.name,
+                teams: bigGame.teams.map(value => value.name),
                 roundCount: rounds.length,
                 questionCount: rounds.length !== 0 ? rounds[0].questions.length : 0
             };
-            gameAdmins[game.id] = new Set();
-            gameUsers[game.id] = new Set();
+            gameAdmins[bigGame.id] = new Set();
+            gameUsers[bigGame.id] = new Set();
             //тут у каждого своя game должна быть
-            const ChGK = new Game(game.name, GameTypeLogic.ChGK);
+            const ChGK = new Game(bigGame.name, GameTypeLogic.ChGK);
             //const Matrix = new Game(game.name, GameTypeLogic.Matrix);
-            bigGames[game.id] = new BigGameLogic(game.name, ChGK, null);
+            bigGames[bigGame.id] = new BigGameLogic(bigGame.name, ChGK, null);
             setTimeout(() => {
                 delete bigGames[gameId];
                 delete gameUsers[gameId];
                 delete gameAdmins[gameId];
                 console.log('delete game ', bigGames[gameId]);
             }, 1000 * 60 * 60 * 24 * 3);
-            const chgkFromBd = game.games.find(game => game.type == GameType.CHGK);
+            const chgkFromBd = bigGame.games.find(game => game.type == GameType.CHGK);
             for (let i = 0; i < chgkFromBd.rounds.length; i++) {
-                bigGames[game.id].CurrentGame.addRound(new Round(i + 1, answer.questionCount, 60, 1));
+                bigGames[bigGame.id].CurrentGame.addRound(new Round(i + 1, answer.questionCount, 60, 1));
             }
-            for (const team of game.teams) {
-                bigGames[game.id].CurrentGame.addTeam(new Team(team.name, team.id));
+            for (const team of bigGame.teams) {
+                bigGames[bigGame.id].CurrentGame.addTeam(new Team(team.name, team.id));
             }
             await getCustomRepository(BigGameRepository).updateByGameIdAndStatus(gameId, GameStatus.STARTED);
             return res.status(200).json(answer);
