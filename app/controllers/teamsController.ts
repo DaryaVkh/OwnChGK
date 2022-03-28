@@ -38,8 +38,8 @@ export class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-            const {teamName, captain} = req.body;
-            await getCustomRepository(TeamRepository).insertByNameAndUserEmail(teamName, captain);
+            const {teamName, captain, participants} = req.body;
+            await getCustomRepository(TeamRepository).insertTeam(teamName, captain, participants);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(400).json({'message': error.message});
@@ -73,11 +73,11 @@ export class TeamsController {
             if (!teamId) {
                 return res.status(400).json({message: 'teamId is invalid'});
             }
-            const {newTeamName, captain} = req.body;
-            await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain);
+            const {newTeamName, captain, participants} = req.body;
+            await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain, participants);
             return res.status(200).json({});
         } catch (error: any) {
-            return res.status(400).json({'message': error.message});
+            return res.status(500).json({'message': error.message});
         }
     }
 
@@ -116,7 +116,8 @@ export class TeamsController {
             }
             return res.status(200).json({
                 name: team.name,
-                captain: team.captain === null ? null : team.captain.email
+                captain: team.captain === null ? null : team.captain.email,
+                participants: team.participants
             });
         } catch (error: any) {
             return res.status(400).json({'message': error.message});

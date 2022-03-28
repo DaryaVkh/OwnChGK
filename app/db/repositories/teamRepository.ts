@@ -1,5 +1,5 @@
 import {EntityRepository, Repository} from 'typeorm';
-import {Team} from '../entities/Team';
+import {Participant, Team} from '../entities/Team';
 import {User} from '../entities/User';
 
 @EntityRepository(Team)
@@ -13,10 +13,10 @@ export class TeamRepository extends Repository<Team> {
             .then(teams => teams.filter(team => team.captain === null))
     }
 
-    insertByNameAndUserEmail(name: string, userEmail: string) {
+    insertTeam(name: string, userEmail: string, participants: Participant[]) {
         return this.manager.transaction(async manager => {
             const captain = await manager.findOne(User, {email: userEmail});
-            const team = await manager.create(Team, {name, captain});
+            const team = await manager.create(Team, {name, captain, participants});
 
             return manager.save(team);
         });
@@ -26,12 +26,13 @@ export class TeamRepository extends Repository<Team> {
         return this.delete({name});
     }
 
-    updateByParams(teamId: string, newName: string, captainEmail: string) {
+    updateByParams(teamId: string, newName: string, captainEmail: string, participants: Participant[]) {
         return this.manager.transaction(async manager => {
             const team = await manager.findOne(Team, teamId);
             const captain = await manager.findOne(User, {email: captainEmail});
             team.name = newName;
             team.captain = captain ?? null;
+            team.participants = participants;
 
             return await manager.save(team);
         });
