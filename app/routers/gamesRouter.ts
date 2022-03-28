@@ -13,19 +13,19 @@ export const gamesRouter = () => {
 
     router.get('/',
         middleware,
-        query('amIParticipate').isBoolean(), gamesController.getAll);
+        query('amIParticipate').optional().isBoolean(), gamesController.getAll);
 
     router.get('/:gameId',
         middleware,
-        param('gameId').isInt(), gamesController.getGame);
+        param('gameId').isUUID(), gamesController.getGame);
 
     router.get('/:gameId/start',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(), gamesController.startGame);
+        param('gameId').isUUID(), gamesController.startGame);
 
     router.patch('/:gameId/change',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(),
+        param('gameId').isUUID(),
         body('newGameName').isString().notEmpty(),
         body('roundCount').isInt({min: 0}),
         body('questionCount').isInt({min: 0}),
@@ -33,41 +33,41 @@ export const gamesRouter = () => {
 
     router.patch('/:gameId/changeStatus',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(),
+        param('gameId').isUUID(),
         body('status').custom(value => {
             return Object.values(GameStatus).includes(value)
         }), gamesController.changeGameStatus);
 
     router.patch('/:gameId/changeIntrigueStatus',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(),
+        param('gameId').isUUID(),
         body('isIntrigue').isBoolean(), gamesController.changeIntrigueStatus);
 
     router.patch('/:gameId/changeName',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(),
+        param('gameId').isUUID(),
         body('newGameName').isString().notEmpty(), gamesController.editGameName);
 
     router.patch('/:gameId/changeAdmin',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(),
+        param('gameId').isUUID(),
         body('adminEmail').isEmail(), gamesController.editGameAdmin); // Не используется
 
     router.delete('/:gameId',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(), gamesController.deleteGame);
+        param('gameId').isUUID(), gamesController.deleteGame);
 
     router.get('/:gameId/result',
         middleware,
-        param('gameId').isInt(), gamesController.getGameResult);
+        param('gameId').isUUID(), gamesController.getGameResult);
 
     router.get('/:gameId/resultTable',
         middleware,
-        param('gameId').isInt(), gamesController.getGameResultScoreTable);
+        param('gameId').isUUID(), gamesController.getGameResultScoreTable);
 
     router.get('/:gameId/resultTable/format',
         middleware,
-        param('gameId').isInt(), gamesController.getResultWithFormat);
+        param('gameId').isUUID(), gamesController.getResultWithFormat);
 
     router.post('/',
         roleMiddleware(adminAccess),

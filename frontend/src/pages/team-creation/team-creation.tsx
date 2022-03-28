@@ -21,6 +21,7 @@ import {connect} from 'react-redux';
 import {AppState} from '../../entities/app/app.interfaces';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
 import Loader from "../../components/loader/loader";
+import {User} from "../admin-start-screen/admin-start-screen";
 
 const TeamCreator: FC<TeamCreatorProps> = props => {
     const [usersFromDB, setUsersFromDB] = useState<string[]>();
@@ -29,7 +30,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     const [oldCaptain, setOldCaptain] = useState<string | undefined>();
     const location = useLocation<{ id: string, name: string }>();
     const [teamName, setTeamName] = useState<string>(props.mode === 'edit' ? location.state.name : '');
-    const [captain, setCaptain] = useState<string>('');
+    const [captain, setCaptain] = useState<string | undefined>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
     const mediaMatch = window.matchMedia('(max-width: 768px)');
@@ -42,15 +43,16 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
             getUsersWithoutTeam().then(res => {
                 if (res.status === 200) {
                     res.json().then(({users}) => {
-                        setUsersFromDB([...users]);
+                        const userObjects = users as User[]
+                        setUsersFromDB([...userObjects.map(user => user.email)]);
                         if (props.mode === 'edit') {
                             getTeam(location.state.id).then(res => {
                                 if (res.status === 200) {
-                                    res.json().then(data => {
-                                        setCaptain(data.captain);
-                                        setOldCaptain(data.captain);
-                                        if (data.captain) {
-                                            setUsersFromDB([...users, data.captain]);
+                                    res.json().then(team => {
+                                        setCaptain(team.captainEmail);
+                                        setOldCaptain(team.captainEmail);
+                                        if (team.captainEmail) {
+                                            setUsersFromDB([...users, team.captainEmail]);
                                         }
                                         setIsPageLoading(false);
                                     });
@@ -133,7 +135,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                         }
 
                         {
-                            (usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation')) || !props.isAdmin
+                            (usersFromDB && (props.mode === 'edit' || props.mode === 'creation')) || !props.isAdmin
                                 ? <CustomInput type='text' id='teamName'
                                                name='teamName'
                                                style={{marginBottom: '9%'}}
@@ -147,11 +149,11 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                         }
 
                         {
-                            !props.isAdmin && captain !== undefined
+                            !props.isAdmin
                                 ? <CustomInput type='text' id='captain' name='captain' placeholder='Капитан' value={captain} readonly={true} />
                                 :
                                 (
-                                    usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation')
+                                    usersFromDB && (props.mode === 'edit' || props.mode === 'creation')
                                         ? <Autocomplete disablePortal
                                                         fullWidth
                                                         id="captain"
@@ -196,7 +198,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
                     </div>
 
-                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={props.isAdmin && !(usersFromDB && (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation'))}
+                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={props.isAdmin && !(usersFromDB && (props.mode === 'edit' || props.mode === 'creation'))}
                                 style={{
                                     padding: mediaMatch.matches ? '0 13vw' : '0 2vw', fontSize: mediaMatch.matches ? '6.5vw' : '1.5vw',
                                     height: mediaMatch.matches ? '13vw' : '7vh', marginBottom: '2.5vh',

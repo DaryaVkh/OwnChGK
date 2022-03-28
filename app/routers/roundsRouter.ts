@@ -17,7 +17,7 @@ export const roundsRouter = () => {
 
     router.patch('/:gameId/:number/change',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(),
+        param('gameId').isUUID(),
         param('number').isInt(),
         body('newQuestionCount').isInt({min: 0}),
         body('newQuestionCost').isInt({min: 0}),
@@ -25,7 +25,7 @@ export const roundsRouter = () => {
 
     router.delete('/:gameId/:number',
         roleMiddleware(adminAccess),
-        param('gameId').isInt(),
+        param('gameId').isUUID(),
         param('number').isInt(), roundsController.deleteRound);
 
     router.post('/',

@@ -306,7 +306,7 @@ export class UsersController { // TODO: дописать смену имени �
             const user = await getCustomRepository(UserRepository).findById(userId);
 
             if (user.team !== null) {
-                return res.status(200).json(new TeamDto(user.team)); // TODO: может сломаться на фронте, если вызывается
+                return res.status(200).json(new TeamDto(user.team));
             } else {
                 return res.status(200).json({});
             }
@@ -336,7 +336,7 @@ export class UsersController { // TODO: дописать смену имени �
                     const user = await getCustomRepository(UserRepository).findById(userId);
                     return res.status(200).json(new UserDto(user));
                 } else if (userRoles === 'admin' || userRoles === 'superadmin') {
-                    const admin = await getCustomRepository(AdminRepository).findOne(+userId);
+                    const admin = await getCustomRepository(AdminRepository).findOne(userId);
                     return res.status(200).json(new AdminDto(admin))
                 } else {
                     return res.status(400).json({});

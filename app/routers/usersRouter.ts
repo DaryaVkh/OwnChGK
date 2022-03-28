@@ -10,7 +10,7 @@ export const usersRouter = () => {
 
     router.get('/',
         middleware,
-        query('withoutTeam').isBoolean(), usersController.getAll);
+        query('withoutTeam').optional().isBoolean(), usersController.getAll);
 
     router.get('/current', usersController.get);
 
@@ -35,7 +35,7 @@ export const usersRouter = () => {
 
     router.patch('/:gameId/changeToken',
         middleware,
-        param('gameId').isInt(), usersController.changeTokenWhenGoIntoGame); // TODO url
+        param('gameId').isUUID(), usersController.changeTokenWhenGoIntoGame); // TODO url
 
     router.patch('/changePasswordByCode',
         body('email').isEmail(),

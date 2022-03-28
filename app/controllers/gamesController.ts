@@ -1,20 +1,17 @@
 import {validationResult} from 'express-validator';
 import {getCustomRepository} from 'typeorm';
-import {GameRepository} from '../db/repositories/gameRepository';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
 import {bigGames, gameAdmins, gameUsers} from '../socket';
 import {Game, GameTypeLogic, Round} from '../logic/Game';
 import {Team} from '../logic/Team';
-import {BigGameDTO} from '../dto';
+import {BigGameDto} from "../dtos/bigGameDto";
 import {BigGameLogic} from "../logic/BigGameLogic";
 import {BigGameRepository} from "../db/repositories/bigGameRepository";
 import {GameStatus, GameType} from "../db/entities/Game";
 import {BigGame} from "../db/entities/BigGame";
-import {GameDto} from "../dtos/gameDto";
 import {TeamDto} from "../dtos/teamDto";
-import {ScoreTableDto} from "../dtos/scoreTableDto";
 
 export class GamesController {
     public async getAll(req: Request, res: Response) {
@@ -37,7 +34,7 @@ export class GamesController {
             }
 
             return res.status(200).json({
-                games: games?.map(value => new BigGameDTO(value))
+                games: games?.map(value => new BigGameDto(value))
             });
         } catch (error) {
             return res.status(500).json({
@@ -106,7 +103,7 @@ export class GamesController {
 
             const {gameId} = req.params;
 
-            await getCustomRepository(GameRepository).delete(gameId);
+            await getCustomRepository(BigGameRepository).delete(gameId);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({
@@ -243,7 +240,7 @@ export class GamesController {
             const {gameId} = req.params;
             const {newGameName, roundCount, questionCount, teams} = req.body;
 
-            const game = await getCustomRepository(GameRepository).findOne(gameId);
+            const game = await getCustomRepository(BigGameRepository).findOne(gameId);
             if (!game) {
                 return res.status(404).json({message: 'game not found'});
             }
@@ -299,7 +296,7 @@ export class GamesController {
             const totalScore = bigGames[gameId].CurrentGame.getTotalScoreForAllTeams();
             const answer = {
                 totalScoreForAllTeams: totalScore,
-            });
+            };
             return res.status(200).json(answer); // TODO: убрать answer
 
         } catch (error: any) {
@@ -393,7 +390,7 @@ export class GamesController {
             }
 
             const answer = {
-                totalTable: Game.getScoreTableWithFormat(games[gameId], scoreTable)
+                totalTable: Game.getScoreTableWithFormat(bigGames[gameId].CurrentGame, scoreTable)
             };
 
             console.log(answer.totalTable, 'gameId = ', gameId);

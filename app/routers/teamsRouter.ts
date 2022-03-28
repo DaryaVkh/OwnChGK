@@ -12,25 +12,25 @@ export const teamsRouter = () => {
 
     router.get('/',
         middleware,
-        query('withoutUser').isBoolean(), teamsController.getAll);
+        query('withoutUser').optional().isBoolean(), teamsController.getAll);
 
     router.get('/:teamId',
         middleware,
-        param('teamId').isInt(), teamsController.getTeam);
+        param('teamId').isUUID(), teamsController.getTeam);
 
     router.patch('/:teamId/change',
         middleware,
-        param('teamId').isInt(),
+        param('teamId').isUUID(),
         body('newTeamName').isString().notEmpty(),
-        body('captain').optional().isEmail(), teamsController.editTeam); // TODO: нет проверки кто меняет, сейчас могут все - и юзеры, и админы
+        body('captain').optional({nullable: true}).isEmail(), teamsController.editTeam); // TODO: нет проверки кто меняет, сейчас могут все - и юзеры, и админы
 
     router.patch('/:teamId/changeCaptain',
         middleware,
-        param('teamId').isInt(), teamsController.editTeamCaptainByCurrentUser);
+        param('teamId').isUUID(), teamsController.editTeamCaptainByCurrentUser);
 
     router.delete('/:teamId',
         roleMiddleware(adminAccess),
-        param('teamId').isInt(), teamsController.deleteTeam);
+        param('teamId').isUUID(), teamsController.deleteTeam);
 
     router.post('/',
         middleware,

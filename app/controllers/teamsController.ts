@@ -5,7 +5,7 @@ import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
 import {TeamDto} from "../dtos/teamDto";
-import {GameDto} from "../dtos/gameDto";
+import {BigGameDto} from "../dtos/bigGameDto";
 
 
 export class TeamsController {
@@ -42,7 +42,7 @@ export class TeamsController {
             const {teamName} = req.params;
             const team = await getCustomRepository(TeamRepository).findByName(teamName);
             return res.status(200).json({
-                games: team.bigGames?.map(game => new BigGameDTO(game))
+                games: team.bigGames?.map(game => new BigGameDto(game))
             })
 
         } catch (error) {

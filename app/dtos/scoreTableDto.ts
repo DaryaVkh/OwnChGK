@@ -1,5 +1,5 @@
 import {Game} from "../logic/Game";
-import {games} from "../socket";
+import {bigGames} from "../socket";
 
 export class ScoreTableDto {
     public readonly gameId: string;
@@ -8,11 +8,11 @@ export class ScoreTableDto {
     public readonly questionsCount: number;
     public readonly totalScoreForAllTeams: { name: string, scoreTable: number[][] };
 
-    constructor(game: Game, teamId: number = undefined) {
+    constructor(game: Game, teamId: string = undefined) {
         this.gameId = game.id.toString();
-        this.isIntrigue = games[this.gameId].isIntrigue;
-        this.roundsCount = games[this.gameId].rounds.length;
-        this.questionsCount = games[this.gameId].rounds[0].questionsCount;
-        this.totalScoreForAllTeams = !teamId ? games[this.gameId].getScoreTable() : games[this.gameId].getScoreTableForTeam(teamId);
+        this.isIntrigue = bigGames[this.gameId].CurrentGame.isIntrigue;
+        this.roundsCount = bigGames[this.gameId].CurrentGame.rounds.length;
+        this.questionsCount = bigGames[this.gameId].CurrentGame.rounds[0].questionsCount;
+        this.totalScoreForAllTeams = !teamId ? bigGames[this.gameId].CurrentGame.getScoreTable() : bigGames[this.gameId].CurrentGame.getScoreTableForTeam(teamId);
     }
 }
