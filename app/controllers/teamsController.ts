@@ -62,7 +62,7 @@ export class TeamsController {
             }
             const {teamName, captain, participants} = req.body;
 
-            const mappedParticipants = participants.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON
+            const mappedParticipants = participants?.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON
             await getCustomRepository(TeamRepository).insertTeam(teamName, captain, mappedParticipants);
             return res.status(200).json({});
         } catch (error: any) {
@@ -101,7 +101,7 @@ export class TeamsController {
             const {teamId} = req.params;
             const {newTeamName, captain, participants} = req.body;
 
-            const mappedParticipants = participants.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON
+            const mappedParticipants = participants?.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON
             await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain, mappedParticipants);
             return res.status(200).json({});
         } catch (error: any) {
