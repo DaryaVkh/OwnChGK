@@ -5,6 +5,7 @@ import {GamesController} from '../controllers/gamesController';
 import {adminAccess} from "./mainRouter";
 import {body, param, query} from 'express-validator';
 import {GameStatus} from "../db/entities/Game";
+import {validateGameStatus} from "../validators";
 
 export const gamesRouter = () => {
     const router = Router();
@@ -34,9 +35,7 @@ export const gamesRouter = () => {
     router.patch('/:gameId/changeStatus',
         roleMiddleware(adminAccess),
         param('gameId').isUUID(),
-        body('status').custom(value => {
-            return Object.values(GameStatus).includes(value)
-        }), gamesController.changeGameStatus);
+        body('status').custom(validateGameStatus), gamesController.changeGameStatus);
 
     router.patch('/:gameId/changeIntrigueStatus',
         roleMiddleware(adminAccess),

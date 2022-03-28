@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import {secret} from '../jwtToken';
 import {TeamDto} from "../dtos/teamDto";
 import {BigGameDto} from "../dtos/bigGameDto";
+import {Participant} from "../db/entities/Team";
 
 
 export class TeamsController {
@@ -60,8 +61,9 @@ export class TeamsController {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
             const {teamName, captain, participants} = req.body;
-            
-            await getCustomRepository(TeamRepository).insertTeam(teamName, captain, participants);
+
+            const mappedParticipants = participants.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON
+            await getCustomRepository(TeamRepository).insertTeam(teamName, captain, mappedParticipants);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({
@@ -99,7 +101,8 @@ export class TeamsController {
             const {teamId} = req.params;
             const {newTeamName, captain, participants} = req.body;
 
-            await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain, participants);
+            const mappedParticipants = participants.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON
+            await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain, mappedParticipants);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({

@@ -4,6 +4,10 @@ import {middleware} from '../middleware/middleware';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 import {adminAccess} from "./mainRouter";
 import {body, param, query} from "express-validator";
+import {GameStatus} from "../db/entities/Game";
+import {Participant} from "../db/entities/Team";
+import {validateEmail} from "../email";
+import {validateParticipants} from "../validators";
 
 export const teamsRouter = () => {
     const router = Router();
@@ -22,7 +26,8 @@ export const teamsRouter = () => {
         middleware,
         param('teamId').isUUID(),
         body('newTeamName').isString().notEmpty(),
-        body('captain').optional({nullable: true}).isEmail(), teamsController.editTeam); // TODO: нет проверки кто меняет, сейчас могут все - и юзеры, и админы
+        body('captain').optional({nullable: true}).isEmail(),
+        body('participants').optional({nullable: true}).isArray().custom(validateParticipants), teamsController.editTeam); // TODO: нет проверки кто меняет, сейчас могут все - и юзеры, и админы
 
     router.patch('/:teamId/changeCaptain',
         middleware,
@@ -35,7 +40,8 @@ export const teamsRouter = () => {
     router.post('/',
         middleware,
         body('teamName').isString().notEmpty(),
-        body('captain').isEmail(), teamsController.insertTeam);
+        body('captain').isEmail(),
+        body('participants').optional({nullable: true}).isArray().custom(validateParticipants), teamsController.insertTeam);
 
     return router;
 }

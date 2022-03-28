@@ -2,9 +2,14 @@ import {Entity, Column, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn
 import {User} from './User';
 import {BigGame} from "./BigGame";
 
-export interface Participant {
+export class Participant {
     name: string;
     email: string;
+
+    constructor(email?: string, name?: string) {
+        this.email = email;
+        this.name = name;
+    }
 }
 
 @Entity('teams')
@@ -34,7 +39,7 @@ export class Team extends BaseEntity {
     )
     bigGames: BigGame[];
 
-    @Column("simple-json", {
+    @Column("json", {
         nullable: true
     })
     participants: Participant[]
