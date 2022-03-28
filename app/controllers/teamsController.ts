@@ -59,10 +59,9 @@ export class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
-
-            const {teamName, captain} = req.body;
-
-            await getCustomRepository(TeamRepository).insertByNameAndUserEmail(teamName, captain);
+            const {teamName, captain, participants} = req.body;
+            
+            await getCustomRepository(TeamRepository).insertTeam(teamName, captain, participants);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({
@@ -98,9 +97,9 @@ export class TeamsController {
             }
 
             const {teamId} = req.params;
-            const {newTeamName, captain} = req.body;
+            const {newTeamName, captain, participants} = req.body;
 
-            await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain);
+            await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain, participants);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({

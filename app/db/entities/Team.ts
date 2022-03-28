@@ -2,7 +2,7 @@ import {Entity, Column, PrimaryGeneratedColumn, BaseEntity, OneToOne, JoinColumn
 import {User} from './User';
 import {BigGame} from "./BigGame";
 
-export class Participant {
+export interface Participant {
     name: string;
     email: string;
 }
