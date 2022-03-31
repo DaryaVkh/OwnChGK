@@ -41,7 +41,7 @@ export const teamsRouter = () => {
     router.post('/',
         middleware,
         body('teamName').isString().notEmpty(),
-        body('captain').isEmail(),
+        body('captain').optional({nullable: true}).isEmail(),
         body('participants').optional({nullable: true}).isArray().custom(validateParticipants), teamsController.insertTeam);
 
     return router;

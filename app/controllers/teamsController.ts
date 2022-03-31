@@ -62,10 +62,38 @@ export class TeamsController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({message: 'Ошибка', errors})
             }
+
             const {teamName, captain, participants} = req.body;
 
+            const oldToken = req.cookies['authorization'];
+            const {
+                id,
+                email,
+                roles,
+                name,
+                teamId,
+            } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+
+            if (captain && email !== captain) {
+                return res.status(403).json({message: 'Юзеру нельзя создать команду с другим капитаном'});
+            }
+
+            const team = await getCustomRepository(TeamRepository).findByName(teamName);
+            if (team) {
+                return res.status(409).json({message: 'Команда с таким названием уже есть'})
+            }
+
             const mappedParticipants = participants?.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON
-            await getCustomRepository(TeamRepository).insertTeam(teamName, captain, mappedParticipants);
+            const newTeam = await getCustomRepository(TeamRepository).insertTeam(teamName, captain, mappedParticipants);
+
+            if (!adminAccess.has(roles) && captain) {
+                const token = generateAccessToken(id, email, roles, newTeam.id, null, name);
+                res.cookie('authorization', token, {
+                    maxAge: 24 * 60 * 60 * 1000,
+                    secure: true
+                });
+            }
+
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({
@@ -103,6 +131,16 @@ export class TeamsController {
             const {teamId} = req.params;
             const {newTeamName, captain, participants} = req.body;
 
+            const currentTeam = await getCustomRepository(TeamRepository).findOne(teamId);
+            if (!currentTeam) {
+                return res.status(404).json({message: "Команда не найдена"})
+            }
+
+            const team = await getCustomRepository(TeamRepository).findByName(newTeamName);
+            if (team && team.id !== teamId) {
+                return res.status(409).json({message: 'Команда с таким названием уже есть'})
+            }
+
             const oldToken = req.cookies['authorization'];
             const {
                 id,
@@ -124,11 +162,6 @@ export class TeamsController {
                         secure: true
                     });
                 }
-            }
-
-            const team = await getCustomRepository(TeamRepository).findByName(newTeamName);
-            if (team && team.id !== teamId) {
-                return res.status(409).json({message: 'Команда с таким названием уже есть'})
             }
 
             const mappedParticipants = participants?.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON

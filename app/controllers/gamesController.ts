@@ -80,6 +80,11 @@ export class GamesController {
             const token = req.cookies['authorization'];
             const payLoad = jwt.verify(token, secret);
             if (typeof payLoad !== 'string') {
+                const game = await getCustomRepository(BigGameRepository).findByName(gameName);
+                if (game) {
+                    return res.status(409).json({message: 'Игра с таким названием уже есть'})
+                }
+
                 await getCustomRepository(BigGameRepository).insertByParams(
                     gameName, payLoad.email, roundCount, questionCount, 1, 60, teams);
                 return res.status(200).json({});
@@ -240,10 +245,16 @@ export class GamesController {
             const {gameId} = req.params;
             const {newGameName, roundCount, questionCount, teams} = req.body;
 
-            const game = await getCustomRepository(BigGameRepository).findOne(gameId);
-            if (!game) {
+            const currentGame = await getCustomRepository(BigGameRepository).findOne(gameId);
+            if (!currentGame) {
                 return res.status(404).json({message: 'game not found'});
             }
+
+            const game = await getCustomRepository(BigGameRepository).findByName(newGameName);
+            if (game) {
+                return res.status(409).json({message: 'Игра с таким названием уже есть'});
+            }
+
             console.log('ChangeGame: ', gameId, ' teams is: ', teams);
             await getCustomRepository(BigGameRepository).updateByParams(
                 gameId, newGameName, roundCount, questionCount, 1, 60, teams
