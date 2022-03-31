@@ -19,7 +19,7 @@ import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces
 import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
 import {connect} from 'react-redux';
 import {AppState} from '../../entities/app/app.interfaces';
-import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
+import MobileNavbar from "../../components/mobile-navbar/mobile-navbar";
 import Loader from "../../components/loader/loader";
 import {User} from "../admin-start-screen/admin-start-screen";
 
@@ -38,6 +38,8 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     useEffect(() => {
         if (!props.isAdmin) {
             setCaptain(props.userEmail);
+            setOldCaptain(props.userEmail);
+            setUsersFromDB([props.userEmail]);
             setIsPageLoading(false);
         } else {
             getUsersWithoutTeam().then(res => {
@@ -135,7 +137,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                         }
 
                         {
-                            (usersFromDB && (props.mode === 'edit' || props.mode === 'creation')) || !props.isAdmin
+                            usersFromDB
                                 ? <CustomInput type='text' id='teamName'
                                                name='teamName'
                                                style={{marginBottom: '9%'}}
@@ -149,51 +151,46 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                         }
 
                         {
-                            !props.isAdmin
-                                ? <CustomInput type='text' id='captain' name='captain' placeholder='Капитан' value={captain} readonly={true} />
-                                :
-                                (
-                                    usersFromDB && (props.mode === 'edit' || props.mode === 'creation')
-                                        ? <Autocomplete disablePortal
-                                                        fullWidth
-                                                        id="captain"
-                                                        options={usersFromDB || []}
-                                                        defaultValue={oldCaptain}
-                                                        onChange={handleAutocompleteChange}
-                                                        sx={{
-                                                            border: 'none',
-                                                            fontSize: '1.5vw',
-                                                            minHeight: '26px',
-                                                            height: '7vh !important',
-                                                            borderRadius: '8px',
-                                                            backgroundColor: 'white',
-                                                            boxShadow: 'inset 0 4px 10px rgba(0, 0, 0, 0.5)',
-                                                            marginBottom: '3%',
-                                                            '& .MuiOutlinedInput-input': {
-                                                                padding: '0 0 0 1.5vw !important',
-                                                                border: 'none',
-                                                                fontFamily: 'Roboto, sans-serif',
-                                                                color: 'black',
-                                                                fontSize: '1.5vw',
-                                                            },
-                                                            '& .MuiOutlinedInput-root': {
-                                                                height: '7vh !important',
-                                                                minHeight: '26px',
-                                                                padding: '0'
-                                                            },
-                                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                                border: '2px solid var(--foreground-color) !important',
-                                                                borderRadius: '8px',
-                                                                minHeight: '26px',
-                                                            },
-                                                            '& .MuiSvgIcon-root': {
-                                                                color: 'var(--background-color)'
-                                                            }
-                                                        }}
-                                                        renderInput={(params) => <TextField {...params} placeholder="Капитан"/>}
-                                        />
-                                        : <Skeleton variant='rectangular' width='100%' height={mediaMatch.matches ? '6vh' : '7vh'} sx={{marginBottom: '3%'}} />
-                                )
+                            usersFromDB
+                                ? <Autocomplete disablePortal
+                                                fullWidth
+                                                id="captain"
+                                                options={usersFromDB || []}
+                                                defaultValue={oldCaptain}
+                                                onChange={handleAutocompleteChange}
+                                                sx={{
+                                                    border: 'none',
+                                                    fontSize: '1.5vw',
+                                                    minHeight: '26px',
+                                                    height: '7vh !important',
+                                                    borderRadius: '8px',
+                                                    backgroundColor: 'white',
+                                                    boxShadow: 'inset 0 4px 10px rgba(0, 0, 0, 0.5)',
+                                                    marginBottom: '3%',
+                                                    '& .MuiOutlinedInput-input': {
+                                                        padding: '0 0 0 1.5vw !important',
+                                                        border: 'none',
+                                                        fontFamily: 'Roboto, sans-serif',
+                                                        color: 'black',
+                                                        fontSize: '1.5vw',
+                                                    },
+                                                    '& .MuiOutlinedInput-root': {
+                                                        height: '7vh !important',
+                                                        minHeight: '26px',
+                                                        padding: '0'
+                                                    },
+                                                    '& .MuiOutlinedInput-notchedOutline': {
+                                                        border: '2px solid var(--foreground-color) !important',
+                                                        borderRadius: '8px',
+                                                        minHeight: '26px',
+                                                    },
+                                                    '& .MuiSvgIcon-root': {
+                                                        color: 'var(--background-color)'
+                                                    }
+                                                }}
+                                                renderInput={(params) => <TextField {...params} placeholder="Капитан"/>}
+                                />
+                                : <Skeleton variant='rectangular' width='100%' height={mediaMatch.matches ? '6vh' : '7vh'} sx={{marginBottom: '3%'}} />
                         }
 
                     </div>

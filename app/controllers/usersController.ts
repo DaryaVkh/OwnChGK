@@ -52,7 +52,7 @@ export class UsersController { // TODO: дописать смену имени �
 
             const isPasswordMatching = await compare(password, user.password);
             if (isPasswordMatching) {
-                const token = generateAccessToken(user.id, user.email, 'user', null, null, user.name);
+                const token = generateAccessToken(user.id, user.email, 'user', user.team?.id, null, user.name);
                 res.cookie('authorization', token, {
                     maxAge: 86400 * 1000,
                     secure: true

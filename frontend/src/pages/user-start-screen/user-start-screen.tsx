@@ -31,10 +31,11 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [page, setPage] = useState<string>('teams');
     const [gamesFromDB, setGamesFromDB] = useState<Game[]>();
     const [teamsFromDB, setTeamsFromDB] = useState<Team[]>();
-    const [userTeam, setUserTeam] = useState<string>('');
+    const [userTeam, setUserTeam] = useState<Team>({name: '', id: ''});
     const [gameId, setGameId] = useState<string>('');
     const [isTeamNotFree, setIsTeamNotFree] = useState<boolean>(false);
     const [numberLoading, setNumberLoading] = useState<number>(0);
+    const [isClickedOnCurrentTeam, setIsClickedOnCurrentTeam] = useState<boolean>(false);
     let location = useLocation<{ page: string }>();
     const mediaMatch = window.matchMedia('(max-width: 768px)');
 
@@ -49,7 +50,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
             if (res.status === 200) {
                 res.json().then(({name, id}) => {
                     if (name !== undefined) {
-                        setUserTeam(name);
+                        setUserTeam({name, id});
                         setTeamsFromDB([{name, id}]);
                         setNumberLoading(prev => Math.min(prev + 1, 2));
                     } else {
@@ -81,13 +82,16 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
     }, []);
 
     const handleChooseTeam = (event: React.SyntheticEvent) => {
-        if (userTeam === '') {
+        if (userTeam.name === '') {
             const element = event.currentTarget as HTMLDivElement;
             const dataset = element.dataset as {teamName: string, teamId: string};
             editTeamCaptainByCurrentUser(dataset.teamId)
                 .then(res => {
                     if (res.status === 200) {
-                        setUserTeam(dataset.teamName);
+                        setUserTeam({
+                            name: dataset.teamName,
+                            id: dataset.teamId
+                        });
                         setIsTeamNotFree(false);
                         props.onAddUserTeam(dataset.teamName);
                     } else {
@@ -121,11 +125,11 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
         if (!teamsFromDB) {
             return Array.from(Array(5).keys()).map(i => <Skeleton key={`team_skeleton_${i}`} variant='rectangular' width='100%' height={mediaMatch.matches ? '5vh' : '7vh'} sx={{marginBottom: '2.5vh'}} />);
         }
-        return userTeam !== ''
+        return userTeam.name !== ''
             ?
-            <div key={userTeam} className={classes.gameOrTeam} style={{cursor: 'default'}}>
+            <div key={userTeam.name} className={classes.gameOrTeam} onClick={() => setIsClickedOnCurrentTeam(true)}>
                 <div className={classes.userTeamNameWrapper}>
-                    <p className={classes.teamName}>{userTeam}</p>
+                    <p className={classes.teamName}>{userTeam.name}</p>
                 </div>
 
                 <div className={classes.selectedIconWrapper}>
@@ -168,10 +172,10 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
 
                                 <div className={classes.addButtonWrapper}>
                                     <Link to="/team-creation"
-                                          style={{pointerEvents: userTeam !== '' ? 'none' : 'auto'}}>
-                                        <IconButton disabled={userTeam !== ''} sx={{padding: mediaMatch.matches ? '0' : '13px'}}>
+                                          style={{pointerEvents: userTeam.name !== '' ? 'none' : 'auto'}}>
+                                        <IconButton disabled={userTeam.name !== ''} sx={{padding: mediaMatch.matches ? '0' : '13px'}}>
                                             <AddCircleOutlineOutlinedIcon sx={{
-                                                color: userTeam === '' ? 'white' : 'gray',
+                                                color: userTeam.name === '' ? 'white' : 'gray',
                                                 fontSize: mediaMatch.matches ? '17vmin' : '9vmin'
                                             }}/>
                                         </IconButton>
@@ -191,6 +195,10 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
 
     if (numberLoading < 2) {
         return <Loader />;
+    }
+
+    if (isClickedOnCurrentTeam) {
+        return <Redirect to={{pathname: `/team-creation/edit`, state: {id: userTeam.id, name: userTeam.name}}}/>
     }
 
     if (gameId) {

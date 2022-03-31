@@ -71,16 +71,14 @@ export class TeamRepository extends Repository<Team> {
     }
 
     deleteTeamCaptainByIdAndUserEmail(teamId: string) {
-        return this.manager.transaction(manager =>
-            manager.findOne(Team, teamId, {relations: ['captain']})
-                .then(team => {
-                        if (team.captain === null) {
-                            throw new Error('Команда уже без капитана');
-                        }
-                        team.captain = null;
-                        return manager.save(Team, team);
-                    }
-                )
-        );
+        return this.manager.transaction(async manager => {
+            const team = await manager.findOne(Team, teamId, {relations: ['captain']});
+            if (team.captain === null) {
+                throw new Error('Команда уже без капитана');
+            }
+
+            team.captain = null;
+            return manager.save(team);
+        });
     }
 }

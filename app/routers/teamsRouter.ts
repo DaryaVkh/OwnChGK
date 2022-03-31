@@ -24,7 +24,7 @@ export const teamsRouter = () => {
         param('teamId').isUUID(),
         body('newTeamName').isString().notEmpty(),
         body('captain').optional({nullable: true}).isEmail(),
-        body('participants').optional({nullable: true}).isArray().custom(validateParticipants), teamsController.editTeam); // TODO: нет проверки кто меняет, сейчас могут все - и юзеры, и админы
+        body('participants').optional({nullable: true}).isArray().custom(validateParticipants), teamsController.editTeam); // TODO: внутри есть проверка юзера, мб перенести в новый middleware
 
     router.patch('/:teamId/changeCaptain',
         middleware,

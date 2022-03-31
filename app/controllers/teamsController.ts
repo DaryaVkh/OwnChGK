@@ -8,6 +8,7 @@ import {TeamDto} from "../dtos/teamDto";
 import {BigGameDto} from "../dtos/bigGameDto";
 import {Participant} from "../db/entities/Team";
 import {UserRepository} from "../db/repositories/userRepository";
+import {adminAccess} from "../routers/mainRouter";
 
 
 export class TeamsController {
@@ -102,6 +103,34 @@ export class TeamsController {
             const {teamId} = req.params;
             const {newTeamName, captain, participants} = req.body;
 
+            const oldToken = req.cookies['authorization'];
+            const {
+                id,
+                email,
+                roles,
+                name,
+                teamId: currentTeamId,
+            } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+
+            if (!adminAccess.has(roles)) {
+                if (teamId !== currentTeamId) {
+                    return res.status(403).json({message: 'У пользователя нет прав'});
+                }
+
+                if (!captain) {
+                    const token = generateAccessToken(id, email, roles, null, null, name);
+                    res.cookie('authorization', token, {
+                        maxAge: 24 * 60 * 60 * 1000,
+                        secure: true
+                    });
+                }
+            }
+
+            const team = await getCustomRepository(TeamRepository).findByName(newTeamName);
+            if (team && team.id !== teamId) {
+                return res.status(409).json({message: 'Команда с таким названием уже есть'})
+            }
+
             const mappedParticipants = participants?.map(value => new Participant(value.email, value.name)); // избавляемся от мусора в JSON
             await getCustomRepository(TeamRepository).updateByParams(teamId, newTeamName, captain, mappedParticipants);
             return res.status(200).json({});
@@ -121,9 +150,23 @@ export class TeamsController {
             }
 
             const {teamId} = req.params;
-            const token = req.cookies['authorization'];
-            const {id: userId} = jwt.verify(token, secret) as jwt.JwtPayload;
-            await getCustomRepository(TeamRepository).updateEmptyTeamByIdAndUserEmail(teamId, userId);
+
+            const oldToken = req.cookies['authorization'];
+            const {
+                id,
+                email,
+                roles,
+                name
+            } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
+
+            await getCustomRepository(TeamRepository).updateEmptyTeamByIdAndUserEmail(teamId, id);
+
+            const token = generateAccessToken(id, email, roles, teamId, null, name);
+            res.cookie('authorization', token, {
+                maxAge: 24 * 60 * 60 * 1000,
+                secure: true
+            });
+
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({
