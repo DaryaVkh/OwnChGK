@@ -6,6 +6,7 @@ export class UserRepository extends Repository<User> {
     findById(userId: string) {
         return this.findOne(userId, {relations: ['team']});
     }
+
     findByEmail(email: string) {
         return this.findOne({email}, {relations: ['team']});
     }

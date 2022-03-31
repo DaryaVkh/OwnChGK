@@ -7,6 +7,7 @@ import {generateAccessToken, secret} from '../jwtToken';
 import {TeamDto} from "../dtos/teamDto";
 import {BigGameDto} from "../dtos/bigGameDto";
 import {Participant} from "../db/entities/Team";
+import {UserRepository} from "../db/repositories/userRepository";
 
 
 export class TeamsController {
@@ -162,6 +163,7 @@ export class TeamsController {
             }
 
             const {teamId} = req.params;
+
             const oldToken = req.cookies['authorization'];
             const {
                 id: userId,
@@ -169,18 +171,20 @@ export class TeamsController {
                 roles: userRoles,
                 name: name
             } = jwt.verify(oldToken, secret) as jwt.JwtPayload;
-            const user = await getCustomRepository(UserRepository).findOne(+userId, {relations: ['team']})
-            if (user.team.id === +teamId) {
+
+            const user = await getCustomRepository(UserRepository).findById(userId);
+            if (user.team?.id === teamId) {
                 await getCustomRepository(TeamRepository).deleteTeamCaptainByIdAndUserEmail(teamId);
                 const token = generateAccessToken(userId, email, userRoles, null, null, name);
                 res.cookie('authorization', token, {
                     maxAge: 24 * 60 * 60 * 1000,
                     secure: true
                 });
+
                 return res.status(200).json({});
             }
-            return res.status(403).json({message: "user not captain of this team"});
 
+            return res.status(403).json({message: "user not captain of this team"});
         } catch (error: any) {
             return res.status(500).json({
                 message: error.message,
@@ -188,5 +192,4 @@ export class TeamsController {
             });
         }
     }
-}
 }

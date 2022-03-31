@@ -4,9 +4,6 @@ import {middleware} from '../middleware/middleware';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 import {adminAccess} from "./mainRouter";
 import {body, param, query} from "express-validator";
-import {GameStatus} from "../db/entities/Game";
-import {Participant} from "../db/entities/Team";
-import {validateEmail} from "../email";
 import {validateParticipants} from "../validators";
 
 export const teamsRouter = () => {
@@ -37,7 +34,9 @@ export const teamsRouter = () => {
         roleMiddleware(adminAccess),
         param('teamId').isUUID(), teamsController.deleteTeam);
     
-    router.patch('/:teamId/deleteCaptain', middleware, teamsController.deleteTeamCaptainById);
+    router.patch('/:teamId/deleteCaptain',
+        middleware,
+        param('teamId').isUUID(), teamsController.deleteTeamCaptainById);
 
     router.post('/',
         middleware,
