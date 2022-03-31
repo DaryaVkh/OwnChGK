@@ -54,7 +54,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                         setCaptain(team.captainEmail);
                                         setOldCaptain(team.captainEmail);
                                         if (team.captainEmail) {
-                                            setUsersFromDB([...users, team.captainEmail]);
+                                            setUsersFromDB([...userObjects.map(user => user.email), team.captainEmail]);
                                         }
                                         setIsPageLoading(false);
                                     });
