@@ -17,6 +17,8 @@ import {Admin} from './db/entities/Admin';
 import {Team} from './db/entities/Team';
 import {Round} from './db/entities/Round';
 import {HandlerWebsocket} from './socket';
+import {BigGame} from "./db/entities/BigGame";
+import {Question} from "./db/entities/Questions";
 
 export class Server {
     private app;
@@ -33,7 +35,7 @@ export class Server {
             await createConnection({
                 type: 'postgres',
                 url: process.env.DATABASE_URL,
-                entities: [User, Admin, Team, Game, Round],
+                entities: [User, Admin, Team, BigGame, Game, Round, Question],
                 synchronize: true,
                 ssl: {rejectUnauthorized:false} // для хероку
             }).then(() => {
@@ -54,11 +56,11 @@ export class Server {
 
     private routerConfig() {
         this.app.use(cookieParser());
-        this.app.use('/users', usersRouter());
-        this.app.use('/admins', adminsRouter());
-        this.app.use('/teams', teamsRouter());
-        this.app.use('/games', gamesRouter());
-        this.app.use('/rounds', roundsRouter());
+        this.app.use('/api/users', usersRouter());
+        this.app.use('/api/admins', adminsRouter());
+        this.app.use('/api/teams', teamsRouter());
+        this.app.use('/api/games', gamesRouter());
+        this.app.use('/api/rounds', roundsRouter());
         this.app.use('/', mainRouter());
     }
 

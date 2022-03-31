@@ -32,6 +32,7 @@ const inputStyles = {
 interface Admin {
     name: string;
     email: string;
+    id?: string;
 }
 
 interface AdminProps {
@@ -82,6 +83,12 @@ export interface Game {
 export interface Team {
     name: string,
     id: string
+}
+
+export interface User {
+    name: string,
+    id?: string,
+    email: string
 }
 
 const AdminStartScreen: FC<AdminStartScreenProps> = props => {

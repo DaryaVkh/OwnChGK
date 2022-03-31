@@ -32,25 +32,31 @@ export enum GameStatus {
     Start
 }
 
+export enum GameTypeLogic {
+    Matrix,
+    ChGK
+}
+
 export class Game {
-    public readonly id: number;
+    public readonly id: string;
     public readonly name: string;
     public readonly rounds: Round[];
-    public readonly teams: { [number: number]: Team };
+    public readonly teams: { [teamId: string]: Team };
     public status: GameStatus;
     public breakTime: number;
     private interval: any;
     public currentQuestion: [number, number];
     public isTimerStart: boolean;
     public isIntrigue: boolean;
+    public type: GameTypeLogic;
 
     public timer: any;
     public leftTime: number;
     public maxTime: number;
     public timeIsOnPause: boolean;
 
-    constructor(name: string) {
-        this.id = Math.round(Math.random() * 1000000)
+    constructor(name: string, type: GameTypeLogic) {
+        this.id = Math.round(Math.random() * 1000000).toString() // TODO: принимать из БД
         this.name = name;
         this.rounds = [];
         this.teams = {};
@@ -61,6 +67,7 @@ export class Game {
         this.leftTime = seconds70PerQuestion;
         this.timeIsOnPause = false;
         this.maxTime = seconds70PerQuestion;
+        this.type = type;
     }
 
     startBreak(time: number): void {
@@ -108,7 +115,7 @@ export class Game {
         return table;
     }
 
-    getScoreTableForTeam(teamId: number): { name: string, scoreTable: number[][] } {
+    getScoreTableForTeam(teamId: string): { name: string, scoreTable: number[][] } {
         let table = {};
         const roundsCount = this.rounds.length;
         const questionsCount = this.rounds[0].questions.length;
@@ -132,5 +139,38 @@ export class Game {
         }
         // @ts-ignore
         return table;
+    }
+
+    static getScoreTableWithFormat(game: Game, scoreTable: { name: string, scoreTable: number[][] }): string {
+        const headersList = ['Название команды', 'Сумма'];
+        for (let i = 1; i <= game.rounds.length; i++) {
+            headersList.push('Тур ' + i);
+            for (let j = 1; j <= game.rounds[i - 1].questionsCount; j++) {
+                headersList.push('Вопрос ' + j);
+            }
+        }
+
+        const teamRows = [];
+        const totalScoreForAllTeams = game.getTotalScoreForAllTeams();
+
+        let roundsResultList = [];
+        for (const team in scoreTable) {
+            let roundSum = 0;
+            for (let i = 0; i < game.rounds.length; i++) {
+                for (let j = 0; j < game.rounds[i].questionsCount; j++) {
+                    roundSum += scoreTable[team][i][j];
+                }
+                roundsResultList.push(roundSum);
+                roundsResultList.push(scoreTable[team][i].join(';'));
+                roundSum = 0;
+            }
+            teamRows.push(team + ';' + totalScoreForAllTeams[team] + ';' + roundsResultList.join(';'));
+            roundsResultList = [];
+        }
+
+        const headers = headersList.join(';');
+        const value = teamRows.join('\n');
+
+        return [headers, value].join('\n');
     }
 }

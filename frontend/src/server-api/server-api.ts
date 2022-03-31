@@ -1,33 +1,33 @@
 export const getAll = async (path: string) => {
-    return await fetch(path);
+    return await fetch('/api' + path);
 };
 
 export const getAmIParticipateGames = async () => {
-    return await fetch('/games/?amIParticipate=true');
+    return await fetch('/api/games/?amIParticipate=true');
 };
 
 export const getResult = async (gameId: string) => {
-    return await fetch(`/games/${gameId}/result`);
+    return await fetch(`/api/games/${gameId}/result`);
 };
 
 export const getResultTable = async (gameId: string) => {
-    return await fetch(`/games/${gameId}/resultTable`);
+    return await fetch(`/api/games/${gameId}/resultTable`);
 };
 
 export const getResultTableFormat = async (gameId: string) => {
-    return await fetch(`/games/${gameId}/resultTable/format`);
+    return await fetch(`/api/games/${gameId}/resultTable/format`);
 };
 
 export const getUsersWithoutTeam = async () => {
-    return await fetch(`/users/?withoutTeam=true`);
+    return await fetch(`/api/users/?withoutTeam=true`);
 };
 
 export const getGame = async (gameId: string) => {
-    return await fetch(`/games/${gameId}`);
+    return await fetch(`/api/games/${gameId}`);
 };
 
 export const createGame = async (gameName: string, roundCount: number, questionCount: number, teams: string[]) => {
-    return await fetch('/games/', {
+    return await fetch('/api/games/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -44,7 +44,7 @@ export const createGame = async (gameName: string, roundCount: number, questionC
 };
 
 export const createUser = async (email: string, password: string) => {
-    return await fetch('/users/insert', {
+    return await fetch('/api/users/insert', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -59,7 +59,7 @@ export const createUser = async (email: string, password: string) => {
 };
 
 export const login = async (email: string, password: string, isAdmin: boolean) => {
-    return await fetch(isAdmin ? 'admins/login' : 'users/login', {
+    return await fetch(isAdmin ? '/api/admins/login' : '/api/users/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -74,7 +74,7 @@ export const login = async (email: string, password: string, isAdmin: boolean) =
 }
 
 export const logout = async () => {
-    return await fetch('/users/logout', {
+    return await fetch('/api/users/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -85,7 +85,7 @@ export const logout = async () => {
 }
 
 export const changeToken = async (gameId: string) => {
-    return fetch(`/users/${gameId}/changeToken`, {
+    return fetch(`/api/users/${gameId}/changeToken`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
@@ -96,11 +96,11 @@ export const changeToken = async (gameId: string) => {
 }
 
 export const startGame = async (gameId: string) => {
-    return fetch(`/games/${gameId}/start`);
+    return fetch(`/api/games/${gameId}/start`);
 }
 
 export const editGame = async (gameId: string, newGameName: string, roundCount: number, questionCount: number, teams: string[]) => {
-    return await fetch(`/games/${gameId}/change`, {
+    return await fetch(`/api/games/${gameId}/change`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -117,23 +117,23 @@ export const editGame = async (gameId: string, newGameName: string, roundCount: 
 };
 
 export const deleteGame = async (gameId: string) => {
-    return await fetch(`/games/${gameId}`, {
+    return await fetch(`/api/games/${gameId}`, {
         method: 'DELETE'
     });
 };
 
 export const deleteTeam = async (teamId: string) => {
-    return await fetch(`/teams/${teamId}`, {
+    return await fetch(`/api/teams/${teamId}`, {
         method: 'DELETE'
     });
 };
 
 export const getTeam = async (teamId: string) => {
-    return await fetch(`/teams/${teamId}`);
+    return await fetch(`/api/teams/${teamId}`);
 };
 
-export const createTeam = async (teamName: string, captain: string) => {
-    return await fetch('/teams/', {
+export const createTeam = async (teamName: string, captain?: string) => {
+    return await fetch('/api/teams/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -147,8 +147,8 @@ export const createTeam = async (teamName: string, captain: string) => {
     });
 };
 
-export const editTeam = async (teamId: string, newTeamName: string, captain: string) => {
-    return await fetch(`/teams/${teamId}/change`, {
+export const editTeam = async (teamId: string, newTeamName: string, captain?: string) => {
+    return await fetch(`/api/teams/${teamId}/change`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -162,8 +162,8 @@ export const editTeam = async (teamId: string, newTeamName: string, captain: str
     });
 };
 
-export const editTeamCaptainByCurrentUser = async (teamId: string) => { // TODO: дописать, потому что вызывается оно всё ещё с name
-    return await fetch(`/teams/${teamId}/changeCaptain`, {
+export const editTeamCaptainByCurrentUser = async (teamId: string) => {
+    return await fetch(`/api/teams/${teamId}/changeCaptain`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
@@ -173,20 +173,30 @@ export const editTeamCaptainByCurrentUser = async (teamId: string) => { // TODO:
     });
 };
 
+export const deleteTeamCaptainById = async (teamId: string) => {
+    return await fetch(`/teams/${teamId}/deleteCaptain`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+};
+
 export const getTeamByCurrentUser = async () => {
-    return await fetch('/users/getTeam');
+    return await fetch('/api/users/getTeam');
 };
 
 export const getTeamsWithoutUser = async () => {
-    return await fetch(`/teams/?withoutUser=true`);
+    return await fetch(`/api/teams/?withoutUser=true`);
 };
 
 export const checkToken = async () => {
-    return await fetch('/users/current');
+    return await fetch('/api/users/current');
 };
 
 export const sendTemporaryPassword = async (email: string, isAdmin: boolean) => {
-    return await fetch(`/${isAdmin ? 'admins' : 'users'}/sendMail`, {
+    return await fetch(`/api/${isAdmin ? 'admins' : 'users'}/sendMail`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -200,7 +210,7 @@ export const sendTemporaryPassword = async (email: string, isAdmin: boolean) => 
 }
 
 export const checkTemporaryPassword = async (email: string, code: string, isAdmin: boolean) => {
-    return await fetch(`/${isAdmin ? 'admins' : 'users'}/checkTemporaryPassword`, {
+    return await fetch(`/api/${isAdmin ? 'admins' : 'users'}/checkTemporaryPassword`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -215,7 +225,7 @@ export const checkTemporaryPassword = async (email: string, code: string, isAdmi
 }
 
 export const changePassword = async (email: string, password: string, oldPassword: string, isAdmin = false) => {
-    return await fetch(`/${isAdmin ? 'admins' : 'users'}/changePassword`, {
+    return await fetch(`/api/${isAdmin ? 'admins' : 'users'}/changePassword`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -231,7 +241,7 @@ export const changePassword = async (email: string, password: string, oldPasswor
 };
 
 export const changePasswordByCode = async (email: string, password: string, code: string, isAdmin: boolean) => {
-    return await fetch(`/${isAdmin ? 'admins' : 'users'}/changePasswordByCode`, {
+    return await fetch(`/api/${isAdmin ? 'admins' : 'users'}/changePasswordByCode`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -247,7 +257,7 @@ export const changePasswordByCode = async (email: string, password: string, code
 };
 
 export const changeName = async (newName: string, isAdmin: boolean) => {
-    return await fetch(`/${isAdmin ? 'admins' : 'users'}/changeName`, {
+    return await fetch(`/api/${isAdmin ? 'admins' : 'users'}/changeName`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -261,7 +271,7 @@ export const changeName = async (newName: string, isAdmin: boolean) => {
 };
 
 export const changeIntrigueGameStatus = async (gameId: string, isIntrigue: boolean) => {
-    return await fetch(`/games/${gameId}/changeIntrigueStatus`, {
+    return await fetch(`/api/games/${gameId}/changeIntrigueStatus`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -275,7 +285,7 @@ export const changeIntrigueGameStatus = async (gameId: string, isIntrigue: boole
 }
 
 export const deleteAdmin = async (adminEmail: string) => {
-    return await fetch(`/admins/delete`, {
+    return await fetch(`/api/admins/delete`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
@@ -289,7 +299,7 @@ export const deleteAdmin = async (adminEmail: string) => {
 }
 
 export const addAdmin = async (adminEmail: string, adminName = '') => {
-    return await fetch(`/admins/insert`, {
+    return await fetch(`/api/admins/insert`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',

@@ -35,8 +35,8 @@ const GameCreator: FC<GameCreatorProps> = props => {
     useEffect(() => {
         getAll('/teams/').then(res => {
             if (res.status === 200) {
-                res.json().then(({teams: t}) => {
-                    setTeamsFromDB(t);
+                res.json().then(({teams}) => {
+                    setTeamsFromDB(teams);
                 });
             } else {
                 // TODO: код не 200, мейби всплывашку, что что-то не так?

@@ -4,14 +4,11 @@ import {
     PrimaryGeneratedColumn,
     BaseEntity,
     JoinColumn,
-    JoinTable,
     ManyToOne,
     OneToMany,
-    ManyToMany
 } from 'typeorm';
-import {Admin} from './Admin';
 import {Round} from './Round';
-import {Team} from './Team';
+import {BigGame} from "./BigGame";
 
 export enum GameStatus {
     NOT_STARTED = 'not_started',
@@ -19,32 +16,22 @@ export enum GameStatus {
     FINISHED = 'finished'
 }
 
+export enum GameType {
+    CHGK = 'chgk',
+    MATRIX = 'matrix'
+}
+
 @Entity('games')
 export class Game extends BaseEntity {
-    @PrimaryGeneratedColumn({name: 'game_id'})
-    id: number;
-
-    @Column({
-        unique: true
-    })
-    name: string;
+    @PrimaryGeneratedColumn('uuid', {name: 'game_id'})
+    id: string;
 
     @Column({
         type: 'enum',
-        enum: GameStatus,
-        default: GameStatus.NOT_STARTED
+        enum: GameType,
+        default: GameType.CHGK
     })
-    status: string;
-
-    @ManyToOne(() => Admin, {
-        nullable: false,
-        onDelete: 'RESTRICT',
-        onUpdate: 'CASCADE'
-    })
-    @JoinColumn({
-        name: 'admin_id',
-    })
-    admin: Admin;
+    type: string;
 
     @OneToMany(
         () => Round,
@@ -52,23 +39,13 @@ export class Game extends BaseEntity {
     )
     rounds: Round[];
 
-    @ManyToMany(
-        () => Team,
-        {
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        }
-    )
-    @JoinTable({
-        name: 'game_team_links',
-        joinColumn: {
-            name: 'game_id',
-            referencedColumnName: 'id'
-        },
-        inverseJoinColumn: {
-            name: 'team_id',
-            referencedColumnName: 'id'
-        }
+    @ManyToOne(() => BigGame, {
+        nullable: false,
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
     })
-    teams: Team[];
+    @JoinColumn({
+        name: 'big_game_id',
+    })
+    bigGame: BigGame
 }
