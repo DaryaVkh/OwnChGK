@@ -69,4 +69,18 @@ export class TeamRepository extends Repository<Team> {
             return manager.save(team);
         });
     }
+
+    deleteTeamCaptainByIdAndUserEmail(teamId: string) {
+        return this.manager.transaction(manager =>
+            manager.findOne(Team, teamId, {relations: ['captain']})
+                .then(team => {
+                        if (team.captain === null) {
+                            throw new Error('Команда уже без капитана');
+                        }
+                        team.captain = null;
+                        return manager.save(Team, team);
+                    }
+                )
+        );
+    }
 }

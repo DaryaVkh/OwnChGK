@@ -162,10 +162,20 @@ export const editTeam = async (teamId: string, newTeamName: string, captain?: st
     });
 };
 
-export const editTeamCaptainByCurrentUser = async (teamId: string) => { // TODO: дописать, потому что вызывается оно всё ещё с name
+export const editTeamCaptainByCurrentUser = async (teamId: string) => {
     return await fetch(`/api/teams/${teamId}/changeCaptain`, {
         method: 'PATCH',
         credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept': 'application/json'
+        }
+    });
+};
+
+export const deleteTeamCaptainById = async (teamId: string) => {
+    return await fetch(`/teams/${teamId}/deleteCaptain`, {
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',
             'Accept': 'application/json'

@@ -36,6 +36,8 @@ export const teamsRouter = () => {
     router.delete('/:teamId',
         roleMiddleware(adminAccess),
         param('teamId').isUUID(), teamsController.deleteTeam);
+    
+    router.patch('/:teamId/deleteCaptain', middleware, teamsController.deleteTeamCaptainById);
 
     router.post('/',
         middleware,
