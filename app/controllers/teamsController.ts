@@ -234,8 +234,10 @@ export class TeamsController {
                 error,
             });
         }
-        
-   public async getParticipants(req:Request, res:Response) {
+    }
+
+
+    public async getParticipants(req: Request, res: Response) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -247,5 +249,12 @@ export class TeamsController {
             return res.status(200).json({
                 games: team.participants
             });
+
+        } catch (error: any) {
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
+        }
     }
 }
