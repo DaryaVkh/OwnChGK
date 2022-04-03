@@ -234,5 +234,18 @@ export class TeamsController {
                 error,
             });
         }
+        
+   public async getParticipants(req:Request, res:Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+
+            const {teamId} = req.params;
+            const team = await getCustomRepository(TeamRepository).findOne(teamId);
+            return res.status(200).json({
+                games: team.participants
+            });
     }
 }
