@@ -141,7 +141,7 @@ export class GamesController {
 
             const {gameId} = req.params;
             const {adminEmail} = req.body;
-            
+
             await getCustomRepository(BigGameRepository).updateAdminByIdAndAdminEmail(gameId, adminEmail);
             return res.status(200).json({});
         } catch (error: any) {
@@ -201,12 +201,11 @@ export class GamesController {
                 roundCount: rounds.length,
                 questionCount: rounds.length !== 0 ? rounds[0].questions.length : 0
             };
-            gameAdmins[bigGame.id] = new Set();
-            gameUsers[bigGame.id] = new Set();
-            //тут у каждого своя game должна быть
+            gameAdmins[gameId] = new Set();
+            gameUsers[gameId] = new Set();
             const ChGK = new Game(bigGame.name, GameTypeLogic.ChGK);
-            //const Matrix = new Game(game.name, GameTypeLogic.Matrix);
-            bigGames[bigGame.id] = new BigGameLogic(bigGame.name, ChGK, null);
+            const Matrix = new Game(bigGame.name, GameTypeLogic.Matrix);
+            bigGames[bigGame.id] = new BigGameLogic(bigGame.name, ChGK, Matrix);
             setTimeout(() => {
                 delete bigGames[gameId];
                 delete gameUsers[gameId];
@@ -214,12 +213,26 @@ export class GamesController {
                 console.log('delete game ', bigGames[gameId]);
             }, 1000 * 60 * 60 * 24 * 3);
             const chgkFromBd = bigGame.games.find(game => game.type == GameType.CHGK);
-            for (let i = 0; i < chgkFromBd.rounds.length; i++) {
-                bigGames[bigGame.id].CurrentGame.addRound(new Round(i + 1, answer.questionCount, 60, 1));
+            const matrixFromBd = bigGame.games.find(game => game.type == GameType.MATRIX);
+            if (chgkFromBd) {
+                for (let i = 0; i < chgkFromBd.rounds.length; i++) {
+                    bigGames[gameId].ChGK.addRound(new Round(i + 1, answer.questionCount, 60, GameTypeLogic.ChGK));
+                }
+
+                for (const team of bigGame.teams) {
+                    bigGames[gameId].ChGK.addTeam(new Team(team.name, team.id));
+                }
             }
-            for (const team of bigGame.teams) {
-                bigGames[bigGame.id].CurrentGame.addTeam(new Team(team.name, team.id));
+            if (matrixFromBd) {
+                for (let i = 0; i < matrixFromBd.rounds.length; i++) {
+                    bigGames[gameId].Matrix.addRound(new Round(i + 1, answer.questionCount, 60, GameTypeLogic.Matrix));
+                }
+
+                for (const team of bigGame.teams) {
+                    bigGames[gameId].Matrix.addTeam(new Team(team.name, team.id));
+                }
             }
+
             await getCustomRepository(BigGameRepository).updateByGameIdAndStatus(gameId, GameStatus.STARTED);
             return res.status(200).json(answer);
         } catch (error: any) {
@@ -373,7 +386,7 @@ export class GamesController {
             const teamRows = [];
             const totalScoreForAllTeams = bigGames[gameId].CurrentGame.getTotalScoreForAllTeams();
             const scoreTable = roles === 'user' && teamId && bigGames[gameId].CurrentGame.isIntrigue ?
-                    bigGames[gameId].CurrentGame.getScoreTableForTeam(teamId) : bigGames[gameId].CurrentGame.getScoreTable();
+                bigGames[gameId].CurrentGame.getScoreTableForTeam(teamId) : bigGames[gameId].CurrentGame.getScoreTable();
             let roundsResultList = [];
             for (const team in scoreTable) {
                 let roundSum = 0;
