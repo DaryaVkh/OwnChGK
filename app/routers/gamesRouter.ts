@@ -24,6 +24,10 @@ export const gamesRouter = () => {
         roleMiddleware(adminAccess),
         param('gameId').isUUID(), gamesController.startGame);
 
+    router.get('/:gameId/participants',
+        roleMiddleware(adminAccess),
+        param('gameId').isUUID(), gamesController.getParticipants);
+
     router.patch('/:gameId/change',
         roleMiddleware(adminAccess),
         param('gameId').isUUID(),

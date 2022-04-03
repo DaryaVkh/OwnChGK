@@ -247,7 +247,7 @@ export class TeamsController {
             const {teamId} = req.params;
             const team = await getCustomRepository(TeamRepository).findOne(teamId);
             return res.status(200).json({
-                games: team.participants
+                participants: team.participants
             });
 
         } catch (error: any) {

@@ -19,6 +19,10 @@ export const teamsRouter = () => {
         middleware,
         param('teamId').isUUID(), teamsController.getTeam);
 
+    router.get('/:teamId/participants',
+        middleware,
+        param('teamId').isUUID(), teamsController.getParticipants);
+
     router.patch('/:teamId/change',
         middleware,
         param('teamId').isUUID(),

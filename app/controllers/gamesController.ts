@@ -434,4 +434,38 @@ export class GamesController {
             });
         }
     }
+
+    public async getParticipants(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+
+            const {gameId} = req.params;
+            const game = await getCustomRepository(BigGameRepository).findOne(gameId, { relations: ['teams'] });
+            const table = [];
+            for (let team of game.teams) {
+                table.push(team.name);
+                if (team.participants) {
+                    table.push(["Имя", "Почта"].join(';'));
+                    const participantsList = [];
+                    for (let participant of team.participants) {
+                        participantsList.push(participant.name + ';' + participant.email + ';');
+                    }
+                    table.push(participantsList.join('\n'));
+                }
+            }
+
+                return res.status(200).json({
+                    participants: table.join('\n')
+                });
+
+        } catch (error: any) {
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
+        }
+    }
 }
