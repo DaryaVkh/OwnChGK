@@ -1,7 +1,7 @@
 import {Team} from "../app/logic/Team";
 import {Question} from "../app/logic/Question";
 import {Status} from "../app/logic/AnswerAndAppeal"
-import {Game, Round} from "../app/logic/Game";
+import {Game, GameTypeLogic, Round} from "../app/logic/Game";
 
 let game;
 let team;
@@ -9,8 +9,8 @@ let question;
 let round;
 
 beforeEach(() => {
-    game = new Game("newGame");
-    team = new Team("cool", 1);
+    game = new Game("newGame", GameTypeLogic.ChGK);
+    team = new Team("cool", "1");
     game.addTeam(team);
     game.addRound(new Round(1, 2, 50, 1));
     round = game.rounds[0];
@@ -241,8 +241,8 @@ test('Should_accept_appeal_and_change_score_for_one_team', () => {
 });
 
 test('Should_accept_appeal_for_all_team', () => {
-    const team1 = new Team("cool", 1);
-    const team2 = new Team("good", 2);
+    const team1 = new Team("cool", "1");
+    const team2 = new Team("good", "2");
     const question = new Question(1, 1, 1, 50);
     question.giveAnswer(team1, "otherAnswer");
     question.giveAnswer(team2, "otherAnswer");
@@ -266,7 +266,7 @@ test('Should_accept_appeal_for_all_team', () => {
 });
 
 test('Should_get_score_table_for_all_team', () => {
-    const team2 = new Team("good", 2);
+    const team2 = new Team("good", "2");
     game.addTeam(team2);
 
     question.giveAnswer(team, "rightAnswer");
