@@ -167,16 +167,19 @@ const Profile: FC<ProfileProps> = props => {
                                          placeholder="Введите старый пароль" style={{marginBottom: '3.5vh'}}
                                          isInvalid={isOldPasswordInvalid} required={false} value={userOldPassword}
                                          onChange={handleUserOldPassportChange}
-                                         errorHelperText='Неверный старый пароль'/>
+                                         errorHelperText='Неверный старый пароль'
+                                         onFocus={() => setIsOldPasswordInvalid(false)}/>
                             <CustomInput type="password" id="new-password" name="new-password"
                                          placeholder="Введите новый пароль" isInvalid={isRepeatedPasswordInvalid}
                                          required={false} value={userPassword}
-                                         onChange={handleUserPassportChange}/>
+                                         onChange={handleUserPassportChange}
+                                         onFocus={() => setIsRepeatedPasswordInvalid(false)}/>
                             <CustomInput type="password" id="repeat-new-password" name="repeat-new-password"
                                          placeholder="Повторите новый пароль" isInvalid={isRepeatedPasswordInvalid}
                                          value={repeatedPassword} onChange={handleRepeatedPasswordChange}
                                          onBlur={checkRepeatedPassword} required={false}
-                                         errorHelperText='Пароли не совпадают'/>
+                                         errorHelperText='Пароли не совпадают'
+                                         onFocus={() => setIsRepeatedPasswordInvalid(false)}/>
                         </div>
                     </div>
 

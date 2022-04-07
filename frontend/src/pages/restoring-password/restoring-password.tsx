@@ -123,6 +123,7 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                                          style={{width: mediaMatch.matches ? '100%' : '65%'}}
                                          onChange={handleEmailChange} isInvalid={isEmailInvalid}
                                          errorHelperText='Эта почта ещё не зарегистрирована'
+                                         onFocus={() => setIsEmailInvalid(false)}
                             />
                             <button className={classes.sendButton} type="submit">Отправить
                             </button>
@@ -150,7 +151,8 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                         <div className={classes.secondStepForm}>
                             <CustomInput type="text" placeholder="Введите код" name="code" id="code" value={code}
                                          style={{width: mediaMatch.matches ? '100%' : '35%', marginRight: '1vw'}}
-                                         onChange={handleCodeChange} isInvalid={isCodeInvalid} errorHelperText='Код неверный'/>
+                                         onChange={handleCodeChange} isInvalid={isCodeInvalid} errorHelperText='Код неверный'
+                                         onFocus={() => setIsCodeInvalid(false)}/>
                             <button className={classes.sendButton} type="submit" onClick={handleCheckCode}>Отправить
                             </button>
                         </div>
@@ -172,12 +174,14 @@ const RestoringPassword: FC<RestoringPasswordProps> = props => {
                         <form className={classes.newPasswordsForm} onSubmit={handleSubmitNewPassword}>
                             <CustomInput type="password" id="password" name="password" placeholder="Пароль"
                                          value={newPassword} onChange={handleChangeNewPassword}
-                                         isInvalid={isRepeatedPasswordInvalid || isError}/>
+                                         isInvalid={isRepeatedPasswordInvalid || isError}
+                                         onFocus={() => setIsRepeatedPasswordInvalid(false)}/>
                             <CustomInput type="password" id="repeatPassword" name="repeatPassword"
                                          placeholder="Повторите пароль"
                                          value={repeatedPassword} onChange={handleChangeRepeatedPassword}
                                          isInvalid={isRepeatedPasswordInvalid || isError}
                                          errorHelperText={isRepeatedPasswordInvalid ? 'Пароли не совпадают' : 'Что-то пошло не так, попробуйте снова'}
+                                         onFocus={() => setIsRepeatedPasswordInvalid(false)}
                             />
                             <button className={`${classes.sendButton} ${classes.saveButton}`}>Сохранить</button>
                         </form>

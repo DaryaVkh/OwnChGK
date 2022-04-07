@@ -250,9 +250,11 @@ export class GamesController {
                 return res.status(404).json({message: 'game not found'});
             }
 
-            const game = await getCustomRepository(BigGameRepository).findByName(newGameName);
-            if (game) {
-                return res.status(409).json({message: 'Игра с таким названием уже есть'});
+            if (currentGame.name !== newGameName) {
+                const game = await getCustomRepository(BigGameRepository).findByName(newGameName);
+                if (game) {
+                    return res.status(409).json({message: 'Игра с таким названием уже есть'});
+                }
             }
 
             console.log('ChangeGame: ', gameId, ' teams is: ', teams);

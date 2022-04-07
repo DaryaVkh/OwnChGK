@@ -29,6 +29,10 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const oldGameId = props.mode === 'edit' ? location.state.id : '';
 
     if (teamsFromDB && (props.mode != 'edit' || chosenTeams) && isPageLoading) {
+        teamsFromDB
+            .sort((a: Team, b: Team) => chosenTeams?.includes(a.name) && chosenTeams?.includes(b.name) && a.name.toLowerCase() < b.name.toLowerCase()
+            || chosenTeams?.includes(a.name) && !chosenTeams?.includes(b.name)
+            || !chosenTeams?.includes(a.name) && !chosenTeams?.includes(b.name) && a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1);
         setIsPageLoading(false);
     }
 
@@ -87,13 +91,10 @@ const GameCreator: FC<GameCreatorProps> = props => {
         }
 
         return teamsFromDB
-            .sort((a: Team, b: Team) => chosenTeams?.includes(a.name) && chosenTeams?.includes(b.name) && a.name.toLowerCase() < b.name.toLowerCase()
-                || chosenTeams?.includes(a.name) && !chosenTeams?.includes(b.name)
-                || !chosenTeams?.includes(a.name) && !chosenTeams?.includes(b.name) && a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1)
             .map((team, index) => {
                 return chosenTeams?.includes(team.name)
-                    ? <CustomCheckbox name={team.name} key={index} checked={true} onChange={handleCheckboxChange}/>
-                    : <CustomCheckbox name={team.name} key={index} onChange={handleCheckboxChange}/>;
+                    ? <CustomCheckbox name={team.name} key={team.id} checked={true} onChange={handleCheckboxChange}/>
+                    : <CustomCheckbox name={team.name} key={team.id} onChange={handleCheckboxChange}/>;
             });
     };
 
@@ -173,7 +174,8 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                                              defaultValue={gameName}
                                                              isInvalid={isGameNameInvalid}
                                                              errorHelperText='Игра с таким названием уже существует'
-                                                             onChange={handleGameNameChange} />
+                                                             onChange={handleGameNameChange}
+                                                             onFocus={() => setIsGameNameInvalid(false)}/>
 
                                                 <div className={classes.toursCountWrapper}>
                                                     <label htmlFor="toursCount" className={classes.toursCountLabel}>Количество

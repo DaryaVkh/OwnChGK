@@ -84,7 +84,11 @@ const Registration: FC<RegistrationProps> = props => {
                                  style={{marginBottom: '9%'}}
                                  value={email} onChange={handleEmailChange}
                                  isInvalid={isError || isRegisteredAlready}
-                                 errorHelperText={isRegisteredAlready ? 'Эта почта уже зарегистрирована' : ''}/>
+                                 errorHelperText={isRegisteredAlready ? 'Эта почта уже зарегистрирована' : ''}
+                                 onFocus={() => {
+                                     setIsRegisteredAlready(false);
+                                     setIsError(false);
+                                 }}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль" value={password}
                                  isInvalid={isRepeatedPasswordInvalid || isError} onChange={handlePasswordChange}/>
                     <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите пароль" value={repeatedPassword}
