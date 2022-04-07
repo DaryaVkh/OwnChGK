@@ -284,7 +284,7 @@ export class UsersController { // TODO: дописать смену имени �
             if (user.temporary_code === code) {
                 return res.status(200).json({});
             } else {
-                return res.status(403).json({message: 'not your password'});
+                return res.status(403).json({message: 'code is invalid'});
             }
         } catch (error: any) {
             return res.status(500).json({

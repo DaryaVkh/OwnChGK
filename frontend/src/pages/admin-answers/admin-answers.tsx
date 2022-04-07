@@ -97,12 +97,26 @@ const AdminAnswersPage: FC = () => {
 
     const handleCheckboxChange = (event: React.SyntheticEvent) => {
         const element = event.target as HTMLInputElement;
-        setCurrentHandledAnswers(prev => [...prev, element.name]);
+        if (currentHandledAnswers.includes(element.name)) {
+            setCurrentHandledAnswers(prev => {
+                prev.splice(prev.indexOf(element.name), 1);
+                return prev;
+            });
+        } else {
+            setCurrentHandledAnswers(prev => [...prev, element.name]);
+        }
     };
 
     const handleAppealCheckboxChange = (event: React.SyntheticEvent) => {
         const element = event.target as HTMLInputElement;
-        setCurrentHandledAppeals(prev => [...prev, element.name]);
+        if (currentHandledAppeals.includes(element.name)) {
+            setCurrentHandledAppeals(prev => {
+                prev.splice(prev.indexOf(element.name), 1);
+                return prev;
+            });
+        } else {
+            setCurrentHandledAppeals(prev => [...prev, element.name]);
+        }
     };
 
     const handleIndicator = (event: React.SyntheticEvent) => {

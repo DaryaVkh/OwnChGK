@@ -97,6 +97,10 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
         } else {
             editTeam(location.state.id, teamName, captain).then(res => {
                 if (res.status === 200) {
+                    if (!props.isAdmin) {
+                        props.onAddUserTeam(teamName);
+                    }
+
                     setIsCreatedSuccessfully(true);
                 } else {
                     setIsLoading(false);
@@ -146,7 +150,8 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                                defaultValue={teamName}
                                                onChange={handleInputChange}
                                                isInvalid={isNameInvalid}
-                                               errorHelperText={'Такая команда уже существует'}/>
+                                               errorHelperText={'Такая команда уже существует'}
+                                               onFocus={() => setIsNameInvalid(false)}/>
                                 : <Skeleton variant='rectangular' width='100%' height={mediaMatch.matches ? '6vh' : '7vh'} sx={{marginBottom: '3%'}} />
                         }
 
