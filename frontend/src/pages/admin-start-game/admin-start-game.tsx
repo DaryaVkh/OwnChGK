@@ -11,6 +11,7 @@ import {
 import Header from '../../components/header/header';
 import NavBar from '../../components/nav-bar/nav-bar';
 import Loader from '../../components/loader/loader';
+import {createFileLink} from "../../fileWorker";
 
 const StartGame: FC = () => {
     const [gameName, setGameName] = useState<string>();
@@ -41,7 +42,7 @@ const StartGame: FC = () => {
 
     const getGameName = () => {
         if ((gameName as string).length > 55) {
-            return (gameName as string).substr(0, 55) + '\u2026';
+            return (gameName as string).slice(0, 55) + '\u2026';
         } else {
             return gameName;
         }
@@ -59,46 +60,14 @@ const StartGame: FC = () => {
             });
     };
 
-    const downloadResults = () => {
+    const downloadResults = async () => {
         getTeamsParticipantTable(gameId).then(res => {
             if (res.status === 200) {
                 res.json().then(({participants}) => {
-                    const element = document.createElement('a');
-                    element.setAttribute('href', 'data:text/plain;charset=cp1251,' + encodeCP1251(participants));
-                    element.setAttribute('download', `game-${gameId}-participants.csv`);
-
-                    element.style.display = 'none';
-                    document.body.appendChild(element);
-
-                    element.click();
-
-                    document.body.removeChild(element);
+                    createFileLink(participants, `game-${gameId}-participants.csv`);
                 });
             }
         })
-    }
-
-    const encodeCP1251 = function (text: string) {
-        function encodeChar(c: string) {
-            const isKyr = function (str: string) {
-                return /[а-я]/i.test(str);
-            }
-            const cp1251 = 'ЂЃ‚ѓ„…†‡€‰Љ‹ЊЌЋЏђ‘’“”•–—�™љ›њќћџ ЎўЈ¤Ґ¦§Ё©Є«¬*®Ї°±Ііґµ¶·\
-ё№є»јЅѕїАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя';
-            const p = isKyr(c) ? (cp1251.indexOf(c) + 128) : c.charCodeAt(0);
-            let h = p.toString(16);
-            if (h == 'a') {
-                h = '0A';
-            }
-            return '%' + h;
-        }
-
-        let res = '';
-        for (let i = 0; i < text.length; i++) {
-            console.log(text)
-            res += encodeChar(text.charAt(i))
-        }
-        return res;
     }
 
     if (isLoading) {

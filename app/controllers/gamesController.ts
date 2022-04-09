@@ -443,7 +443,7 @@ export class GamesController {
             }
 
             const {gameId} = req.params;
-            const game = await getCustomRepository(BigGameRepository).findOne(gameId, { relations: ['teams'] });
+            const game = await getCustomRepository(BigGameRepository).findWithAllRelations(gameId);
             const table = [];
             for (let team of game.teams) {
                 table.push(team.name);
