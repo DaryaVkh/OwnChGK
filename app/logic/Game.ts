@@ -26,7 +26,7 @@ export class Round {
             }
         }
         else for (let i = 1; i <= this.questionsCount; i++) {
-            result.push(new Question(i*this.questionsCount, this.number, i, this.questionTime));
+            result.push(new Question(i*10, this.number, i, this.questionTime));
         }
         return result;
     }
