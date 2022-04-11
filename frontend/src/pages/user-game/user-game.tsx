@@ -39,7 +39,19 @@ const UserGame: FC<UserGameProps> = props => {
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
 
     useEffect(() => {
         getGame(gameId).then((res) => {

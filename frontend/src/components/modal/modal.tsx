@@ -4,7 +4,7 @@ import React, {FC, useCallback, useState} from 'react';
 import classes from './modal.module.scss';
 import {ModalProps} from '../../entities/modal/modal.interfaces';
 import {deleteGame, deleteTeam} from '../../server-api/server-api';
-import {getCookie, getUrlForSocket} from "../../commonFunctions";
+import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import {createPortal} from 'react-dom';
 
 let conn: WebSocket;
@@ -27,11 +27,15 @@ const Modal: FC<ModalProps> = props => {
     };
 
     const handleDelete = useCallback(e => {
-        props.deleteElement?.(arr => arr?.filter(el => el.name !== props.itemForDeleteName));
-        if (props.type === 'game') {
-            deleteGame(props.itemForDeleteId as string);
+        if (props.modalType === 'delete-game-part') {
+            props.setGamePartUndefined?.(undefined);
         } else {
-            deleteTeam(props.itemForDeleteId as string);
+            props.deleteElement?.(arr => arr?.filter(el => el.name !== props.itemForDeleteName));
+            if (props.type === 'game') {
+                deleteGame(props.itemForDeleteId as string);
+            } else {
+                deleteTeam(props.itemForDeleteId as string);
+            }
         }
     }, [props]);
 
@@ -75,22 +79,26 @@ const Modal: FC<ModalProps> = props => {
                         ? <p className={classes.modalText}>Вы уверены, что хотите удалить «{props.itemForDeleteName}»?</p>
                         :
                         (
-                            <p className={`${classes.modalText} ${classes.breakModalText}`}>
-                                Перерыв
-                                <input className={classes.minutesInput}
-                                       type="text"
-                                       id="minutes"
-                                       name="minutes"
-                                       value={minutes || ''}
-                                       required={true}
-                                       onChange={handleMinutesCountChange} />
-                                минут
-                            </p>
+                            props.modalType === 'delete-game-part'
+                                ?
+                                <p className={classes.modalText}>Вы уверены, что хотите удалить {props.itemForDeleteName}?</p>
+                                :
+                                <p className={`${classes.modalText} ${classes.breakModalText}`}>
+                                    Перерыв
+                                    <input className={classes.minutesInput}
+                                           type="text"
+                                           id="minutes"
+                                           name="minutes"
+                                           value={minutes || ''}
+                                           required={true}
+                                           onChange={handleMinutesCountChange} />
+                                    минут
+                                </p>
                         )
                 }
                 <div className={classes.modalButtonWrapper}>
-                    <button className={classes.modalButton} onClick={props.modalType === 'delete' ? handleDeleteClick : handleStartBreak}>
-                        {props.modalType === 'delete' ? 'Да' : 'Запустить'}
+                    <button className={classes.modalButton} onClick={props.modalType === 'delete' || props.modalType === 'delete-game-part' ? handleDeleteClick : handleStartBreak}>
+                        {props.modalType === 'delete' || props.modalType === 'delete-game-part' ? 'Да' : 'Запустить'}
                     </button>
                 </div>
             </div>

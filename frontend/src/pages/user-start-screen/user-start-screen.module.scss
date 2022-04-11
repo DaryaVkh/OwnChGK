@@ -24,7 +24,7 @@
   width: 100%;
   background-color: white;
   font-size: 1.2vw;
-  padding: 1.5vh 1.5vw;
+  padding: 1.5vh 1.5vw 1.5vh 1vw;
   border-radius: 10px;
   filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 0.25));
   margin-bottom: 2.5vh;
@@ -35,6 +35,7 @@
   font-weight: 500;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   &:hover {
     cursor: pointer;
@@ -96,7 +97,30 @@
   justify-content: center;
 }
 
-@media only screen and (max-width: 768px) {
+.emptyGames {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+
+  .logo {
+    width: 30%;
+    margin-bottom: 5vh;
+  }
+
+  .emptyGamesParagraph {
+    color: white;
+    font-size: 1.4vw;
+    font-weight: 400;
+    width: 80%;
+    text-align: center;
+  }
+}
+
+@media only screen and (max-width: 600px) {
   .contentWrapper {
     width: 80%;
   }

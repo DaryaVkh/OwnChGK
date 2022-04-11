@@ -1,115 +1,309 @@
 .pageWrapper {
-  width: 60%;
-  height: 91%;
-  flex-direction: column;
-  justify-content: center;
-  align-self: flex-end;
+    width: 55%;
+    height: 91%;
+    flex-direction: column;
+    justify-content: center;
+    align-self: flex-end;
+    position: relative;
 }
 
 .gameCreationForm {
-  width: 100%;
-  height: 90%;
-  align-self: flex-end;
+    width: 100%;
+    height: 90%;
+    align-self: flex-end;
 }
 
-.pageTitle {
-  font-size: 4vmin;
-  color: white;
-  text-align: center;
-  font-weight: 300;
-  margin-top: 5vh;
-  margin-bottom: -3vh;
+.pageTitle,
+.gameSettingsPageTitle {
+    font-size: 4vmin;
+    color: white;
+    text-align: center;
+    font-weight: 300;
+    margin-top: 5vh;
+    margin-bottom: -3vh;
+}
+
+.gameSettingsPageTitle {
+    margin-bottom: 0;
 }
 
 .contentWrapper {
-  height: 70%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  box-sizing: border-box;
-  justify-content: space-evenly;
-  margin-bottom: 5vh;
+    height: 85%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    justify-content: space-evenly;
+    padding-bottom: 5%;
+    //margin-bottom: 5vh;
 }
 
 .gameParametersWrapper,
 .teamsWrapper {
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  width: 40%;
-  height: 80%;
-  align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 47%;
+    height: 90%;
+    align-self: flex-end;
 }
 
 .teamsWrapper {
-  border: 2px solid var(--foreground-color);
-  border-radius: 8px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    border: 2px solid var(--foreground-color);
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .teamsDiv {
-  margin: 1.5vw;
-  box-sizing: border-box;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  padding-right: 0.2vw;
+    box-sizing: border-box;
+    display: flex;
+    align-self: flex-end;
+    width: 100%;
+    height: 100%;
+    padding-left: 1vw;
+    padding-right: 0.8vw;
+    overflow: hidden;
 }
 
 .toursCountInput,
 .questionsCountInput {
-  border: 2px solid var(--foreground-color);
-  height: 6.5vh;
-  border-radius: 8px;
-  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
-  font-size: 1.5vw;
-  box-sizing: border-box;
-  font-weight: var(--regular-weight);
-  width: 3.5vw;
-  margin: 0;
-  text-align: center;
-  min-height: 26px;
+    border: 2px solid var(--foreground-color);
+    height: 6.5vh;
+    border-radius: 8px;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+    font-size: 1.5vw;
+    box-sizing: border-box;
+    font-weight: var(--regular-weight);
+    width: 4.5vw;
+    margin: 0;
+    text-align: center;
+    min-height: 26px;
+}
+
+.gameParamsWrapper {
+    margin-top: 10vh;
+    margin-bottom: 3vh;
 }
 
 .questionsCountWrapper,
 .toursCountWrapper {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 3%;
+    width: 45%;
+    display: flex;
+    justify-content: space-between;
+    margin: 3vh auto;
+}
+
+.addButtonWrapper {
+    width: 45%;
+    margin: 5vh auto;
+}
+
+.addQuestionsButton {
+    height: 6vh;
+    font-size: 1.3vw;
+    font-weight: var(--medium-weight);
+    border: 2px solid var(--foreground-color);
+    border-radius: 8px;
+    filter: drop-shadow(0px 4px 4px rgba(255, 255, 255, 0.25));
+    overflow: hidden;
+    user-select: none;
+    font-family: Roboto, sans-serif;
+    min-height: 26px;
+    padding: 0 2vw;
+
+    &:not(:disabled):hover {
+        cursor: pointer;
+        box-shadow: 0 0 2vh 2px var(--foreground-color);
+    }
+
+    &:active {
+        box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+    }
 }
 
 .toursCountLabel,
 .questionsCountLabel {
-  color: #F6F7FF;
-  padding: 1.5vh 5vh;
-  font-weight: 700;
-  font-size: 1.4vw;
-  box-sizing: border-box;
-  user-select: none;
+    color: #F6F7FF;
+    padding: 1.5vh 0;
+    font-size: 1.5vw;
+    box-sizing: border-box;
+    user-select: none;
 }
 
 .teamsLabel {
-  background-color: var(--background-color);
-  color: white;
-  position: absolute;
-  top: -1vw;
-  left: 1vw;
-  width: 35%;
-  font-weight: 700;
-  font-size: 1.4vw;
-  text-align: center;
-  user-select: none;
+    background-color: var(--background-color);
+    color: white;
+    position: absolute;
+    top: -1vw;
+    left: 1vw;
+    width: 35%;
+    font-weight: 700;
+    font-size: 1.4vw;
+    text-align: center;
+    user-select: none;
 }
 
 .scrollbarView {
-  overflow-x: hidden !important;
-  padding: 1vh 0.5vw 1vh 0;
+    overflow-x: hidden !important;
+    padding: 1vh 0.5vw 1vh 0;
 }
 
 .link {
-  text-decoration: none;
+    text-decoration: none;
+}
+
+.chgkWrapper,
+.matrixWrapper {
+    width: 100%;
+    height: 6vh;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    min-height: 26px;
+    border: 2px solid var(--foreground-color);
+    filter: drop-shadow(0px 4px 2px rgba(255, 255, 255, 0.25));
+    background-color: white;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 3vh;
+    padding: 1vh 0.5vw;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.chgkIcon,
+.svoyakIcon {
+    height: 115%;
+    width: 10%;
+    margin-right: 0.8vw;
+}
+
+.modeName {
+    font-size: 1.5vw;
+    width: 60%;
+}
+
+.addModeButton {
+    width: 25%;
+    display: flex;
+    justify-content: flex-end;
+    cursor: pointer;
+    font-size: 2.5vw;
+    font-weight: 200;
+}
+
+.iconsWrapper {
+    width: 25%;
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 0.4vw;
+}
+
+.searchWrapper {
+    margin-top: 7%;
+    width: 100%;
+    padding-left: 2.3vw;
+    padding-right: 2.3vw;
+    box-sizing: border-box;
+}
+
+.searchInput {
+    width: 100%;
+    font-size: 1.1vw !important;
+    height: 5vh;
+    background-color: white;
+    font-family: Roboto, sans-serif;
+    margin-bottom: 1vh;
+    border-radius: 10px !important;
+    filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 0.25));
+    min-height: 26px;
+    align-self: center;
+}
+
+.buttonsWrapper,
+.gameParamsButtonsWrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.gameParamsButtonsWrapper {
+    position: absolute;
+    bottom: 7.6vh;
+    margin: auto;
+    transform: translate(50%, 0);
+    width: 50%;
+}
+
+.createButton,
+.undoButton {
+    height: 7vh;
+    font-size: 1.2vw;
+    padding: 1vh 3vw;
+    border-radius: 10px;
+    font-family: Roboto, sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:not(:disabled):hover {
+        box-shadow: 0 0 2vh 2px var(--foreground-color);
+    }
+
+    &:active {
+        box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+    }
+}
+
+.createButton {
+    margin-right: 1vw;
+    background-color: var(--foreground-color);
+    color: white;
+    border: 2px solid white;
+
+    &:disabled {
+        cursor: default;
+        background-color: #F6F7FF;
+        border-color: rgba(27, 38, 44, 0.5);
+        color: rgba(27, 38, 44, 0.5);
+    }
+}
+
+.undoButton {
+    background-color: white;
+    border: 2px solid var(--foreground-color);
+}
+
+.tourNamesWrapper {
+    width: 60%;
+    height: 55%;
+    margin: 3vh auto 0;
+    border: 2px solid var(--foreground-color);
+    border-radius: 10px;
+    padding: 3vh 0.5vw 0 1.5vw;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.matrixQuestionsWrapper {
+    width: 60%;
+    margin: 2vh auto 0;
+}
+
+.tourNameWrapper {
+    width: 100%;
+    display: flex;
+}
+
+.tourNumber {
+    text-decoration: none;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    font-weight: 400;
+    justify-content: center;
+    font-size: 4vmin;
+    width: 10%;
+    height: 7vh;
 }

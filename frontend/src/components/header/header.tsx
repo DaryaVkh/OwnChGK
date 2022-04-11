@@ -1,4 +1,4 @@
-import React, {FC, Fragment} from 'react';
+import React, {FC, Fragment, useEffect, useState} from 'react';
 import classes from './header.module.scss';
 import {HeaderDispatchProps, HeaderProps, HeaderStateProps} from '../../entities/header/header.interfaces';
 import {Link} from 'react-router-dom';
@@ -10,7 +10,19 @@ import {logOut} from '../../redux/actions/app-actions/app-actions';
 import {logout} from '../../server-api/server-api';
 
 const Header: FC<HeaderProps> = props => {
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
 
     const handleLogout = async () => {
         logout().then(() => {});

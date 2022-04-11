@@ -1,4 +1,4 @@
-import React, {FC, useEffect, Suspense} from 'react';
+import React, {FC, Suspense, useEffect, useState} from 'react';
 import Wrapper from './wrapper';
 import Authorization from './pages/authorization/authorization';
 import Registration from './pages/registration/registration';
@@ -28,7 +28,19 @@ const StartGame = React.lazy(() => Promise.all([import('./pages/admin-start-game
 const Rating = React.lazy(() => Promise.all([import('./pages/rating/rating'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
 
 const App: FC<AppProps> = props => {
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
 
     useEffect(() => {
         checkToken().then((res) => {

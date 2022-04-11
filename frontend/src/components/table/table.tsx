@@ -1,9 +1,22 @@
-import React, {FC} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {TableCell, TableRow} from '@mui/material';
 import {TeamTableRowProps, TourHeaderCellProps} from '../../entities/table/table.interfaces';
 
 export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
+
     const tableCellStyles = {
         color: 'white',
         fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
@@ -47,7 +60,20 @@ export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
 };
 
 const TourCell: FC<{ tourResults: number[], isExpanded: boolean }> = props => {
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
+
     const styles = {
         color: 'white',
         fontSize: mediaMatch.matches ? '1.8vmax' : '1.3vw',
@@ -91,7 +117,20 @@ const TourCell: FC<{ tourResults: number[], isExpanded: boolean }> = props => {
 };
 
 export const TeamTableRow: FC<TeamTableRowProps> = props => {
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
+
     const bodyTableCellStyles = {
         color: 'white',
         fontSize: mediaMatch.matches ? '1.8vmax' : '1.3vw',

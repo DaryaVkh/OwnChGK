@@ -17,7 +17,19 @@ const Rating: FC<RatingProps> = props => {
     const [teams, setTeams] = useState<TeamResult[]>();
     const [expandedTours, setExpandedTours] = useState<boolean[]>([]);
     const [isIntrigue, setIsIntrigue] = useState(false);
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
 
     const headerTableCellStyles = {
         color: 'white',

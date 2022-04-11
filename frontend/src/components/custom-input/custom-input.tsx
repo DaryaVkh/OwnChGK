@@ -1,15 +1,28 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './custom-input.module.scss';
 import {InputProps} from '../../entities/custom-input/custom-input.interfaces';
 import {FormControl, FormHelperText, IconButton, InputAdornment, OutlinedInput} from '@mui/material';
 import {Visibility, VisibilityOff} from '@mui/icons-material';
 
 export const CustomInput: FC<InputProps> = props => {
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
+
     const [values, setValues] = useState({
         password: '',
         showPassword: false
     });
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
 
     let required: boolean;
     if (props.required !== undefined) {

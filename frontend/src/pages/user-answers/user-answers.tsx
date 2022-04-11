@@ -21,7 +21,19 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const [gameName, setGameName] = useState<string>();
     const [answers, setAnswers] = useState<Answer[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
 
     useEffect(() => {
         getGame(gameId).then((res) => {

@@ -25,7 +25,8 @@ import {AppAction} from '../../redux/reducers/app-reducer/app-reducer.interfaces
 import {addUserTeam} from '../../redux/actions/app-actions/app-actions';
 import {connect} from 'react-redux';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
-import Loader from "../../components/loader/loader";
+import Loader from '../../components/loader/loader';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 
 const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [page, setPage] = useState<string>('teams');
@@ -37,7 +38,19 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
     const [numberLoading, setNumberLoading] = useState<number>(0);
     const [isClickedOnCurrentTeam, setIsClickedOnCurrentTeam] = useState<boolean>(false);
     let location = useLocation<{ page: string }>();
-    const mediaMatch = window.matchMedia('(max-width: 768px)');
+    const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
+        }
+
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
+        };
+    }, []);
 
     useEffect(() => {
         if (location.state !== undefined) {
@@ -111,6 +124,10 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
         });
     };
 
+    const handleEditClick = () => {
+
+    };
+
     const renderGames = () => {
         if (!gamesFromDB) {
             return Array.from(Array(5).keys()).map(i => <Skeleton key={`game_skeleton_${i}`} variant='rectangular' width='100%' height={mediaMatch.matches ? '5vh' : '7vh'} sx={{marginBottom: '2.5vh'}} />);
@@ -127,13 +144,32 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
         }
         return userTeam.name !== ''
             ?
-            <div key={userTeam.name} className={classes.gameOrTeam} onClick={() => setIsClickedOnCurrentTeam(true)}>
+            <div key={userTeam.name} className={classes.gameOrTeam} style={{cursor: 'default'}}  onClick={() => setIsClickedOnCurrentTeam(true)}>
+                <div className={classes.selectedIconWrapper}>
+                    <CheckCircleOutlinedIcon color="success" sx={{fontSize: mediaMatch.matches ? '3vmax' : '1.5vw', cursor: 'default'}}/>
+                </div>
+
                 <div className={classes.userTeamNameWrapper}>
                     <p className={classes.teamName}>{userTeam.name}</p>
                 </div>
 
-                <div className={classes.selectedIconWrapper}>
-                    <CheckCircleOutlinedIcon color="success" sx={{fontSize: mediaMatch.matches ? '3vmax' : '1.5vw', cursor: 'default'}}/>
+                <div className={classes.editIconWrapper}>
+                    <IconButton
+                        onClick={handleEditClick}
+                        edge="end"
+                        sx={{
+                            height: '3vh',
+                            '& .MuiSvgIcon-root': {
+                                color: 'var(--background-color)',
+                                cursor: 'pointer',
+                            },
+                            '&:hover': {
+                                background: 'none !important'
+                            }
+                        }}
+                    >
+                        <EditOutlinedIcon sx={{fontSize: mediaMatch.matches ? '3vmax' : '1.5vw', cursor: 'default'}}/>
+                    </IconButton>
                 </div>
             </div>
             :
@@ -150,10 +186,19 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
             case 'games':
                 return (
                     <div className={classes.contentWrapper}>
-                        <div className={classes.contentBox} style={{padding: mediaMatch.matches ? '3vh 9vw' : '5vh 0.5vw 5vh 2vw'}}>
-                            <Scrollbar>
-                                {renderGames()}
-                            </Scrollbar>
+                        <div className={classes.contentBox} style={{padding: gamesFromDB && gamesFromDB.length || !gamesFromDB ? (mediaMatch.matches ? '3vh 9vw' : '5vh 0.5vw 5vh 2vw') : 0}}>
+                            {
+                                gamesFromDB && !gamesFromDB.length
+                                    ?
+                                    <div className={classes.emptyGames}>
+                                        <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
+                                        <div className={classes.emptyGamesParagraph}>Вас ещё не добавили ни в одну игру</div>
+                                    </div>
+                                    :
+                                    <Scrollbar>
+                                        {renderGames()}
+                                    </Scrollbar>
+                            }
                         </div>
                     </div>
                 );

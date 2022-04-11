@@ -1,5 +1,5 @@
 .teamCreationForm {
-  width: 26%;
+  width: 50%;
   height: 91%;
   align-self: flex-end;
 }
@@ -11,17 +11,16 @@
   text-align: center;
   align-self: center;
   font-weight: 300;
-  margin: 5vh 0 10vh;
+  margin: 5vh 0;
 }
 
 .contentWrapper {
-  height: 70%;
+  height: 85%;
   width: 100%;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   flex-direction: column;
-  margin-bottom: 5vh;
   box-sizing: content-box;
 }
 
@@ -29,15 +28,125 @@
   text-decoration: none;
 }
 
-.formButton {
-  padding: 0 2vw;
-  font-size: 1.5vw;
-  height: 7vh;
-  margin-bottom: 2.5vh;
-  filter: drop-shadow(0 3px 3px rgba(255, 255, 255, 0.2));
+.settingsWrapper {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 1%;
 }
 
-@media only screen and (max-width: 768px) {
+.membersWrapper {
+  width: 100%;
+  height: 65%;
+  border: 3px solid var(--foreground-color);
+  border-radius: 10px;
+  padding: 2vh 2vw;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.membersPanel {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1vh;
+
+  .membersLabel {
+    height: 5vh;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 1.5vw;
+    color: white;
+  }
+}
+
+.members {
+  width: 103.3%;
+  flex: 1;
+}
+
+.memberWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.adminName {
+  width: 38%;
+}
+
+.adminEmail {
+  width: 52%;
+}
+
+.adminInput {
+  font-size: 1.4vw !important;
+  height: 6vh;
+  border-radius: 8px !important;
+  background-color: white;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+  margin-bottom: 2vh;
+  min-height: 26px;
+  cursor: text;
+
+  input {
+    cursor: default;
+  }
+}
+
+.button {
+  height: 5vh;
+  font-size: 1.1vw;
+  font-weight: var(--medium-weight);
+  border: 2px solid var(--foreground-color);
+  border-radius: 8px;
+  overflow: hidden;
+  user-select: none;
+  font-family: Roboto, sans-serif;
+  min-height: 26px;
+  padding: 0 2vw;
+
+  &:not(:disabled):hover {
+    cursor: pointer;
+    box-shadow: 0 0 2vh 2px var(--foreground-color);
+  }
+
+  &:active {
+    box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+  }
+}
+
+.adminButton {
+  width: 7% !important;
+  min-width: 0 !important;
+  height: 6vh;
+  font-size: 1.5vw;
+  border: 2px solid var(--foreground-color) !important;
+  background-color: white !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  user-select: none;
+  font-family: Roboto, sans-serif;
+  min-height: 26px;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.scrollbarView {
+  overflow-x: hidden !important;
+  padding: 1vh 1.5vw 1vh 0;
+}
+
+.verticalTrack {
+  z-index: 0 !important;
+}
+
+@media only screen and (max-width: 600px) {
   .teamCreationForm {
     width: 80%;
   }
