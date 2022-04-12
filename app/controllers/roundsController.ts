@@ -10,7 +10,7 @@ export class RoundsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameName} = req.body;
@@ -29,7 +29,7 @@ export class RoundsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {
@@ -59,7 +59,7 @@ export class RoundsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId, number} = req.params;
@@ -77,7 +77,7 @@ export class RoundsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId, number} = req.params;

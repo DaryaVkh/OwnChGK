@@ -125,7 +125,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
     };
 
     const handleEditClick = () => {
-
+        setIsClickedOnCurrentTeam(true);
     };
 
     const renderGames = () => {
@@ -144,7 +144,7 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
         }
         return userTeam.name !== ''
             ?
-            <div key={userTeam.name} className={classes.gameOrTeam} style={{cursor: 'default'}}  onClick={() => setIsClickedOnCurrentTeam(true)}>
+            <div key={userTeam.name} className={classes.gameOrTeam} style={{cursor: 'default'}}>
                 <div className={classes.selectedIconWrapper}>
                     <CheckCircleOutlinedIcon color="success" sx={{fontSize: mediaMatch.matches ? '3vmax' : '1.5vw', cursor: 'default'}}/>
                 </div>

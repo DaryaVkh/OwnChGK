@@ -17,7 +17,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {withoutTeam} = req.query;
@@ -40,7 +40,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, password} = req.body;
@@ -73,7 +73,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, password} = req.body;
@@ -106,7 +106,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -150,7 +150,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {newName} = req.body;
@@ -184,7 +184,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, password, oldPassword} = req.body;
@@ -214,7 +214,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, password, code} = req.body;
@@ -245,7 +245,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email} = req.body;
@@ -272,7 +272,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, code} = req.body;
@@ -298,7 +298,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const oldToken = req.cookies['authorization'];
@@ -322,7 +322,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const oldToken = req.cookies['authorization'];
@@ -360,7 +360,7 @@ export class UsersController { // TODO: дописать смену имени �
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             res.clearCookie('authorization');

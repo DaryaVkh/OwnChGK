@@ -62,7 +62,18 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
             setCaptain(props.userEmail);
             setOldCaptain(props.userEmail);
             setUsersFromDB([props.userEmail]);
-            setIsPageLoading(false);
+            if (props.mode === 'edit') {
+                getTeam(location.state.id).then(res => {
+                    if (res.status === 200) {
+                        res.json().then(team => {
+                            setMembers(team.participants ?? []);
+                            setIsPageLoading(false);
+                        })
+                    }
+                });
+            } else {
+                setIsPageLoading(false);
+            }
         } else {
             getUsersWithoutTeam().then(res => {
                 if (res.status === 200) {
@@ -75,6 +86,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                     res.json().then(team => {
                                         setCaptain(team.captainEmail);
                                         setOldCaptain(team.captainEmail);
+                                        setMembers(team.participants ?? []);
                                         if (team.captainEmail) {
                                             setUsersFromDB([...userObjects.map(user => user.email), team.captainEmail]);
                                         }
@@ -94,7 +106,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     }, []);
 
     const handleAutocompleteChange = (event: React.SyntheticEvent, value: string | null) => {
-        setCaptain(value as string);
+        setCaptain(value ? value as string : undefined);
         setIsCaptainEmpty(false);
     };
 
@@ -105,34 +117,38 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
-        if (captain === '') {
+        /*if (captain === undefined) {
             setIsCaptainEmpty(true);
             return;
-        }
+        }*/
         setIsLoading(true);
         if (props.mode === 'creation') {
-            createTeam(teamName, captain).then(res => {
+            createTeam(teamName, captain, members).then(res => {
                 if (res.status === 200) {
                     setIsCreatedSuccessfully(true);
                     if (!props.isAdmin) {
                         props.onAddUserTeam(teamName);
                     }
-                } else {
+                } else if (res.status === 409) {
                     setIsLoading(false);
                     setIsNameInvalid(true);
+                } else {
+                    // TODO
                 }
             });
         } else {
-            editTeam(location.state.id, teamName, captain).then(res => {
+            editTeam(location.state.id, teamName, captain, members).then(res => {
                 if (res.status === 200) {
                     if (!props.isAdmin) {
                         props.onAddUserTeam(teamName);
                     }
 
                     setIsCreatedSuccessfully(true);
-                } else {
+                } else if (res.status === 409) {
                     setIsLoading(false);
                     setIsNameInvalid(true);
+                } else {
+                    // TODO
                 }
             });
         }
@@ -175,6 +191,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleMemberNameChange(event, index)}
                                value={member.name} placeholder='Имя'/>
                 <OutlinedInput className={`${classes.adminEmail} ${classes.adminInput}`}
+                               type='email'
                                sx={{
                                    '& .MuiOutlinedInput-notchedOutline': {
                                        border: '2px solid var(--foreground-color) !important'
@@ -221,9 +238,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
                         <div className={classes.settingsWrapper}>
                             {
-                                (usersFromDB &&
-                                    (props.mode === 'edit' && oldCaptain !== undefined || props.mode === 'creation')) ||
-                                !props.isAdmin
+                                usersFromDB
                                     ? <CustomInput type='text' id='teamName'
                                                    name='teamName'
                                                    style={{width: '49%'}}
@@ -248,6 +263,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                                         options={usersFromDB || []}
                                                         defaultValue={oldCaptain}
                                                         onChange={handleAutocompleteChange}
+                                                        disabled={!props.isAdmin && props.mode === 'creation'}
                                                         sx={{
                                                             border: 'none',
                                                             fontSize: '1.5vw',
@@ -280,9 +296,14 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                                         renderInput={(params) => <TextField {...params} placeholder="Капитан"/>}
                                         />
                                         {
-                                            isCaptainEmpty || true
+                                            false // isCaptainEmpty - пока совсем убирать не будем
                                                 ?
-                                                <small style={{position: 'absolute', color: '#FF0000', top: '7.5vh', fontSize: '1vmax'}}>Выберите
+                                                <small style={{
+                                                    position: 'absolute',
+                                                    color: '#FF0000',
+                                                    top: '7.5vh',
+                                                    fontSize: '1vmax'
+                                                }}>Выберите
                                                     капитана</small>
                                                 : null
                                         }
@@ -325,7 +346,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                         </div>
                     </div>
 
-                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={props.isAdmin && !(usersFromDB && (props.mode === 'edit' || props.mode === 'creation'))}
+                    <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={props.isAdmin && !usersFromDB}
                                 style={{
                                     padding: mediaMatch.matches ? '0 13vw' : '0 2vw',
                                     fontSize: mediaMatch.matches ? '6.5vw' : '1.5vw',

@@ -46,6 +46,6 @@ export async function SendMailWithTemporaryPasswordToAdmin(transporter, email: s
 }
 
 export function validateEmail(email: string) {
-    const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+    const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{1,4})$/;
     return reg.test(email);
 }

@@ -132,7 +132,7 @@ export const getTeam = async (teamId: string) => {
     return await fetch(`/api/teams/${teamId}`);
 };
 
-export const createTeam = async (teamName: string, captain?: string) => {
+export const createTeam = async (teamName: string, captain?: string, participants?: { name: string, email: string }[]) => {
     return await fetch('/api/teams/', {
         method: 'POST',
         headers: {
@@ -142,12 +142,13 @@ export const createTeam = async (teamName: string, captain?: string) => {
         credentials: 'include',
         body: JSON.stringify({
             teamName,
-            captain
+            captain,
+            participants,
         })
     });
 };
 
-export const editTeam = async (teamId: string, newTeamName: string, captain?: string) => {
+export const editTeam = async (teamId: string, newTeamName: string, captain?: string, participants?: { name: string, email: string }[]) => {
     return await fetch(`/api/teams/${teamId}/change`, {
         method: 'PATCH',
         headers: {
@@ -157,7 +158,8 @@ export const editTeam = async (teamId: string, newTeamName: string, captain?: st
         credentials: 'include',
         body: JSON.stringify({
             newTeamName,
-            captain
+            captain,
+            participants,
         })
     });
 };

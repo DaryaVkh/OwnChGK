@@ -16,7 +16,7 @@ export class TeamsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {withoutUser} = req.query;
@@ -39,7 +39,7 @@ export class TeamsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {teamName} = req.params;
@@ -60,7 +60,7 @@ export class TeamsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {teamName, captain, participants} = req.body;
@@ -107,7 +107,7 @@ export class TeamsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {teamId} = req.params;
@@ -125,7 +125,7 @@ export class TeamsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {teamId} = req.params;
@@ -179,7 +179,7 @@ export class TeamsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {teamId} = req.params;
@@ -213,7 +213,7 @@ export class TeamsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {teamId} = req.params;
@@ -235,7 +235,7 @@ export class TeamsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {teamId} = req.params;

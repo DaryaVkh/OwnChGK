@@ -18,7 +18,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {amIParticipate} = req.query;
@@ -48,7 +48,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameName} = req.params;
@@ -72,7 +72,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameName, roundCount, questionCount, teams} = req.body;
@@ -103,7 +103,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -122,7 +122,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -141,7 +141,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -161,7 +161,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -191,7 +191,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -239,7 +239,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -274,7 +274,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -299,7 +299,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -324,7 +324,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -361,7 +361,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;
@@ -420,7 +420,7 @@ export class GamesController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {gameId} = req.params;

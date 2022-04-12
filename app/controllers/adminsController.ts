@@ -16,7 +16,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const admins = await getCustomRepository(AdminRepository).find();
@@ -35,7 +35,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, password} = req.body;
@@ -69,7 +69,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, name, password} = req.body;
@@ -95,7 +95,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email} = req.body;
@@ -122,7 +122,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, code} = req.body;
@@ -148,7 +148,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {newName} = req.body;
@@ -182,7 +182,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, password, oldPassword} = req.body;
@@ -212,7 +212,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email, password, code} = req.body;
@@ -243,7 +243,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             res.clearCookie('authorization');
@@ -261,7 +261,7 @@ export class AdminsController {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка', errors})
+                return res.status(400).json(errors)
             }
 
             const {email} = req.body;
