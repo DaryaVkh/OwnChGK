@@ -2,10 +2,16 @@ import React, {FC, useEffect, useState} from 'react';
 import classes from './admin-start-game.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Redirect, useParams} from 'react-router-dom';
-import {changeToken, getGame, startGame} from '../../server-api/server-api';
+import {
+    changeToken,
+    getGame,
+    getTeamsParticipantTable,
+    startGame
+} from '../../server-api/server-api';
 import Header from '../../components/header/header';
 import NavBar from '../../components/nav-bar/nav-bar';
 import Loader from '../../components/loader/loader';
+import {createFileLink} from "../../fileWorker";
 
 const StartGame: FC = () => {
     const [gameName, setGameName] = useState<string>();
@@ -36,7 +42,7 @@ const StartGame: FC = () => {
 
     const getGameName = () => {
         if ((gameName as string).length > 55) {
-            return (gameName as string).substr(0, 55) + '\u2026';
+            return (gameName as string).slice(0, 55) + '\u2026';
         } else {
             return gameName;
         }
@@ -54,6 +60,16 @@ const StartGame: FC = () => {
             });
     };
 
+    const downloadResults = async () => {
+        getTeamsParticipantTable(gameId).then(res => {
+            if (res.status === 200) {
+                res.json().then(({participants}) => {
+                    createFileLink(participants, `game-${gameId}-participants.csv`);
+                });
+            }
+        })
+    }
+
     if (isLoading) {
         return <Loader />;
     }
@@ -68,6 +84,8 @@ const StartGame: FC = () => {
                 <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
                 <div className={classes.gameName}>{getGameName()}</div>
+
+                <button className={classes.button} onClick={downloadResults}>Скачать список команд</button>
 
                 <button className={classes.button} onClick={handleStart}>Запустить игру</button>
             </div>

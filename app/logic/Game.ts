@@ -8,10 +8,10 @@ export class Round {
     public readonly questions: Question[];
     public readonly questionsCount: number;
     public readonly questionTime: number;
-    public readonly questionCost: number;
+    public readonly gameType: GameTypeLogic;
 
-    constructor(number: number, questionsCount: number, questionTime: number, questionCost: number) {
-        this.questionCost = questionCost;
+    constructor(number: number, questionsCount: number, questionTime: number, gameType=GameTypeLogic.ChGK) {
+        this.gameType = gameType;
         this.questionsCount = questionsCount;
         this.questionTime = questionTime;
         this.number = number;
@@ -20,8 +20,13 @@ export class Round {
 
     createQuestions(): Question[] {
         const result = [];
-        for (let i = 1; i <= this.questionsCount; i++) {
-            result.push(new Question(this.questionCost, this.number, i, this.questionTime));
+        if (this.gameType == GameTypeLogic.ChGK) {
+            for (let i = 1; i <= this.questionsCount; i++) {
+                result.push(new Question(1, this.number, i, this.questionTime));
+            }
+        }
+        else for (let i = 1; i <= this.questionsCount; i++) {
+            result.push(new Question(i*10, this.number, i, this.questionTime));
         }
         return result;
     }

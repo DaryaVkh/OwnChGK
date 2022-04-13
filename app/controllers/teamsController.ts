@@ -268,4 +268,26 @@ export class TeamsController {
             });
         }
     }
+
+
+    public async getParticipants(req: Request, res: Response) {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({message: 'Ошибка', errors})
+            }
+
+            const {teamId} = req.params;
+            const team = await getCustomRepository(TeamRepository).findOne(teamId);
+            return res.status(200).json({
+                participants: team.participants
+            });
+
+        } catch (error: any) {
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
+        }
+    }
 }

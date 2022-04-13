@@ -11,8 +11,8 @@ export class BigGameLogic {
     }
 
     private name: String;
-    private ChGK: Game;
-    private Matrix: Game;
+    public ChGK: Game;
+    public Matrix: Game;
     public CurrentGame: Game;
 }
 
