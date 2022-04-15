@@ -12,6 +12,8 @@ import {BigGameRepository} from "../db/repositories/bigGameRepository";
 import {GameStatus, GameType} from "../db/entities/Game";
 import {BigGame} from "../db/entities/BigGame";
 import {TeamDto} from "../dtos/teamDto";
+import {ChgkSettingsDto} from "../dtos/chgkSettingsDto";
+import {MatrixSettingsDto} from "../dtos/matrixSettingsDto";
 
 export class GamesController {
     public async getAll(req: Request, res: Response) {
@@ -75,22 +77,17 @@ export class GamesController {
                 return res.status(400).json(errors)
             }
 
-            const {gameName, roundCount, questionCount, teams} = req.body;
+            const {gameName, teams, chgkSettings, matrixSettings} = req.body;
 
             const token = req.cookies['authorization'];
-            const payLoad = jwt.verify(token, secret);
-            if (typeof payLoad !== 'string') {
-                const game = await getCustomRepository(BigGameRepository).findByName(gameName);
-                if (game) {
-                    return res.status(409).json({message: 'Игра с таким названием уже есть'})
-                }
-
-                await getCustomRepository(BigGameRepository).insertByParams(
-                    gameName, payLoad.email, roundCount, questionCount, 1, 60, teams);
-                return res.status(200).json({});
-            } else {
-                res.status(403).json({message: 'You are not admin'});
+            const {email} = jwt.verify(token, secret) as jwt.JwtPayload;
+            const game = await getCustomRepository(BigGameRepository).findByName(gameName);
+            if (game) {
+                return res.status(409).json({message: 'Игра с таким названием уже есть'})
             }
+
+            await getCustomRepository(BigGameRepository).insertByParams(gameName, email, teams, chgkSettings, matrixSettings);
+            return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({
                 message: error.message,
@@ -165,18 +162,19 @@ export class GamesController {
             }
 
             const {gameId} = req.params;
-            const game = await getCustomRepository(BigGameRepository).findWithAllRelations(gameId);
-            if (!game) {
+            const bigGame = await getCustomRepository(BigGameRepository).findWithAllRelations(gameId);
+            if (!bigGame) {
                 return res.status(404).json({message: 'game not found'});
             }
-            const rounds = game.games.find(game => game.type == GameType.CHGK).rounds;
+            const chgk = bigGame.games.find(game => game.type == GameType.CHGK);
+            const matrix = bigGame.games.find(game => game.type == GameType.MATRIX);
             const answer = { // TODO: DTO
-                name: game.name,
+                name: bigGame.name,
                 isStarted: !!bigGames[gameId],
-                id: game.id,
-                teams: game.teams.map(value => value.name),
-                roundCount: rounds.length,
-                questionCount: rounds.length !== 0 ? rounds[0].questions.length : 0
+                id: bigGame.id,
+                teams: bigGame.teams.map(value => value.name),
+                chgkSettings: chgk ? new ChgkSettingsDto(chgk) : null,
+                matrixSettings: matrix ? new MatrixSettingsDto(matrix) : null,
             };
             return res.status(200).json(answer);
         } catch (error: any) {
@@ -256,7 +254,7 @@ export class GamesController {
             }
 
             const {gameId} = req.params;
-            const {newGameName, roundCount, questionCount, teams} = req.body;
+            const {newGameName, teams, chgkSettings, matrixSettings} = req.body;
 
             const currentGame = await getCustomRepository(BigGameRepository).findOne(gameId);
             if (!currentGame) {
@@ -271,9 +269,7 @@ export class GamesController {
             }
 
             console.log('ChangeGame: ', gameId, ' teams is: ', teams);
-            await getCustomRepository(BigGameRepository).updateByParams(
-                gameId, newGameName, roundCount, questionCount, 1, 60, teams
-            );
+            await getCustomRepository(BigGameRepository).updateByParams(gameId, newGameName, teams, chgkSettings, matrixSettings);
             return res.status(200).json({});
         } catch (error: any) {
             return res.status(500).json({

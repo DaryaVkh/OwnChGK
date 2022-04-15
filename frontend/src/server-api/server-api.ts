@@ -34,7 +34,14 @@ export const getGame = async (gameId: string) => {
     return await fetch(`/api/games/${gameId}`);
 };
 
-export const createGame = async (gameName: string, roundCount: number, questionCount: number, teams: string[]) => {
+export interface GamePartSettings {
+    roundCount: number;
+    questionCount: number;
+    questions: string[];
+    roundNames?: string[];
+}
+
+export const createGame = async (gameName: string, teams: string[], chgkSettings?: GamePartSettings, matrixSettings?: GamePartSettings) => {
     return await fetch('/api/games/', {
         method: 'POST',
         headers: {
@@ -44,9 +51,9 @@ export const createGame = async (gameName: string, roundCount: number, questionC
         credentials: 'include',
         body: JSON.stringify({
             gameName,
-            roundCount,
-            questionCount,
-            teams
+            teams,
+            chgkSettings,
+            matrixSettings
         })
     });
 };
@@ -107,7 +114,7 @@ export const startGame = async (gameId: string) => {
     return fetch(`/api/games/${gameId}/start`);
 }
 
-export const editGame = async (gameId: string, newGameName: string, roundCount: number, questionCount: number, teams: string[]) => {
+export const editGame = async (gameId: string, newGameName: string, teams: string[], chgkSettings?: GamePartSettings, matrixSettings?: GamePartSettings) => {
     return await fetch(`/api/games/${gameId}/change`, {
         method: 'PATCH',
         headers: {
@@ -117,9 +124,9 @@ export const editGame = async (gameId: string, newGameName: string, roundCount: 
         credentials: 'include',
         body: JSON.stringify({
             newGameName,
-            roundCount,
-            questionCount,
-            teams
+            teams,
+            chgkSettings,
+            matrixSettings
         })
     });
 };

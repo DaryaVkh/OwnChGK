@@ -1,6 +1,6 @@
 import {Dispatch, SetStateAction} from 'react';
 import {Game, Team} from '../../pages/admin-start-screen/admin-start-screen';
-import {GamePartSettings} from '../../pages/game-creation/game-creation';
+import {GamePartSettings} from "../../server-api/server-api";
 
 export interface ModalProps {
     modalType: 'delete' | 'break' | 'delete-game-part';

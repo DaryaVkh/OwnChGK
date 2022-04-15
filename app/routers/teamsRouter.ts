@@ -4,7 +4,6 @@ import {middleware} from '../middleware/middleware';
 import {roleMiddleware} from '../middleware/roleMiddleware';
 import {adminAccess} from "./mainRouter";
 import {body, param, query} from "express-validator";
-import {validateParticipants} from "../validators";
 
 export const teamsRouter = () => {
     const router = Router();
@@ -28,7 +27,9 @@ export const teamsRouter = () => {
         param('teamId').isUUID(),
         body('newTeamName').isString().notEmpty(),
         body('captain').optional({nullable: true}).isEmail(),
-        body('participants').optional({nullable: true}).isArray().custom(validateParticipants), teamsController.editTeam); // TODO: внутри есть проверка юзера, мб перенести в новый middleware
+        body('participants').optional({nullable: true}).isArray(),
+        body('participants.*.email').isEmail(),
+        body('participants.*.name').isString(), teamsController.editTeam); // TODO: внутри есть проверка юзера, мб перенести в новый middleware
 
     router.patch('/:teamId/changeCaptain',
         middleware,
@@ -46,7 +47,9 @@ export const teamsRouter = () => {
         middleware,
         body('teamName').isString().notEmpty(),
         body('captain').optional({nullable: true}).isEmail(),
-        body('participants').optional({nullable: true}).isArray().custom(validateParticipants), teamsController.insertTeam);
+        body('participants').optional({nullable: true}).isArray(),
+        body('participants.*.email').isEmail(),
+        body('participants.*.name').isString(), teamsController.insertTeam);
 
     return router;
 }

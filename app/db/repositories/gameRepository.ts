@@ -1,19 +1,23 @@
 import {EntityManager, EntityRepository, Repository} from 'typeorm';
-import {Game} from '../entities/Game';
+import {Game, GameType} from '../entities/Game';
 import {Round} from "../entities/Round";
 import {Question} from "../entities/Questions";
 
 @EntityRepository(Game)
 export class GameRepository extends Repository<Game> {
-    async createRoundsWithQuestions(roundCount: number, questionCount: number, manager: EntityManager,
-                                    game: Game, questionTime: number, questionCost: number) {
+    async createRoundsWithQuestions(roundCount: number, questionCount: number, game: Game,
+                                    questionTime: number, questionCost: number, roundNames?: string[]) {
+        if (roundNames && roundCount !== roundNames.length) {
+            throw new Error("roundNames.length !== roundCount");
+        }
+
         for (let i = 1; i <= roundCount; i++) {
-            const round = await manager.create(Round, {number: i, game, questionTime});
-            await manager.save(round);
+            const round = await this.manager.create(Round, {number: i, game, questionTime, name: roundNames ? roundNames[i - 1] : null});
+            await this.manager.save(round);
 
             for (let j = 1; j <= questionCount; j++) {
-                const question = await manager.create(Question, {cost: questionCost, round});
-                await manager.save(question);
+                const question = await this.manager.create(Question, {number: j, cost: game.type === GameType.CHGK ? j * questionCost : questionCost, round});
+                await this.manager.save(question);
             }
         }
     }

@@ -6,6 +6,9 @@ export class Question extends BaseEntity {
     @PrimaryGeneratedColumn('uuid', {name: 'question_id'})
     id: string;
 
+    @Column()
+    number: number;
+
     @Column({
         nullable: true
     })
