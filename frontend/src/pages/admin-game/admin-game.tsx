@@ -48,8 +48,8 @@ const AdminGame: FC<AdminGameProps> = props => {
                                      matrixSettings
                                  }) => {
                     setGameName(name);
-                    // setToursCount(chgkSettings?.roundCount ?? 0);
-                    // setQuestionsCount(chgkSettings?.questionCount ?? 0);
+                    setMatrixSettings(matrixSettings ?? null);
+                    setChgkSettings(chgkSettings ?? null);
                     setIsAppeal(new Array(chgkSettings ? chgkSettings.roundCount * chgkSettings.questionCount : 0).fill(false));
                 });
             }
@@ -148,13 +148,14 @@ const AdminGame: FC<AdminGameProps> = props => {
                 if (activeTourIndex === props.tourNumber) {
                     conn.send(JSON.stringify({
                         'cookie': getCookie('authorization'),
-                        'action': 'getQuestionNumber'
+                        'action': 'getQuestionNumber',
                     }));
                 }
 
                 return props.tourIndex;
             });
             setClickedGamePart(props.gamePart);
+            setTimer(props.gamePart === 'chgk' ? 70000 : 20000);
             setActiveQuestion('none');
         };
 
@@ -209,6 +210,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             'action': 'changeQuestion',
             'questionNumber': +clickedQuestion.id,
             'tourNumber': clickedTourIndex,
+            'activeGamePart': gamePart
         }));
 
         handleStopClick(); // Прошлый вопрос остановится!
@@ -219,7 +221,6 @@ const AdminGame: FC<AdminGameProps> = props => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Start',
-                'question': [activeTourIndex, activeQuestionNumber]
             }));
             setPlayOrPause('pause');
             interval = setInterval(() =>
@@ -248,7 +249,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             'action': 'Stop'
         }));
         clearInterval(interval);
-        setTimer(70000);
+        setTimer(activeGamePart === 'chgk' ? 70000 : 20000);
     };
 
     const handleAddedTimeClick = () => {
