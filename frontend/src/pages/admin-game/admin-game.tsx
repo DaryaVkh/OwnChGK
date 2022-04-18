@@ -45,13 +45,13 @@ const AdminGame: FC<AdminGameProps> = props => {
             if (res.status === 200) {
                 res.json().then(({
                                      name,
-                                     roundCount,
-                                     questionCount
+                                     chgkSettings,
+                                     matrixSettings
                                  }) => {
                     setGameName(name);
-                    // setToursCount(roundCount);
-                    // setQuestionsCount(questionCount);
-                    setIsAppeal(new Array(questionCount * roundCount).fill(false));
+                    // setToursCount(chgkSettings?.roundCount ?? 0);
+                    // setQuestionsCount(chgkSettings?.questionCount ?? 0);
+                    setIsAppeal(new Array(chgkSettings ? chgkSettings.roundCount * chgkSettings.questionCount : 0).fill(false));
                 });
             }
         });

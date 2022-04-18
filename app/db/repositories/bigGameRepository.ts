@@ -6,6 +6,20 @@ import {Game, GameStatus, GameType} from "../entities/Game";
 import {Round} from "../entities/Round";
 import {GameRepository} from "./gameRepository";
 
+
+export interface ChgkSettings {
+    roundCount: number,
+    questionCount: number,
+    questionCost: number,
+    questionTime: number,
+}
+
+
+export interface MatrixSettings extends ChgkSettings {
+    roundNames: string[]
+}
+
+
 @EntityRepository(BigGame)
 export class BigGameRepository extends Repository<BigGame> {
     findByName(name: string) {
@@ -26,21 +40,41 @@ export class BigGameRepository extends Repository<BigGame> {
 
     insertByParams(name: string,
                    adminEmail: string,
-                   roundCount: number,
-                   questionCount: number,
-                   questionCost: number,
-                   questionTime: number,
-                   teams: string[]) {
+                   teams: string[],
+                   chgkSettings: ChgkSettings,
+                   matrixSettings: MatrixSettings) {
         return this.manager.transaction(async manager => {
             const admin = await manager.findOne(Admin, {email: adminEmail});
             const teamsFromDb = await manager.find(Team, {name: In(teams)});
             const bigGame = await manager.create(BigGame, {name, admin, teams: teamsFromDb});
             await manager.save(bigGame);
 
-            const game = await manager.create(Game, {type: GameType.CHGK, bigGame});
-            await manager.save(game);
+            if (chgkSettings) {
+                const chgk = await manager.create(Game, {type: GameType.CHGK, bigGame});
+                await manager.save(chgk);
 
-            await getCustomRepository(GameRepository).createRoundsWithQuestions(roundCount, questionCount, manager, game, questionTime, questionCost);
+                await manager.getCustomRepository(GameRepository).createRoundsWithQuestions(
+                    chgkSettings?.roundCount ?? 0,
+                    chgkSettings?.questionCount ?? 0,
+                    chgk,
+                    chgkSettings?.questionTime ?? 60,
+                    chgkSettings?.questionCost ?? 1
+                )
+            }
+
+            if (matrixSettings) {
+                const matrix = await manager.create(Game, {type: GameType.MATRIX, bigGame});
+                await manager.save(matrix);
+
+                await manager.getCustomRepository(GameRepository).createRoundsWithQuestions(
+                    matrixSettings?.roundCount ?? 0,
+                    matrixSettings?.questionCount ?? 0,
+                    matrix,
+                    matrixSettings?.questionTime ?? 20,
+                    matrixSettings?.questionCost ?? 10,
+                    matrixSettings?.roundNames ?? null
+                )
+            }
 
             return bigGame;
         });
@@ -48,11 +82,9 @@ export class BigGameRepository extends Repository<BigGame> {
 
     updateByParams(bigGameId: string,
                    newName: string,
-                   roundCount: number,
-                   questionCount: number,
-                   questionCost: number,
-                   questionTime: number,
-                   teams: string[]) {
+                   teams: string[],
+                   chgkSettings: ChgkSettings,
+                   matrixSettings: MatrixSettings) {
         return this.manager.transaction(async manager => {
             const teamsFromDb = await manager.find(Team, {name: In(teams)});
             const bigGame = await manager.findOne(BigGame, bigGameId, {relations: ['games']});
@@ -60,10 +92,41 @@ export class BigGameRepository extends Repository<BigGame> {
             bigGame.name = newName;
             await manager.save(bigGame);
 
-            const game = bigGame.games.find(game => game.type == GameType.CHGK);
-            await manager.delete(Round, {game});
+            const chgk = bigGame.games.find(game => game.type == GameType.CHGK);
+            const matrix = bigGame.games.find(game => game.type == GameType.MATRIX);
+            if (chgk) {
+                await manager.delete(Game, chgk.id);
+            }
+            if (matrix) {
+                await manager.delete(Game, matrix.id);
+            }
 
-            await getCustomRepository(GameRepository).createRoundsWithQuestions(roundCount, questionCount, manager, game, questionTime, questionCost);
+            if (chgkSettings) {
+                const game = await manager.create(Game, {type: GameType.CHGK, bigGame});
+                await manager.save(game);
+
+                await manager.getCustomRepository(GameRepository).createRoundsWithQuestions(
+                    chgkSettings?.roundCount ?? 0,
+                    chgkSettings?.questionCount ?? 0,
+                    game,
+                    chgkSettings?.questionTime ?? 60,
+                    chgkSettings?.questionCost ?? 1
+                )
+            }
+
+            if (matrixSettings) {
+                const game = await manager.create(Game, {type: GameType.MATRIX, bigGame});
+                await manager.save(game);
+
+                await manager.getCustomRepository(GameRepository).createRoundsWithQuestions(
+                    matrixSettings?.roundCount ?? 0,
+                    matrixSettings?.questionCount ?? 0,
+                    game,
+                    matrixSettings?.questionTime ?? 20,
+                    matrixSettings?.questionCost ?? 10,
+                    matrixSettings?.roundNames ?? null
+                )
+            }
 
             return bigGame;
         });

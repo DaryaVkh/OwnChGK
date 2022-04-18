@@ -32,9 +32,11 @@ export const gamesRouter = () => {
         roleMiddleware(adminAccess),
         param('gameId').isUUID(),
         body('newGameName').isString().notEmpty(),
-        body('roundCount').isInt({min: 0}),
-        body('questionCount').isInt({min: 0}),
-        body('teams').isArray(), gamesController.changeGame)
+        body('chgkSettings.roundCount').optional().isInt({min: 0}),
+        body('chgkSettings.questionCount').optional().isInt({min: 0}),
+        body('matrixSettings.roundCount').optional().isInt({min: 0}),
+        body('matrixSettings.questionCount').optional().isInt({min: 0}),
+        body('matrixSettings.roundNames').optional().isArray(), gamesController.changeGame)
 
     router.patch('/:gameId/changeStatus',
         roleMiddleware(adminAccess),
@@ -75,9 +77,12 @@ export const gamesRouter = () => {
     router.post('/',
         roleMiddleware(adminAccess),
         body('gameName').isString().notEmpty(),
-        body('roundCount').isInt({min: 0}),
-        body('questionCount').isInt({min: 0}),
-        body('teams').isArray(), gamesController.insertGame);
+        body('teams').isArray(),
+        body('chgkSettings.roundCount').optional().isInt({min: 0}),
+        body('chgkSettings.questionCount').optional().isInt({min: 0}),
+        body('matrixSettings.roundCount').optional().isInt({min: 0}),
+        body('matrixSettings.questionCount').optional().isInt({min: 0}),
+        body('matrixSettings.roundNames').optional().isArray(), gamesController.insertGame);
 
     return router;
 }
