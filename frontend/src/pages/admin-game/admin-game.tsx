@@ -8,13 +8,12 @@ import StopIcon from '@mui/icons-material/Stop';
 import {AdminGameProps, TourProps} from '../../entities/admin-game/admin-game.interfaces';
 import PauseIcon from '@mui/icons-material/Pause';
 import CircleOutlinedIcon from '@mui/icons-material/Circle';
-import {getGame} from '../../server-api/server-api';
+import {GamePartSettings, getGame} from '../../server-api/server-api';
 import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Modal from '../../components/modal/modal';
 import Loader from '../../components/loader/loader';
 import {Alert, Snackbar} from '@mui/material';
-import {GamePartSettings} from '../game-creation/game-creation';
 
 let interval: any;
 let breakInterval: any;
@@ -265,7 +264,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             return null;
         }
 
-        const startTourNumber = matrixSettings ? (gamePart === 'matrix' ? 0 : matrixSettings.toursCount) : 0;
+        const startTourNumber = matrixSettings ? (gamePart === 'matrix' ? 0 : matrixSettings.roundCount) : 0;
 
         return Array.from(Array(toursCount).keys()).map(i => <Tour gamePart={gamePart} key={`tour_${i}`} tourIndex={startTourNumber + i + 1}
                                                                    tourNumber={i + 1} tourName={tourNames?.[i]}/>);
@@ -376,7 +375,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                                     ?
                                     <>
                                         <div className={classes.gamePartWrapper}>Матрица</div>
-                                        {renderTours(matrixSettings.toursCount, 'matrix', matrixSettings.tourNames)}
+                                        {renderTours(matrixSettings.roundCount, 'matrix', matrixSettings.roundNames)}
                                     </>
                                     : null
                             }
@@ -385,7 +384,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                                     ?
                                     <>
                                         <div className={classes.gamePartWrapper}>ЧГК</div>
-                                        {renderTours(chgkSettings.toursCount, 'chgk')}
+                                        {renderTours(chgkSettings.roundCount, 'chgk')}
                                     </>
                                     : null
                             }
@@ -396,12 +395,12 @@ const AdminGame: FC<AdminGameProps> = props => {
                         <Scrollbar>
                             {
                                 activeQuestionNumber && clickedGamePart === 'matrix'
-                                    ? renderQuestions(matrixSettings?.questionsCount || 0, 'matrix')
+                                    ? renderQuestions(matrixSettings?.questionCount || 0, 'matrix')
                                     : null
                             }
                             {
                                 activeQuestionNumber && clickedGamePart === 'chgk'
-                                    ? renderQuestions(chgkSettings?.questionsCount || 0, 'chgk')
+                                    ? renderQuestions(chgkSettings?.questionCount || 0, 'chgk')
                                     : null
                             }
                         </Scrollbar>
