@@ -2,16 +2,11 @@ import React, {FC, useEffect, useState} from 'react';
 import classes from './admin-start-game.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Redirect, useParams} from 'react-router-dom';
-import {
-    changeToken,
-    getGame,
-    getTeamsParticipantTable,
-    startGame
-} from '../../server-api/server-api';
+import {changeToken, getGame, getTeamsParticipantTable, startGame} from '../../server-api/server-api';
 import Header from '../../components/header/header';
 import NavBar from '../../components/nav-bar/nav-bar';
 import Loader from '../../components/loader/loader';
-import {createFileLink} from "../../fileWorker";
+import {createFileLink} from '../../fileWorker';
 
 const StartGame: FC = () => {
     const [gameName, setGameName] = useState<string>();
@@ -60,7 +55,8 @@ const StartGame: FC = () => {
             });
     };
 
-    const downloadResults = async () => {
+    const downloadResults = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+        event.preventDefault();
         getTeamsParticipantTable(gameId).then(res => {
             if (res.status === 200) {
                 res.json().then(({participants}) => {
@@ -85,9 +81,12 @@ const StartGame: FC = () => {
 
                 <div className={classes.gameName}>{getGameName()}</div>
 
-                <button className={classes.button} onClick={downloadResults}>Скачать список команд</button>
-
                 <button className={classes.button} onClick={handleStart}>Запустить игру</button>
+
+                <a className={classes.downloadTeams} onClick={downloadResults}>
+                    <img className={classes.downloadIcon} src={require('../../images/DownloadIcon.svg').default} alt='download'/>
+                    {'  Скачать список команд'}
+                </a>
             </div>
         </PageWrapper>
     );

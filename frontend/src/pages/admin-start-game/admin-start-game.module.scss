@@ -42,3 +42,20 @@
     }
   }
 }
+
+.downloadTeams {
+  display: flex;
+  align-items: flex-end;
+  align-self: center;
+  background: none;
+  color: var(--foreground-color);
+  font-size: 2.3vmin;
+  margin-top: 20vh;
+  cursor: pointer;
+  white-space: pre-wrap;
+  font-weight: 500;
+}
+
+.downloadIcon {
+  height: 3vmin;
+}

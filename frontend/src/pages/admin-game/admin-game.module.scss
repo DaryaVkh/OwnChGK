@@ -105,20 +105,28 @@
 
     .tour,
     .question {
+      position: relative;
       height: 6.5vh;
       border: 2px solid var(--foreground-color);
       background-color: white;
-      font-size: 1.4vw;
+      font-size: 1.2vw;
       font-weight: 400;
       text-align: center;
       display: flex;
       align-items: center;
-      justify-content: center;
       border-radius: 8px;
       width: 100%;
       margin-bottom: 2vh;
       cursor: pointer;
       box-sizing: border-box;
+    }
+
+    .tour {
+      padding-left: 5%;
+    }
+
+    .question {
+      justify-content: center;
     }
 
     .toursWrapper {
@@ -201,4 +209,21 @@
   color: white;
   font-size: 3vmin;
   margin: 4vh 0;
+}
+
+.gamePartWrapper {
+  display: flex;
+  font-size: 1.5vmax;
+  color: white;
+  font-weight: 300;
+  justify-content: center;
+  margin-bottom: 2vh;
+}
+
+.tourName {
+  position: relative;
+  width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

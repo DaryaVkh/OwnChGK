@@ -14,6 +14,7 @@ import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Modal from '../../components/modal/modal';
 import Loader from '../../components/loader/loader';
 import {Alert, Snackbar} from '@mui/material';
+import {GamePartSettings} from '../game-creation/game-creation';
 
 let interval: any;
 let breakInterval: any;
@@ -22,11 +23,13 @@ let ping: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
-    const [chosenTourNumber, setChosenTourNumber] = useState<number>();
-    const [activeTourNumber, setActiveTour] = useState<number | 'none'>();
-    const [activeQuestionNumber, setActiveQuestion] = useState<number | 'none'>();
-    const [toursCount, setToursCount] = useState<number>();
-    const [questionsCount, setQuestionsCount] = useState<number>();
+    const [clickedTourIndex, setClickedTourIndex] = useState<number>(); // Тур, на который жмякнули
+    const [clickedGamePart, setClickedGamePart] = useState<'matrix' | 'chgk'>(); // Часть игры, на тур которой жмякнули (чтобы перерисовать количество вопросов)
+    const [activeTourIndex, setActiveTour] = useState<number | 'none'>(1); // Индекс активного тура активной части игры
+    const [activeGamePart, setActiveGamePart] = useState<'chgk' | 'matrix'>(); // Активная часть игры
+    const [activeQuestionNumber, setActiveQuestion] = useState<number | 'none'>(1); // Индекс активного вопроса в активном туре активной части игры
+    const [chgkSettings, setChgkSettings] = useState<GamePartSettings>(); // Настройки ЧГК
+    const [matrixSettings, setMatrixSettings] = useState<GamePartSettings>(); // Настройки матрицы
     const [gameName, setGameName] = useState<string>();
     const {gameId} = useParams<{ gameId: string }>();
     const [timer, setTimer] = useState<number>(70000);
@@ -46,8 +49,8 @@ const AdminGame: FC<AdminGameProps> = props => {
                                      questionCount
                                  }) => {
                     setGameName(name);
-                    setToursCount(roundCount);
-                    setQuestionsCount(questionCount);
+                    // setToursCount(roundCount);
+                    // setQuestionsCount(questionCount);
                     setIsAppeal(new Array(questionCount * roundCount).fill(false));
                 });
             }
@@ -130,7 +133,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                     }), 1000)
                 }
             } else if (jsonMessage.action == 'changeQuestionNumber') {
-                setChosenTourNumber(jsonMessage.round);
+                setClickedTourIndex(jsonMessage.round);
                 setActiveTour(jsonMessage.round);
                 setActiveQuestion(jsonMessage.question);
                 setIsLoading(false);
@@ -142,33 +145,36 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const Tour: FC<TourProps> = props => {
         const handleTourClick = () => {
-            setChosenTourNumber(() => {
-                if (activeTourNumber === props.tourNumber) {
+            setClickedTourIndex(() => {
+                if (activeTourIndex === props.tourNumber) {
                     conn.send(JSON.stringify({
                         'cookie': getCookie('authorization'),
                         'action': 'getQuestionNumber'
                     }));
                 }
 
-                return props.tourNumber;
+                return props.tourIndex;
             });
+            setClickedGamePart(props.gamePart);
             setActiveQuestion('none');
         };
 
-        if (chosenTourNumber === undefined) {
+        if (clickedTourIndex === undefined) {
             return null;
         }
 
         return (
-            <div className={`${classes.tour} ${props.tourNumber === chosenTourNumber ? classes.activeTour : ''}`} id={`${props.tourNumber}`}
+            <div className={`${classes.tour} ${props.tourIndex === clickedTourIndex ? classes.activeTour : ''}`} id={`${props.tourIndex}`}
                  onClick={handleTourClick} key={`tour_${props.tourNumber}`}>
-                <div style={{position: 'relative'}}>
+                {
+                    typeof activeTourIndex === 'number' && props.tourIndex === activeTourIndex
+                        ? <span>&#9654;</span>
+                        : <span style={{color: 'transparent'}}>&#9654;</span>
+                }
+                <div className={classes.tourName}>
                     {
-                        typeof activeTourNumber === 'number' && props.tourNumber === activeTourNumber
-                            ? <span style={{position: 'absolute', left: '-40%'}}>&#9654;</span>
-                            : ''
+                        props.tourName || `Тур ${props.tourNumber}`
                     }
-                    Тур {props.tourNumber}
                 </div>
             </div>
         );
@@ -176,7 +182,7 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const getGameName = () => {
         if ((gameName as string)?.length > 34) {
-            return (gameName as string).substr(0, 34) + '\u2026';
+            return (gameName as string).substring(0, 35) + '\u2026';
         } else {
             return gameName;
         }
@@ -188,7 +194,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         return `${minutes}:${sec}`;
     };
 
-    const handleQuestionClick = (event: React.SyntheticEvent) => {
+    const handleQuestionClick = (event: React.SyntheticEvent, gamePart: 'matrix' | 'chgk') => {
         const activeQuestion = document.querySelector(`.${classes.activeQuestion}`) as HTMLDivElement;
         const clickedQuestion = event.target as HTMLDivElement;
         if (activeQuestion) {
@@ -196,13 +202,14 @@ const AdminGame: FC<AdminGameProps> = props => {
         }
         clickedQuestion.classList.add(classes.activeQuestion);
         setActiveQuestion(+clickedQuestion.id);
-        setActiveTour(chosenTourNumber);
+        setActiveTour(clickedTourIndex || 0);
+        setActiveGamePart(gamePart);
 
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'changeQuestion',
             'questionNumber': +clickedQuestion.id,
-            'tourNumber': chosenTourNumber,
+            'tourNumber': clickedTourIndex,
         }));
 
         handleStopClick(); // Прошлый вопрос остановится!
@@ -213,7 +220,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Start',
-                'question': [activeTourNumber, activeQuestionNumber]
+                'question': [activeTourIndex, activeQuestionNumber]
             }));
             setPlayOrPause('pause');
             interval = setInterval(() =>
@@ -253,33 +260,37 @@ const AdminGame: FC<AdminGameProps> = props => {
         setTimer(t => t + 10000);
     };
 
-    const renderTours = () => {
-        if (!activeTourNumber || !chosenTourNumber) {
+    const renderTours = (toursCount: number, gamePart: 'matrix' | 'chgk', tourNames?: string[]) => {
+        if (!activeTourIndex || !clickedTourIndex) {
             return null;
         }
 
-        return Array.from(Array(toursCount).keys()).map(i => <Tour tourNumber={i + 1} />);
+        const startTourNumber = matrixSettings ? (gamePart === 'matrix' ? 0 : matrixSettings.toursCount) : 0;
+
+        return Array.from(Array(toursCount).keys()).map(i => <Tour gamePart={gamePart} key={`tour_${i}`} tourIndex={startTourNumber + i + 1}
+                                                                   tourNumber={i + 1} tourName={tourNames?.[i]}/>);
     };
 
-    const renderQuestions = () => {
-        if (!activeTourNumber || !activeQuestionNumber || !chosenTourNumber || !questionsCount) {
+    const renderQuestions = (questionsCount: number, gamePart: 'matrix' | 'chgk') => {
+        if (!activeTourIndex || !activeQuestionNumber || !clickedTourIndex || !questionsCount) {
             return null;
         }
 
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
-                <div className={classes.questionWrapper} key={`tour_${activeTourNumber}_question_${i + 1}`}>
-                    <div className={`${classes.question} ${typeof activeQuestionNumber === 'number' && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`} id={`${i + 1}`}
-                         onClick={handleQuestionClick}>
+                <div className={classes.questionWrapper} key={`tour_${activeTourIndex}_question_${i + 1}`}>
+                    <div className={`${classes.question} ${typeof activeQuestionNumber === 'number' && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`}
+                         id={`${i + 1}`}
+                         onClick={(event) => handleQuestionClick(event, gamePart)}>
                         Вопрос {i + 1}
                     </div>
 
                     <Link className={classes.answersButtonLink}
-                          to={`/admin/game/${gameId}/answers/${chosenTourNumber}/${i + 1}`}>
+                          to={`/admin/game/${gameId}/answers/${clickedTourIndex}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
-                                isAppeal[(chosenTourNumber - 1) * questionsCount + i]
+                                isAppeal[(clickedTourIndex - 1) * questionsCount + i]
                                     ?
                                     <div className={classes.opposition}>
                                         <CircleOutlinedIcon sx={{
@@ -360,13 +371,39 @@ const AdminGame: FC<AdminGameProps> = props => {
                 <div className={classes.tablesWrapper}>
                     <div className={classes.toursWrapper}>
                         <Scrollbar>
-                            {activeTourNumber ? renderTours() : null}
+                            {
+                                matrixSettings
+                                    ?
+                                    <>
+                                        <div className={classes.gamePartWrapper}>Матрица</div>
+                                        {renderTours(matrixSettings.toursCount, 'matrix', matrixSettings.tourNames)}
+                                    </>
+                                    : null
+                            }
+                            {
+                                chgkSettings
+                                    ?
+                                    <>
+                                        <div className={classes.gamePartWrapper}>ЧГК</div>
+                                        {renderTours(chgkSettings.toursCount, 'chgk')}
+                                    </>
+                                    : null
+                            }
                         </Scrollbar>
                     </div>
 
                     <div className={classes.questionsWrapper}>
                         <Scrollbar>
-                            {activeQuestionNumber ? renderQuestions() : null}
+                            {
+                                activeQuestionNumber && clickedGamePart === 'matrix'
+                                    ? renderQuestions(matrixSettings?.questionsCount || 0, 'matrix')
+                                    : null
+                            }
+                            {
+                                activeQuestionNumber && clickedGamePart === 'chgk'
+                                    ? renderQuestions(chgkSettings?.questionsCount || 0, 'chgk')
+                                    : null
+                            }
                         </Scrollbar>
                     </div>
                 </div>

@@ -7,10 +7,15 @@ import {Scrollbars} from 'rc-scrollbars';
 import {Table, TableBody, TableCell, tableCellClasses, TableHead, TableRow} from '@mui/material';
 import {TeamTableRow, TourHeaderCell} from '../../components/table/table';
 import {Link, useParams} from 'react-router-dom';
-import {changeIntrigueGameStatus, getResultTable, getResultTableFormat} from '../../server-api/server-api';
+import {
+    changeIntrigueGameStatus,
+    getResultTable,
+    getResultTableFormat,
+    getTeamsParticipantTable
+} from '../../server-api/server-api';
 import Loader from '../../components/loader/loader';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
-import {createFileLink} from "../../fileWorker";
+import {createFileLink} from '../../fileWorker';
 
 const Rating: FC<RatingProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -126,6 +131,16 @@ const Rating: FC<RatingProps> = props => {
         })
     }
 
+    const downloadTeams = async () => {
+        getTeamsParticipantTable(gameId).then(res => {
+            if (res.status === 200) {
+                res.json().then(({participants}) => {
+                    createFileLink(participants, `game-${gameId}-participants.csv`);
+                });
+            }
+        })
+    }
+
     if (!teams || !expandedTours || !gameParams) {
         return <Loader />;
     }
@@ -148,15 +163,22 @@ const Rating: FC<RatingProps> = props => {
                     : null
             }
             <div className={classes.contentWrapper}>
-                <div className={`${classes.buttonsWrapper} ${!props.isAdmin ? classes.userTopPanelWrapper : ''}`}>
+                <div className={classes.buttonsWrapper}>
                     {
                         props.isAdmin
-                            ? <button className={`${classes.button} ${classes.intrigueButton}`}
+                            ? <button className={classes.button}
                                       onClick={turnOnIntrigue}>{isIntrigue ? 'Выключить «Интригу»' : 'Включить «Интригу»'}</button>
                             : null
                     }
 
-                    <button className={classes.button} onClick={downloadResults}>Скачать результаты</button>
+                    <div>
+                        <button className={`${classes.button} ${classes.downloadResultsButton}`} onClick={downloadResults}>Скачать результаты</button>
+                        {
+                            props.isAdmin
+                                ? <button className={classes.button} onClick={downloadTeams}>Скачать список команд</button>
+                                : null
+                        }
+                    </div>
 
                     {
                         isIntrigue && !props.isAdmin

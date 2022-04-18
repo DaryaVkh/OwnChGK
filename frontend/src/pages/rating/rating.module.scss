@@ -27,6 +27,7 @@
 
     .buttonsWrapper {
         display: flex;
+        justify-content: space-between;
         width: 100%;
         margin-top: 7vh;
         margin-bottom: 2vh;
@@ -54,7 +55,7 @@
             }
         }
 
-        .intrigueButton {
+        .downloadResultsButton {
             margin-right: 1vw;
         }
     }
@@ -71,10 +72,6 @@
 
 .scrollbarView {
     padding: 0 0.5vw 0.5vw 0;
-}
-
-.userTopPanelWrapper {
-    justify-content: space-between;
 }
 
 .intrigueParagraph {

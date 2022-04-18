@@ -22,7 +22,7 @@ import Scrollbar from '../../components/scrollbar/scrollbar';
 export interface GamePartSettings {
     toursCount: number;
     questionsCount: number;
-    questions: string[];
+    questions?: string[];
     tourNames?: string[];
 }
 
