@@ -274,7 +274,8 @@ function GetQuestionNumber(gameId, ws) {
     ws.send(JSON.stringify({
         'action': 'changeQuestionNumber',
         'round': bigGames[gameId].CurrentGame.currentQuestion[0],
-        'question': bigGames[gameId].CurrentGame.currentQuestion[1]
+        'question': bigGames[gameId].CurrentGame.currentQuestion[1],
+        'activeGamePart': bigGames[gameId].CurrentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
     }));
 }
 

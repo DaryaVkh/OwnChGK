@@ -22,19 +22,21 @@ let ping: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
+
     const [clickedTourIndex, setClickedTourIndex] = useState<number>(); // Тур, на который жмякнули
     const [clickedGamePart, setClickedGamePart] = useState<'matrix' | 'chgk'>(); // Часть игры, на тур которой жмякнули (чтобы перерисовать количество вопросов)
-    const [activeTourIndex, setActiveTour] = useState<number | 'none'>(1); // Индекс активного тура активной части игры
+    const [activeTourIndex, setActiveTour] = useState<number | undefined>(1); // Индекс активного тура активной части игры
     const [activeGamePart, setActiveGamePart] = useState<'chgk' | 'matrix'>(); // Активная часть игры
-    const [activeQuestionNumber, setActiveQuestion] = useState<number | 'none'>(1); // Индекс активного вопроса в активном туре активной части игры
+    const [activeQuestionNumber, setActiveQuestion] = useState<number | undefined>(1); // Индекс активного вопроса в активном туре активной части игры
+
     const [chgkSettings, setChgkSettings] = useState<GamePartSettings>(); // Настройки ЧГК
     const [matrixSettings, setMatrixSettings] = useState<GamePartSettings>(); // Настройки матрицы
     const [gameName, setGameName] = useState<string>();
     const {gameId} = useParams<{ gameId: string }>();
-    const [timer, setTimer] = useState<number>(70000);
+    const [timer, setTimer] = useState<number>(70000); // Таймер одного вопроса
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0); // в секундах
-    const [isBreak, setIsBreak] = useState<boolean>(false);
+    const [isBreak, setIsBreak] = useState<boolean>(false); // флаг для перерыва
     const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -134,6 +136,8 @@ const AdminGame: FC<AdminGameProps> = props => {
             } else if (jsonMessage.action == 'changeQuestionNumber') {
                 setClickedTourIndex(jsonMessage.round);
                 setActiveTour(jsonMessage.round);
+                setClickedGamePart(jsonMessage.activeGamePart);
+                setActiveGamePart(jsonMessage.activeGamePart);
                 setActiveQuestion(jsonMessage.question);
                 setIsLoading(false);
             }
@@ -144,19 +148,16 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const Tour: FC<TourProps> = props => {
         const handleTourClick = () => {
-            setClickedTourIndex(() => {
-                if (activeTourIndex === props.tourNumber) {
-                    conn.send(JSON.stringify({
-                        'cookie': getCookie('authorization'),
-                        'action': 'getQuestionNumber',
-                    }));
-                }
-
-                return props.tourIndex;
-            });
-            setClickedGamePart(props.gamePart);
-            setTimer(props.gamePart === 'chgk' ? 70000 : 20000);
-            setActiveQuestion('none');
+            if (activeTourIndex === props.tourNumber && activeGamePart === props.gamePart) {
+                conn.send(JSON.stringify({
+                    'cookie': getCookie('authorization'),
+                    'action': 'getQuestionNumber',
+                }));
+            } else {
+                setClickedTourIndex(props.tourIndex);
+                setClickedGamePart(props.gamePart);
+                setActiveQuestion(undefined);
+            }
         };
 
         if (clickedTourIndex === undefined) {
@@ -164,10 +165,10 @@ const AdminGame: FC<AdminGameProps> = props => {
         }
 
         return (
-            <div className={`${classes.tour} ${props.tourIndex === clickedTourIndex ? classes.activeTour : ''}`} id={`${props.tourIndex}`}
+            <div className={`${classes.tour} ${props.tourIndex === clickedTourIndex && clickedGamePart === props.gamePart ? classes.activeTour : ''}`} id={`${props.tourIndex}_${props.gamePart}`}
                  onClick={handleTourClick} key={`tour_${props.tourNumber}`}>
                 {
-                    typeof activeTourIndex === 'number' && props.tourIndex === activeTourIndex
+                    activeTourIndex !== undefined && props.tourIndex === activeTourIndex && activeGamePart === props.gamePart
                         ? <span>&#9654;</span>
                         : <span style={{color: 'transparent'}}>&#9654;</span>
                 }
@@ -204,6 +205,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         setActiveQuestion(+clickedQuestion.id);
         setActiveTour(clickedTourIndex || 0);
         setActiveGamePart(gamePart);
+        setTimer(gamePart === 'chgk' ? 70000 : 20000);
 
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
@@ -213,7 +215,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             'activeGamePart': gamePart
         }));
 
-        handleStopClick(); // Прошлый вопрос остановится!
+        handleStopClick(gamePart); // Прошлый вопрос остановится!
     };
 
     const handlePlayClick = () => {
@@ -242,14 +244,14 @@ const AdminGame: FC<AdminGameProps> = props => {
         }
     };
 
-    const handleStopClick = () => {
+    const handleStopClick = (gamePart: 'matrix' | 'chgk' | undefined) => {
         setPlayOrPause('play');
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'Stop'
         }));
         clearInterval(interval);
-        setTimer(activeGamePart === 'chgk' ? 70000 : 20000);
+        setTimer(gamePart === 'chgk' ? 70000 : 20000);
     };
 
     const handleAddedTimeClick = () => {
@@ -265,21 +267,21 @@ const AdminGame: FC<AdminGameProps> = props => {
             return null;
         }
 
-        const startTourNumber = matrixSettings ? (gamePart === 'matrix' ? 0 : matrixSettings.roundCount) : 0;
+        //const startTourNumber = matrixSettings ? (gamePart === 'matrix' ? 0 : matrixSettings.roundCount) : 0;
 
-        return Array.from(Array(toursCount).keys()).map(i => <Tour gamePart={gamePart} key={`tour_${i}`} tourIndex={startTourNumber + i + 1}
+        return Array.from(Array(toursCount).keys()).map(i => <Tour gamePart={gamePart} key={`tour_${i}_${gamePart}`} tourIndex={i + 1}
                                                                    tourNumber={i + 1} tourName={tourNames?.[i]}/>);
     };
 
     const renderQuestions = (questionsCount: number, gamePart: 'matrix' | 'chgk') => {
-        if (!activeTourIndex || !activeQuestionNumber || !clickedTourIndex || !questionsCount) {
+        if (!activeTourIndex || !clickedTourIndex || !questionsCount) {
             return null;
         }
 
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
                 <div className={classes.questionWrapper} key={`tour_${activeTourIndex}_question_${i + 1}`}>
-                    <div className={`${classes.question} ${typeof activeQuestionNumber === 'number' && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`}
+                    <div className={`${classes.question} ${activeQuestionNumber !== undefined && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`}
                          id={`${i + 1}`}
                          onClick={(event) => handleQuestionClick(event, gamePart)}>
                         Вопрос {i + 1}
@@ -290,7 +292,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
-                                isAppeal[(clickedTourIndex - 1) * questionsCount + i]
+                                clickedGamePart === 'chgk' && isAppeal[(clickedTourIndex - 1) * questionsCount + i]
                                     ?
                                     <div className={classes.opposition}>
                                         <CircleOutlinedIcon sx={{
@@ -357,7 +359,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         }
                     </button>
 
-                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak} onClick={handleStopClick}>
+                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak} onClick={() => handleStopClick(activeGamePart)}>
                         <StopIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
                     </button>
 
@@ -395,12 +397,12 @@ const AdminGame: FC<AdminGameProps> = props => {
                     <div className={classes.questionsWrapper}>
                         <Scrollbar>
                             {
-                                activeQuestionNumber && clickedGamePart === 'matrix'
+                                clickedGamePart === 'matrix'
                                     ? renderQuestions(matrixSettings?.questionCount || 0, 'matrix')
                                     : null
                             }
                             {
-                                activeQuestionNumber && clickedGamePart === 'chgk'
+                                clickedGamePart === 'chgk'
                                     ? renderQuestions(chgkSettings?.questionCount || 0, 'chgk')
                                     : null
                             }
