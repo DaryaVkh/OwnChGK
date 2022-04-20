@@ -75,11 +75,11 @@
   font-weight: 300;
   font-size: 1.5vw;
   display: flex;
-  justify-content: space-around;
-  width: 35%;
-  padding: 5vh 0;
+  width: 70%;
+  padding: 4vh 0;
   pointer-events: none;
   z-index: 1;
+  white-space: pre-wrap;
 
   .team {
     color: white;
@@ -98,18 +98,6 @@
   flex-direction: column;
   height: 80%;
 
-  .timeLeft {
-    color: white;
-    font-weight: 400;
-    font-size: 1.5vw;
-    margin-bottom: 2vh;
-  }
-
-  .progressBar {
-    width: 100%;
-    height: 100%;
-  }
-
   .answerBox {
     border: 3px solid white;
     border-radius: 12px;
@@ -121,6 +109,7 @@
     padding: 8vh 5vw;
     box-sizing: border-box;
     position: relative;
+    overflow: hidden;
 
     .answerNumber {
       color: white;
@@ -128,37 +117,19 @@
       font-size: 2vw;
       margin-bottom: 2vh;
     }
-
-    .answerInputWrapper {
-      display: flex;
-      width: 100%;
-      justify-content: space-between;
-
-      .sendAnswerButton {
-        height: 7vh;
-        font-size: 1.5vw;
-        font-weight: 400;
-        padding: 0 0.5vw;
-        color: var(--foreground-color);
-        border: 2px solid var(--foreground-color);
-        border-radius: 4px;
-        filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25));
-        overflow: hidden;
-        user-select: none;
-        font-family: Roboto, sans-serif;
-        min-height: 26px;
-
-        &:hover {
-          cursor: pointer;
-          box-shadow: 0 0 2vh 2px var(--foreground-color);
-        }
-
-        &:active {
-          box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
-        }
-      }
-    }
   }
+}
+
+.timeLeft {
+  color: white;
+  font-weight: 400;
+  font-size: 1.5vw;
+  margin-bottom: 2vh;
+}
+
+.progressBar {
+  width: 100%;
+  height: 100%;
 }
 
 .gameStartContentWrapper {
@@ -181,6 +152,89 @@
     font-size: 6vmin;
     margin-bottom: 2vh;
   }
+}
+
+.answersWrapper {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  height: 87%;
+}
+
+.answersBox {
+  border: 3px solid white;
+  border-radius: 12px;
+  width: 100%;
+  height: 85%;
+  box-shadow: 0 0 3vh 1vh rgba(50, 130, 184, 0.25);
+  display: flex;
+  flex-direction: column;
+  padding: 3vh 2vw;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.answerInputWrapper {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  position: relative;
+
+  .sendAnswerButton {
+    height: 7vh;
+    font-size: 1.5vw;
+    font-weight: 400;
+    padding: 0 0.5vw;
+    border: 2px solid var(--foreground-color);
+    border-radius: 4px;
+    filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.25));
+    overflow: hidden;
+    user-select: none;
+    font-family: Roboto, sans-serif;
+    min-height: 26px;
+
+    &:hover {
+      cursor: pointer;
+      box-shadow: 0 0 2vh 2px var(--foreground-color);
+    }
+
+    &:active {
+      box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
+    }
+  }
+}
+
+.tourName {
+  display: flex;
+  font-size: 1.8vmax;
+  color: white;
+  font-weight: 300;
+  margin-bottom: 3vh;
+}
+
+.matrixAnswerNumber {
+  font-size: 1.4vmax;
+  color: white;
+  font-weight: 400;
+  margin-bottom: 0.5vh;
+}
+
+.accepted,
+.acceptedChgk {
+  position: absolute;
+  bottom: 15%;
+  color: white;
+  font-weight: 300;
+  font-size: 0.9vmax;
+  white-space: pre-wrap;
+}
+
+.acceptedChgk {
+  bottom: 0;
+}
+
+.acceptedAnswer {
+  font-weight: 500;
 }
 
 @media only screen and (max-width: 600px) {
@@ -220,7 +274,7 @@
     padding: 8vh 0;
 
     .team {
-      margin-left: 10vw;
+      margin-left: 0;
       margin-right: 7vw;
     }
   }
@@ -233,7 +287,7 @@
     }
 
     .answerBox {
-      height: 40%;
+      height: 65vw;
       border-radius: 8px;
       padding: 6.5vh 7vw;
 

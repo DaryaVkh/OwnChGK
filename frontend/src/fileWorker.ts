@@ -15,7 +15,6 @@ export const encodeCP1251 = function (text: string) {
 
     let res = '';
     for (let i = 0; i < text.length; i++) {
-        console.log(text)
         res += encodeChar(text.charAt(i))
     }
     return res;
