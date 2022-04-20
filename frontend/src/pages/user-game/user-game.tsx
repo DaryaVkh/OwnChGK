@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, {ChangeEvent, FC, useEffect, useState} from 'react';
 import classes from './user-game.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import Header from '../../components/header/header';
@@ -6,13 +6,14 @@ import {Link, useParams} from 'react-router-dom';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {Alert, Snackbar} from '@mui/material';
 import {UserGameProps} from '../../entities/user-game/user-game.interfaces';
-import {getGame} from '../../server-api/server-api';
+import {GamePartSettings, getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import NavBar from '../../components/nav-bar/nav-bar';
 import Loader from '../../components/loader/loader';
 import {AppState} from '../../entities/app/app.interfaces';
 import {connect} from 'react-redux';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
+import Scrollbar from '../../components/scrollbar/scrollbar';
 
 let progressBar: any;
 let interval: any;
@@ -23,7 +24,7 @@ let conn: WebSocket;
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [answer, setAnswer] = useState<string>('');
-    const [gameName, setGameName] = useState<string>();
+    const [gameName, setGameName] = useState<string>('Hello world');
     const [questionNumber, setQuestionNumber] = useState<number>(1);
     const [timeForAnswer, setTimeForAnswer] = useState<number>(70);
     const [maxTime, setMaxTime] = useState<number>(70);
@@ -36,9 +37,14 @@ const UserGame: FC<UserGameProps> = props => {
     });
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0);
-    const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+    const [isGameStarted, setIsGameStarted] = useState<boolean>(true);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [gamePart, setGamePart] = useState<'matrix' | 'chgk'>(); // активная часть игры
+    const [matrixSettings, setMatrixSettings] = useState<GamePartSettings>();
+    const [matrixAnswers, setMatrixAnswers] = useState<{[key: string]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
+    const [acceptedMatrixAnswers, setAcceptedMatrixAnswers] = useState<{[key: string]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
+    const [acceptedAnswer, setAcceptedAnswer] = useState<string>();
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
     useEffect(() => {
@@ -225,7 +231,16 @@ const UserGame: FC<UserGameProps> = props => {
                 }));
             }
         }
-    }, [isLoading, isBreak])
+    }, [isLoading, isBreak]);
+
+    const fillMatrixAnswers = (roundNames: string[], questionsCount: number) => {
+        const answers: {[key: string]: string[]} = {};
+        roundNames.map((name) => {
+            answers[name] = Array(questionsCount).fill('');
+        });
+        setMatrixAnswers(answers);
+        setAcceptedMatrixAnswers(answers);
+    };
 
     const getGameName = () => {
         const maxLength = mediaMatch.matches ? 22 : 34;
@@ -240,7 +255,7 @@ const UserGame: FC<UserGameProps> = props => {
         const teamName = props.userTeam;
         const maxLength = mediaMatch.matches ? 25 : 45;
         if (teamName.length > maxLength) {
-            return teamName.substr(0, maxLength) + '\u2026';
+            return teamName.substring(0, maxLength + 1) + '\u2026';
         } else {
             return teamName;
         }
@@ -249,7 +264,7 @@ const UserGame: FC<UserGameProps> = props => {
     const getGameNameForWaitingScreen = () => {
         const maxLength = mediaMatch.matches ? 30 : 52;
         if ((gameName as string).length > maxLength) {
-            return `«${(gameName as string).substr(0, maxLength)}\u2026»`;
+            return `«${(gameName as string).substring(0, maxLength + 1)}\u2026»`;
         } else {
             return `«${gameName}»`;
         }
@@ -330,6 +345,9 @@ const UserGame: FC<UserGameProps> = props => {
             'answer': answer
         }));
 
+        // скорее всего, надо заполнять acceptedAnswer только если все ок и он реально отправился, то есть засунуть в один из нижних ифов
+        setAcceptedAnswer(answer);
+
         setTimeout(() => {
             setFlags(flags => {
                 const res = {
@@ -350,6 +368,149 @@ const UserGame: FC<UserGameProps> = props => {
                 return flags;
             });
         }, 1000);
+    };
+
+    const handleMatrixAnswer = (event: ChangeEvent<HTMLInputElement>, index: number, tourName: string) => {
+        setMatrixAnswers((prevValue) => {
+            const copy = {...prevValue};
+            copy[tourName] = copy[tourName].map((answer, i) => i === index ? event.target.value : answer);
+            return copy;
+        });
+    };
+
+    const handleSendMatrixAnswer = (index: number, tourName: string) => {
+        setAcceptedMatrixAnswers((prevValue) => {
+            const copy = {...prevValue};
+            copy[tourName] = copy[tourName].map((answer, i) => i === index ? matrixAnswers?.[tourName][i] || '' : answer);
+            return copy;
+        });
+    };
+
+    const renderMatrix = () => {
+        return matrixSettings?.roundNames?.map((tourName, i) => {
+            return (
+                <div className={classes.tourQuestionsWrapper} key={`${tourName}_${i}`}>
+                    <div className={classes.tourName}>{tourName}</div>
+
+                    {
+                        Array.from(Array(matrixSettings.questionCount).keys()).map((i) => {
+                            return (
+                                <div key={`matrix_question_${i}`}>
+                                    <p className={classes.matrixAnswerNumber}>Вопрос {i + 1}</p>
+
+                                    <div className={classes.answerInputWrapper}>
+                                        <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
+                                                     style={{width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
+                                                         height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={matrixAnswers?.[tourName][i]} onChange={(event) => handleMatrixAnswer(event, i, tourName)}/>
+                                        <button className={classes.sendAnswerButton} onClick={() => handleSendMatrixAnswer(i, tourName)}>Отправить
+                                        </button>
+
+                                        {
+                                            acceptedMatrixAnswers?.[tourName][i]
+                                                ?
+                                                <small className={classes.accepted}>{'Принятый ответ: '}
+                                                    <span className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[tourName][i]}</span>
+                                                </small>
+                                                : null
+                                        }
+                                    </div>
+
+                                    <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}
+                                              sx={{position: mediaMatch.matches ? 'absolute' : 'fixed',
+                                                  bottom: mediaMatch.matches ? '-8vh' : 'unset'}}>
+                                        <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
+                                               sx={{width: '100%'}}>
+                                            {flags.isAnswerAccepted ? 'Ответ успешно отправлен' : 'Ответ не отправлен'}
+                                        </Alert>
+                                    </Snackbar>
+                                </div>
+                            );
+                        })
+                    }
+                </div>
+            );
+        });
+    };
+
+    const renderGamePart = () => {
+        const width = Math.ceil(100 * (timeForAnswer / maxTime));
+
+        if (gamePart === 'matrix') {
+            return (
+                <>
+                    <div className={classes.teamWrapper}>
+                        <div className={classes.team}>{'Команда '}</div>
+                        <div className={classes.teamName}>{getTeamName()}</div>
+                    </div>
+
+                    <div className={classes.answersWrapper}>
+                        <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >= 0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
+                        </div>
+
+                        <div style={{width: mediaMatch.matches ? '98%' : '99%', height: '2%', marginLeft: '4px'}}>
+                            <div className={classes.progressBar} id="progress-bar"
+                                 style={{width: width + '%', backgroundColor: chooseColor(width)}}/>
+                        </div>
+
+                        <div className={classes.answersBox}>
+                            <Scrollbar>
+                                {renderMatrix()}
+                            </Scrollbar>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+        if (gamePart === 'chgk') {
+            return (
+                <>
+                    <div className={classes.teamWrapper}>
+                        <div className={classes.team}>{'Команда '}</div>
+                        <div className={classes.teamName}>{getTeamName()}</div>
+                    </div>
+
+                    <div className={classes.answerWrapper}>
+                        <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >=
+                        0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
+                        </div>
+
+                        <div style={{width: mediaMatch.matches ? '98%' : '99%', height: '2%', marginLeft: '4px'}}>
+                            <div className={classes.progressBar} id="progress-bar"
+                                 style={{width: width + '%', backgroundColor: chooseColor(width)}}/>
+                        </div>
+                        <div className={classes.answerBox}>
+                            <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
+
+                            <div className={classes.answerInputWrapper}>
+                                <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
+                                             style={{width: mediaMatch.matches ? '100%' : '79%',
+                                                 height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={answer} onChange={handleAnswer}/>
+                                <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
+                                </button>
+
+                                {
+                                    acceptedAnswer
+                                        ?
+                                        <small className={classes.acceptedChgk}>{'Принятый ответ: '}
+                                            <span className={classes.acceptedAnswer}>{acceptedAnswer}</span>
+                                        </small>
+                                        : null
+                                }
+                            </div>
+
+                            <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}
+                                      sx={{position: mediaMatch.matches ? 'absolute' : 'fixed',
+                                          bottom: mediaMatch.matches ? '-8vh' : 'unset'}}>
+                                <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
+                                       sx={{width: '100%'}}>
+                                    {flags.isAnswerAccepted ? 'Ответ успешно отправлен' : 'Ответ не отправлен'}
+                                </Alert>
+                            </Snackbar>
+                        </div>
+                    </div>
+                </>
+            );
+        }
     };
 
     const renderPage = () => {
@@ -421,8 +582,6 @@ const UserGame: FC<UserGameProps> = props => {
             );
         }
 
-        const width = Math.ceil(100 * (timeForAnswer / maxTime));
-
         return (
             <PageWrapper>
                 <Header isAuthorized={true} isAdmin={false}>
@@ -447,41 +606,7 @@ const UserGame: FC<UserGameProps> = props => {
                         : null
                 }
                 <div className={classes.contentWrapper}>
-                    <div className={classes.teamWrapper}>
-                        <div className={classes.team}>Команда</div>
-                        <div className={classes.teamName}>{getTeamName()}</div>
-                    </div>
-
-                    <div className={classes.answerWrapper}>
-                        <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >=
-                        0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
-                        </div>
-
-                        <div style={{width: mediaMatch.matches ? '98%' : '99%', height: '2%', marginLeft: '4px'}}>
-                            <div className={classes.progressBar} id="progress-bar"
-                                 style={{width: width + '%', backgroundColor: chooseColor(width)}}/>
-                        </div>
-                        <div className={classes.answerBox}>
-                            <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
-
-                            <div className={classes.answerInputWrapper}>
-                                <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
-                                             style={{width: mediaMatch.matches ? '100%' : '79%',
-                                                 height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={answer} onChange={handleAnswer}/>
-                                <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
-                                </button>
-                            </div>
-
-                            <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}
-                                      sx={{position: mediaMatch.matches ? 'absolute' : 'fixed',
-                                          bottom: mediaMatch.matches ? '-8vh' : 'unset'}}>
-                                <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
-                                       sx={{width: '100%'}}>
-                                    {flags.isAnswerAccepted ? 'Ответ успешно отправлен' : 'Ответ не отправлен'}
-                                </Alert>
-                            </Snackbar>
-                        </div>
-                    </div>
+                    {renderGamePart()}
                 </div>
                 <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
                     <Alert severity='error' sx={{width: '100%'}}>
