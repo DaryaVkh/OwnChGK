@@ -1,6 +1,6 @@
 import {Team} from './Team';
 import {Question} from './Question';
-import {seconds70PerQuestion} from '../socket';
+import {seconds20PerQuestion, seconds70PerQuestion} from "../socket";
 
 
 export class Round {
@@ -47,50 +47,28 @@ export class Game {
     public readonly name: string;
     public readonly rounds: Round[];
     public readonly teams: { [teamId: string]: Team };
-    public status: GameStatus;
-    public breakTime: number;
-    private interval: any;
     public currentQuestion: [number, number];
-    public isTimerStart: boolean;
-    public isIntrigue: boolean;
     public type: GameTypeLogic;
 
+    public isTimerStart: boolean;
     public timer: any;
     public leftTime: number;
     public maxTime: number;
     public timeIsOnPause: boolean;
+
 
     constructor(name: string, type: GameTypeLogic) {
         this.id = Math.round(Math.random() * 1000000).toString() // TODO: принимать из БД
         this.name = name;
         this.rounds = [];
         this.teams = {};
-        this.status = GameStatus.Start;
-        this.breakTime = 0;
         this.currentQuestion = [1, 1];
-        this.isTimerStart = false;
-        this.leftTime = seconds70PerQuestion;
-        this.timeIsOnPause = false;
-        this.maxTime = seconds70PerQuestion;
         this.type = type;
-    }
 
-    startBreak(time: number): void {
-        this.status = GameStatus.IsOnBreak;
-        this.breakTime = time;
-        this.interval = setInterval(() => {
-            if (this.breakTime === 0) {
-                this.stopBreak();
-            } else {
-                this.breakTime -= 1;
-            }
-        }, 1000, this);
-    }
-
-    stopBreak(): void {
-        clearInterval(this.interval);
-        this.status = GameStatus.Start;
-        this.breakTime = 0;
+        this.isTimerStart = false;
+        this.leftTime = type === GameTypeLogic.ChGK ? seconds70PerQuestion : seconds20PerQuestion;
+        this.timeIsOnPause = false;
+        this.maxTime = type === GameTypeLogic.ChGK ? seconds70PerQuestion : seconds20PerQuestion;
     }
 
     addTeam(team: Team): void {

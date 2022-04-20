@@ -1,26 +1,43 @@
-import {Game} from './Game';
+import {Game, GameStatus} from './Game';
+import {seconds70PerQuestion} from "../socket";
 
 
 export class BigGameLogic {
+    private name: String;
+    public ChGK: Game;
+    public Matrix: Game;
+    public CurrentGame: Game;
+
+    public status: GameStatus;
+    public breakTime: number;
+    private interval: any;
+    public isIntrigue: boolean;
 
     constructor(name:String, ChGK: Game = null, Matrix: Game = null) {
         this.Matrix = Matrix;
         this.ChGK = ChGK;
         this.name = name;
-        this.CurrentGame = this.ChGK;
+        this.CurrentGame = this.Matrix ?? this.ChGK;
+
+        this.status = GameStatus.Start;
+        this.breakTime = 0;
     }
 
-    private name: String;
-    public ChGK: Game;
-    public Matrix: Game;
-    public CurrentGame: Game;
-}
+    startBreak(time: number): void {
+        this.status = GameStatus.IsOnBreak;
+        this.breakTime = time;
+        this.interval = setInterval(() => {
+            if (this.breakTime === 0) {
+                this.stopBreak();
+            } else {
+                this.breakTime -= 1;
+            }
+        }, 1000, this);
+    }
 
-
-function addChGK(id: number) {
-    this.ChGK = id;
-}
-
-function addMatrix(id: number) {
-    this.Matrix = id;
+    stopBreak(): void {
+        clearInterval(this.interval);
+        this.status = GameStatus.Start;
+        this.breakTime = 0;
+    }
 }

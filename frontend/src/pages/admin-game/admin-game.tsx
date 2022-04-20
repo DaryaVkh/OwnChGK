@@ -288,7 +288,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                     </div>
 
                     <Link className={classes.answersButtonLink}
-                          to={`/admin/game/${gameId}/answers/${clickedTourIndex}/${i + 1}`}>
+                          to={`/admin/game/${gameId}/${gamePart}/answers/${clickedTourIndex}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {

@@ -293,7 +293,7 @@ export class GamesController {
                 return res.status(404).json({'message': 'Игра не началась'});
             }
 
-            bigGames[gameId].CurrentGame.isIntrigue = isIntrigue;
+            bigGames[gameId].isIntrigue = isIntrigue;
             isIntrigue ? console.log('intrigue started') : console.log('intrigue finished');
             return res.status(200).json({});
         } catch (error: any) {
@@ -350,10 +350,10 @@ export class GamesController {
 
             const answer = { // TODO: DTO
                 gameId,
-                isIntrigue: bigGames[gameId].CurrentGame.isIntrigue,
+                isIntrigue: bigGames[gameId].isIntrigue,
                 roundsCount: bigGames[gameId].CurrentGame.rounds.length,
                 questionsCount: bigGames[gameId].CurrentGame.rounds[0].questionsCount,
-                totalScoreForAllTeams: roles === 'user' && teamId && bigGames[gameId].CurrentGame.isIntrigue ?
+                totalScoreForAllTeams: roles === 'user' && teamId && bigGames[gameId].isIntrigue ?
                     bigGames[gameId].CurrentGame.getScoreTableForTeam(teamId) : bigGames[gameId].CurrentGame.getScoreTable(),
             };
 
@@ -394,7 +394,7 @@ export class GamesController {
             }
             const teamRows = [];
             const totalScoreForAllTeams = bigGames[gameId].CurrentGame.getTotalScoreForAllTeams();
-            const scoreTable = roles === 'user' && teamId && bigGames[gameId].CurrentGame.isIntrigue ?
+            const scoreTable = roles === 'user' && teamId && bigGames[gameId].isIntrigue ?
                 bigGames[gameId].CurrentGame.getScoreTableForTeam(teamId) : bigGames[gameId].CurrentGame.getScoreTable();
             let roundsResultList = [];
             for (const team in scoreTable) {

@@ -24,7 +24,7 @@ let conn: WebSocket;
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [answer, setAnswer] = useState<string>('');
-    const [gameName, setGameName] = useState<string>('Hello world');
+    const [gameName, setGameName] = useState<string>();
     const [questionNumber, setQuestionNumber] = useState<number>(1);
     const [timeForAnswer, setTimeForAnswer] = useState<number>(70);
     const [maxTime, setMaxTime] = useState<number>(70);
@@ -37,9 +37,9 @@ const UserGame: FC<UserGameProps> = props => {
     });
     const [isBreak, setIsBreak] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0);
-    const [isGameStarted, setIsGameStarted] = useState<boolean>(true);
+    const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [gamePart, setGamePart] = useState<'matrix' | 'chgk'>(); // активная часть игры
     const [matrixSettings, setMatrixSettings] = useState<GamePartSettings>();
     const [matrixAnswers, setMatrixAnswers] = useState<{[key: string]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
@@ -64,8 +64,12 @@ const UserGame: FC<UserGameProps> = props => {
             if (res.status === 200) {
                 res.json().then(({
                                      name,
+                                     matrixSettings
                                  }) => {
                     setGameName(name);
+                    console.log('from DB', matrixSettings);
+                    setMatrixSettings(matrixSettings);
+                    fillMatrixAnswers(matrixSettings.roundNames, matrixSettings.questionCount);
                 });
             }
         });
@@ -114,6 +118,7 @@ const UserGame: FC<UserGameProps> = props => {
                 return;
             } else if (jsonMessage.action === 'gameStatus') {
                 if (jsonMessage.isStarted) {
+                    setGamePart(jsonMessage.activeGamePart);
                     setIsGameStarted(true);
                     clearInterval(checkStart);
 
@@ -121,8 +126,6 @@ const UserGame: FC<UserGameProps> = props => {
                         'cookie': getCookie('authorization'),
                         'action': 'isOnBreak'
                     }));
-                } else {
-                    setIsLoading(false);
                 }
             } else if (jsonMessage.action === 'time') {
                 setTimeForAnswer(() => {
@@ -158,23 +161,44 @@ const UserGame: FC<UserGameProps> = props => {
                 clearInterval(progressBar);
             } else if (jsonMessage.action === 'stop') {
                 clearInterval(progressBar);
-                setTimeForAnswer(70000 / 1000);
+                setTimeForAnswer(jsonMessage.activeGamePart === 'chgk' ? 70 : 20);
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
-                progress.style.width = '100%';
-                changeColor(progress);
+                if (progress) {
+                    progress.style.width = '100%';
+                    changeColor(progress);
+                }
             } else if (jsonMessage.action === 'changeQuestionNumber') {
-                setQuestionNumber(+jsonMessage.number);
                 clearInterval(progressBar);
-                setTimeForAnswer(70000 / 1000);
                 setAnswer('');
                 let progress = document.querySelector('#progress-bar') as HTMLDivElement;
                 progress.style.width = '100%';
-                changeColor(progress);
                 let answerInput = document.querySelector('#answer') as HTMLInputElement;
                 answerInput.focus();
+                changeColor(progress);
+                setTimeForAnswer(jsonMessage.activeGamePart === 'chgk' ? 70 : 20);
+                setMaxTime(jsonMessage.activeGamePart === 'chgk' ? 70 : 20);
+                setQuestionNumber(+jsonMessage.number);
+                setGamePart(jsonMessage.activeGamePart);
             } else if (jsonMessage.action === 'currentQuestionNumber') {
                 setQuestionNumber(+jsonMessage.number);
+                setGamePart(jsonMessage.activeGamePart);
             } else if (jsonMessage.action === 'statusAnswer') {
+                if (gamePart === "chgk") {
+                    setAcceptedAnswer(answer);
+                } else {
+                    console.log(matrixSettings);
+                    setAcceptedMatrixAnswers((prevValue) => { // TODO: ПОФИКСИТЬ matrixSettings == undefined
+                        const copy = {...prevValue};
+                        console.log(matrixSettings);
+                        if (matrixSettings && matrixSettings?.roundNames) {
+                            const roundName = matrixSettings.roundNames[+jsonMessage.roundNumber - 1];
+                            console.log(roundName);
+                            copy[roundName] = copy[roundName].map((answer, i) => i === +jsonMessage.questionNumber - 1 ? jsonMessage.answer : answer);
+                        }
+                        return copy;
+                    });
+                }
+
                 if (jsonMessage.isAccepted) {
                     setFlags({
                         isAnswerAccepted: true,
@@ -203,14 +227,16 @@ const UserGame: FC<UserGameProps> = props => {
                             setIsBreak(false);
                         }
                         return time - 1 > 0 ? time - 1 : 0;
-                    }), 1000)
+                    }), 1000);
                 } else {
                     clearInterval(interval);
                     setIsBreak(false);
                     setBreakTime(0);
                 }
 
-                setIsLoading(false);
+                if (isLoading) {
+                    setIsLoading(false);
+                }
             }
         };
 
@@ -231,7 +257,7 @@ const UserGame: FC<UserGameProps> = props => {
                 }));
             }
         }
-    }, [isLoading, isBreak]);
+    }, [isLoading, isBreak, isGameStarted]);
 
     const fillMatrixAnswers = (roundNames: string[], questionsCount: number) => {
         const answers: {[key: string]: string[]} = {};
@@ -345,9 +371,6 @@ const UserGame: FC<UserGameProps> = props => {
             'answer': answer
         }));
 
-        // скорее всего, надо заполнять acceptedAnswer только если все ок и он реально отправился, то есть засунуть в один из нижних ифов
-        setAcceptedAnswer(answer);
-
         setTimeout(() => {
             setFlags(flags => {
                 const res = {
@@ -378,12 +401,35 @@ const UserGame: FC<UserGameProps> = props => {
         });
     };
 
-    const handleSendMatrixAnswer = (index: number, tourName: string) => {
-        setAcceptedMatrixAnswers((prevValue) => {
-            const copy = {...prevValue};
-            copy[tourName] = copy[tourName].map((answer, i) => i === index ? matrixAnswers?.[tourName][i] || '' : answer);
-            return copy;
-        });
+    const handleSendMatrixAnswer = (questionNumber: number, tourName: string, roundNumber: number) => {
+        conn.send(JSON.stringify({
+            'cookie': getCookie('authorization'),
+            'action': 'Answer',
+            'answer': matrixAnswers?.[tourName][questionNumber - 1],
+            'roundNumber': roundNumber,
+            'questionNumber': questionNumber,
+        }));
+
+        setTimeout(() => {
+            setFlags(flags => {
+                const res = {
+                    isSnackbarOpen: true,
+                    isAnswerAccepted: false
+                };
+
+                if (!flags.isSnackbarOpen) {
+                    setTimeout(() => setFlags(flags => {
+                        return {
+                            isSnackbarOpen: false,
+                            isAnswerAccepted: flags.isAnswerAccepted
+                        }
+                    }), 5000);
+                    return res;
+                }
+
+                return flags;
+            });
+        }, 1000);
     };
 
     const renderMatrix = () => {
@@ -393,23 +439,23 @@ const UserGame: FC<UserGameProps> = props => {
                     <div className={classes.tourName}>{tourName}</div>
 
                     {
-                        Array.from(Array(matrixSettings.questionCount).keys()).map((i) => {
+                        Array.from(Array(matrixSettings.questionCount).keys()).map((j) => {
                             return (
-                                <div key={`matrix_question_${i}`}>
-                                    <p className={classes.matrixAnswerNumber}>Вопрос {i + 1}</p>
+                                <div key={`matrix_question_${j}`}>
+                                    <p className={classes.matrixAnswerNumber}>Вопрос {j + 1}</p>
 
                                     <div className={classes.answerInputWrapper}>
                                         <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
                                                      style={{width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
-                                                         height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={matrixAnswers?.[tourName][i]} onChange={(event) => handleMatrixAnswer(event, i, tourName)}/>
-                                        <button className={classes.sendAnswerButton} onClick={() => handleSendMatrixAnswer(i, tourName)}>Отправить
+                                                         height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={matrixAnswers?.[tourName][j]} onChange={(event) => handleMatrixAnswer(event, j, tourName)}/>
+                                        <button className={classes.sendAnswerButton} onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}>Отправить
                                         </button>
 
                                         {
-                                            acceptedMatrixAnswers?.[tourName][i]
+                                            acceptedMatrixAnswers?.[tourName][j]
                                                 ?
                                                 <small className={classes.accepted}>{'Принятый ответ: '}
-                                                    <span className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[tourName][i]}</span>
+                                                    <span className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[tourName][j]}</span>
                                                 </small>
                                                 : null
                                         }

@@ -10,7 +10,7 @@ export class ScoreTableDto {
 
     constructor(game: Game, teamId: string = undefined) {
         this.gameId = game.id.toString();
-        this.isIntrigue = bigGames[this.gameId].CurrentGame.isIntrigue;
+        this.isIntrigue = bigGames[this.gameId].isIntrigue;
         this.roundsCount = bigGames[this.gameId].CurrentGame.rounds.length;
         this.questionsCount = bigGames[this.gameId].CurrentGame.rounds[0].questionsCount;
         this.totalScoreForAllTeams = !teamId ? bigGames[this.gameId].CurrentGame.getScoreTable() : bigGames[this.gameId].CurrentGame.getScoreTableForTeam(teamId);

@@ -15,7 +15,7 @@ let conn: WebSocket;
 let ping: any;
 
 const AdminAnswersPage: FC = () => {
-    const {gameId} = useParams<{ gameId: string }>();
+    const {gameId, gamePart} = useParams<{ gameId: string, gamePart: string }>();
     const {tour, question} = useParams<{ tour: string, question: string }>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('unchecked');
@@ -49,6 +49,7 @@ const AdminAnswersPage: FC = () => {
                 'action': 'getAnswers',
                 'roundNumber': +tour,
                 'questionNumber': +question,
+                'gamePart': gamePart,
             }));
 
             conn.send(JSON.stringify({
@@ -56,6 +57,7 @@ const AdminAnswersPage: FC = () => {
                 'action': 'getAppealsByNumber',
                 'roundNumber': +tour,
                 'questionNumber': +question,
+                'gamePart': gamePart,
             }));
 
             ping = setInterval(() => {
@@ -182,6 +184,7 @@ const AdminAnswersPage: FC = () => {
                 conn.send(JSON.stringify({
                     'cookie': getCookie('authorization'),
                     'action': 'RejectAnswer',
+                    'gamePart': gamePart,
                     'roundNumber': tour,
                     'questionNumber': question,
                     'answers': currentHandledAnswers
@@ -193,6 +196,7 @@ const AdminAnswersPage: FC = () => {
                 conn.send(JSON.stringify({
                     'cookie': getCookie('authorization'),
                     'action': 'AcceptAnswer',
+                    'gamePart': gamePart,
                     'roundNumber': tour,
                     'questionNumber': question,
                     'answers': currentHandledAnswers
@@ -200,6 +204,7 @@ const AdminAnswersPage: FC = () => {
                 conn.send(JSON.stringify({
                     'cookie': getCookie('authorization'),
                     'action': 'RejectAnswer',
+                    'gamePart': gamePart,
                     'roundNumber': tour,
                     'questionNumber': question,
                     'answers': [...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]
@@ -212,6 +217,7 @@ const AdminAnswersPage: FC = () => {
                 conn.send(JSON.stringify({
                     'cookie': getCookie('authorization'),
                     'action': 'AcceptAnswer',
+                    'gamePart': gamePart,
                     'roundNumber': tour,
                     'questionNumber': question,
                     'answers': currentHandledAnswers
@@ -253,6 +259,7 @@ const AdminAnswersPage: FC = () => {
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'AcceptAppeals',
+            'gamePart': gamePart,
             'appeals': currentHandledAppeals,
             'roundNumber': tour,
             'questionNumber': question,
@@ -261,6 +268,7 @@ const AdminAnswersPage: FC = () => {
         conn.send(JSON.stringify({
             'cookie': getCookie('authorization'),
             'action': 'RejectAppeals',
+            'gamePart': gamePart,
             'appeals': [...appeals.map(el => el.answer).filter(el => !currentHandledAppeals.includes(el))],
             'roundNumber': tour,
             'questionNumber': question,
