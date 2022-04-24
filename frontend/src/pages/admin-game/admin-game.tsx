@@ -41,25 +41,8 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    useEffect(() => {
-        getGame(gameId).then((res) => {
-            if (res.status === 200) {
-                res.json().then(({
-                                     name,
-                                     chgkSettings,
-                                     matrixSettings
-                                 }) => {
-                    setGameName(name);
-                    setMatrixSettings(matrixSettings ?? null);
-                    setChgkSettings(chgkSettings ?? null);
-                    setIsAppeal(new Array(chgkSettings ? chgkSettings.roundCount * chgkSettings.questionCount : 0).fill(false));
-                });
-            }
-        });
-
-        conn = new WebSocket(getUrlForSocket());
-
-        conn.onopen = () => {
+    const requester = {
+        startRequests: () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'time'
@@ -82,64 +65,160 @@ const AdminGame: FC<AdminGameProps> = props => {
                     'action': 'ping'
                 }));
             }, 30000);
-        }
+        },
 
-        conn.onclose = () => {
-            setIsConnectionError(true);
-        }
+        changeQuestion: (questionNumber: number, roundNumber: number, gamePart: 'chgk' | 'matrix') => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'changeQuestion',
+                'questionNumber': questionNumber,
+                'tourNumber': roundNumber,
+                'activeGamePart': gamePart
+            }));
+        },
 
-        conn.onerror = () => {
-            setIsConnectionError(true);
+        getQuestionNumber: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber',
+            }));
+        },
+
+        startGame: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Start',
+            }));
+        },
+
+        pauseGame: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Pause'
+            }));
+        },
+
+        stopGame: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Stop'
+            }));
+        },
+
+        addTenSeconds: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': '+10sec'
+            }));
+        },
+
+        stopBreak: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'stopBreak'
+            }));
         }
+    };
+
+    const handlers = {
+        handleTimeMessage: (time: number, isStarted: boolean) => {
+            setTimer(time);
+            if (isStarted) {
+                setPlayOrPause('pause');
+                interval = setInterval(() => setTimer(t => {
+                    let res = t - 1000;
+                    if (res <= 0) {
+                        clearInterval(interval);
+                        setPlayOrPause('play');
+                    }
+                    return res > 0 ? res : 0;
+                }), 1000);
+            }
+        },
+
+        handleAppealMessage: (questionNumber: number) => {
+            setIsAppeal(appeals => {
+                const appealsCopy = appeals.slice();
+                appealsCopy[questionNumber - 1] = true;
+                return appealsCopy;
+            })
+        },
+
+        handleAppealsMessage: (appealByQuestionNumber: number[]) => {
+            setIsAppeal(appeals => {
+                const appealsCopy = new Array(appeals.length).fill(false)
+                for (const number of appealByQuestionNumber) {
+                    appealsCopy[number - 1] = true;
+                }
+                return appealsCopy;
+            })
+        },
+
+        handleIsOnBreakMessage: (status: boolean, time: number) => {
+            if (status) {
+                setIsBreak(true);
+                setBreakTime(time);
+                breakInterval = setInterval(() => setBreakTime((time) => {
+                    if (time - 1 <= 0) {
+                        clearInterval(breakInterval);
+                        setIsBreak(false);
+                    }
+                    return time - 1 > 0 ? time - 1 : 0;
+                }), 1000)
+            }
+        },
+
+        handleChangeQuestionNumber: (round: number, question: number, activeGamePart: 'chgk' | 'matrix') => {
+            setClickedTourIndex(round);
+            setActiveTour(round);
+            setClickedGamePart(activeGamePart);
+            setActiveGamePart(activeGamePart);
+            setActiveQuestion(question);
+            setIsLoading(false);
+        },
+    }
+
+    useEffect(() => {
+        getGame(gameId).then((res) => {
+            if (res.status === 200) {
+                res.json().then(({
+                                     name,
+                                     chgkSettings,
+                                     matrixSettings
+                                 }) => {
+                    setGameName(name);
+                    setMatrixSettings(matrixSettings ?? null);
+                    setChgkSettings(chgkSettings ?? null);
+                    setIsAppeal(new Array(chgkSettings ? chgkSettings.roundCount * chgkSettings.questionCount : 0).fill(false));
+                });
+            }
+        });
+
+        conn = new WebSocket(getUrlForSocket());
+
+        conn.onopen = () => requester.startRequests();
+        conn.onclose = () => setIsConnectionError(true);
+        conn.onerror = () => setIsConnectionError(true);
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
-            if (jsonMessage.action === 'time') {
-                setTimer(jsonMessage.time);
-                if (jsonMessage.isStarted) {
-                    setPlayOrPause('pause');
-                    interval = setInterval(() => setTimer(t => {
-                        let res = t - 1000;
-                        if (res <= 0) {
-                            clearInterval(interval);
-                            setPlayOrPause('play');
-                        }
-                        return res > 0 ? res : 0;
-                    }), 1000);
-                }
-            } else if (jsonMessage.action === 'appeal') {
-                setIsAppeal(appeals => {
-                    const appealsCopy = appeals.slice();
-                    appealsCopy[jsonMessage.questionNumber - 1] = true;
-                    return appealsCopy;
-                })
-            } else if (jsonMessage.action === 'appeals') {
-                setIsAppeal(appeals => {
-                    const appealsCopy = new Array(appeals.length).fill(false)
-                    for (const number of jsonMessage.appealByQuestionNumber) {
-                        appealsCopy[number - 1] = true;
-                    }
-                    return appealsCopy;
-                })
-            } else if (jsonMessage.action === 'isOnBreak') {
-                if (jsonMessage.status) {
-                    setIsBreak(true);
-                    setBreakTime(jsonMessage.time);
-                    breakInterval = setInterval(() => setBreakTime((time) => {
-                        if (time - 1 <= 0) {
-                            clearInterval(breakInterval);
-                            setIsBreak(false);
-                        }
-                        return time - 1 > 0 ? time-1 : 0;
-                    }), 1000)
-                }
-            } else if (jsonMessage.action == 'changeQuestionNumber') {
-                setClickedTourIndex(jsonMessage.round);
-                setActiveTour(jsonMessage.round);
-                setClickedGamePart(jsonMessage.activeGamePart);
-                setActiveGamePart(jsonMessage.activeGamePart);
-                setActiveQuestion(jsonMessage.question);
-                setIsLoading(false);
+
+            switch (jsonMessage.action) {
+                case 'time':
+                    handlers.handleTimeMessage(jsonMessage.time, jsonMessage.isStarted);
+                    break;
+                case 'appeal':
+                    handlers.handleAppealMessage(jsonMessage.questionNumber);
+                    break;
+                case 'appeals':
+                    handlers.handleAppealsMessage(jsonMessage.appealByQuestionNumber);
+                    break;
+                case 'isOnBreak':
+                    handlers.handleIsOnBreakMessage(jsonMessage.status, jsonMessage.time);
+                    break;
+                case 'changeQuestionNumber':
+                    handlers.handleChangeQuestionNumber(jsonMessage.round, jsonMessage.question, jsonMessage.activeGamePart);
+                    break;
             }
         };
 
@@ -149,10 +228,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     const Tour: FC<TourProps> = props => {
         const handleTourClick = () => {
             if (activeTourIndex === props.tourNumber && activeGamePart === props.gamePart) {
-                conn.send(JSON.stringify({
-                    'cookie': getCookie('authorization'),
-                    'action': 'getQuestionNumber',
-                }));
+                requester.getQuestionNumber();
             } else {
                 setClickedTourIndex(props.tourIndex);
                 setClickedGamePart(props.gamePart);
@@ -207,23 +283,14 @@ const AdminGame: FC<AdminGameProps> = props => {
         setActiveGamePart(gamePart);
         setTimer(gamePart === 'chgk' ? 70000 : 20000);
 
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'changeQuestion',
-            'questionNumber': +clickedQuestion.id,
-            'tourNumber': clickedTourIndex,
-            'activeGamePart': gamePart
-        }));
+        requester.changeQuestion(+clickedQuestion.id, clickedTourIndex || 0, gamePart);
 
         handleStopClick(gamePart); // Прошлый вопрос остановится!
     };
 
     const handlePlayClick = () => {
         if (playOrPause === 'play') {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'Start',
-            }));
+            requester.startGame();
             setPlayOrPause('pause');
             interval = setInterval(() =>
                 setTimer(t => {
@@ -236,29 +303,20 @@ const AdminGame: FC<AdminGameProps> = props => {
                 }), 1000);
         } else {
             clearInterval(interval);
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'Pause'
-            }));
+            requester.pauseGame();
             setPlayOrPause('play');
         }
     };
 
     const handleStopClick = (gamePart: 'matrix' | 'chgk' | undefined) => {
         setPlayOrPause('play');
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'Stop'
-        }));
+        requester.stopGame();
         clearInterval(interval);
         setTimer(gamePart === 'chgk' ? 70000 : 20000);
     };
 
     const handleAddedTimeClick = () => {
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': '+10sec'
-        }));
+        requester.addTenSeconds();
         setTimer(t => t + 10000);
     };
 
@@ -320,10 +378,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         setBreakTime(0);
         setIsBreak(false);
         clearInterval(breakInterval);
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'stopBreak'
-        }))
+        requester.stopBreak();
     }
 
     if (isLoading || !gameName) {

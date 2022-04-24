@@ -156,7 +156,9 @@ function GiveAnswer(answer: string, teamId: string, gameId: number, ws) {
     bigGames[gameId].CurrentGame.rounds[roundNumber].questions[questionNumber].giveAnswer(bigGames[gameId].CurrentGame.teams[teamId], answer);
     ws.send(JSON.stringify({
         'action': 'statusAnswer',
-        'isAccepted': true
+        'isAccepted': true,
+        'answer': answer,
+        'activeGamePart': 'chgk'
     }));
 }
 
@@ -243,7 +245,7 @@ function GetAllAppeals(gameId: number, ws) {
     }));
 }
 
-function GiveAnswerMatrix(answer: string, roundNumber: number, questionNumber: number, teamId: any, gameId: any, ws) {
+function GiveAnswerMatrix(answer: string, roundNumber: number, questionNumber: number, roundName: string, teamId: any, gameId: any, ws) {
     console.log('received: %s', answer, roundNumber, questionNumber, teamId);
     bigGames[gameId].CurrentGame.rounds[roundNumber - 1].questions[questionNumber - 1].giveAnswer(bigGames[gameId].CurrentGame.teams[teamId], answer);
     ws.send(JSON.stringify({
@@ -251,7 +253,9 @@ function GiveAnswerMatrix(answer: string, roundNumber: number, questionNumber: n
         'isAccepted': true,
         'roundNumber': roundNumber,
         'questionNumber': questionNumber,
-        'answer': answer
+        'roundName': roundName,
+        'answer': answer,
+        'activeGamePart': 'matrix'
     }));
 }
 
@@ -393,7 +397,7 @@ function UsersAction(gameId, ws, jsonMessage, gameType, teamId) {
             if (gameType === GameTypeLogic.ChGK && bigGames[gameId].CurrentGame.isTimerStart) {
                 GiveAnswer(jsonMessage.answer, teamId, gameId, ws);
             } else if (gameType === GameTypeLogic.Matrix) {
-                GiveAnswerMatrix(jsonMessage.answer, jsonMessage.roundNumber, jsonMessage.questionNumber, teamId, gameId, ws);
+                GiveAnswerMatrix(jsonMessage.answer, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.roundName, teamId, gameId, ws);
             }
             break;
         case 'appeal':

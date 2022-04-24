@@ -11,6 +11,18 @@ const UserAnswer: FC<UserAnswerProps> = props => {
     const [opposition, setOpposition] = useState<string>('');
     const [answerStatus, setAnswerStatus] = useState<'success' | 'error' | 'opposition'>(props.status);
 
+    const requester = {
+        sendAppeal: (opposition: string) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'appeal',
+                'number': props.order,
+                'appeal': opposition,
+                'answer': props.answer
+            }));
+        }
+    };
+
     const handleOppositionButtonClick = () => {
         setIsOppositionClicked(!isOppositionClicked);
     };
@@ -23,15 +35,7 @@ const UserAnswer: FC<UserAnswerProps> = props => {
         if (opposition !== '') {
             setAnswerStatus('opposition');
             conn = new WebSocket(getUrlForSocket());
-            conn.onopen = () => {
-                conn.send(JSON.stringify({
-                    'cookie': getCookie('authorization'),
-                    'action': 'appeal',
-                    'number': props.order,
-                    'appeal': opposition,
-                    'answer': props.answer
-                }));
-            }
+            conn.onopen = () => requester.sendAppeal(opposition);
         }
         setIsOppositionClicked(false);
     };

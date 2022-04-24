@@ -47,36 +47,8 @@ const UserGame: FC<UserGameProps> = props => {
     const [acceptedAnswer, setAcceptedAnswer] = useState<string>();
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
-    useEffect(() => {
-        const resizeEventHandler = () => {
-            setMediaMatch(window.matchMedia('(max-width: 600px)'));
-        }
-
-        window.addEventListener('resize', resizeEventHandler);
-
-        return () => {
-            window.removeEventListener('resize', resizeEventHandler);
-        };
-    }, []);
-
-    useEffect(() => {
-        getGame(gameId).then((res) => {
-            if (res.status === 200) {
-                res.json().then(({
-                                     name,
-                                     matrixSettings
-                                 }) => {
-                    setGameName(name);
-                    console.log('from DB', matrixSettings);
-                    setMatrixSettings(matrixSettings);
-                    fillMatrixAnswers(matrixSettings.roundNames, matrixSettings.questionCount);
-                });
-            }
-        });
-
-        conn = new WebSocket(getUrlForSocket());
-
-        conn.onopen = () => {
+    const requester = {
+        startRequests: () => {
             conn.send(JSON.stringify({
                 'action': 'checkStart',
                 'cookie': getCookie('authorization'),
@@ -100,143 +72,260 @@ const UserGame: FC<UserGameProps> = props => {
                     'action': 'ping'
                 }));
             }, 30000);
+        },
+
+        checkBreak: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'isOnBreak'
+            }));
+        },
+
+        getQuestionNumber: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber'
+            }));
+        },
+
+        getQuestionTime: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'time'
+            }));
+        },
+
+        giveAnswerToChgk: (answer: string) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Answer',
+                'answer': answer
+            }));
+        },
+
+        giveAnswerToMatrix: (answer: string, roundNumber: number, questionNumber: number, roundName: string) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Answer',
+                'answer': answer,
+                'roundNumber': roundNumber,
+                'questionNumber': questionNumber,
+                'roundName': roundName,
+            }));
+        }
+    }
+
+    const handler = {
+        handleGameNotStartedMessage: () => {
+            setIsGameStarted(false);
+            setIsLoading(false);
+        },
+
+        handleGameStatusMessage: (isStarted: boolean, gamePart: 'chgk' | 'matrix') => {
+            if (isStarted) {
+                setGamePart(gamePart);
+                setIsGameStarted(true);
+                clearInterval(checkStart);
+
+                requester.checkBreak();
+            }
+        },
+
+        handleTimeMessage: (time: number, maxTime: number, isStarted: boolean) => {
+            setTimeForAnswer(() => {
+                const progress = document.querySelector('#progress-bar') as HTMLDivElement;
+                const width = Math.ceil(100 * time / maxTime);
+                if (!progress) {
+                    setIsConnectionError(true);
+                } else {
+                    progress.style.width = width + '%';
+                    changeColor(progress);
+                }
+                return time / 1000;
+            });
+            if (isStarted) {
+                clearInterval(progressBar);
+                progressBar = moveProgressBar(time, maxTime);
+            }
+            setMaxTime(maxTime / 1000);
+        },
+
+        handleStartMessage: (time: number, maxTime: number) => {
+            setTimeForAnswer(time / 1000);
+            clearInterval(progressBar);
+            progressBar = moveProgressBar(time, maxTime);
+            setMaxTime(maxTime / 1000);
+        },
+
+        handleAddTimeMessage: (time: number, maxTime: number, isStarted: boolean) => {
+            clearInterval(progressBar);
+            setTimeForAnswer(t => (t ?? 0) + 10);
+            if (isStarted) {
+                clearInterval(progressBar);
+                progressBar = moveProgressBar(time, maxTime);
+            }
+            setMaxTime(maxTime / 1000);
+        },
+
+        handlePauseMessage: () => {
+            clearInterval(progressBar);
+        },
+
+        handleStopMessage: (gamePart: 'chgk' | 'matrix') => {
+            clearInterval(progressBar);
+            setTimeForAnswer(gamePart === 'chgk' ? 70 : 20);
+            let progress = document.querySelector('#progress-bar') as HTMLDivElement;
+            if (progress) {
+                progress.style.width = '100%';
+                changeColor(progress);
+            }
+        },
+
+        handleChangeQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', questionNumber: number) => {
+            clearInterval(progressBar);
+            setAnswer('');
+            let progress = document.querySelector('#progress-bar') as HTMLDivElement;
+            progress.style.width = '100%';
+            let answerInput = document.querySelector('#answer') as HTMLInputElement;
+            answerInput.focus();
+            changeColor(progress);
+            setTimeForAnswer(gamePart === 'chgk' ? 70 : 20);
+            setMaxTime(gamePart === 'chgk' ? 70 : 20);
+            setQuestionNumber(questionNumber);
+            setGamePart(gamePart);
+        },
+
+        handleCurrentQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', questionNumber: number) => {
+            setQuestionNumber(questionNumber);
+            setGamePart(gamePart);
+        },
+
+        handleStatusAnswerMessage: (gamePart: 'chgk' | 'matrix', newAnswer: string, roundName: string, questionNumber: number, isAccepted: boolean) => {
+            if (gamePart === "chgk") {
+                setAcceptedAnswer(newAnswer);
+            } else {
+                setAcceptedMatrixAnswers((prevValue) => {
+                    const copy = {...prevValue};
+                    copy[roundName] = copy[roundName].map((answer, i) => i === questionNumber - 1 ? newAnswer : answer);
+                    return copy;
+                });
+            }
+
+            if (isAccepted) {
+                setFlags({
+                    isAnswerAccepted: true,
+                    isSnackbarOpen: true
+                });
+            } else {
+                setFlags({
+                    isAnswerAccepted: false,
+                    isSnackbarOpen: true
+                });
+            }
+            setTimeout(() => setFlags(flags => {
+                return {
+                    isSnackbarOpen: false,
+                    isAnswerAccepted: flags.isAnswerAccepted
+                }
+            }), 5000);
+        },
+
+        handleIsOnBreakMessage: (status: boolean, time: number) => {
+            if (status) {
+                setIsBreak(true);
+                setBreakTime(time);
+                clearInterval(interval);
+                interval = setInterval(() => setBreakTime((time) => {
+                    if (time - 1 <= 0) {
+                        clearInterval(interval);
+                        setIsBreak(false);
+                    }
+                    return time - 1 > 0 ? time - 1 : 0;
+                }), 1000);
+            } else {
+                clearInterval(interval);
+                setIsBreak(false);
+                setBreakTime(0);
+            }
+
+            if (isLoading) {
+                setIsLoading(false);
+            }
+        }
+    }
+
+    useEffect(() => {
+        const resizeEventHandler = () => {
+            setMediaMatch(window.matchMedia('(max-width: 600px)'));
         }
 
-        conn.onclose = () => {
-            setIsConnectionError(true);
+        window.addEventListener('resize', resizeEventHandler);
+
+        return () => {
+            window.removeEventListener('resize', resizeEventHandler);
         };
+    }, []);
 
-        conn.onerror = () => {
-            setIsConnectionError(true);
-        }
+    useEffect(() => {
+        getGame(gameId).then((res) => {
+            if (res.status === 200) {
+                res.json().then(({
+                                     name,
+                                     matrixSettings
+                                 }) => {
+                    setGameName(name);
+                    if (matrixSettings) {
+                        setMatrixSettings(matrixSettings);
+                        fillMatrixAnswers(matrixSettings.roundNames, matrixSettings.questionCount);
+                    }
+                });
+            }
+        });
+
+        conn = new WebSocket(getUrlForSocket());
+
+        conn.onopen = () => requester.startRequests();
+        conn.onclose = () => setIsConnectionError(true);
+        conn.onerror = () => setIsConnectionError(true);
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
-            if (jsonMessage.action === 'gameNotStarted') {
-                setIsGameStarted(false);
-                setIsLoading(false);
-                return;
-            } else if (jsonMessage.action === 'gameStatus') {
-                if (jsonMessage.isStarted) {
-                    setGamePart(jsonMessage.activeGamePart);
-                    setIsGameStarted(true);
-                    clearInterval(checkStart);
 
-                    conn.send(JSON.stringify({
-                        'cookie': getCookie('authorization'),
-                        'action': 'isOnBreak'
-                    }));
-                }
-            } else if (jsonMessage.action === 'time') {
-                setTimeForAnswer(() => {
-                    const progress = document.querySelector('#progress-bar') as HTMLDivElement;
-                    const width = Math.ceil(100 * jsonMessage.time / jsonMessage.maxTime);
-                    if (!progress) {
-                        setIsConnectionError(true);
-                    } else {
-                        progress.style.width = width + '%';
-                        changeColor(progress);
-                    }
-                    return jsonMessage.time / 1000;
-                });
-                if (jsonMessage.isStarted) {
-                    clearInterval(progressBar);
-                    progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
-                }
-                setMaxTime(jsonMessage.maxTime / 1000);
-            } else if (jsonMessage.action === 'start') {
-                setTimeForAnswer(jsonMessage.time / 1000);
-                clearInterval(progressBar);
-                progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
-                setMaxTime(jsonMessage.maxTime / 1000);
-            } else if (jsonMessage.action === 'addTime') {
-                clearInterval(progressBar);
-                setTimeForAnswer(t => (t ?? 0) + 10);
-                if (jsonMessage.isStarted) {
-                    clearInterval(progressBar);
-                    progressBar = moveProgressBar(jsonMessage.time, jsonMessage.maxTime);
-                }
-                setMaxTime(jsonMessage.maxTime / 1000);
-            } else if (jsonMessage.action === 'pause') {
-                clearInterval(progressBar);
-            } else if (jsonMessage.action === 'stop') {
-                clearInterval(progressBar);
-                setTimeForAnswer(jsonMessage.activeGamePart === 'chgk' ? 70 : 20);
-                let progress = document.querySelector('#progress-bar') as HTMLDivElement;
-                if (progress) {
-                    progress.style.width = '100%';
-                    changeColor(progress);
-                }
-            } else if (jsonMessage.action === 'changeQuestionNumber') {
-                clearInterval(progressBar);
-                setAnswer('');
-                let progress = document.querySelector('#progress-bar') as HTMLDivElement;
-                progress.style.width = '100%';
-                let answerInput = document.querySelector('#answer') as HTMLInputElement;
-                answerInput.focus();
-                changeColor(progress);
-                setTimeForAnswer(jsonMessage.activeGamePart === 'chgk' ? 70 : 20);
-                setMaxTime(jsonMessage.activeGamePart === 'chgk' ? 70 : 20);
-                setQuestionNumber(+jsonMessage.number);
-                setGamePart(jsonMessage.activeGamePart);
-            } else if (jsonMessage.action === 'currentQuestionNumber') {
-                setQuestionNumber(+jsonMessage.number);
-                setGamePart(jsonMessage.activeGamePart);
-            } else if (jsonMessage.action === 'statusAnswer') {
-                if (gamePart === "chgk") {
-                    setAcceptedAnswer(answer);
-                } else {
-                    console.log(matrixSettings);
-                    setAcceptedMatrixAnswers((prevValue) => { // TODO: ПОФИКСИТЬ matrixSettings == undefined
-                        const copy = {...prevValue};
-                        console.log(matrixSettings);
-                        if (matrixSettings && matrixSettings?.roundNames) {
-                            const roundName = matrixSettings.roundNames[+jsonMessage.roundNumber - 1];
-                            console.log(roundName);
-                            copy[roundName] = copy[roundName].map((answer, i) => i === +jsonMessage.questionNumber - 1 ? jsonMessage.answer : answer);
-                        }
-                        return copy;
-                    });
-                }
-
-                if (jsonMessage.isAccepted) {
-                    setFlags({
-                        isAnswerAccepted: true,
-                        isSnackbarOpen: true
-                    });
-                } else {
-                    setFlags({
-                        isAnswerAccepted: false,
-                        isSnackbarOpen: true
-                    });
-                }
-                setTimeout(() => setFlags(flags => {
-                    return {
-                        isSnackbarOpen: false,
-                        isAnswerAccepted: flags.isAnswerAccepted
-                    }
-                }), 5000);
-            } else if (jsonMessage.action === 'isOnBreak') {
-                if (jsonMessage.status) {
-                    setIsBreak(true);
-                    setBreakTime(jsonMessage.time);
-                    clearInterval(interval);
-                    interval = setInterval(() => setBreakTime((time) => {
-                        if (time - 1 <= 0) {
-                            clearInterval(interval);
-                            setIsBreak(false);
-                        }
-                        return time - 1 > 0 ? time - 1 : 0;
-                    }), 1000);
-                } else {
-                    clearInterval(interval);
-                    setIsBreak(false);
-                    setBreakTime(0);
-                }
-
-                if (isLoading) {
-                    setIsLoading(false);
-                }
+            switch (jsonMessage.action) {
+                case 'gameNotStarted':
+                    handler.handleGameNotStartedMessage();
+                    break;
+                case 'gameStatus':
+                    handler.handleGameStatusMessage(jsonMessage.isStarted, jsonMessage.activeGamePart);
+                    break;
+                case 'time':
+                    handler.handleTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
+                    break;
+                case 'start':
+                    handler.handleStartMessage(jsonMessage.time, jsonMessage.maxTime);
+                    break;
+                case 'addTime':
+                    handler.handleAddTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
+                    break;
+                case 'pause':
+                    handler.handlePauseMessage();
+                    break;
+                case 'stop':
+                    handler.handleStopMessage(jsonMessage.activeGamePart);
+                    break;
+                case 'changeQuestionNumber':
+                    handler.handleChangeQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number);
+                    break;
+                case 'currentQuestionNumber':
+                    handler.handleCurrentQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number);
+                    break;
+                case 'statusAnswer':
+                    handler.handleStatusAnswerMessage(jsonMessage.activeGamePart, jsonMessage.answer,
+                        jsonMessage.roundName, jsonMessage.questionNumber, jsonMessage.isAccepted);
+                    break;
+                case 'isOnBreak':
+                    handler.handleIsOnBreakMessage(jsonMessage.status, jsonMessage.time);
+                    break;
             }
         };
 
@@ -245,16 +334,10 @@ const UserGame: FC<UserGameProps> = props => {
 
     useEffect(() => {
         if (!isLoading && isGameStarted) {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getQuestionNumber'
-            }));
+            requester.getQuestionNumber();
 
             if (!isBreak) {
-                conn.send(JSON.stringify({
-                    'cookie': getCookie('authorization'),
-                    'action': 'time'
-                }));
+                requester.getQuestionTime();
             }
         }
     }, [isLoading, isBreak, isGameStarted]);
@@ -365,11 +448,7 @@ const UserGame: FC<UserGameProps> = props => {
     };
 
     const handleSendButtonClick = () => {
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'Answer',
-            'answer': answer
-        }));
+        requester.giveAnswerToChgk(answer);
 
         setTimeout(() => {
             setFlags(flags => {
@@ -401,14 +480,8 @@ const UserGame: FC<UserGameProps> = props => {
         });
     };
 
-    const handleSendMatrixAnswer = (questionNumber: number, tourName: string, roundNumber: number) => {
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'Answer',
-            'answer': matrixAnswers?.[tourName][questionNumber - 1],
-            'roundNumber': roundNumber,
-            'questionNumber': questionNumber,
-        }));
+    const handleSendMatrixAnswer = (questionNumber: number, roundName: string, roundNumber: number) => {
+        requester.giveAnswerToMatrix(matrixAnswers?.[roundName][questionNumber - 1] as string, roundNumber, questionNumber, roundName);
 
         setTimeout(() => {
             setFlags(flags => {
