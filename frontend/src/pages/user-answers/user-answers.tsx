@@ -23,6 +23,35 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
+    const requester = {
+        startRequests: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getTeamAnswers'
+            }));
+
+            ping = setInterval(() => {
+                conn.send(JSON.stringify({
+                    'action': 'ping'
+                }));
+            }, 30000);
+        }
+    };
+
+    const handler = {
+        handleTeamAnswersMessage: (answers: { answer: string; status: number; number: number}[]) => {
+            setAnswers(answers.map((ans: { answer: string; status: number; number: number}) => {
+                return {
+                    answer: ans.answer,
+                    status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
+                    number: ans.number
+                };
+            }));
+
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
         const resizeEventHandler = () => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
@@ -48,31 +77,14 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
 
         conn = new WebSocket(getUrlForSocket());
 
-        conn.onopen = () => {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getTeamAnswers'
-            }));
-
-            ping = setInterval(() => {
-                conn.send(JSON.stringify({
-                    'action': 'ping'
-                }));
-            }, 30000);
-        }
+        conn.onopen = () => requester.startRequests();
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
-            if (jsonMessage.action === 'teamAnswers') {
-                setAnswers(jsonMessage.answers.map((ans: { answer: string; status: number; number: number}) => {
-                    return {
-                        answer: ans.answer,
-                        status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
-                        number: ans.number
-                    };
-                }));
-
-                setIsLoading(false);
+            switch (jsonMessage.action) {
+                case 'teamAnswers':
+                    handler.handleTeamAnswersMessage(jsonMessage.answers);
+                    break;
             }
         };
 

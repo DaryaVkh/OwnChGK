@@ -122,7 +122,7 @@ const App: FC<AppProps> = props => {
                         <AdminGame/>
                     </ProtectedRoute>
 
-                    <ProtectedRoute path="/admin/game/:gameId/answers/:tour/:question" exact
+                    <ProtectedRoute path="/admin/game/:gameId/:gamePart/answers/:tour/:question" exact
                                     currentUserRole={props.user.role}
                                     neededRole={adminRoles}
                                     redirectPath="/admin">

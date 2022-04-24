@@ -15,7 +15,7 @@ let conn: WebSocket;
 let ping: any;
 
 const AdminAnswersPage: FC = () => {
-    const {gameId} = useParams<{ gameId: string }>();
+    const {gameId, gamePart} = useParams<{ gameId: string, gamePart: 'chgk' | 'matrix' }>();
     const {tour, question} = useParams<{ tour: string, question: string }>();
     const [page, setPage] = useState<Page>('answers');
     const [answersType, setAnswersType] = useState<AnswerType>('unchecked');
@@ -27,6 +27,90 @@ const AdminAnswersPage: FC = () => {
     const [appeals, setAppeals] = useState<Opposition[]>([]);
     const [currentHandledAppeals, setCurrentHandledAppeals] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const requester = {
+        startRequests: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getAnswers',
+                'roundNumber': +tour,
+                'questionNumber': +question,
+                'gamePart': gamePart,
+            }));
+
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getAppealsByNumber',
+                'roundNumber': +tour,
+                'questionNumber': +question,
+                'gamePart': gamePart,
+            }));
+
+            ping = setInterval(() => {
+                conn.send(JSON.stringify({
+                    'action': 'ping'
+                }));
+            }, 30000);
+        },
+
+        rejectAnswers: (answers: string[]) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'RejectAnswer',
+                'gamePart': gamePart,
+                'roundNumber': tour,
+                'questionNumber': question,
+                'answers': answers
+            }));
+        },
+
+        acceptAnswers: (answers: string[]) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'AcceptAnswer',
+                'gamePart': gamePart,
+                'roundNumber': tour,
+                'questionNumber': question,
+                'answers': answers
+            }));
+        },
+
+        rejectAppeals: (appeals: string[]) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'RejectAppeals',
+                'gamePart': gamePart,
+                'appeals': appeals,
+                'roundNumber': tour,
+                'questionNumber': question,
+            }));
+        },
+
+        acceptAppeals: (appeals: string[]) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'AcceptAppeals',
+                'gamePart': gamePart,
+                'appeals': appeals,
+                'roundNumber': tour,
+                'questionNumber': question,
+            }));
+        }
+    };
+
+    const handler = {
+        handleAnswersMessage: (acceptedAnswers: string[], rejectedAnswers: string[], uncheckedAnswers: string[]) => {
+            setAcceptedAnswers(acceptedAnswers);
+            setRejectedAnswers(rejectedAnswers);
+            setUncheckedAnswers(uncheckedAnswers);
+            setGameAnswers([...acceptedAnswers, ...rejectedAnswers, ...uncheckedAnswers]);
+            setIsLoading(false);
+        },
+
+        handleAppealsByNumberMessage: (appeals: Opposition[]) => {
+            setAppeals(appeals);
+        }
+    };
 
     useEffect(() => {
         function handleWindowResize() {
@@ -43,38 +127,17 @@ const AdminAnswersPage: FC = () => {
 
         conn = new WebSocket(getUrlForSocket());
 
-        conn.onopen = () => {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getAnswers',
-                'roundNumber': +tour,
-                'questionNumber': +question,
-            }));
-
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'getAppealsByNumber',
-                'roundNumber': +tour,
-                'questionNumber': +question,
-            }));
-
-            ping = setInterval(() => {
-                conn.send(JSON.stringify({
-                    'action': 'ping'
-                }));
-            }, 30000);
-        }
+        conn.onopen = () => requester.startRequests();
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
-            if (jsonMessage.action === 'answers') {
-                setAcceptedAnswers(jsonMessage.acceptedAnswers);
-                setRejectedAnswers(jsonMessage.rejectedAnswers);
-                setUncheckedAnswers(jsonMessage.uncheckedAnswers);
-                setGameAnswers([...jsonMessage.acceptedAnswers, ...jsonMessage.rejectedAnswers, ...jsonMessage.uncheckedAnswers]);
-                setIsLoading(false);
-            } else if (jsonMessage.action === 'appealsByNumber') {
-                setAppeals(jsonMessage.appeals);
+            switch (jsonMessage.action) {
+                case 'answers':
+                    handler.handleAnswersMessage(jsonMessage.acceptedAnswers, jsonMessage.rejectedAnswers, jsonMessage.uncheckedAnswers);
+                    break;
+                case 'appealsByNumber':
+                    handler.handleAppealsByNumberMessage(jsonMessage.appeals);
+                    break;
             }
         };
 
@@ -179,43 +242,19 @@ const AdminAnswersPage: FC = () => {
     const handleSaveButtonClick = () => {
         switch (answersType) {
             case 'accepted':
-                conn.send(JSON.stringify({
-                    'cookie': getCookie('authorization'),
-                    'action': 'RejectAnswer',
-                    'roundNumber': tour,
-                    'questionNumber': question,
-                    'answers': currentHandledAnswers
-                }));
+                requester.rejectAnswers(currentHandledAnswers);
                 setRejectedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setAcceptedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
                 break;
             case 'unchecked':
-                conn.send(JSON.stringify({
-                    'cookie': getCookie('authorization'),
-                    'action': 'AcceptAnswer',
-                    'roundNumber': tour,
-                    'questionNumber': question,
-                    'answers': currentHandledAnswers
-                }));
-                conn.send(JSON.stringify({
-                    'cookie': getCookie('authorization'),
-                    'action': 'RejectAnswer',
-                    'roundNumber': tour,
-                    'questionNumber': question,
-                    'answers': [...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]
-                }));
+                requester.acceptAnswers(currentHandledAnswers);
+                requester.rejectAnswers([...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]);
                 setAcceptedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setRejectedAnswers(prev => [...prev, ...uncheckedAnswers.filter(el => !currentHandledAnswers.includes(el))]);
                 setUncheckedAnswers([]);
                 break;
             case 'rejected':
-                conn.send(JSON.stringify({
-                    'cookie': getCookie('authorization'),
-                    'action': 'AcceptAnswer',
-                    'roundNumber': tour,
-                    'questionNumber': question,
-                    'answers': currentHandledAnswers
-                }));
+                requester.acceptAnswers(currentHandledAnswers);
                 setAcceptedAnswers(prev => [...prev, ...currentHandledAnswers]);
                 setRejectedAnswers(prev => prev.filter(el => !currentHandledAnswers.includes(el)));
                 break;
@@ -250,21 +289,8 @@ const AdminAnswersPage: FC = () => {
 
     const handleSaveOppositionButtonClick = () => {
         setAppeals([]);
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'AcceptAppeals',
-            'appeals': currentHandledAppeals,
-            'roundNumber': tour,
-            'questionNumber': question,
-        }));
-
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'RejectAppeals',
-            'appeals': [...appeals.map(el => el.answer).filter(el => !currentHandledAppeals.includes(el))],
-            'roundNumber': tour,
-            'questionNumber': question,
-        }));
+        requester.acceptAppeals(currentHandledAppeals);
+        requester.rejectAppeals([...appeals.map(el => el.answer).filter(el => !currentHandledAppeals.includes(el))]);
     };
 
     const renderPage = () => {

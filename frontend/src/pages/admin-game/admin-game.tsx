@@ -22,42 +22,27 @@ let ping: any;
 
 const AdminGame: FC<AdminGameProps> = props => {
     const [playOrPause, setPlayOrPause] = useState<'play' | 'pause'>('play');
+
     const [clickedTourIndex, setClickedTourIndex] = useState<number>(); // Тур, на который жмякнули
     const [clickedGamePart, setClickedGamePart] = useState<'matrix' | 'chgk'>(); // Часть игры, на тур которой жмякнули (чтобы перерисовать количество вопросов)
-    const [activeTourIndex, setActiveTour] = useState<number | 'none'>(1); // Индекс активного тура активной части игры
+    const [activeTourIndex, setActiveTour] = useState<number | undefined>(1); // Индекс активного тура активной части игры
     const [activeGamePart, setActiveGamePart] = useState<'chgk' | 'matrix'>(); // Активная часть игры
-    const [activeQuestionNumber, setActiveQuestion] = useState<number | 'none'>(1); // Индекс активного вопроса в активном туре активной части игры
+    const [activeQuestionNumber, setActiveQuestion] = useState<number | undefined>(1); // Индекс активного вопроса в активном туре активной части игры
+
     const [chgkSettings, setChgkSettings] = useState<GamePartSettings>(); // Настройки ЧГК
     const [matrixSettings, setMatrixSettings] = useState<GamePartSettings>(); // Настройки матрицы
     const [gameName, setGameName] = useState<string>();
     const {gameId} = useParams<{ gameId: string }>();
-    const [timer, setTimer] = useState<number>(70000);
+    const [timer, setTimer] = useState<number>(70000); // Таймер одного вопроса
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [breakTime, setBreakTime] = useState<number>(0); // в секундах
-    const [isBreak, setIsBreak] = useState<boolean>(false);
+    const [isBreak, setIsBreak] = useState<boolean>(false); // флаг для перерыва
     const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    useEffect(() => {
-        getGame(gameId).then((res) => {
-            if (res.status === 200) {
-                res.json().then(({
-                                     name,
-                                     chgkSettings,
-                                     matrixSettings
-                                 }) => {
-                    setGameName(name);
-                    // setToursCount(chgkSettings?.roundCount ?? 0);
-                    // setQuestionsCount(chgkSettings?.questionCount ?? 0);
-                    setIsAppeal(new Array(chgkSettings ? chgkSettings.roundCount * chgkSettings.questionCount : 0).fill(false));
-                });
-            }
-        });
-
-        conn = new WebSocket(getUrlForSocket());
-
-        conn.onopen = () => {
+    const requester = {
+        startRequests: () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'time'
@@ -80,62 +65,160 @@ const AdminGame: FC<AdminGameProps> = props => {
                     'action': 'ping'
                 }));
             }, 30000);
-        }
+        },
 
-        conn.onclose = () => {
-            setIsConnectionError(true);
-        }
+        changeQuestion: (questionNumber: number, roundNumber: number, gamePart: 'chgk' | 'matrix') => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'changeQuestion',
+                'questionNumber': questionNumber,
+                'tourNumber': roundNumber,
+                'activeGamePart': gamePart
+            }));
+        },
 
-        conn.onerror = () => {
-            setIsConnectionError(true);
+        getQuestionNumber: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getQuestionNumber',
+            }));
+        },
+
+        startGame: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Start',
+            }));
+        },
+
+        pauseGame: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Pause'
+            }));
+        },
+
+        stopGame: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'Stop'
+            }));
+        },
+
+        addTenSeconds: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': '+10sec'
+            }));
+        },
+
+        stopBreak: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'stopBreak'
+            }));
         }
+    };
+
+    const handlers = {
+        handleTimeMessage: (time: number, isStarted: boolean) => {
+            setTimer(time);
+            if (isStarted) {
+                setPlayOrPause('pause');
+                interval = setInterval(() => setTimer(t => {
+                    let res = t - 1000;
+                    if (res <= 0) {
+                        clearInterval(interval);
+                        setPlayOrPause('play');
+                    }
+                    return res > 0 ? res : 0;
+                }), 1000);
+            }
+        },
+
+        handleAppealMessage: (questionNumber: number) => {
+            setIsAppeal(appeals => {
+                const appealsCopy = appeals.slice();
+                appealsCopy[questionNumber - 1] = true;
+                return appealsCopy;
+            })
+        },
+
+        handleAppealsMessage: (appealByQuestionNumber: number[]) => {
+            setIsAppeal(appeals => {
+                const appealsCopy = new Array(appeals.length).fill(false)
+                for (const number of appealByQuestionNumber) {
+                    appealsCopy[number - 1] = true;
+                }
+                return appealsCopy;
+            })
+        },
+
+        handleIsOnBreakMessage: (status: boolean, time: number) => {
+            if (status) {
+                setIsBreak(true);
+                setBreakTime(time);
+                breakInterval = setInterval(() => setBreakTime((time) => {
+                    if (time - 1 <= 0) {
+                        clearInterval(breakInterval);
+                        setIsBreak(false);
+                    }
+                    return time - 1 > 0 ? time - 1 : 0;
+                }), 1000)
+            }
+        },
+
+        handleChangeQuestionNumber: (round: number, question: number, activeGamePart: 'chgk' | 'matrix') => {
+            setClickedTourIndex(round);
+            setActiveTour(round);
+            setClickedGamePart(activeGamePart);
+            setActiveGamePart(activeGamePart);
+            setActiveQuestion(question);
+            setIsLoading(false);
+        },
+    }
+
+    useEffect(() => {
+        getGame(gameId).then((res) => {
+            if (res.status === 200) {
+                res.json().then(({
+                                     name,
+                                     chgkSettings,
+                                     matrixSettings
+                                 }) => {
+                    setGameName(name);
+                    setMatrixSettings(matrixSettings ?? null);
+                    setChgkSettings(chgkSettings ?? null);
+                    setIsAppeal(new Array(chgkSettings ? chgkSettings.roundCount * chgkSettings.questionCount : 0).fill(false));
+                });
+            }
+        });
+
+        conn = new WebSocket(getUrlForSocket());
+
+        conn.onopen = () => requester.startRequests();
+        conn.onclose = () => setIsConnectionError(true);
+        conn.onerror = () => setIsConnectionError(true);
 
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
-            if (jsonMessage.action === 'time') {
-                setTimer(jsonMessage.time);
-                if (jsonMessage.isStarted) {
-                    setPlayOrPause('pause');
-                    interval = setInterval(() => setTimer(t => {
-                        let res = t - 1000;
-                        if (res <= 0) {
-                            clearInterval(interval);
-                            setPlayOrPause('play');
-                        }
-                        return res > 0 ? res : 0;
-                    }), 1000);
-                }
-            } else if (jsonMessage.action === 'appeal') {
-                setIsAppeal(appeals => {
-                    const appealsCopy = appeals.slice();
-                    appealsCopy[jsonMessage.questionNumber - 1] = true;
-                    return appealsCopy;
-                })
-            } else if (jsonMessage.action === 'appeals') {
-                setIsAppeal(appeals => {
-                    const appealsCopy = new Array(appeals.length).fill(false)
-                    for (const number of jsonMessage.appealByQuestionNumber) {
-                        appealsCopy[number - 1] = true;
-                    }
-                    return appealsCopy;
-                })
-            } else if (jsonMessage.action === 'isOnBreak') {
-                if (jsonMessage.status) {
-                    setIsBreak(true);
-                    setBreakTime(jsonMessage.time);
-                    breakInterval = setInterval(() => setBreakTime((time) => {
-                        if (time - 1 <= 0) {
-                            clearInterval(breakInterval);
-                            setIsBreak(false);
-                        }
-                        return time - 1 > 0 ? time-1 : 0;
-                    }), 1000)
-                }
-            } else if (jsonMessage.action == 'changeQuestionNumber') {
-                setClickedTourIndex(jsonMessage.round);
-                setActiveTour(jsonMessage.round);
-                setActiveQuestion(jsonMessage.question);
-                setIsLoading(false);
+
+            switch (jsonMessage.action) {
+                case 'time':
+                    handlers.handleTimeMessage(jsonMessage.time, jsonMessage.isStarted);
+                    break;
+                case 'appeal':
+                    handlers.handleAppealMessage(jsonMessage.questionNumber);
+                    break;
+                case 'appeals':
+                    handlers.handleAppealsMessage(jsonMessage.appealByQuestionNumber);
+                    break;
+                case 'isOnBreak':
+                    handlers.handleIsOnBreakMessage(jsonMessage.status, jsonMessage.time);
+                    break;
+                case 'changeQuestionNumber':
+                    handlers.handleChangeQuestionNumber(jsonMessage.round, jsonMessage.question, jsonMessage.activeGamePart);
+                    break;
             }
         };
 
@@ -144,18 +227,13 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const Tour: FC<TourProps> = props => {
         const handleTourClick = () => {
-            setClickedTourIndex(() => {
-                if (activeTourIndex === props.tourNumber) {
-                    conn.send(JSON.stringify({
-                        'cookie': getCookie('authorization'),
-                        'action': 'getQuestionNumber'
-                    }));
-                }
-
-                return props.tourIndex;
-            });
-            setClickedGamePart(props.gamePart);
-            setActiveQuestion('none');
+            if (activeTourIndex === props.tourNumber && activeGamePart === props.gamePart) {
+                requester.getQuestionNumber();
+            } else {
+                setClickedTourIndex(props.tourIndex);
+                setClickedGamePart(props.gamePart);
+                setActiveQuestion(undefined);
+            }
         };
 
         if (clickedTourIndex === undefined) {
@@ -163,10 +241,10 @@ const AdminGame: FC<AdminGameProps> = props => {
         }
 
         return (
-            <div className={`${classes.tour} ${props.tourIndex === clickedTourIndex ? classes.activeTour : ''}`} id={`${props.tourIndex}`}
+            <div className={`${classes.tour} ${props.tourIndex === clickedTourIndex && clickedGamePart === props.gamePart ? classes.activeTour : ''}`} id={`${props.tourIndex}_${props.gamePart}`}
                  onClick={handleTourClick} key={`tour_${props.tourNumber}`}>
                 {
-                    typeof activeTourIndex === 'number' && props.tourIndex === activeTourIndex
+                    activeTourIndex !== undefined && props.tourIndex === activeTourIndex && activeGamePart === props.gamePart
                         ? <span>&#9654;</span>
                         : <span style={{color: 'transparent'}}>&#9654;</span>
                 }
@@ -203,24 +281,16 @@ const AdminGame: FC<AdminGameProps> = props => {
         setActiveQuestion(+clickedQuestion.id);
         setActiveTour(clickedTourIndex || 0);
         setActiveGamePart(gamePart);
+        setTimer(gamePart === 'chgk' ? 70000 : 20000);
 
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'changeQuestion',
-            'questionNumber': +clickedQuestion.id,
-            'tourNumber': clickedTourIndex,
-        }));
+        requester.changeQuestion(+clickedQuestion.id, clickedTourIndex || 0, gamePart);
 
-        handleStopClick(); // Прошлый вопрос остановится!
+        handleStopClick(gamePart); // Прошлый вопрос остановится!
     };
 
     const handlePlayClick = () => {
         if (playOrPause === 'play') {
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'Start',
-                'question': [activeTourIndex, activeQuestionNumber]
-            }));
+            requester.startGame();
             setPlayOrPause('pause');
             interval = setInterval(() =>
                 setTimer(t => {
@@ -233,29 +303,20 @@ const AdminGame: FC<AdminGameProps> = props => {
                 }), 1000);
         } else {
             clearInterval(interval);
-            conn.send(JSON.stringify({
-                'cookie': getCookie('authorization'),
-                'action': 'Pause'
-            }));
+            requester.pauseGame();
             setPlayOrPause('play');
         }
     };
 
-    const handleStopClick = () => {
+    const handleStopClick = (gamePart: 'matrix' | 'chgk' | undefined) => {
         setPlayOrPause('play');
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'Stop'
-        }));
+        requester.stopGame();
         clearInterval(interval);
-        setTimer(70000);
+        setTimer(gamePart === 'chgk' ? 70000 : 20000);
     };
 
     const handleAddedTimeClick = () => {
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': '+10sec'
-        }));
+        requester.addTenSeconds();
         setTimer(t => t + 10000);
     };
 
@@ -264,32 +325,32 @@ const AdminGame: FC<AdminGameProps> = props => {
             return null;
         }
 
-        const startTourNumber = matrixSettings ? (gamePart === 'matrix' ? 0 : matrixSettings.roundCount) : 0;
+        //const startTourNumber = matrixSettings ? (gamePart === 'matrix' ? 0 : matrixSettings.roundCount) : 0;
 
-        return Array.from(Array(toursCount).keys()).map(i => <Tour gamePart={gamePart} key={`tour_${i}`} tourIndex={startTourNumber + i + 1}
+        return Array.from(Array(toursCount).keys()).map(i => <Tour gamePart={gamePart} key={`tour_${i}_${gamePart}`} tourIndex={i + 1}
                                                                    tourNumber={i + 1} tourName={tourNames?.[i]}/>);
     };
 
     const renderQuestions = (questionsCount: number, gamePart: 'matrix' | 'chgk') => {
-        if (!activeTourIndex || !activeQuestionNumber || !clickedTourIndex || !questionsCount) {
+        if (!activeTourIndex || !clickedTourIndex || !questionsCount) {
             return null;
         }
 
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
                 <div className={classes.questionWrapper} key={`tour_${activeTourIndex}_question_${i + 1}`}>
-                    <div className={`${classes.question} ${typeof activeQuestionNumber === 'number' && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`}
+                    <div className={`${classes.question} ${activeQuestionNumber !== undefined && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`}
                          id={`${i + 1}`}
                          onClick={(event) => handleQuestionClick(event, gamePart)}>
                         Вопрос {i + 1}
                     </div>
 
                     <Link className={classes.answersButtonLink}
-                          to={`/admin/game/${gameId}/answers/${clickedTourIndex}/${i + 1}`}>
+                          to={`/admin/game/${gameId}/${gamePart}/answers/${clickedTourIndex}/${i + 1}`}>
                         <button className={`${classes.button} ${classes.answersButton}`}>
                             Ответы
                             {
-                                isAppeal[(clickedTourIndex - 1) * questionsCount + i]
+                                clickedGamePart === 'chgk' && isAppeal[(clickedTourIndex - 1) * questionsCount + i]
                                     ?
                                     <div className={classes.opposition}>
                                         <CircleOutlinedIcon sx={{
@@ -317,10 +378,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         setBreakTime(0);
         setIsBreak(false);
         clearInterval(breakInterval);
-        conn.send(JSON.stringify({
-            'cookie': getCookie('authorization'),
-            'action': 'stopBreak'
-        }))
+        requester.stopBreak();
     }
 
     if (isLoading || !gameName) {
@@ -356,7 +414,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         }
                     </button>
 
-                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak} onClick={handleStopClick}>
+                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak} onClick={() => handleStopClick(activeGamePart)}>
                         <StopIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
                     </button>
 
@@ -394,12 +452,12 @@ const AdminGame: FC<AdminGameProps> = props => {
                     <div className={classes.questionsWrapper}>
                         <Scrollbar>
                             {
-                                activeQuestionNumber && clickedGamePart === 'matrix'
+                                clickedGamePart === 'matrix'
                                     ? renderQuestions(matrixSettings?.questionCount || 0, 'matrix')
                                     : null
                             }
                             {
-                                activeQuestionNumber && clickedGamePart === 'chgk'
+                                clickedGamePart === 'chgk'
                                     ? renderQuestions(chgkSettings?.questionCount || 0, 'chgk')
                                     : null
                             }

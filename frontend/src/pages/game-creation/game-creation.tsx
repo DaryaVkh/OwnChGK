@@ -110,6 +110,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
         }
 
         return teamsFromDB
+            .filter(team => searchQuery.length < 1 || team.name.toLowerCase().includes(searchQuery.toLowerCase()))
             .map((team, index) => {
                 return chosenTeams?.includes(team.name)
                     ? <CustomCheckbox name={team.name} key={team.id} checked={true} onChange={handleCheckboxChange}/>
