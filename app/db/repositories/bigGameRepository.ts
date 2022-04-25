@@ -27,7 +27,7 @@ export class BigGameRepository extends Repository<BigGame> {
     }
 
     findWithAllRelations(bigGameId: string) {
-        return this.findOne(bigGameId, {relations: ['games', 'teams', 'games.rounds', 'games.rounds.questions']});
+        return this.findOne(bigGameId, {relations: ['games', 'teams', 'teams.captain', 'games.rounds', 'games.rounds.questions']});
     }
 
     findAmIParticipate(userId: string) {

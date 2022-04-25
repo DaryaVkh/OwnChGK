@@ -456,7 +456,6 @@ export class GamesController {
             const table = [];
             for (let team of game.teams) {
                 table.push(team.name);
-                console.log(team.captain);
                 if (team.captain) {
                     table.push(["Капитан", "Почта"].join(';'));
                     table.push(team.captain.name + ';' + team.captain.email + ';');
