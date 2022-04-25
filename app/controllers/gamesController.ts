@@ -456,6 +456,11 @@ export class GamesController {
             const table = [];
             for (let team of game.teams) {
                 table.push(team.name);
+                console.log(team.captain);
+                if (team.captain) {
+                    table.push(["Капитан", "Почта"].join(';'));
+                    table.push(team.captain.name + ';' + team.captain.email + ';');
+                }
                 if (team.participants) {
                     table.push(["Имя", "Почта"].join(';'));
                     const participantsList = [];
@@ -464,6 +469,8 @@ export class GamesController {
                     }
                     table.push(participantsList.join('\n'));
                 }
+                table.push('\n');
+
             }
 
                 return res.status(200).json({

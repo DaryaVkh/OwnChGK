@@ -246,7 +246,7 @@ function GetAllAppeals(gameId: number, ws) {
 }
 
 function GiveAnswerMatrix(answer: string, roundNumber: number, questionNumber: number, roundName: string, teamId: any, gameId: any, ws) {
-    console.log('received: %s', answer, roundNumber, questionNumber, teamId);
+    console.log('received: %s', answer, roundNumber, questionNumber, teamId, bigGames[gameId].CurrentGame.type);
     bigGames[gameId].CurrentGame.rounds[roundNumber - 1].questions[questionNumber - 1].giveAnswer(bigGames[gameId].CurrentGame.teams[teamId], answer);
     ws.send(JSON.stringify({
         'action': 'statusAnswer',
