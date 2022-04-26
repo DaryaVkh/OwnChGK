@@ -197,13 +197,6 @@ export class GamesController {
             if (!bigGame) {
                 return res.status(404).json({message: 'game not found'});
             }
-            const rounds = bigGame.games.find(game => game.type == GameType.CHGK).rounds;
-            const answer = { // TODO: DTO
-                name: bigGame.name,
-                teams: bigGame.teams.map(value => value.name),
-                roundCount: rounds.length,
-                questionCount: rounds.length !== 0 ? rounds[0].questions.length : 0
-            };
             gameAdmins[gameId] = new Set();
             gameUsers[gameId] = new Set();
             const ChGK = new Game(bigGame.name, GameTypeLogic.ChGK);
@@ -215,11 +208,15 @@ export class GamesController {
                 delete gameAdmins[gameId];
                 console.log('delete game ', bigGames[gameId]);
             }, 1000 * 60 * 60 * 24 * 3);
+
             const chgkFromBd = bigGame.games.find(game => game.type == GameType.CHGK);
             const matrixFromBd = bigGame.games.find(game => game.type == GameType.MATRIX);
+            let matrixSettings, chgkSettings;
+
             if (chgkFromBd) {
-                for (let i = 0; i < chgkFromBd.rounds.length; i++) {
-                    bigGames[gameId].ChGK.addRound(new Round(i + 1, answer.questionCount, 60, GameTypeLogic.ChGK));
+                chgkSettings = new ChgkSettingsDto(chgkFromBd);
+                for (let i = 0; i < chgkSettings.roundCount; i++) {
+                    bigGames[gameId].ChGK.addRound(new Round(i + 1, chgkSettings.questionCount, 60, GameTypeLogic.ChGK));
                 }
 
                 for (const team of bigGame.teams) {
@@ -227,14 +224,22 @@ export class GamesController {
                 }
             }
             if (matrixFromBd) {
-                for (let i = 0; i < matrixFromBd.rounds.length; i++) {
-                    bigGames[gameId].Matrix.addRound(new Round(i + 1, answer.questionCount, 60, GameTypeLogic.Matrix));
+                matrixSettings = new MatrixSettingsDto(matrixFromBd);
+                for (let i = 0; i < matrixSettings.roundCount; i++) {
+                    bigGames[gameId].Matrix.addRound(new Round(i + 1, matrixSettings.questionCount, 20, GameTypeLogic.Matrix));
                 }
 
                 for (const team of bigGame.teams) {
                     bigGames[gameId].Matrix.addTeam(new Team(team.name, team.id));
                 }
             }
+
+            const answer = { // TODO: DTO
+                name: bigGame.name,
+                teams: bigGame.teams.map(value => value.name),
+                chgkSettings: chgkSettings,
+                matrixSettings: matrixSettings
+            };
 
             await getCustomRepository(BigGameRepository).updateByGameIdAndStatus(gameId, GameStatus.STARTED);
             return res.status(200).json(answer);
