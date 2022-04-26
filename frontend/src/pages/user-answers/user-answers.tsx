@@ -82,9 +82,11 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         const indicator = document.querySelector('#indicator') as HTMLSpanElement;
         const activeItem = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
 
-        indicator.style.width = `${activeItem.offsetWidth}px`;
-        indicator.style.left = `${activeItem.offsetLeft}px`;
-        indicator.style.backgroundColor = 'white';
+        if (activeItem) {
+            indicator.style.width = `${activeItem.offsetWidth}px`;
+            indicator.style.left = `${activeItem.offsetLeft}px`;
+            indicator.style.backgroundColor = 'white';
+        }
     };
 
     useEffect(() => {
@@ -98,9 +100,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             }
         });
 
-        if (isBothPartsInGame) {
-            activateIndicator();
-        }
+        activateIndicator();
 
         conn = new WebSocket(getUrlForSocket());
 
