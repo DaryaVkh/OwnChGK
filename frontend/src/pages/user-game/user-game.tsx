@@ -354,7 +354,7 @@ const UserGame: FC<UserGameProps> = props => {
     const getGameName = () => {
         const maxLength = mediaMatch.matches ? 22 : 34;
         if ((gameName as string).length > maxLength) {
-            return (gameName as string).substr(0, maxLength) + '\u2026';
+            return (gameName as string).substring(0, maxLength + 1) + '\u2026';
         } else {
             return gameName;
         }

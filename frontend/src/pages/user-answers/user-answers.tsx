@@ -19,8 +19,10 @@ let ping: any;
 const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
     const [gameName, setGameName] = useState<string>();
-    const [answers, setAnswers] = useState<Answer[]>([]);
+    const [answers, setAnswers] = useState<{ [key: string]: Answer[] }>({matrix: [], chgk: []});
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [gamePart, setGamePart] = useState<string>('matrix');
+    const [isBothPartsInGame, setIsBothPartsInGame] = useState<boolean>(true);
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
     const requester = {
@@ -39,14 +41,15 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     };
 
     const handler = {
-        handleTeamAnswersMessage: (answers: { answer: string; status: number; number: number}[]) => {
-            setAnswers(answers.map((ans: { answer: string; status: number; number: number}) => {
-                return {
-                    answer: ans.answer,
-                    status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
-                    number: ans.number
-                };
-            }));
+        handleTeamAnswersMessage: (answers: { answer: string; status: number; number: number }[]) => {
+            // TODO починить
+            // setAnswers(answers.map((ans: { answer: string; status: number; number: number}) => {
+            //     return {
+            //         answer: ans.answer,
+            //         status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
+            //         number: ans.number
+            //     };
+            // }));
 
             setIsLoading(false);
         }
@@ -55,7 +58,8 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     useEffect(() => {
         const resizeEventHandler = () => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
-        }
+            handleWindowResize();
+        };
 
         window.addEventListener('resize', resizeEventHandler);
 
@@ -63,6 +67,27 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             window.removeEventListener('resize', resizeEventHandler);
         };
     }, []);
+
+    const handleWindowResize = () => {
+        const indicator = document.querySelector('#indicator') as HTMLSpanElement;
+        const el = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
+        if (el) {
+            indicator.style.width = `${el.offsetWidth}px`;
+            indicator.style.left = `${el.offsetLeft}px`;
+            indicator.style.backgroundColor = 'white';
+        }
+    };
+
+    const activateIndicator = () => {
+        const indicator = document.querySelector('#indicator') as HTMLSpanElement;
+        const activeItem = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
+
+        if (activeItem) {
+            indicator.style.width = `${activeItem.offsetWidth}px`;
+            indicator.style.left = `${activeItem.offsetLeft}px`;
+            indicator.style.backgroundColor = 'white';
+        }
+    };
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -74,6 +99,8 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                 });
             }
         });
+
+        activateIndicator();
 
         conn = new WebSocket(getUrlForSocket());
 
@@ -94,23 +121,52 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const getGameName = () => {
         const maxLength = mediaMatch.matches ? 22 : 34;
         if ((gameName as string)?.length > maxLength) {
-            return (gameName as string).substr(0, maxLength) + '\u2026';
+            return (gameName as string).substring(0, maxLength + 1) + '\u2026';
         } else {
             return gameName;
         }
-    }
+    };
+
+    const getTeamName = () => {
+        const teamName = props.userTeam;
+        const maxLength = mediaMatch.matches ? 25 : 55;
+        if ((teamName as string)?.length > maxLength) {
+            return (teamName as string).substring(0, maxLength + 1) + '\u2026';
+        } else {
+            return teamName;
+        }
+    };
 
     const renderAnswers = () => {
-        return answers.sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
+        return answers[gamePart].sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
             .map((answer, index) => {
-            return (
-                <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status} order={answer.number}/>
-            );
+                return (
+                    <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
+                                order={answer.number}/>
+                );
+            });
+    };
+
+    const handleIndicator = (e: React.SyntheticEvent) => {
+        const indicator = document.querySelector('#indicator') as HTMLSpanElement;
+        const items = document.querySelectorAll(`.${classes['nav-item']}`);
+        const el = e.target as HTMLElement;
+
+        items.forEach(function (item) {
+            item.classList.remove(classes['is-active']);
+            item.removeAttribute('style');
         });
+
+        indicator.style.width = `${el.offsetWidth}px`;
+        indicator.style.left = `${el.offsetLeft}px`;
+        indicator.style.backgroundColor = 'white';
+
+        el.classList.add(classes['is-active']);
+        setGamePart((e.target as HTMLElement).id);
     };
 
     if (!gameName || isLoading) {
-        return <Loader />;
+        return <Loader/>;
     }
 
     return (
@@ -120,8 +176,10 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                     !mediaMatch.matches
                         ?
                         <>
-                            <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                            <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В игру</Link>
+                            <Link to={`/rating/${gameId}`}
+                                  className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                            <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В
+                                игру</Link>
                         </>
                         : null
                 }
@@ -139,10 +197,28 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             <div className={classes.contentWrapper}>
                 <div className={classes.teamWrapper}>
                     <div className={classes.team}>Команда</div>
-                    <div className={classes.teamName}>{props.userTeam}</div>
+                    <div className={classes.teamName}>{getTeamName()}</div>
                 </div>
 
                 <div className={classes.answersWrapper}>
+                    {
+                        isBothPartsInGame
+                            ?
+                            <nav className={classes.nav}>
+                                <div id='matrix'
+                                     className={`${classes['nav-item']} ${gamePart === 'matrix' ? classes['is-active'] : ''}`}
+                                     onClick={handleIndicator}>
+                                    Матрица
+                                </div>
+                                <div id='chgk'
+                                     className={`${classes['nav-item']} ${gamePart === 'chgk' ? classes['is-active'] : ''}`}
+                                     onClick={handleIndicator}>
+                                    ЧГК
+                                </div>
+                                <span className={`${classes['nav-indicator']}`} id='indicator'/>
+                            </nav>
+                            : null
+                    }
                     <Scrollbar>
                         {renderAnswers()}
                     </Scrollbar>
