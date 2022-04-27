@@ -42,14 +42,24 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
 
     const handler = {
         handleTeamAnswersMessage: (answers: { answer: string; status: number; number: number }[]) => {
-            // TODO починить
-            // setAnswers(answers.map((ans: { answer: string; status: number; number: number}) => {
-            //     return {
-            //         answer: ans.answer,
-            //         status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
-            //         number: ans.number
-            //     };
-            // }));
+            let dictionary: { [key: string]: Answer[] };
+            dictionary = {};
+            dictionary['matrix'] = answers.map((ans: { answer: string; status: number; number: number;}) => {
+                return {
+                    answer: ans.answer,
+                    status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
+                    number: ans.number
+                };
+            });
+
+            dictionary['chgk'] = answers.map((ans: { answer: string; status: number; number: number;}) => {
+                return {
+                    answer: ans.answer,
+                    status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
+                    number: ans.number
+                };
+            });
+            setAnswers(dictionary);
 
             setIsLoading(false);
         }

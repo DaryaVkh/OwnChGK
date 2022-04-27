@@ -311,16 +311,24 @@ function GetQuestionNumberForUser(gameId, ws) {
 
 function GetTeamAnswers(gameId, teamId, ws) {
     const answers = bigGames[gameId].CurrentGame.teams[teamId].getAnswers();
-    const result = answers.map((ans) => {
+    const chgkAnswers = answers.map((ans) => {
         return {
-            number: (ans.roundNumber - 1) * bigGames[gameId].CurrentGame.rounds[0].questionsCount + ans.questionNumber,
+            number: (ans.roundNumber - 1) * bigGames[gameId].ChGK.rounds[0].questionsCount + ans.questionNumber,
+            answer: ans.text,
+            status: ans.status
+        }
+    })
+    const matrixAnswers = answers.map((ans) => {
+        return {
+            number: (ans.roundNumber - 1) * bigGames[gameId].Matrix.rounds[0].questionsCount + ans.questionNumber,
             answer: ans.text,
             status: ans.status
         }
     })
     ws.send(JSON.stringify({
         'action': 'teamAnswers',
-        'answers': result
+        'chgkAnswers': chgkAnswers,
+        'matrixAnswers': matrixAnswers
     }))
 }
 
