@@ -179,21 +179,21 @@ function AcceptAnswer(gameId: number, gameType: string, roundNumber: number, que
 function AcceptAppeal(gameId: number, gameType: string, roundNumber: number, questionNumber: number, answers: string[]) {
     const game = gameType === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
     for (const answer of answers) {
-        bigGames[gameId].CurrentGame.rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(answer, '');
+        game.rounds[roundNumber - 1].questions[questionNumber - 1].acceptAppeal(answer, '');
     }
 }
 
 function RejectAppeal(gameId: number, gameType: string, roundNumber: number, questionNumber: number, answers: string[]) {
     const game = gameType === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
     for (const answer of answers) {
-        bigGames[gameId].CurrentGame.rounds[roundNumber - 1].questions[questionNumber - 1].rejectAppeal(answer, '');
+        game.rounds[roundNumber - 1].questions[questionNumber - 1].rejectAppeal(answer, '');
     }
 }
 
 function RejectAnswer(gameId: number, gameType: string, roundNumber: number, questionNumber: number, answers: string[], isMatrixType = false) {
     const game = gameType === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
     for (const answer of answers) {
-        bigGames[gameId].CurrentGame.rounds[roundNumber - 1].questions[questionNumber - 1].rejectAnswers(answer, isMatrixType);
+        game.rounds[roundNumber - 1].questions[questionNumber - 1].rejectAnswers(answer, isMatrixType);
     }
 }
 
@@ -310,25 +310,35 @@ function GetQuestionNumberForUser(gameId, ws) {
 }
 
 function GetTeamAnswers(gameId, teamId, ws) {
-    const answers = bigGames[gameId].CurrentGame.teams[teamId].getAnswers();
-    const chgkAnswers = answers.map((ans) => {
-        return {
-            number: (ans.roundNumber - 1) * bigGames[gameId].ChGK.rounds[0].questionsCount + ans.questionNumber,
-            answer: ans.text,
-            status: ans.status
-        }
-    })
-    const matrixAnswers = answers.map((ans) => {
-        return {
-            number: (ans.roundNumber - 1) * bigGames[gameId].Matrix.rounds[0].questionsCount + ans.questionNumber,
-            answer: ans.text,
-            status: ans.status
-        }
-    })
+    let answer: { [key: string]: {number:number, answer:string, status:Status}[] };
+    answer = {};
+    if (bigGames[gameId].ChGK) {
+        const chgk = bigGames[gameId].ChGK.teams[teamId].getAnswers();
+        answer['chgk'] = chgk.map((ans) => {
+            return {
+                number: (ans.roundNumber - 1) * bigGames[gameId].ChGK.rounds[0].questionsCount + ans.questionNumber,
+                answer: ans.text,
+                status: ans.status
+            }
+        });
+    }
+    if (bigGames[gameId].Matrix) {
+        const matrix = bigGames[gameId].Matrix.teams[teamId].getAnswers();
+
+        answer['matrix'] = matrix.map((ans) => {
+            return {
+                number: (ans.roundNumber - 1) * bigGames[gameId].Matrix.rounds[0].questionsCount + ans.questionNumber,
+                answer: ans.text,
+                status: ans.status
+            }
+        });
+
+    }
+
     ws.send(JSON.stringify({
         'action': 'teamAnswers',
-        'chgkAnswers': chgkAnswers,
-        'matrixAnswers': matrixAnswers
+        'chgkAnswers': answer['chgk'],
+        'matrixAnswers': answer['matrix']
     }))
 }
 
