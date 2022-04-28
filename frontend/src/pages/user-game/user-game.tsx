@@ -193,6 +193,7 @@ const UserGame: FC<UserGameProps> = props => {
             setMaxTime(gamePart === 'chgk' ? 70 : 20);
             setQuestionNumber(questionNumber);
             setGamePart(gamePart);
+            setAcceptedAnswer(undefined);
         },
 
         handleCurrentQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', questionNumber: number) => {
