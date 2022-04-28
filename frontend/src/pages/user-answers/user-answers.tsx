@@ -41,24 +41,30 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     };
 
     const handler = {
-        handleTeamAnswersMessage: (answers: { answer: string; status: number; number: number }[]) => {
+        handleTeamAnswersMessage: (chgkAnswers: { answer: string; status: number; number: number }[], matrixAnswers: { answer: string; status: number; number: number }[]) => {
             let dictionary: { [key: string]: Answer[] };
+            console.log(chgkAnswers);
+            console.log(matrixAnswers);
             dictionary = {};
-            dictionary['matrix'] = answers.map((ans: { answer: string; status: number; number: number;}) => {
-                return {
-                    answer: ans.answer,
-                    status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
-                    number: ans.number
-                };
-            });
+            if (matrixAnswers) {
+                dictionary['matrix'] = matrixAnswers.map((ans: { answer: string; status: number; number: number; }) => {
+                    return {
+                        answer: ans.answer,
+                        status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
+                        number: ans.number
+                    };
+                });
+            }
 
-            dictionary['chgk'] = answers.map((ans: { answer: string; status: number; number: number;}) => {
-                return {
-                    answer: ans.answer,
-                    status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
-                    number: ans.number
-                };
-            });
+            if (chgkAnswers) {
+                dictionary['chgk'] = chgkAnswers.map((ans: { answer: string; status: number; number: number; }) => {
+                    return {
+                        answer: ans.answer,
+                        status: ans.status === 0 ? 'success' : (ans.status === 1 ? 'error' : 'opposition'),
+                        number: ans.number
+                    };
+                });
+            }
             setAnswers(dictionary);
 
             setIsLoading(false);
@@ -120,7 +126,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             const jsonMessage = JSON.parse(event.data);
             switch (jsonMessage.action) {
                 case 'teamAnswers':
-                    handler.handleTeamAnswersMessage(jsonMessage.answers);
+                    handler.handleTeamAnswersMessage(jsonMessage.chgkAnswers, jsonMessage.matrixAnswers);
                     break;
             }
         };
