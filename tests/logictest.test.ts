@@ -42,6 +42,7 @@ test('Should_not_set_wrong_answer', () => {
 });
 
 test('Should_get_total_score_when_exist_right_answers', () => {
+    const questionCost = 1;
     const round = new Round(1, 2, 50, 1);
 
     round.questions[0].giveAnswer(team, "rightAnswer");
@@ -50,7 +51,7 @@ test('Should_get_total_score_when_exist_right_answers', () => {
     round.questions[1].giveAnswer(team, "rightAnswer");
     round.questions[1].acceptAnswers("rightAnswer");
 
-    expect(team.getTotalScore()).toBe(round.questionsCount*round.questionCost);
+    expect(team.getTotalScore()).toBe(round.questionsCount * questionCost);
 });
 
 test('Should_get_0_in_total_score_when_no_right_answer', () => {
@@ -93,10 +94,11 @@ test('Should_get_right_score_table_for_one_team_when_one_round', () => {
     round.questions[1].giveAnswer(team, "rightAnswer");
     round.questions[1].acceptAnswers("rightAnswer");
 
-    expect(game.getScoreTableForTeam(1)[team.name]).toStrictEqual([[round.questionCost, round.questionCost]]);
+    expect(game.getScoreTableForTeam(1)[team.name]).toStrictEqual([[1, 1]]);
 });
 
 test('Should_get_right_score_table_for_one_team_when_two_rounds', () => {
+    const questionCost = 1;
     const round1 = game.rounds[0];
     const round2 = new Round(2, 1, 50, 1);
     game.addRound(round2);
@@ -108,7 +110,7 @@ test('Should_get_right_score_table_for_one_team_when_two_rounds', () => {
     round2.questions[0].acceptAnswers("rightAnswer");
 
     expect(game.getScoreTableForTeam(1)[team.name].length).toBe(2);
-    expect(game.getScoreTableForTeam(1)[team.name]).toStrictEqual([[round1.questionCost, 0], [round2.questionCost, 0]]);
+    expect(game.getScoreTableForTeam(1)[team.name]).toStrictEqual([[questionCost, 0], [questionCost, 0]]);
 });
 
 test('Should_get_team_answer_when_it_exist', () => {
@@ -164,7 +166,7 @@ test('Should_not_change_score_when_answer_alredy_accept', () => {
 
     expect(team.getTotalScore()).toBe(1);
     const answer = team.getAnswer(1, 1);
-    expect(answer.score).toBe(round.questionCost);
+    expect(answer.score).toBe(1);
     expect(answer.status).toBe(Status.Right);
     expect(game.getScoreTableForTeam(team.id)).toStrictEqual(scoreTable);
 });
@@ -174,12 +176,12 @@ test('Should_change_score_when_accept_answer_reject', () => {
     question.acceptAnswers("right");
 
     const answer = team.getAnswer(1, 1);
-    answer.reject();
+    answer.reject(0);
 
     expect(team.getTotalScore()).toBe(0);
-    expect(answer.score).toBe(0);
+    expect(Math.abs(answer.score)).toBe(0);
     expect(answer.status).toBe(Status.Wrong);
-    expect(game.getScoreTable()[team.name][0][0]).toBe(0);
+    expect(Math.abs(game.getScoreTable()[team.name][0][0])).toBe(0);
 });
 
 test('Should_not_change_score_when_answer_reject', () => {
@@ -188,12 +190,12 @@ test('Should_not_change_score_when_answer_reject', () => {
     const scoreTable = game.getScoreTable();
 
     const answer = team.getAnswer(1, 1);
-    answer.reject();
+    answer.reject(0);
 
     expect(team.getTotalScore()).toBe(0);
-    expect(answer.score).toBe(0);
+    expect(Math.abs(answer.score)).toBe(0);
     expect(answer.status).toBe(Status.Wrong);
-    expect(game.getScoreTable()).toStrictEqual(scoreTable);
+    expect(Math.abs(game.getScoreTable()[team.name][0][0])).toBe(0);
 });
 
 test('Should_change_score_when_rejected_answer_accept', () => {
@@ -204,9 +206,9 @@ test('Should_change_score_when_rejected_answer_accept', () => {
 
     const answer = team.getAnswer(1, 1);
     expect(team.getTotalScore()).toBe(1);
-    expect(answer.score).toBe(round.questionCost);
+    expect(answer.score).toBe(1);
     expect(answer.status).toBe(Status.Right);
-    expect(game.getScoreTable()[team.name][0][0]).toStrictEqual(round.questionCost);
+    expect(game.getScoreTable()[team.name][0][0]).toStrictEqual(1);
 });
 
 test('Should_accept_appeal_and_change_answer_state_for_one_team', () => {
@@ -266,13 +268,13 @@ test('Should_accept_appeal_for_all_team', () => {
 });
 
 test('Should_get_score_table_for_all_team', () => {
-    const team2 = new Team("good", "2");
-    game.addTeam(team2);
+        const team2 = new Team("good", "2");
+        game.addTeam(team2);
 
-    question.giveAnswer(team, "rightAnswer");
-    question.giveAnswer(team2, "otherAnswer");
-    question.acceptAnswers("rightAnswer");
+        question.giveAnswer(team, "rightAnswer");
+        question.giveAnswer(team2, "otherAnswer");
+        question.acceptAnswers("rightAnswer");
 
-    expect(game.getScoreTable()).toStrictEqual({"cool": [[1, 0]], "good": [[0, 0]]});
-}
+        expect(game.getScoreTable()).toStrictEqual({"cool": [[1, 0]], "good": [[0, 0]]});
+    }
 );
