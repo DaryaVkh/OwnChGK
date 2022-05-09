@@ -12,7 +12,7 @@ beforeEach(() => {
     game = new Game("newGame", GameTypeLogic.ChGK);
     team = new Team("cool", "1");
     game.addTeam(team);
-    game.addRound(new Round(1, 2, 50, 1));
+    game.addRound(new Round(1, 2, 50, GameTypeLogic.ChGK));
     round = game.rounds[0];
     question = round.questions[0];
 });
