@@ -10,7 +10,7 @@ import {createGame, editGame, GamePartSettings, getAll, getGame} from '../../ser
 import {Redirect, useLocation} from 'react-router-dom';
 import NavBar from '../../components/nav-bar/nav-bar';
 import {Team} from '../admin-start-screen/admin-start-screen';
-import {IconButton, InputAdornment, OutlinedInput, Skeleton} from '@mui/material';
+import {IconButton, InputAdornment, OutlinedInput, Skeleton, TextareaAutosize} from '@mui/material';
 import PageBackdrop from '../../components/backdrop/backdrop';
 import Loader from '../../components/loader/loader';
 import SearchIcon from '@mui/icons-material/Search';
@@ -32,13 +32,13 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const [isCancelled, setIsCancelled] = useState<boolean>(false);
     const [page, setPage] = useState<'main' | 'chgk-settings' | 'chgk-questions' | 'matrix-settings' | 'matrix-tours' | 'matrix-questions'>('main');
     const [chgkSettings, setChgkSettings] = useState<GamePartSettings | undefined>();
-    const [tempChgkToursCount, setTempChgkToursCount] = useState<number | undefined>();
+    const [tempChgkRoundCount, setTempChgkRoundCount] = useState<number | undefined>();
     const [tempChgkQuestionsCount, setTempChgkQuestionsCount] = useState<number | undefined>();
-    const [tempChgkQuestions, setTempChgkQuestions] = useState<string[] | undefined>();
-    const [tempMatrixToursCount, setTempMatrixToursCount] = useState<number | undefined>();
+    const [tempChgkQuestions, setTempChgkQuestions] = useState<Record<string, string[]> | undefined>();
+    const [tempMatrixRoundCount, setTempMatrixRoundCount] = useState<number | undefined>();
     const [tempMatrixQuestionsCount, setTempMatrixQuestionsCount] = useState<number | undefined>();
-    const [tempMatrixQuestions, setTempMatrixQuestions] = useState<string[] | undefined>();
-    const [tempMatrixTourNames, setTempMatrixTourNames] = useState<string[] | undefined>();
+    const [tempMatrixQuestions, setTempMatrixQuestions] = useState<Record<string, string[]> | undefined>();
+    const [tempMatrixRoundNames, setTempMatrixRoundNames] = useState<string[] | undefined>();
     const [matrixSettings, setMatrixSettings] = useState<GamePartSettings | undefined>();
     const [isDeleteChgkModalVisible, setIsDeleteChgkModalVisible] = useState<boolean>(false);
     const [isDeleteMatrixModalVisible, setIsDeleteMatrixModalVisible] = useState<boolean>(false);
@@ -113,9 +113,74 @@ const GameCreator: FC<GameCreatorProps> = props => {
             .filter(team => searchQuery.length < 1 || team.name.toLowerCase().includes(searchQuery.toLowerCase()))
             .map((team, index) => {
                 return chosenTeams?.includes(team.name)
-                    ? <CustomCheckbox name={team.name} key={team.id} checked={true} onChange={handleCheckboxChange}/>
-                    : <CustomCheckbox name={team.name} key={team.id} onChange={handleCheckboxChange}/>;
+                    ? <CustomCheckbox name={team.name} key={`${team.id}_${index}_chosen`} checked={true}
+                                      onChange={handleCheckboxChange}/>
+                    : <CustomCheckbox name={team.name} key={`${team.id}_${index}`} onChange={handleCheckboxChange}/>;
             });
+    };
+
+    const handleChgkQuestionChange = (event: React.ChangeEvent<HTMLTextAreaElement>, roundIndex: number, questionIndex: number) => {
+        setTempChgkQuestions(prevState => {
+            const newState = {...prevState};
+            newState[`Round ${roundIndex + 1}`][questionIndex] = event.target.value;
+            return newState;
+        });
+    };
+
+    const handleMatrixQuestionChange = (event: React.ChangeEvent<HTMLTextAreaElement>, roundIndex: number, questionIndex: number) => {
+        setTempMatrixQuestions(prevState => {
+            const newState = {...prevState};
+            newState[`Round ${roundIndex + 1}`][questionIndex] = event.target.value;
+            return newState;
+        });
+    };
+
+    const renderChgkQuestionInputs = () => {
+        return Array.from(Array(tempChgkRoundCount).keys()).map((roundIndex) => {
+            return (
+                <div className={classes.tourQuestionInputsWrapper} key={`chgk_tour_${roundIndex + 1}`}>
+                    <p className={classes.tourName}>{`Тур ${roundIndex + 1}`}</p>
+
+                    {
+                        Array.from(Array(tempChgkQuestionsCount).keys()).map((questionIndex) => (
+                            <div className={classes.questionInputWrapper}
+                                 key={`question_input_wrapper_${questionIndex + 1}`}>
+                                <div className={classes.questionNumber}>{questionIndex + 1}</div>
+
+                                <TextareaAutosize className={classes.questionInput} minRows={1}
+                                                  value={tempChgkQuestions?.[`Round ${roundIndex + 1}`][questionIndex] || chgkSettings?.questions?.[`Round ${roundIndex + 1}`]?.[questionIndex]}
+                                                  onChange={(event) => handleChgkQuestionChange(event, roundIndex, questionIndex)}
+                                />
+                            </div>
+                        ))
+                    }
+                </div>
+            );
+        });
+    };
+
+    const renderMatrixQuestionInputs = () => {
+        return Array.from(Array(tempMatrixRoundCount).keys()).map((roundIndex) => {
+            return (
+                <div className={classes.tourQuestionInputsWrapper} key={`matrix_tour_${roundIndex + 1}`}>
+                    <p className={classes.tourName}>{`Тур ${roundIndex + 1} — ${tempMatrixRoundNames?.[roundIndex]}`}</p>
+
+                    {
+                        Array.from(Array(tempMatrixQuestionsCount).keys()).map((questionIndex) => (
+                            <div className={classes.questionInputWrapper}
+                                 key={`question_input_wrapper_${questionIndex + 1}`}>
+                                <div className={classes.questionNumber}>{questionIndex + 1}</div>
+
+                                <TextareaAutosize className={classes.questionInput} minRows={1}
+                                                  value={tempMatrixQuestions?.[`Round ${roundIndex + 1}`][questionIndex] || matrixSettings?.questions?.[`Round ${roundIndex + 1}`]?.[questionIndex]}
+                                                  onChange={(event) => handleMatrixQuestionChange(event, roundIndex, questionIndex)}
+                                />
+                            </div>
+                        ))
+                    }
+                </div>
+            );
+        });
     };
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
@@ -155,9 +220,9 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const handleToursCountChange = (event: React.ChangeEvent<HTMLInputElement>, mode: 'chgk' | 'matrix') => {
         if (+event.target.value <= 99) {
             if (mode === 'chgk') {
-                setTempChgkToursCount(+event.target.value);
+                setTempChgkRoundCount(+event.target.value);
             } else {
-                setTempMatrixToursCount(+event.target.value);
+                setTempMatrixRoundCount(+event.target.value);
             }
         }
     };
@@ -173,7 +238,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
     };
 
     const setTourName = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-        setTempMatrixTourNames(prevValue => prevValue?.map((tourName, i) => {
+        setTempMatrixRoundNames(prevValue => prevValue?.map((tourName, i) => {
             if (i === index) {
                 return event.target.value;
             } else {
@@ -182,16 +247,15 @@ const GameCreator: FC<GameCreatorProps> = props => {
         }));
     };
 
-    const renderTourNameInputs = () => {
-        return Array.from(Array(tempMatrixToursCount || matrixSettings?.roundCount || 0).keys()).map((index) => {
+    const renderRoundNameInputs = () => {
+        return Array.from(Array(tempMatrixRoundCount || matrixSettings?.roundCount || 0).keys()).map((index) => {
             return (
-                <div className={classes.tourNameWrapper} key={`tourName_${index}`}>
+                <div className={classes.tourNameWrapper} key={`matrixTourName_${index}`}>
                     <div className={classes.tourNumber}>{index + 1}</div>
                     <CustomInput type='text' id='tour-name' name='tour-name' placeholder='Название тура'
-                                 value={tempMatrixTourNames?.[index]}
+                                 value={tempMatrixRoundNames?.[index] || matrixSettings?.roundNames?.[index]}
                                  onChange={(event) => setTourName(event, index)}
-                                 isInvalid={submitted && !tempMatrixTourNames?.[index]}
-                    />
+                                 isInvalid={submitted && !tempMatrixRoundNames?.[index]}/>
                 </div>
             );
         });
@@ -201,7 +265,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
         switch (page) {
             case 'main':
                 return (
-                    <>
+                    <div className={classes.pageWrapper}>
                         {
                             props.mode === 'creation'
                                 ? <p className={classes.pageTitle}>Создание игры</p>
@@ -242,7 +306,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                                                     <IconButton
                                                                         onClick={() => {
                                                                             setTempChgkQuestionsCount(chgkSettings?.questionCount);
-                                                                            setTempChgkToursCount(chgkSettings?.roundCount);
+                                                                            setTempChgkRoundCount(chgkSettings?.roundCount);
                                                                             setTempChgkQuestions(chgkSettings?.questions);
                                                                             setPage('chgk-settings');
                                                                         }}
@@ -274,7 +338,8 @@ const GameCreator: FC<GameCreatorProps> = props => {
 
                                                     <div className={classes.matrixWrapper}>
                                                         <img className={classes.svoyakIcon}
-                                                             src={require('../../images/IconSvoyak.svg').default} alt='logo'/>
+                                                             src={require('../../images/IconSvoyak.svg').default}
+                                                             alt='logo'/>
                                                         <div className={classes.modeName}>Матрица</div>
                                                         {
                                                             !matrixSettings
@@ -287,9 +352,9 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                                                 <div className={classes.iconsWrapper}>
                                                                     <IconButton
                                                                         onClick={() => {
-                                                                            setTempMatrixToursCount(matrixSettings?.roundCount);
+                                                                            setTempMatrixRoundCount(matrixSettings?.roundCount);
                                                                             setTempMatrixQuestionsCount(matrixSettings?.questionCount);
-                                                                            setTempMatrixTourNames(matrixSettings?.roundNames);
+                                                                            setTempMatrixRoundNames(matrixSettings?.roundNames);
                                                                             setTempMatrixQuestions(matrixSettings?.questions);
                                                                             setPage('matrix-settings');
                                                                         }}
@@ -320,7 +385,11 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                                     </div>
                                                     {
                                                         submitted && !matrixSettings && !chgkSettings
-                                                            ? <small style={{color: '#FF0000', fontSize: '1vmax', marginTop: '-1.5vh'}}>Добавьте хотя бы один режим в игру</small>
+                                                            ? <small style={{
+                                                                color: '#FF0000',
+                                                                fontSize: '1vmax',
+                                                                marginTop: '-1.5vh'
+                                                            }}>Добавьте хотя бы один режим в игру</small>
                                                             : null
                                                     }
                                                 </>
@@ -382,16 +451,17 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                     {props.mode === 'edit' ? 'Сохранить' : 'Создать'}
                                 </button>
 
-                                <button type='button' className={classes.undoButton} onClick={() => setIsCancelled(true)}>
+                                <button type='button' className={classes.undoButton}
+                                        onClick={() => setIsCancelled(true)}>
                                     Отменить
                                 </button>
                             </div>
                         </form>
-                    </>
+                    </div>
                 );
             case 'chgk-settings':
                 return (
-                    <>
+                    <div className={classes.pageWrapper}>
                         <p className={classes.gameSettingsPageTitle}>ЧГК</p>
 
                         <div className={classes.gameParamsWrapper}>
@@ -402,7 +472,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                        type="text"
                                        id="toursCount"
                                        name="toursCount"
-                                       value={tempChgkToursCount || ''}
+                                       value={tempChgkRoundCount || ''}
                                        placeholder='99'
                                        required={true}
                                        onChange={(event) => handleToursCountChange(event, 'chgk')}/>
@@ -421,68 +491,82 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                        onChange={(event) => handleQuestionsCountChange(event, 'chgk')}/>
                             </div>
                         </div>
-                        {/*// TODO: добавление вопросов*/}
-                        {/*<div className={classes.addButtonWrapper}>*/}
-                        {/*    <button className={classes.addQuestionsButton} disabled={!chgkSettings?.questionsCount || !chgkSettings?.toursCount}*/}
-                        {/*            onClick={() => setPage('chgk-questions')}>*/}
-                        {/*        Добавить вопросы в игру*/}
-                        {/*    </button>*/}
-                        {/*</div>*/}
+                        <div className={classes.addButtonWrapper}>
+                            <button className={classes.addQuestionsButton}
+                                    disabled={!tempChgkQuestionsCount || !tempChgkRoundCount}
+                                    onClick={() => {
+                                        if (!tempChgkQuestions || !Object.values(tempChgkQuestions).length) {
+                                            const questions: Record<string, string[]> = {};
+                                            for (let i = 0; i < (tempChgkRoundCount || 0); i++) {
+                                                questions[`Round ${i + 1}`] = new Array(tempChgkQuestionsCount).fill('');
+                                            }
+                                            setTempChgkQuestions(questions);
+                                        }
+                                        setPage('chgk-questions');
+                                    }}>
+                                Добавить вопросы в игру
+                            </button>
+                        </div>
 
                         <div className={classes.gameParamsButtonsWrapper}>
                             <button type='submit' className={classes.createButton}
-                                    disabled={(!tempChgkQuestionsCount || !tempChgkToursCount)}
+                                    disabled={(!tempChgkQuestionsCount || !tempChgkRoundCount)}
                                     onClick={() => {
-                                setChgkSettings(prevValue => {
-                                    return {
-                                        questionCount: tempChgkQuestionsCount || prevValue?.questionCount || 0,
-                                        roundCount: tempChgkToursCount || prevValue?.roundCount || 0,
-                                        questions: tempChgkQuestions || prevValue?.questions || []
-                                    };
-                                });
-                                setTempChgkQuestionsCount(undefined);
-                                setTempChgkToursCount(undefined);
-                                setTempChgkQuestions(undefined);
-                                setPage('main');
-                            }}>
+                                        setChgkSettings(prevValue => {
+                                            return {
+                                                questionCount: tempChgkQuestionsCount || prevValue?.questionCount || 0,
+                                                roundCount: tempChgkRoundCount || prevValue?.roundCount || 0,
+                                                questions: tempChgkQuestions || prevValue?.questions || {}
+                                            };
+                                        });
+                                        setTempChgkQuestionsCount(undefined);
+                                        setTempChgkRoundCount(undefined);
+                                        setTempChgkQuestions(undefined);
+                                        setPage('main');
+                                    }}>
                                 {props.mode === 'edit' ? 'Сохранить' : 'Создать'}
                             </button>
 
                             <button type='button' className={classes.undoButton} onClick={() => {
-                                setTempChgkToursCount(undefined);
+                                setTempChgkRoundCount(undefined);
                                 setTempChgkQuestionsCount(undefined);
-                                // setChgkSettings(undefined);
                                 setPage('main');
                             }}>
                                 Отменить
                             </button>
                         </div>
-                    </>
+                    </div>
                 );
             case 'chgk-questions':
                 return (
-                    <>
+                    <div className={classes.questionsWrapper}>
                         <p className={classes.gameSettingsPageTitle}>ЧГК</p>
 
-                        <div className={classes.gameParamsButtonsWrapper}>
-                            <button type='submit' className={classes.createButton} onClick={() => setPage('main')}>
+                        <div className={classes.questionInputsWrapper}>
+                            <Scrollbar>
+                                {renderChgkQuestionInputs()}
+                            </Scrollbar>
+                        </div>
+
+                        <div className={classes.buttonsWrapper}>
+                            <button type='submit' className={classes.createButton} onClick={() => {
+                                setPage('chgk-settings');
+                            }}>
                                 Сохранить
                             </button>
 
                             <button type='button' className={classes.undoButton} onClick={() => {
-                                setTempChgkToursCount(undefined);
-                                setTempChgkQuestionsCount(undefined);
                                 setTempChgkQuestions(undefined);
-                                setPage('main');
+                                setPage('chgk-settings');
                             }}>
                                 Отменить
                             </button>
                         </div>
-                    </>
+                    </div>
                 );
             case 'matrix-settings':
                 return (
-                    <>
+                    <div className={classes.pageWrapper}>
                         <p className={classes.gameSettingsPageTitle}>Матрица</p>
 
                         <div className={classes.gameParamsWrapper}>
@@ -493,7 +577,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                        type="text"
                                        id="toursCount"
                                        name="toursCount"
-                                       value={tempMatrixToursCount || ''}
+                                       value={tempMatrixRoundCount || ''}
                                        placeholder='99'
                                        required={true}
                                        onChange={(event) => handleToursCountChange(event, 'matrix')}/>
@@ -514,10 +598,11 @@ const GameCreator: FC<GameCreatorProps> = props => {
                         </div>
 
                         <div className={classes.gameParamsButtonsWrapper}>
-                            <button className={classes.createButton} disabled={!tempMatrixQuestionsCount || !tempMatrixToursCount}
+                            <button className={classes.createButton}
+                                    disabled={!tempMatrixQuestionsCount || !tempMatrixRoundCount}
                                     onClick={() => {
-                                        setTempMatrixTourNames(prevValue => {
-                                            return Array.from(Array(tempMatrixToursCount).keys()).map((i) => prevValue?.[i] || '')
+                                        setTempMatrixRoundNames(prevValue => {
+                                            return Array.from(Array(tempMatrixRoundCount).keys()).map((i) => prevValue?.[i] || '')
                                         });
                                         setPage('matrix-tours');
                                     }}>
@@ -526,52 +611,69 @@ const GameCreator: FC<GameCreatorProps> = props => {
 
                             <button type='button' className={classes.undoButton} onClick={() => {
                                 setTempMatrixQuestionsCount(undefined);
-                                setTempMatrixToursCount(undefined);
+                                setTempMatrixRoundCount(undefined);
+                                setTempMatrixRoundNames(undefined);
                                 setPage('main');
                             }}>
                                 Отменить
                             </button>
                         </div>
-                    </>
+                    </div>
                 );
             case 'matrix-tours':
                 return (
-                    <>
+                    <div className={classes.pageWrapper}>
                         <p className={classes.gameSettingsPageTitle}>Матрица</p>
 
                         <div className={classes.tourNamesWrapper}>
                             <Scrollbar>
-                                {renderTourNameInputs()}
+                                {renderRoundNameInputs()}
                             </Scrollbar>
 
                             {
-                                submitted && tempMatrixTourNames?.filter(n => n === '').length
-                                    ? <small style={{position: 'absolute', color: '#FF0000', bottom: '-7%', left: 0, fontSize: '1vmax'}}>Введите названия для всех туров</small>
+                                submitted && tempMatrixRoundNames?.filter(n => n === '').length
+                                    ? <small style={{
+                                        position: 'absolute',
+                                        color: '#FF0000',
+                                        bottom: '-7%',
+                                        left: 0,
+                                        fontSize: '1vmax'
+                                    }}>Введите названия для всех туров</small>
                                     : null
                             }
                         </div>
-                        {/*// TODO: добавление вопросов*/}
-                        {/*<div className={classes.matrixQuestionsWrapper}>*/}
-                        {/*    <button className={classes.addQuestionsButton} onClick={() => setPage('matrix-questions')}>*/}
-                        {/*        Добавить вопросы в игру*/}
-                        {/*    </button>*/}
-                        {/*</div>*/}
+                        <div className={classes.matrixQuestionsWrapper}>
+                            <button className={classes.addQuestionsButton}
+                                    disabled={!!(tempMatrixRoundNames?.filter(n => n === '').length)}
+                                    onClick={() => {
+                                        if (!tempMatrixQuestions || !Object.values(tempMatrixQuestions).length) {
+                                            const questions: Record<string, string[]> = {};
+                                            for (let i = 0; i < (tempMatrixRoundCount || 0); i++) {
+                                                questions[`Round ${i + 1}`] = new Array(tempMatrixQuestionsCount).fill('');
+                                            }
+                                            setTempMatrixQuestions(questions);
+                                        }
+                                        setPage('matrix-questions');
+                                    }}>
+                                Добавить вопросы в игру
+                            </button>
+                        </div>
 
                         <div className={classes.gameParamsButtonsWrapper}>
                             <button className={classes.createButton} onClick={() => {
-                                if (!tempMatrixTourNames?.filter(n => n === '').length) {
+                                if (!tempMatrixRoundNames?.filter(n => n === '').length) {
                                     setMatrixSettings(prevValue => {
                                         return {
                                             questionCount: tempMatrixQuestionsCount || 0,
-                                            roundCount: tempMatrixToursCount || 0,
-                                            roundNames: tempMatrixTourNames || prevValue?.roundNames || [],
-                                            questions: tempMatrixQuestions || prevValue?.questions || []
+                                            roundCount: tempMatrixRoundCount || 0,
+                                            roundNames: tempMatrixRoundNames || prevValue?.roundNames || [],
+                                            questions: tempMatrixQuestions || prevValue?.questions || {}
                                         };
                                     });
-                                    setTempMatrixToursCount(undefined);
+                                    setTempMatrixRoundCount(undefined);
                                     setTempMatrixQuestionsCount(undefined);
                                     setTempMatrixQuestions(undefined);
-                                    setTempMatrixTourNames(undefined);
+                                    setTempMatrixRoundNames(undefined);
                                     setPage('main');
                                     setSubmitted(false);
                                 } else {
@@ -582,28 +684,50 @@ const GameCreator: FC<GameCreatorProps> = props => {
                             </button>
 
                             <button type='button' className={classes.undoButton} onClick={() => {
-                                setTempMatrixTourNames(undefined);
+                                setTempMatrixRoundNames(undefined);
                                 setPage('matrix-settings');
                             }}>
                                 Назад
                             </button>
                         </div>
-                    </>
+                    </div>
                 );
             case 'matrix-questions':
                 return (
-                    <>
-                    </>
+                    <div className={classes.questionsWrapper}>
+                        <p className={classes.gameSettingsPageTitle}>Матрица</p>
+
+                        <div className={classes.questionInputsWrapper}>
+                            <Scrollbar>
+                                {renderMatrixQuestionInputs()}
+                            </Scrollbar>
+                        </div>
+
+                        <div className={classes.buttonsWrapper}>
+                            <button type='submit' className={classes.createButton} onClick={() => {
+                                setPage('matrix-tours');
+                            }}>
+                                Сохранить
+                            </button>
+
+                            <button type='button' className={classes.undoButton} onClick={() => {
+                                setTempMatrixQuestions(undefined);
+                                setPage('matrix-tours');
+                            }}>
+                                Отменить
+                            </button>
+                        </div>
+                    </div>
                 );
         }
     }
 
     if (isPageLoading) {
-        return <Loader />;
+        return <Loader/>;
     }
 
     if (isCancelled) {
-        return <Redirect to={{pathname: '/admin/start-screen', state: {page: 'games'}}} />
+        return <Redirect to={{pathname: '/admin/start-screen', state: {page: 'games'}}}/>
     }
 
     return isCreatedSuccessfully
@@ -615,9 +739,8 @@ const GameCreator: FC<GameCreatorProps> = props => {
                     <NavBar isAdmin={props.isAdmin} page=''/>
                 </Header>
 
-                <div className={classes.pageWrapper}>
-                    {renderPage()}
-                </div>
+                {renderPage()}
+
                 <PageBackdrop isOpen={isLoading}/>
                 {
                     isDeleteChgkModalVisible
