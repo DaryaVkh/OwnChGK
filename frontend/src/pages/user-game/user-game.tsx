@@ -42,8 +42,8 @@ const UserGame: FC<UserGameProps> = props => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [gamePart, setGamePart] = useState<'matrix' | 'chgk'>(); // активная часть игры
     const [matrixSettings, setMatrixSettings] = useState<GamePartSettings>();
-    const [matrixAnswers, setMatrixAnswers] = useState<{[key: string]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
-    const [acceptedMatrixAnswers, setAcceptedMatrixAnswers] = useState<{[key: string]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
+    const [matrixAnswers, setMatrixAnswers] = useState<{[key: number]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
+    const [acceptedMatrixAnswers, setAcceptedMatrixAnswers] = useState<{[key: number]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
     const [acceptedAnswer, setAcceptedAnswer] = useState<string>();
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
@@ -112,6 +112,13 @@ const UserGame: FC<UserGameProps> = props => {
                 'questionNumber': questionNumber,
                 'roundName': roundName,
             }));
+        },
+
+        getTeamAnswers: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'getTeamAnswers'
+            }));
         }
     }
 
@@ -121,14 +128,43 @@ const UserGame: FC<UserGameProps> = props => {
             setIsLoading(false);
         },
 
-        handleGameStatusMessage: (isStarted: boolean, gamePart: 'chgk' | 'matrix') => {
+        handleGameStatusMessage: (isStarted: boolean, gamePart: 'chgk' | 'matrix', isOnBreak: boolean,
+                                  breakTime: number, questionNumber: number, maxTime: number, time: number) => {
             if (isStarted) {
                 setGamePart(gamePart);
                 setIsGameStarted(true);
                 clearInterval(checkStart);
+                clearInterval(interval);
+                setQuestionNumber(questionNumber);
+                setTimeForAnswer(time / 1000);
+                setMaxTime(maxTime / 1000);
+                if (isOnBreak) {
+                    setIsBreak(true);
+                    setBreakTime(breakTime);
+                    interval = setInterval(() => setBreakTime((time) => {
+                        if (time - 1 <= 0) {
+                            clearInterval(interval);
+                            setIsBreak(false);
+                        }
+                        return time - 1 > 0 ? time - 1 : 0;
+                    }), 1000);
+                }
 
-                requester.checkBreak();
+                requester.getTeamAnswers();
             }
+        },
+
+        handleGetTeamAnswers: (matrixAnswers: {roundNumber: number, questionNumber: number, answer: string}[]) => {
+            setAcceptedMatrixAnswers((prevValue) => {
+                const copy = {...prevValue};
+                for (const answer of matrixAnswers) {
+                    copy[answer.roundNumber][answer.questionNumber - 1] = answer.answer;
+                }
+                return copy;
+            });
+
+            setIsLoading(false);
+            requester.getQuestionTime();
         },
 
         handleTimeMessage: (time: number, maxTime: number, isStarted: boolean) => {
@@ -181,19 +217,25 @@ const UserGame: FC<UserGameProps> = props => {
             }
         },
 
-        handleChangeQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', questionNumber: number) => {
+        handleChangeQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', number: number) => {
             clearInterval(progressBar);
             setAnswer('');
             let progress = document.querySelector('#progress-bar') as HTMLDivElement;
-            progress.style.width = '100%';
+            if (progress) {
+                progress.style.width = '100%';
+            }
             let answerInput = document.querySelector('#answer') as HTMLInputElement;
-            answerInput.focus();
+            if (answerInput) {
+                answerInput.focus();
+            }
             changeColor(progress);
             setTimeForAnswer(gamePart === 'chgk' ? 70 : 20);
             setMaxTime(gamePart === 'chgk' ? 70 : 20);
-            setQuestionNumber(questionNumber);
+            if (number != questionNumber) {
+                setAcceptedAnswer(undefined);
+            }
+            setQuestionNumber(number);
             setGamePart(gamePart);
-            setAcceptedAnswer(undefined);
         },
 
         handleCurrentQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', questionNumber: number) => {
@@ -201,13 +243,13 @@ const UserGame: FC<UserGameProps> = props => {
             setGamePart(gamePart);
         },
 
-        handleStatusAnswerMessage: (gamePart: 'chgk' | 'matrix', newAnswer: string, roundName: string, questionNumber: number, isAccepted: boolean) => {
+        handleStatusAnswerMessage: (gamePart: 'chgk' | 'matrix', newAnswer: string, roundNumber: number, questionNumber: number, isAccepted: boolean) => {
             if (gamePart === "chgk") {
                 setAcceptedAnswer(newAnswer);
             } else {
                 setAcceptedMatrixAnswers((prevValue) => {
                     const copy = {...prevValue};
-                    copy[roundName] = copy[roundName].map((answer, i) => i === questionNumber - 1 ? newAnswer : answer);
+                    copy[roundNumber] = copy[roundNumber].map((answer, i) => i === questionNumber - 1 ? newAnswer : answer);
                     return copy;
                 });
             }
@@ -268,6 +310,60 @@ const UserGame: FC<UserGameProps> = props => {
     }, []);
 
     useEffect(() => {
+        const openWs = () => {
+            conn = new WebSocket(getUrlForSocket());
+
+            conn.onopen = () => requester.startRequests();
+            conn.onclose = () => setIsConnectionError(true);
+            conn.onerror = () => setIsConnectionError(true);
+
+            conn.onmessage = function (event) {
+                const jsonMessage = JSON.parse(event.data);
+
+                switch (jsonMessage.action) {
+                    case 'gameNotStarted':
+                        handler.handleGameNotStartedMessage();
+                        break;
+                    case 'gameStatus':
+                        handler.handleGameStatusMessage(jsonMessage.isStarted, jsonMessage.activeGamePart,
+                            jsonMessage.isOnBreak, jsonMessage.breakTime, jsonMessage.currentQuestionNumber,
+                            jsonMessage.maxTime, jsonMessage.time);
+                        break;
+                    case 'time':
+                        handler.handleTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
+                        break;
+                    case 'start':
+                        handler.handleStartMessage(jsonMessage.time, jsonMessage.maxTime);
+                        break;
+                    case 'addTime':
+                        handler.handleAddTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
+                        break;
+                    case 'pause':
+                        handler.handlePauseMessage();
+                        break;
+                    case 'stop':
+                        handler.handleStopMessage(jsonMessage.activeGamePart);
+                        break;
+                    case 'changeQuestionNumber':
+                        handler.handleChangeQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number);
+                        break;
+                    case 'currentQuestionNumber':
+                        handler.handleCurrentQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number);
+                        break;
+                    case 'statusAnswer':
+                        handler.handleStatusAnswerMessage(jsonMessage.activeGamePart, jsonMessage.answer,
+                            jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.isAccepted);
+                        break;
+                    case 'isOnBreak':
+                        handler.handleIsOnBreakMessage(jsonMessage.status, jsonMessage.time);
+                        break;
+                    case 'teamAnswers':
+                        handler.handleGetTeamAnswers(jsonMessage.matrixAnswers);
+                        break;
+                }
+            }
+        };
+
         getGame(gameId).then((res) => {
             if (res.status === 200) {
                 res.json().then(({
@@ -277,77 +373,22 @@ const UserGame: FC<UserGameProps> = props => {
                     setGameName(name);
                     if (matrixSettings) {
                         setMatrixSettings(matrixSettings);
-                        fillMatrixAnswers(matrixSettings.roundNames, matrixSettings.questionCount);
+                        fillMatrixAnswers(matrixSettings.roundCount, matrixSettings.questionCount);
                     }
+
+                    openWs();
                 });
             }
         });
 
-        conn = new WebSocket(getUrlForSocket());
-
-        conn.onopen = () => requester.startRequests();
-        conn.onclose = () => setIsConnectionError(true);
-        conn.onerror = () => setIsConnectionError(true);
-
-        conn.onmessage = function (event) {
-            const jsonMessage = JSON.parse(event.data);
-
-            switch (jsonMessage.action) {
-                case 'gameNotStarted':
-                    handler.handleGameNotStartedMessage();
-                    break;
-                case 'gameStatus':
-                    handler.handleGameStatusMessage(jsonMessage.isStarted, jsonMessage.activeGamePart);
-                    break;
-                case 'time':
-                    handler.handleTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
-                    break;
-                case 'start':
-                    handler.handleStartMessage(jsonMessage.time, jsonMessage.maxTime);
-                    break;
-                case 'addTime':
-                    handler.handleAddTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
-                    break;
-                case 'pause':
-                    handler.handlePauseMessage();
-                    break;
-                case 'stop':
-                    handler.handleStopMessage(jsonMessage.activeGamePart);
-                    break;
-                case 'changeQuestionNumber':
-                    handler.handleChangeQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number);
-                    break;
-                case 'currentQuestionNumber':
-                    handler.handleCurrentQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number);
-                    break;
-                case 'statusAnswer':
-                    handler.handleStatusAnswerMessage(jsonMessage.activeGamePart, jsonMessage.answer,
-                        jsonMessage.roundName, jsonMessage.questionNumber, jsonMessage.isAccepted);
-                    break;
-                case 'isOnBreak':
-                    handler.handleIsOnBreakMessage(jsonMessage.status, jsonMessage.time);
-                    break;
-            }
-        };
-
         return () => clearInterval(ping);
     }, []);
 
-    useEffect(() => {
-        if (!isLoading && isGameStarted) {
-            requester.getQuestionNumber();
-
-            if (!isBreak) {
-                requester.getQuestionTime();
-            }
+    const fillMatrixAnswers = (roundsCount: number, questionsCount: number) => {
+        const answers: {[key: number]: string[]} = {};
+        for (let i = 1; i <= roundsCount; i++) {
+            answers[i] = Array(questionsCount).fill('');
         }
-    }, [isLoading, isBreak, isGameStarted]);
-
-    const fillMatrixAnswers = (roundNames: string[], questionsCount: number) => {
-        const answers: {[key: string]: string[]} = {};
-        roundNames.map((name) => {
-            answers[name] = Array(questionsCount).fill('');
-        });
         setMatrixAnswers(answers);
         setAcceptedMatrixAnswers(answers);
     };
@@ -387,6 +428,10 @@ const UserGame: FC<UserGameProps> = props => {
     };
 
     const changeColor = (progressBar: HTMLDivElement) => {
+        if (!progressBar) {
+            return;
+        }
+
         if (progressBar.style.width) {
             let width = +(progressBar.style.width).slice(0, -1);
             progressBar.style.backgroundColor = chooseColor(width);
@@ -473,16 +518,16 @@ const UserGame: FC<UserGameProps> = props => {
         }, 1000);
     };
 
-    const handleMatrixAnswer = (event: ChangeEvent<HTMLInputElement>, index: number, tourName: string) => {
+    const handleMatrixAnswer = (event: ChangeEvent<HTMLInputElement>, index: number, roundNumber: number) => {
         setMatrixAnswers((prevValue) => {
             const copy = {...prevValue};
-            copy[tourName] = copy[tourName].map((answer, i) => i === index ? event.target.value : answer);
+            copy[roundNumber] = copy[roundNumber].map((answer, i) => i === index ? event.target.value : answer);
             return copy;
         });
     };
 
     const handleSendMatrixAnswer = (questionNumber: number, roundName: string, roundNumber: number) => {
-        requester.giveAnswerToMatrix(matrixAnswers?.[roundName][questionNumber - 1] as string, roundNumber, questionNumber, roundName);
+        requester.giveAnswerToMatrix(matrixAnswers?.[roundNumber][questionNumber - 1] as string, roundNumber, questionNumber, roundName);
 
         setTimeout(() => {
             setFlags(flags => {
@@ -521,15 +566,15 @@ const UserGame: FC<UserGameProps> = props => {
                                     <div className={classes.answerInputWrapper}>
                                         <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
                                                      style={{width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
-                                                         height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={matrixAnswers?.[tourName][j]} onChange={(event) => handleMatrixAnswer(event, j, tourName)}/>
+                                                         height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={matrixAnswers?.[i + 1][j]} onChange={(event) => handleMatrixAnswer(event, j, i + 1)}/>
                                         <button className={classes.sendAnswerButton} onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}>Отправить
                                         </button>
 
                                         {
-                                            acceptedMatrixAnswers?.[tourName][j]
+                                            acceptedMatrixAnswers?.[i + 1][j]
                                                 ?
                                                 <small className={classes.accepted}>{'Принятый ответ: '}
-                                                    <span className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[tourName][j]}</span>
+                                                    <span className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[i + 1][j]}</span>
                                                 </small>
                                                 : null
                                         }

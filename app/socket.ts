@@ -317,6 +317,8 @@ function GetTeamAnswers(gameId, teamId, ws) {
         answer['chgk'] = chgk.map((ans) => {
             return {
                 number: (ans.roundNumber - 1) * bigGames[gameId].ChGK.rounds[0].questionsCount + ans.questionNumber,
+                roundNumber: ans.roundNumber,
+                questionNumber: ans.questionNumber,
                 answer: ans.text,
                 status: ans.status
             }
@@ -328,6 +330,8 @@ function GetTeamAnswers(gameId, teamId, ws) {
         answer['matrix'] = matrix.map((ans) => {
             return {
                 number: (ans.roundNumber - 1) * bigGames[gameId].Matrix.rounds[0].questionsCount + ans.questionNumber,
+                roundNumber: ans.roundNumber,
+                questionNumber: ans.questionNumber,
                 answer: ans.text,
                 status: ans.status
             }
@@ -431,30 +435,27 @@ function UsersAction(gameId, ws, jsonMessage, gameType, teamId) {
     }
 }
 
-function GetTime(gameId, ws) {
+function GetPreliminaryTime(gameId) {
     if (bigGames[gameId].CurrentGame.timer) {
         const pastDelay = Math.floor(process.uptime() * 1000 - bigGames[gameId].CurrentGame.timer._idleStart);
         const initialDelay = bigGames[gameId].CurrentGame.timer._idleTimeout;
-        let result: number;
         if (bigGames[gameId].CurrentGame.isTimerStart) {
-            result = initialDelay - pastDelay;
+            return initialDelay - pastDelay;
         } else {
-            result = bigGames[gameId].CurrentGame.leftTime;
+            return bigGames[gameId].CurrentGame.leftTime;
         }
-        ws.send(JSON.stringify({
-            'action': 'time',
-            'isStarted': bigGames[gameId].CurrentGame.isTimerStart,
-            'maxTime': bigGames[gameId].CurrentGame.maxTime,
-            'time': result
-        }));
-    } else {
-        ws.send(JSON.stringify({
-            'action': 'time',
-            'isStarted': bigGames[gameId].CurrentGame.isTimerStart,
-            'maxTime': bigGames[gameId].CurrentGame.maxTime,
-            'time': bigGames[gameId].CurrentGame.leftTime
-        }));
     }
+
+    return bigGames[gameId].CurrentGame.leftTime;
+}
+
+function GetTime(gameId, ws) {
+    ws.send(JSON.stringify({
+        'action': 'time',
+        'isStarted': bigGames[gameId].CurrentGame.isTimerStart,
+        'maxTime': bigGames[gameId].CurrentGame.maxTime,
+        'time': GetPreliminaryTime(gameId)
+    }));
 }
 
 function IsOnBreak(gameId, ws) {
@@ -465,12 +466,20 @@ function IsOnBreak(gameId, ws) {
     }))
 }
 
-function CheckStart(gameId, ws) {
-    if (bigGames[gameId].CurrentGame) {
+function getGameStatus(gameId, ws) {
+    const currentGame = bigGames[gameId]?.CurrentGame
+
+    if (currentGame) {
+        const currentQuestionNumber = currentGame.rounds[0].questionsCount * (currentGame.currentQuestion[0] - 1) + currentGame.currentQuestion[1];
         ws.send(JSON.stringify({
             'action': 'gameStatus',
             'isStarted': !!bigGames[gameId],
-            'activeGamePart': bigGames[gameId].CurrentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
+            'activeGamePart': currentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
+            'isOnBreak': bigGames[gameId].status === GameStatus.IsOnBreak,
+            'breakTime': bigGames[gameId].breakTime,
+            'currentQuestionNumber': currentQuestionNumber,
+            'maxTime': currentGame.maxTime,
+            'time': GetPreliminaryTime(gameId),
         }));
     }
 }
@@ -513,7 +522,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 IsOnBreak(gameId, ws);
                 break;
             case 'checkStart':
-                CheckStart(gameId, ws);
+                getGameStatus(gameId, ws);
                 break;
         }
 
