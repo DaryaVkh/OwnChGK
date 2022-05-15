@@ -12,6 +12,7 @@ export interface ChgkSettings {
     questionCount: number,
     questionCost: number,
     questionTime: number,
+    questions: Record<string, string[]>
 }
 
 
@@ -58,7 +59,9 @@ export class BigGameRepository extends Repository<BigGame> {
                     chgkSettings?.questionCount ?? 0,
                     chgk,
                     chgkSettings?.questionTime ?? 60,
-                    chgkSettings?.questionCost ?? 1
+                    chgkSettings?.questionCost ?? 1,
+                    null,
+                    chgkSettings?.questions ?? null
                 )
             }
 
@@ -72,7 +75,8 @@ export class BigGameRepository extends Repository<BigGame> {
                     matrix,
                     matrixSettings?.questionTime ?? 20,
                     matrixSettings?.questionCost ?? 10,
-                    matrixSettings?.roundNames ?? null
+                    matrixSettings?.roundNames ?? null,
+                    matrixSettings?.questions ?? null
                 )
             }
 
@@ -110,7 +114,9 @@ export class BigGameRepository extends Repository<BigGame> {
                     chgkSettings?.questionCount ?? 0,
                     game,
                     chgkSettings?.questionTime ?? 60,
-                    chgkSettings?.questionCost ?? 1
+                    chgkSettings?.questionCost ?? 1,
+                    null,
+                    chgkSettings?.questions ?? null
                 )
             }
 
@@ -124,7 +130,8 @@ export class BigGameRepository extends Repository<BigGame> {
                     game,
                     matrixSettings?.questionTime ?? 20,
                     matrixSettings?.questionCost ?? 10,
-                    matrixSettings?.roundNames ?? null
+                    matrixSettings?.roundNames ?? null,
+                    matrixSettings?.questions ?? null
                 )
             }
 
