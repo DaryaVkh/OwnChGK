@@ -122,7 +122,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const handleChgkQuestionChange = (event: React.ChangeEvent<HTMLTextAreaElement>, roundIndex: number, questionIndex: number) => {
         setTempChgkQuestions(prevState => {
             const newState = {...prevState};
-            newState[`Round ${roundIndex + 1}`][questionIndex] = event.target.value;
+            newState[roundIndex + 1][questionIndex] = event.target.value;
             return newState;
         });
     };
@@ -130,7 +130,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const handleMatrixQuestionChange = (event: React.ChangeEvent<HTMLTextAreaElement>, roundIndex: number, questionIndex: number) => {
         setTempMatrixQuestions(prevState => {
             const newState = {...prevState};
-            newState[`Round ${roundIndex + 1}`][questionIndex] = event.target.value;
+            newState[roundIndex + 1][questionIndex] = event.target.value;
             return newState;
         });
     };
@@ -148,7 +148,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                 <div className={classes.questionNumber}>{questionIndex + 1}</div>
 
                                 <TextareaAutosize className={classes.questionInput} minRows={1}
-                                                  value={tempChgkQuestions?.[`Round ${roundIndex + 1}`][questionIndex] || chgkSettings?.questions?.[`Round ${roundIndex + 1}`]?.[questionIndex]}
+                                                  value={tempChgkQuestions?.[roundIndex + 1][questionIndex] || chgkSettings?.questions?.[roundIndex + 1]?.[questionIndex]}
                                                   onChange={(event) => handleChgkQuestionChange(event, roundIndex, questionIndex)}
                                 />
                             </div>
@@ -172,7 +172,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                 <div className={classes.questionNumber}>{questionIndex + 1}</div>
 
                                 <TextareaAutosize className={classes.questionInput} minRows={1}
-                                                  value={tempMatrixQuestions?.[`Round ${roundIndex + 1}`][questionIndex] || matrixSettings?.questions?.[`Round ${roundIndex + 1}`]?.[questionIndex]}
+                                                  value={tempMatrixQuestions?.[roundIndex + 1][questionIndex] || matrixSettings?.questions?.[roundIndex + 1]?.[questionIndex]}
                                                   onChange={(event) => handleMatrixQuestionChange(event, roundIndex, questionIndex)}
                                 />
                             </div>
@@ -498,7 +498,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                         if (!tempChgkQuestions || !Object.values(tempChgkQuestions).length) {
                                             const questions: Record<string, string[]> = {};
                                             for (let i = 0; i < (tempChgkRoundCount || 0); i++) {
-                                                questions[`Round ${i + 1}`] = new Array(tempChgkQuestionsCount).fill('');
+                                                questions[i + 1] = new Array(tempChgkQuestionsCount).fill('');
                                             }
                                             setTempChgkQuestions(questions);
                                         }
@@ -649,7 +649,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                         if (!tempMatrixQuestions || !Object.values(tempMatrixQuestions).length) {
                                             const questions: Record<string, string[]> = {};
                                             for (let i = 0; i < (tempMatrixRoundCount || 0); i++) {
-                                                questions[`Round ${i + 1}`] = new Array(tempMatrixQuestionsCount).fill('');
+                                                questions[i + 1] = new Array(tempMatrixQuestionsCount).fill('');
                                             }
                                             setTempMatrixQuestions(questions);
                                         }

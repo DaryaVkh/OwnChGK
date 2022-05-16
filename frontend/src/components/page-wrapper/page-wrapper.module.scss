@@ -9,3 +9,9 @@
   background-color: var(--background-color);
   position: relative;
 }
+
+@media only screen and (max-width: 600px) {
+  .PageWrapper {
+    overflow-y: auto;
+  }
+}
