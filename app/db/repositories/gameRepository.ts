@@ -16,7 +16,7 @@ export class GameRepository extends Repository<Game> {
             await this.manager.save(round);
 
             for (let j = 1; j <= questionCount; j++) {
-                const question = await this.manager.create(Question, {number: j, cost: game.type === GameType.CHGK ? j * questionCost : questionCost, round, text: questionsText ? questionsText[i][j-1] : null});
+                const question = await this.manager.create(Question, {number: j, cost: game.type === GameType.CHGK ? j * questionCost : questionCost, round, text: Object.keys(questionsText).length !== 0 ? questionsText['Round '+i][j-1] : null});
                 await this.manager.save(question);
             }
         }
