@@ -54,6 +54,9 @@ const UserGame: FC<UserGameProps> = props => {
                 'cookie': getCookie('authorization'),
             }));
 
+
+            requester.getTeamAnswers();
+
             clearInterval(checkStart);
             checkStart = setInterval(() => {
                 if (!isGameStarted) {
@@ -150,21 +153,23 @@ const UserGame: FC<UserGameProps> = props => {
                     }), 1000);
                 }
 
-                requester.getTeamAnswers();
+                setIsLoading(false);
+                requester.getQuestionTime();
             }
         },
 
         handleGetTeamAnswers: (matrixAnswers: {roundNumber: number, questionNumber: number, answer: string}[]) => {
             setAcceptedMatrixAnswers((prevValue) => {
-                const copy = {...prevValue};
+                const copy = prevValue ? {...prevValue} : {};
+                if (!matrixAnswers) {
+                    return copy;
+                }
+
                 for (const answer of matrixAnswers) {
                     copy[answer.roundNumber][answer.questionNumber - 1] = answer.answer;
                 }
                 return copy;
             });
-
-            setIsLoading(false);
-            requester.getQuestionTime();
         },
 
         handleTimeMessage: (time: number, maxTime: number, isStarted: boolean) => {
@@ -172,7 +177,7 @@ const UserGame: FC<UserGameProps> = props => {
                 const progress = document.querySelector('#progress-bar') as HTMLDivElement;
                 const width = Math.ceil(100 * time / maxTime);
                 if (!progress) {
-                    setIsConnectionError(true);
+                    //setIsConnectionError(true)
                 } else {
                     progress.style.width = width + '%';
                     changeColor(progress);
@@ -454,7 +459,7 @@ const UserGame: FC<UserGameProps> = props => {
     const moveProgressBar = (time: number, maxTime: number) => {
         const progressBar = document.querySelector('#progress-bar') as HTMLDivElement;
         if (!progressBar) {
-            setIsConnectionError(true);
+            //setIsConnectionError(true);
             return;
         }
 

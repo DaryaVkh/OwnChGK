@@ -199,40 +199,48 @@ export class GamesController {
             }
             gameAdmins[gameId] = new Set();
             gameUsers[gameId] = new Set();
-            const ChGK = new Game(bigGame.name, GameTypeLogic.ChGK);
-            const Matrix = new Game(bigGame.name, GameTypeLogic.Matrix);
-            bigGames[bigGame.id] = new BigGameLogic(bigGame.name, ChGK, Matrix);
+
+            const chgkFromDB = bigGame.games.find(game => game.type == GameType.CHGK);
+            const matrixFromDB = bigGame.games.find(game => game.type == GameType.MATRIX);
+            let matrixSettings: MatrixSettingsDto;
+            let chgkSettings: ChgkSettingsDto;
+
+            const chgk = new Game(bigGame.name, GameTypeLogic.ChGK);
+            const matrix = new Game(bigGame.name, GameTypeLogic.Matrix);
+
+            if (chgkFromDB) {
+                chgkSettings = new ChgkSettingsDto(chgkFromDB);
+                for (let i = 0; i < chgkSettings.roundCount; i++) {
+                    chgk.addRound(new Round(i + 1, chgkSettings.questionCount, 60, GameTypeLogic.ChGK));
+                }
+
+                for (const team of bigGame.teams) {
+                    chgk.addTeam(new Team(team.name, team.id));
+                }
+            }
+
+            if (matrixFromDB) {
+                matrixSettings = new MatrixSettingsDto(matrixFromDB);
+                for (let i = 0; i < matrixSettings.roundCount; i++) {
+                    matrix.addRound(new Round(i + 1, matrixSettings.questionCount, 20, GameTypeLogic.Matrix));
+                }
+
+                for (const team of bigGame.teams) {
+                    matrix.addTeam(new Team(team.name, team.id));
+                }
+            }
+
+            bigGames[bigGame.id] = new BigGameLogic(
+                bigGame.name,
+                chgkFromDB ? chgk : null,
+                matrixFromDB ? matrix : null);
+
             setTimeout(() => {
                 delete bigGames[gameId];
                 delete gameUsers[gameId];
                 delete gameAdmins[gameId];
                 console.log('delete game ', bigGames[gameId]);
-            }, 1000 * 60 * 60 * 24 * 3);
-
-            const chgkFromBd = bigGame.games.find(game => game.type == GameType.CHGK);
-            const matrixFromBd = bigGame.games.find(game => game.type == GameType.MATRIX);
-            let matrixSettings, chgkSettings;
-
-            if (chgkFromBd) {
-                chgkSettings = new ChgkSettingsDto(chgkFromBd);
-                for (let i = 0; i < chgkSettings.roundCount; i++) {
-                    bigGames[gameId].ChGK.addRound(new Round(i + 1, chgkSettings.questionCount, 60, GameTypeLogic.ChGK));
-                }
-
-                for (const team of bigGame.teams) {
-                    bigGames[gameId].ChGK.addTeam(new Team(team.name, team.id));
-                }
-            }
-            if (matrixFromBd) {
-                matrixSettings = new MatrixSettingsDto(matrixFromBd);
-                for (let i = 0; i < matrixSettings.roundCount; i++) {
-                    bigGames[gameId].Matrix.addRound(new Round(i + 1, matrixSettings.questionCount, 20, GameTypeLogic.Matrix));
-                }
-
-                for (const team of bigGame.teams) {
-                    bigGames[gameId].Matrix.addTeam(new Team(team.name, team.id));
-                }
-            }
+            }, 1000 * 60 * 60 * 24 * 3); // TODO: избавиться
 
             const answer = { // TODO: DTO
                 name: bigGame.name,

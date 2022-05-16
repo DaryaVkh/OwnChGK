@@ -43,8 +43,6 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const handler = {
         handleTeamAnswersMessage: (chgkAnswers: { answer: string; status: number; number: number }[], matrixAnswers: { answer: string; status: number; number: number }[]) => {
             let dictionary: { [key: string]: Answer[] };
-            console.log(chgkAnswers);
-            console.log(matrixAnswers);
             dictionary = {};
             if (matrixAnswers) {
                 dictionary['matrix'] = matrixAnswers.map((ans: { answer: string; status: number; number: number; }) => {
@@ -154,7 +152,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     };
 
     const renderAnswers = () => {
-        return answers[gamePart].sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
+        return answers[gamePart]?.sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
             .map((answer, index) => {
                 return (
                     <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
