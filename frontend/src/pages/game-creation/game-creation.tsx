@@ -34,10 +34,10 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const [chgkSettings, setChgkSettings] = useState<GamePartSettings | undefined>();
     const [tempChgkRoundCount, setTempChgkRoundCount] = useState<number | undefined>();
     const [tempChgkQuestionsCount, setTempChgkQuestionsCount] = useState<number | undefined>();
-    const [tempChgkQuestions, setTempChgkQuestions] = useState<Record<string, string[]> | undefined>();
+    const [tempChgkQuestions, setTempChgkQuestions] = useState<Record<number, string[]> | undefined>();
     const [tempMatrixRoundCount, setTempMatrixRoundCount] = useState<number | undefined>();
     const [tempMatrixQuestionsCount, setTempMatrixQuestionsCount] = useState<number | undefined>();
-    const [tempMatrixQuestions, setTempMatrixQuestions] = useState<Record<string, string[]> | undefined>();
+    const [tempMatrixQuestions, setTempMatrixQuestions] = useState<Record<number, string[]> | undefined>();
     const [tempMatrixRoundNames, setTempMatrixRoundNames] = useState<string[] | undefined>();
     const [matrixSettings, setMatrixSettings] = useState<GamePartSettings | undefined>();
     const [isDeleteChgkModalVisible, setIsDeleteChgkModalVisible] = useState<boolean>(false);
@@ -496,7 +496,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                     disabled={!tempChgkQuestionsCount || !tempChgkRoundCount}
                                     onClick={() => {
                                         if (!tempChgkQuestions || !Object.values(tempChgkQuestions).length) {
-                                            const questions: Record<string, string[]> = {};
+                                            const questions: Record<number, string[]> = {};
                                             for (let i = 0; i < (tempChgkRoundCount || 0); i++) {
                                                 questions[i + 1] = new Array(tempChgkQuestionsCount).fill('');
                                             }
@@ -647,7 +647,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                     disabled={!!(tempMatrixRoundNames?.filter(n => n === '').length)}
                                     onClick={() => {
                                         if (!tempMatrixQuestions || !Object.values(tempMatrixQuestions).length) {
-                                            const questions: Record<string, string[]> = {};
+                                            const questions: Record<number, string[]> = {};
                                             for (let i = 0; i < (tempMatrixRoundCount || 0); i++) {
                                                 questions[i + 1] = new Array(tempMatrixQuestionsCount).fill('');
                                             }

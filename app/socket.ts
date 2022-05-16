@@ -71,6 +71,7 @@ function ChangeQuestionNumber(gameId: number, questionNumber: number, tourNumber
     for (let user of gameUsers[gameId]) {
         user.send(JSON.stringify({
             'action': 'changeQuestionNumber',
+            'matrixActive': {round: tourNumber, question: questionNumber},
             'number': bigGames[gameId].CurrentGame.rounds[0].questionsCount * (tourNumber - 1) + questionNumber,
             'activeGamePart': activeGamePart
         }));
@@ -305,6 +306,7 @@ function GetQuestionNumberForUser(gameId, ws) {
     ws.send(JSON.stringify({
         'action': 'currentQuestionNumber',
         'number': result,
+        'matrixActive': {round: game.currentQuestion[0], question: game.currentQuestion[1]},
         'activeGamePart': game.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
     }));
 }
@@ -477,7 +479,8 @@ function getGameStatus(gameId, ws) {
             'activeGamePart': currentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
             'isOnBreak': bigGames[gameId].status === GameStatus.IsOnBreak,
             'breakTime': bigGames[gameId].breakTime,
-            'currentQuestionNumber': currentQuestionNumber,
+            'currentQuestionNumber': currentQuestionNumber, //todo: тут вроде надо ток для чгк
+            'matrixActive': currentGame.type === GameTypeLogic.Matrix ? {round: currentGame.currentQuestion[0], question: currentGame.currentQuestion[1]} : null,
             'maxTime': currentGame.maxTime,
             'time': GetPreliminaryTime(gameId),
         }));
