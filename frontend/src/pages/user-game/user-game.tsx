@@ -20,6 +20,7 @@ let interval: any;
 let checkStart: any;
 let ping: any;
 let conn: WebSocket;
+let matrixSettingsCurrent: GamePartSettings|undefined;
 
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -41,7 +42,6 @@ const UserGame: FC<UserGameProps> = props => {
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [gamePart, setGamePart] = useState<'matrix' | 'chgk'>(); // активная часть игры
-    const [matrixSettings, setMatrixSettings] = useState<GamePartSettings>();
     const [chgkSettings, setChgkSettings] = useState<GamePartSettings>();
     const [matrixAnswers, setMatrixAnswers] = useState<{ [key: number]: string[] } | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
     const [acceptedMatrixAnswers, setAcceptedMatrixAnswers] = useState<{ [key: number]: string[] } | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
@@ -143,15 +143,10 @@ const UserGame: FC<UserGameProps> = props => {
                 clearInterval(interval);
                 setQuestionNumber(questionNumber);
                 if (gamePart === 'matrix') {
-                    console.log("тута1", matrixActive.round);
-                    const matrixRoundName = matrixSettings?.roundNames?.[matrixActive.round-1];
-                    console.log("тута122", matrixSettings?.roundNames);
-                    console.log("тута123", matrixSettings);
-                    console.log("тута2", matrixRoundName);
-                    if (matrixRoundName !== 'undefined') {
-                        setActiveMatrixRound({name: 'matrixRoundName', index: matrixActive.round});
+                    const matrixRoundName = matrixSettingsCurrent?.roundNames?.[matrixActive.round-1];
+                    if (matrixRoundName) {
+                        setActiveMatrixRound({name: matrixRoundName, index: matrixActive.round});
                     }
-                    console.log("тута3", matrixActive.question);
                     setActiveMatrixQuestion(matrixActive.question);
                 }
                 setTimeForAnswer(time / 1000);
@@ -256,13 +251,10 @@ const UserGame: FC<UserGameProps> = props => {
             }
             setQuestionNumber(number);
             if (gamePart === 'matrix') {
-                console.log("тута1", matrixActive.round);
-                const matrixRoundName = matrixSettings?.roundNames?.[matrixActive.round - 1];
-                console.log("тута2", matrixRoundName);
-                if (matrixRoundName !== 'undefined') {
-                    setActiveMatrixRound({name: 'matrixRoundName', index: matrixActive.round});
+                const matrixRoundName = matrixSettingsCurrent?.roundNames?.[matrixActive.round - 1];
+                if (matrixRoundName) {
+                    setActiveMatrixRound({name: matrixRoundName, index: matrixActive.round});
                 }
-                console.log("тута3", matrixActive.question);
                 setActiveMatrixQuestion(matrixActive.question);
             }
             setGamePart(gamePart);
@@ -271,13 +263,10 @@ const UserGame: FC<UserGameProps> = props => {
         handleCurrentQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', questionNumber: number, matrixActive: { round: number, question: number }) => {
             setQuestionNumber(questionNumber);
             if (gamePart === 'matrix') {
-                console.log("тута1", matrixActive.round);
-                const matrixRoundName = matrixSettings?.roundNames?.[matrixActive.round - 1];
-                console.log("тута2", matrixRoundName);
-                if (matrixRoundName !== 'undefined') {
-                    setActiveMatrixRound({name: 'matrixRoundName', index: matrixActive.round});
+                const matrixRoundName = matrixSettingsCurrent?.roundNames?.[matrixActive.round - 1];
+                if (matrixRoundName) {
+                    setActiveMatrixRound({name: matrixRoundName, index: matrixActive.round});
                 }
-                console.log("тута3", matrixActive.question);
                 setActiveMatrixQuestion(matrixActive.question);
             }
             setGamePart(gamePart);
@@ -412,13 +401,12 @@ const UserGame: FC<UserGameProps> = props => {
                                      matrixSettings
                                  }) => {
                     setGameName(name);
+                    matrixSettingsCurrent = undefined;
                     if (matrixSettings) {
-                        console.log("matrix settings");
-                        setMatrixSettings(matrixSettings);
+                        matrixSettingsCurrent = matrixSettings;
                         fillMatrixAnswers(matrixSettings.roundCount, matrixSettings.questionCount);
                     }
                     if (chgkSettings) {
-                        console.log("chgk settings");
                         setChgkSettings(chgkSettings);
                     }
 
@@ -431,7 +419,6 @@ const UserGame: FC<UserGameProps> = props => {
     }, []);
 
     const fillMatrixAnswers = (roundsCount: number, questionsCount: number) => {
-        console.log("matrix draw");
         const answers: { [key: number]: string[] } = {};
         for (let i = 1; i <= roundsCount; i++) {
             answers[i] = Array(questionsCount).fill('');
@@ -599,13 +586,13 @@ const UserGame: FC<UserGameProps> = props => {
     };
 
     const renderMatrix = () => {
-        return matrixSettings?.roundNames?.map((tourName, i) => {
+        return matrixSettingsCurrent?.roundNames?.map((tourName, i) => {
             return (
                 <div className={classes.tourQuestionsWrapper} key={`${tourName}_${i}`}>
                     <div className={classes.tourName}>{tourName}</div>
 
                     {
-                        Array.from(Array(matrixSettings.questionCount).keys()).map((j) => {
+                        Array.from(Array(matrixSettingsCurrent?.questionCount).keys()).map((j) => {
                             return (
                                 <div key={`matrix_question_${j}`}>
                                     <p className={classes.matrixAnswerNumber}>Вопрос {j + 1}</p>
@@ -645,13 +632,9 @@ const UserGame: FC<UserGameProps> = props => {
     };
 
     const renderChgkQuestionText = () => {
-        console.log(questionNumber);
         const roundIndex = Math.ceil(questionNumber / (chgkSettings?.questionCount as number));
-        console.log(roundIndex);
         const questionInRoundIndex = questionNumber - (roundIndex-1) * (chgkSettings?.questionCount as number);
-        console.log(questionInRoundIndex);
         const question = chgkSettings?.questions?.[roundIndex][questionInRoundIndex - 1];
-        console.log(question);
         if (!question) {
             return (
                 <div className={classes.answerNumber}>
@@ -664,13 +647,7 @@ const UserGame: FC<UserGameProps> = props => {
     };
 
     const renderMatrixQuestionText = () => {
-        console.log(matrixSettings);
-        console.log(matrixSettings?.questions);
-        console.log(matrixSettings?.questions?.[activeMatrixRound?.index as number]);
-        console.log(activeMatrixQuestion);
-        console.log(activeMatrixRound);
-        console.log(matrixSettings?.questions?.[activeMatrixRound?.index as number][activeMatrixQuestion - 1]);
-        const question = matrixSettings?.questions?.[activeMatrixRound?.index as number][activeMatrixQuestion - 1];
+        const question = matrixSettingsCurrent?.questions?.[activeMatrixRound?.index as number][activeMatrixQuestion - 1];
         if (question) {
             return (
                 <div className={classes.matrixQuestion}>{question}</div>
