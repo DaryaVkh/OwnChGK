@@ -561,7 +561,7 @@ const UserGame: FC<UserGameProps> = props => {
     };
 
     const handleSendMatrixAnswer = (questionNumber: number, roundName: string, roundNumber: number) => {
-        requester.giveAnswerToMatrix(matrixAnswers?.[roundNumber][questionNumber - 1] as string, roundNumber, questionNumber, roundName);
+        requester.giveAnswerToMatrix(matrixAnswers?.[roundNumber]?.[questionNumber - 1] as string, roundNumber, questionNumber, roundName);
 
         setTimeout(() => {
             setFlags(flags => {
@@ -634,7 +634,7 @@ const UserGame: FC<UserGameProps> = props => {
     const renderChgkQuestionText = () => {
         const roundIndex = Math.ceil(questionNumber / (chgkSettings?.questionCount as number));
         const questionInRoundIndex = questionNumber - (roundIndex-1) * (chgkSettings?.questionCount as number);
-        const question = chgkSettings?.questions?.[roundIndex][questionInRoundIndex - 1];
+        const question = chgkSettings?.questions?.[roundIndex]?.[questionInRoundIndex - 1];
         if (!question) {
             return (
                 <div className={classes.answerNumber}>
@@ -647,7 +647,7 @@ const UserGame: FC<UserGameProps> = props => {
     };
 
     const renderMatrixQuestionText = () => {
-        const question = matrixSettingsCurrent?.questions?.[activeMatrixRound?.index as number][activeMatrixQuestion - 1];
+        const question = matrixSettingsCurrent?.questions?.[activeMatrixRound?.index as number]?.[activeMatrixQuestion - 1];
         if (question) {
             return (
                 <div className={classes.matrixQuestion}>{question}</div>
