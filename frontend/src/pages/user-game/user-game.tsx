@@ -20,6 +20,7 @@ let interval: any;
 let checkStart: any;
 let ping: any;
 let conn: WebSocket;
+let matrixSettingsCurrent: GamePartSettings|undefined;
 
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -41,11 +42,13 @@ const UserGame: FC<UserGameProps> = props => {
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [gamePart, setGamePart] = useState<'matrix' | 'chgk'>(); // активная часть игры
-    const [matrixSettings, setMatrixSettings] = useState<GamePartSettings>();
-    const [matrixAnswers, setMatrixAnswers] = useState<{[key: number]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
-    const [acceptedMatrixAnswers, setAcceptedMatrixAnswers] = useState<{[key: number]: string[]} | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
-    const [acceptedAnswer, setAcceptedAnswer] = useState<string>();
+    const [chgkSettings, setChgkSettings] = useState<GamePartSettings>();
+    const [matrixAnswers, setMatrixAnswers] = useState<{ [key: number]: string[] } | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
+    const [acceptedMatrixAnswers, setAcceptedMatrixAnswers] = useState<{ [key: number]: string[] } | null>(null); // Заполнить там же, где matrixSettings, вызвав fillMatrixAnswers(tourNames, questionsCount)
+    const [acceptedAnswer, setAcceptedAnswer] = useState<string | undefined>();
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
+    const [activeMatrixRound, setActiveMatrixRound] = useState<{ name: string, index: number }>();
+    const [activeMatrixQuestion, setActiveMatrixQuestion] = useState<number>(1);
 
     const requester = {
         startRequests: () => {
@@ -132,13 +135,20 @@ const UserGame: FC<UserGameProps> = props => {
         },
 
         handleGameStatusMessage: (isStarted: boolean, gamePart: 'chgk' | 'matrix', isOnBreak: boolean,
-                                  breakTime: number, questionNumber: number, maxTime: number, time: number) => {
+                                  breakTime: number, questionNumber: number, matrixActive: { round: number, question: number }, maxTime: number, time: number) => {
             if (isStarted) {
                 setGamePart(gamePart);
                 setIsGameStarted(true);
                 clearInterval(checkStart);
                 clearInterval(interval);
                 setQuestionNumber(questionNumber);
+                if (gamePart === 'matrix') {
+                    const matrixRoundName = matrixSettingsCurrent?.roundNames?.[matrixActive.round-1];
+                    if (matrixRoundName) {
+                        setActiveMatrixRound({name: matrixRoundName, index: matrixActive.round});
+                    }
+                    setActiveMatrixQuestion(matrixActive.question);
+                }
                 setTimeForAnswer(time / 1000);
                 setMaxTime(maxTime / 1000);
                 if (isOnBreak) {
@@ -158,7 +168,7 @@ const UserGame: FC<UserGameProps> = props => {
             }
         },
 
-        handleGetTeamAnswers: (matrixAnswers: {roundNumber: number, questionNumber: number, answer: string}[]) => {
+        handleGetTeamAnswers: (matrixAnswers: { roundNumber: number, questionNumber: number, answer: string }[]) => {
             setAcceptedMatrixAnswers((prevValue) => {
                 const copy = prevValue ? {...prevValue} : {};
                 if (!matrixAnswers) {
@@ -222,7 +232,7 @@ const UserGame: FC<UserGameProps> = props => {
             }
         },
 
-        handleChangeQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', number: number) => {
+        handleChangeQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', number: number, matrixActive: { round: number, question: number }) => {
             clearInterval(progressBar);
             setAnswer('');
             let progress = document.querySelector('#progress-bar') as HTMLDivElement;
@@ -240,11 +250,25 @@ const UserGame: FC<UserGameProps> = props => {
                 setAcceptedAnswer(undefined);
             }
             setQuestionNumber(number);
+            if (gamePart === 'matrix') {
+                const matrixRoundName = matrixSettingsCurrent?.roundNames?.[matrixActive.round - 1];
+                if (matrixRoundName) {
+                    setActiveMatrixRound({name: matrixRoundName, index: matrixActive.round});
+                }
+                setActiveMatrixQuestion(matrixActive.question);
+            }
             setGamePart(gamePart);
         },
 
-        handleCurrentQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', questionNumber: number) => {
+        handleCurrentQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', questionNumber: number, matrixActive: { round: number, question: number }) => {
             setQuestionNumber(questionNumber);
+            if (gamePart === 'matrix') {
+                const matrixRoundName = matrixSettingsCurrent?.roundNames?.[matrixActive.round - 1];
+                if (matrixRoundName) {
+                    setActiveMatrixRound({name: matrixRoundName, index: matrixActive.round});
+                }
+                setActiveMatrixQuestion(matrixActive.question);
+            }
             setGamePart(gamePart);
         },
 
@@ -332,7 +356,7 @@ const UserGame: FC<UserGameProps> = props => {
                     case 'gameStatus':
                         handler.handleGameStatusMessage(jsonMessage.isStarted, jsonMessage.activeGamePart,
                             jsonMessage.isOnBreak, jsonMessage.breakTime, jsonMessage.currentQuestionNumber,
-                            jsonMessage.maxTime, jsonMessage.time);
+                            jsonMessage.matrixActive, jsonMessage.maxTime, jsonMessage.time);
                         break;
                     case 'time':
                         handler.handleTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
@@ -350,10 +374,10 @@ const UserGame: FC<UserGameProps> = props => {
                         handler.handleStopMessage(jsonMessage.activeGamePart);
                         break;
                     case 'changeQuestionNumber':
-                        handler.handleChangeQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number);
+                        handler.handleChangeQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number, jsonMessage.matrixActive);
                         break;
                     case 'currentQuestionNumber':
-                        handler.handleCurrentQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number);
+                        handler.handleCurrentQuestionNumberMessage(jsonMessage.activeGamePart, jsonMessage.number, jsonMessage.matrixActive);
                         break;
                     case 'statusAnswer':
                         handler.handleStatusAnswerMessage(jsonMessage.activeGamePart, jsonMessage.answer,
@@ -373,12 +397,17 @@ const UserGame: FC<UserGameProps> = props => {
             if (res.status === 200) {
                 res.json().then(({
                                      name,
+                                     chgkSettings,
                                      matrixSettings
                                  }) => {
                     setGameName(name);
+                    matrixSettingsCurrent = undefined;
                     if (matrixSettings) {
-                        setMatrixSettings(matrixSettings);
+                        matrixSettingsCurrent = matrixSettings;
                         fillMatrixAnswers(matrixSettings.roundCount, matrixSettings.questionCount);
+                    }
+                    if (chgkSettings) {
+                        setChgkSettings(chgkSettings);
                     }
 
                     openWs();
@@ -390,7 +419,7 @@ const UserGame: FC<UserGameProps> = props => {
     }, []);
 
     const fillMatrixAnswers = (roundsCount: number, questionsCount: number) => {
-        const answers: {[key: number]: string[]} = {};
+        const answers: { [key: number]: string[] } = {};
         for (let i = 1; i <= roundsCount; i++) {
             answers[i] = Array(questionsCount).fill('');
         }
@@ -557,13 +586,13 @@ const UserGame: FC<UserGameProps> = props => {
     };
 
     const renderMatrix = () => {
-        return matrixSettings?.roundNames?.map((tourName, i) => {
+        return matrixSettingsCurrent?.roundNames?.map((tourName, i) => {
             return (
                 <div className={classes.tourQuestionsWrapper} key={`${tourName}_${i}`}>
                     <div className={classes.tourName}>{tourName}</div>
 
                     {
-                        Array.from(Array(matrixSettings.questionCount).keys()).map((j) => {
+                        Array.from(Array(matrixSettingsCurrent?.questionCount).keys()).map((j) => {
                             return (
                                 <div key={`matrix_question_${j}`}>
                                     <p className={classes.matrixAnswerNumber}>Вопрос {j + 1}</p>
@@ -571,7 +600,7 @@ const UserGame: FC<UserGameProps> = props => {
                                     <div className={classes.answerInputWrapper}>
                                         <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
                                                      style={{width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
-                                                         height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={matrixAnswers?.[i + 1][j]} onChange={(event) => handleMatrixAnswer(event, j, i + 1)}/>
+                                                         height: mediaMatch.matches ? '8.7vw' : '7vh', marginRight: '2%'}} value={matrixAnswers?.[i + 1][j]} onChange={(event) => handleMatrixAnswer(event, j, i + 1)}/>
                                         <button className={classes.sendAnswerButton} onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}>Отправить
                                         </button>
 
@@ -602,6 +631,31 @@ const UserGame: FC<UserGameProps> = props => {
         });
     };
 
+    const renderChgkQuestionText = () => {
+        const roundIndex = Math.ceil(questionNumber / (chgkSettings?.questionCount as number));
+        const questionInRoundIndex = questionNumber - (roundIndex-1) * (chgkSettings?.questionCount as number);
+        const question = chgkSettings?.questions?.[roundIndex][questionInRoundIndex - 1];
+        if (!question) {
+            return (
+                <div className={classes.answerNumber}>
+                    {`Вопрос ${questionNumber}`}
+                </div>
+            );
+        } else {
+            return question;
+        }
+    };
+
+    const renderMatrixQuestionText = () => {
+        const question = matrixSettingsCurrent?.questions?.[activeMatrixRound?.index as number][activeMatrixQuestion - 1];
+        if (question) {
+            return (
+                <div className={classes.matrixQuestion}>{question}</div>
+            );
+        }
+        return null;
+    };
+
     const renderGamePart = () => {
         const width = Math.ceil(100 * (timeForAnswer / maxTime));
 
@@ -614,10 +668,17 @@ const UserGame: FC<UserGameProps> = props => {
                     </div>
 
                     <div className={classes.answersWrapper}>
-                        <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >= 0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
+                        <div className={classes.questionWrapper}>
+                            <div className={classes.activeRoundName}>
+                                <div>Вопрос {activeMatrixQuestion}</div>
+                                <div style={{maxWidth: '60%'}}>{activeMatrixRound?.name}</div>
+                            </div>
+                            {renderMatrixQuestionText()}
+                            <div className={classes.matrixTime}>Осталось: {Math.ceil(timeForAnswer ?? 0) >= 0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
+                            </div>
                         </div>
 
-                        <div style={{width: mediaMatch.matches ? '98%' : '99%', height: '2%', marginLeft: '4px'}}>
+                        <div style={{width: '100%', height: '2%', minHeight: '10px'}}>
                             <div className={classes.progressBar} id="progress-bar"
                                  style={{width: width + '%', backgroundColor: chooseColor(width)}}/>
                         </div>
@@ -640,32 +701,44 @@ const UserGame: FC<UserGameProps> = props => {
                     </div>
 
                     <div className={classes.answerWrapper}>
-                        <div className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >=
-                        0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
+                        <div className={classes.questionWrapper}>
+                            {
+                                renderChgkQuestionText()
+                            }
                         </div>
-
-                        <div style={{width: mediaMatch.matches ? '98%' : '99%', height: '2%', marginLeft: '4px'}}>
+                        <div style={{width: '100%', height: '2%', minHeight: '10px'}}>
                             <div className={classes.progressBar} id="progress-bar"
                                  style={{width: width + '%', backgroundColor: chooseColor(width)}}/>
                         </div>
                         <div className={classes.answerBox}>
-                            <p className={classes.answerNumber}>Вопрос {questionNumber}</p>
+                            <div style={{display: 'flex', flexDirection: 'column', width: '85%'}}>
+                                <p className={classes.timeLeft}>Осталось: {Math.ceil(timeForAnswer ?? 0) >=
+                                0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.</p>
 
-                            <div className={classes.answerInputWrapper}>
-                                <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
-                                             style={{width: mediaMatch.matches ? '100%' : '79%',
-                                                 height: mediaMatch.matches ? '8.7vw' : '7vh'}} value={answer} onChange={handleAnswer}/>
-                                <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
-                                </button>
+                                <div className={classes.answerInputWrapper}>
+                                    <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
+                                                 style={{width: mediaMatch.matches ? '100%' : '79%',
+                                                     height: mediaMatch.matches ? '8.7vw' : '7vh', marginRight: mediaMatch.matches ? 0 : '20px'}} value={answer} onChange={handleAnswer}/>
+                                    {
+                                        acceptedAnswer && mediaMatch.matches
+                                            ?
+                                            <small className={classes.acceptedChgk}>{'Принятый ответ: '}
+                                                <span className={classes.acceptedAnswer}>{acceptedAnswer}</span>
+                                            </small>
+                                            : null
+                                    }
+                                    <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
+                                    </button>
 
-                                {
-                                    acceptedAnswer
-                                        ?
-                                        <small className={classes.acceptedChgk}>{'Принятый ответ: '}
-                                            <span className={classes.acceptedAnswer}>{acceptedAnswer}</span>
-                                        </small>
-                                        : null
-                                }
+                                    {
+                                        acceptedAnswer && !mediaMatch.matches
+                                            ?
+                                            <small className={classes.acceptedChgk}>{'Принятый ответ: '}
+                                                <span className={classes.acceptedAnswer}>{acceptedAnswer}</span>
+                                            </small>
+                                            : null
+                                    }
+                                </div>
                             </div>
 
                             <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}
@@ -795,6 +868,5 @@ function mapStateToProps(state: AppState) {
         userTeam: state.appReducer.user.team
     };
 }
-
 
 export default connect(mapStateToProps)(UserGame);

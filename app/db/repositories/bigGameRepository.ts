@@ -12,7 +12,7 @@ export interface ChgkSettings {
     questionCount: number,
     questionCost: number,
     questionTime: number,
-    questions: Record<string, string[]>
+    questions: Record<number, string[]>
 }
 
 
