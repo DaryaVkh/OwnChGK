@@ -20,7 +20,7 @@ let interval: any;
 let checkStart: any;
 let ping: any;
 let conn: WebSocket;
-let matrixSettingsCurrent: GamePartSettings|undefined;
+let matrixSettingsCurrent: GamePartSettings | undefined;
 
 const UserGame: FC<UserGameProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -143,7 +143,7 @@ const UserGame: FC<UserGameProps> = props => {
                 clearInterval(interval);
                 setQuestionNumber(questionNumber);
                 if (gamePart === 'matrix') {
-                    const matrixRoundName = matrixSettingsCurrent?.roundNames?.[matrixActive.round-1];
+                    const matrixRoundName = matrixSettingsCurrent?.roundNames?.[matrixActive.round - 1];
                     if (matrixRoundName) {
                         setActiveMatrixRound({name: matrixRoundName, index: matrixActive.round});
                     }
@@ -599,25 +599,33 @@ const UserGame: FC<UserGameProps> = props => {
 
                                     <div className={classes.answerInputWrapper}>
                                         <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
-                                                     style={{width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
-                                                         height: mediaMatch.matches ? '8.7vw' : '7vh', marginRight: '2%'}} value={matrixAnswers?.[i + 1][j]} onChange={(event) => handleMatrixAnswer(event, j, i + 1)}/>
-                                        <button className={classes.sendAnswerButton} onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}>Отправить
+                                                     style={{
+                                                         width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
+                                                         height: mediaMatch.matches ? '8.7vw' : '7vh', marginRight: '2%'
+                                                     }} value={matrixAnswers?.[i + 1][j]}
+                                                     onChange={(event) => handleMatrixAnswer(event, j, i + 1)}/>
+                                        <button className={classes.sendAnswerButton}
+                                                onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}>Отправить
                                         </button>
 
                                         {
                                             acceptedMatrixAnswers?.[i + 1][j]
                                                 ?
                                                 <small className={classes.accepted}>{'Принятый ответ: '}
-                                                    <span className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[i + 1][j]}</span>
+                                                    <span
+                                                        className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[i + 1][j]}</span>
                                                 </small>
                                                 : null
                                         }
                                     </div>
 
                                     <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}
-                                              sx={{position: mediaMatch.matches ? 'absolute' : 'fixed',
-                                                  bottom: mediaMatch.matches ? '-8vh' : 'unset'}}>
-                                        <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
+                                              sx={{
+                                                  position: mediaMatch.matches ? 'absolute' : 'fixed',
+                                                  bottom: mediaMatch.matches ? '-8vh' : 'unset'
+                                              }}>
+                                        <Alert onClose={handleClose}
+                                               severity={flags.isAnswerAccepted ? 'success' : 'error'}
                                                sx={{width: '100%'}}>
                                             {flags.isAnswerAccepted ? 'Ответ успешно отправлен' : 'Ответ не отправлен'}
                                         </Alert>
@@ -633,17 +641,16 @@ const UserGame: FC<UserGameProps> = props => {
 
     const renderChgkQuestionText = () => {
         const roundIndex = Math.ceil(questionNumber / (chgkSettings?.questionCount as number));
-        const questionInRoundIndex = questionNumber - (roundIndex-1) * (chgkSettings?.questionCount as number);
+        const questionInRoundIndex = questionNumber - (roundIndex - 1) * (chgkSettings?.questionCount as number);
         const question = chgkSettings?.questions?.[roundIndex]?.[questionInRoundIndex - 1];
-        if (!question) {
-            return (
-                <div className={classes.answerNumber}>
+        return (
+            <>
+                <div className={classes.answerNumber} style={{marginBottom: question ? '1.5vh' : '0'}}>
                     {`Вопрос ${questionNumber}`}
                 </div>
-            );
-        } else {
-            return question;
-        }
+                {question || ''}
+            </>
+        );
     };
 
     const renderMatrixQuestionText = () => {
@@ -674,7 +681,8 @@ const UserGame: FC<UserGameProps> = props => {
                                 <div style={{maxWidth: '60%'}}>{activeMatrixRound?.name}</div>
                             </div>
                             {renderMatrixQuestionText()}
-                            <div className={classes.matrixTime}>Осталось: {Math.ceil(timeForAnswer ?? 0) >= 0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
+                            <div
+                                className={classes.matrixTime}>Осталось: {Math.ceil(timeForAnswer ?? 0) >= 0 ? Math.ceil(timeForAnswer ?? 0) : 0} сек.
                             </div>
                         </div>
 
@@ -717,8 +725,11 @@ const UserGame: FC<UserGameProps> = props => {
 
                                 <div className={classes.answerInputWrapper}>
                                     <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
-                                                 style={{width: mediaMatch.matches ? '100%' : '79%',
-                                                     height: mediaMatch.matches ? '8.7vw' : '7vh', marginRight: mediaMatch.matches ? 0 : '20px'}} value={answer} onChange={handleAnswer}/>
+                                                 style={{
+                                                     width: mediaMatch.matches ? '100%' : '79%',
+                                                     height: mediaMatch.matches ? '8.7vw' : '7vh',
+                                                     marginRight: mediaMatch.matches ? 0 : '20px'
+                                                 }} value={answer} onChange={handleAnswer}/>
                                     {
                                         acceptedAnswer && mediaMatch.matches
                                             ?
@@ -727,7 +738,8 @@ const UserGame: FC<UserGameProps> = props => {
                                             </small>
                                             : null
                                     }
-                                    <button className={classes.sendAnswerButton} onClick={handleSendButtonClick}>Отправить
+                                    <button className={classes.sendAnswerButton}
+                                            onClick={handleSendButtonClick}>Отправить
                                     </button>
 
                                     {
@@ -742,8 +754,10 @@ const UserGame: FC<UserGameProps> = props => {
                             </div>
 
                             <Snackbar open={flags.isSnackbarOpen} autoHideDuration={6000} onClose={handleClose}
-                                      sx={{position: mediaMatch.matches ? 'absolute' : 'fixed',
-                                          bottom: mediaMatch.matches ? '-8vh' : 'unset'}}>
+                                      sx={{
+                                          position: mediaMatch.matches ? 'absolute' : 'fixed',
+                                          bottom: mediaMatch.matches ? '-8vh' : 'unset'
+                                      }}>
                                 <Alert onClose={handleClose} severity={flags.isAnswerAccepted ? 'success' : 'error'}
                                        sx={{width: '100%'}}>
                                     {flags.isAnswerAccepted ? 'Ответ успешно отправлен' : 'Ответ не отправлен'}
@@ -770,16 +784,17 @@ const UserGame: FC<UserGameProps> = props => {
 
                     {
                         mediaMatch.matches
-                            ? <MobileNavbar isAdmin={false} page='' isGame={false} />
+                            ? <MobileNavbar isAdmin={false} page='' isGame={false}/>
                             : null
                     }
                     <div className={classes.gameStartContentWrapper}>
                         <img className={classes.logo} src={require('../../images/Logo.svg').default} alt="logo"/>
 
-                        <div className={classes.pageText}>{getGameNameForWaitingScreen()}<br /> скоро начнется</div>
+                        <div className={classes.pageText}>{getGameNameForWaitingScreen()}<br/> скоро начнется</div>
                         <div className={classes.pageText}>Подождите</div>
                     </div>
-                    <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+                    <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError}
+                              anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
                         <Alert severity='error' sx={{width: '100%'}}>
                             Ошибка соединения. Обновите страницу
                         </Alert>
@@ -797,8 +812,10 @@ const UserGame: FC<UserGameProps> = props => {
                             !mediaMatch.matches
                                 ?
                                 <>
-                                    <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                                    <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                                    <Link to={`/rating/${gameId}`}
+                                          className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                                    <Link to={`/game-answers/${gameId}`}
+                                          className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
                                 </>
                                 : null
                         }
@@ -816,7 +833,8 @@ const UserGame: FC<UserGameProps> = props => {
 
                         <div className={classes.breakTime}>{parseTimer()}</div>
                     </div>
-                    <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+                    <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError}
+                              anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
                         <Alert severity='error' sx={{width: '100%'}}>
                             Ошибка соединения. Обновите страницу
                         </Alert>
@@ -832,8 +850,10 @@ const UserGame: FC<UserGameProps> = props => {
                         !mediaMatch.matches
                             ?
                             <>
-                                <Link to={`/rating/${gameId}`} className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                                <Link to={`/game-answers/${gameId}`} className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
+                                <Link to={`/rating/${gameId}`}
+                                      className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
+                                <Link to={`/game-answers/${gameId}`}
+                                      className={`${classes.menuLink} ${classes.answersLink}`}>Ответы</Link>
                             </>
                             : null
                     }
@@ -851,7 +871,8 @@ const UserGame: FC<UserGameProps> = props => {
                 <div className={classes.contentWrapper}>
                     {renderGamePart()}
                 </div>
-                <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+                <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError}
+                          anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
                     <Alert severity='error' sx={{width: '100%'}}>
                         Ошибка соединения. Обновите страницу
                     </Alert>
@@ -860,7 +881,7 @@ const UserGame: FC<UserGameProps> = props => {
         );
     }
 
-    return isLoading || !gameName ? <Loader /> : renderPage();
+    return isLoading || !gameName ? <Loader/> : renderPage();
 };
 
 function mapStateToProps(state: AppState) {

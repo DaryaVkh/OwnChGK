@@ -253,7 +253,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                 <div className={classes.tourNameWrapper} key={`matrixTourName_${index}`}>
                     <div className={classes.tourNumber}>{index + 1}</div>
                     <CustomInput type='text' id='tour-name' name='tour-name' placeholder='Название тура'
-                                 value={tempMatrixRoundNames?.[index] || matrixSettings?.roundNames?.[index]}
+                                 value={tempMatrixRoundNames?.[index]}
                                  onChange={(event) => setTourName(event, index)}
                                  isInvalid={submitted && !tempMatrixRoundNames?.[index]}/>
                 </div>
@@ -602,7 +602,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                     disabled={!tempMatrixQuestionsCount || !tempMatrixRoundCount}
                                     onClick={() => {
                                         setTempMatrixRoundNames(prevValue => {
-                                            return Array.from(Array(tempMatrixRoundCount).keys()).map((i) => prevValue?.[i] || '')
+                                            return Array.from(Array(tempMatrixRoundCount).keys()).map((i) => prevValue?.[i] || matrixSettings?.roundNames?.[i] || '')
                                         });
                                         setPage('matrix-tours');
                                     }}>
