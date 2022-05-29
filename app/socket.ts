@@ -200,7 +200,7 @@ function RejectAnswer(gameId: number, gameType: string, roundNumber: number, que
 
 function GetAllTeamsAnswers(gameId: number, gameType: string, roundNumber: number, questionNumber: number, ws) {
     const game = gameType === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
-    const answers = game.rounds[roundNumber - 1].questions[questionNumber - 1].answers;
+    const answers = game.rounds[roundNumber - 1].questions[questionNumber - 1].answers.filter(ans => ans.text.length > 0);
     const acceptedAnswers = answers.filter(ans => ans.status === 0).map(ans => ans.text);
     const rejectedAnswers = answers.filter(ans => ans.status === 1 || ans.status === 3).map(ans => ans.text);
     const uncheckedAnswers = answers.filter(ans => ans.status === 2).map(ans => ans.text);
