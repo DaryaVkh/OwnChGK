@@ -41,6 +41,13 @@ export interface GamePartSettings {
     roundNames?: string[];
 }
 
+export const uploadFile = async (form: any) => {
+    return await fetch('/api/rounds/519923d5-1685-4cfe-98dc-17b2838eaace/uploadFile?roundNumber=1&questionNumber=1', {
+        method: 'PUT',
+        body: form,
+    })
+}
+
 export const createGame = async (gameName: string, teams: string[], chgkSettings?: GamePartSettings, matrixSettings?: GamePartSettings) => {
     return await fetch('/api/games/', {
         method: 'POST',

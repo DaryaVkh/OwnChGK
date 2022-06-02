@@ -4,6 +4,9 @@ import {roleMiddleware} from '../middleware/roleMiddleware';
 import {middleware} from '../middleware/middleware';
 import {adminAccess} from "./mainRouter";
 import {body, param} from "express-validator";
+const multer = require("multer");
+
+const upload = multer();
 
 export const roundsRouter = () => {
     const router = Router();
@@ -35,6 +38,8 @@ export const roundsRouter = () => {
         body('questionCount').isInt({min: 0}),
         body('questionCost').isInt({min: 0}),
         body('questionTime').isInt({min: 0}), roundsController.insertRound);
+
+    router.put('/:gameId/uploadFile', upload.single('file'), roundsController.uploadFile)
 
     return router;
 }

@@ -16,13 +16,16 @@ import {Dispatch} from 'redux';
 import {authorizeUserWithRole, checkToken as testToken} from '../../redux/actions/app-actions/app-actions';
 import {AppState} from '../../entities/app/app.interfaces';
 import PageBackdrop from '../../components/backdrop/backdrop';
-import {login} from '../../server-api/server-api';
+import {login, uploadFile} from '../../server-api/server-api';
+import {Image} from "@mui/icons-material";
 
 const Authorization: FC<AuthorizationProps> = props => {
     const [wrongEmailOrPassword, setWrongEmailOrPassword] = useState<boolean>(false);
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [file, setFile] = useState<any>();
+    const [imageURL, setImageURL] = useState<any>();
 
     const handleSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
@@ -54,10 +57,44 @@ const Authorization: FC<AuthorizationProps> = props => {
         }
     };
 
+    const fileHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFile(event.target.files?.[0]);
+    }
+
+    const clickFileHandler = async (event: React.SyntheticEvent) => {
+        event.preventDefault();
+        const formData = new FormData()
+
+        formData.append("file", file);
+        await uploadFile(formData)
+            .then(res => {
+                res.json().then(data => {
+                    console.log(data);
+                    console.log(new Uint8Array(data.data))
+                    // @ts-ignore
+                    console.log(String.fromCharCode(...new Uint8Array(data.data)))
+                    // @ts-ignore
+                    const base64String = btoa(String.fromCharCode(...new Uint8Array(data.data)));
+                    console.log(`data:image/png;base64,${base64String}`);
+                    setImageURL(`data:image/png;base64,${base64String}`);
+                })
+            });
+    }
+    
+    if (imageURL) {
+        return (
+            <img src={imageURL} alt={"фото в цвете"}/>
+        );
+    }
+
     return props.isLoggedIn ? (
         <Redirect to={props.user.role === 'admin' || props.user.role === 'superadmin' ? '/admin/start-screen' : '/start-screen'}/>
     ) : (
         <PageWrapper>
+            <form onSubmit={clickFileHandler}>
+                <input type="file" accept="image/jpeg,image/png" onChange={fileHandler}/>
+                <input type="submit"/>
+            </form>
             <Header isAuthorized={false}/>
 
             <div className={classes.contentWrapper}>

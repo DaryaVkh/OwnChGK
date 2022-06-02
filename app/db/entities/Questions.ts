@@ -14,6 +14,11 @@ export class Question extends BaseEntity {
     })
     text: string;
 
+    @Column("bytea", {
+        nullable: true
+    })
+    picture: Buffer;
+
     @Column()
     cost: number
 

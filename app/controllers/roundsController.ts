@@ -3,6 +3,7 @@ import {RoundRepository} from '../db/repositories/roundRepository';
 import {validationResult} from 'express-validator';
 import {Request, Response} from 'express';
 import {RoundDto} from "../dtos/roundDto";
+import {BigGameRepository} from "../db/repositories/bigGameRepository";
 
 
 export class RoundsController {
@@ -17,6 +18,22 @@ export class RoundsController {
 
             const rounds = await getCustomRepository(RoundRepository).findByGameName(gameName);
             return res.status(200).json(rounds?.map(round => new RoundDto(round)));
+        } catch (error) {
+            return res.status(500).json({
+                message: error.message,
+                error,
+            });
+        }
+    }
+
+    public async uploadFile(req: any, res: Response) {
+        try {
+            const { gameId } = req.params;
+            const { roundNumber, questionNumber } = req.query;
+            console.log('buffer', req.file.buffer);
+            const question = await getCustomRepository(BigGameRepository).addPictureInQuestion(gameId, roundNumber, questionNumber, req.file.buffer);
+            console.log(question.picture);
+            res.status(200).json(question.picture);
         } catch (error) {
             return res.status(500).json({
                 message: error.message,
