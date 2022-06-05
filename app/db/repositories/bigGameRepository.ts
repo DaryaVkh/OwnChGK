@@ -31,12 +31,13 @@ export class BigGameRepository extends Repository<BigGame> {
         return this.findOne(bigGameId, {relations: ['games', 'teams', 'teams.captain', 'games.rounds', 'games.rounds.questions']});
     }
 
-    addPictureInQuestion(bigGameId: string, roundNumber: number, questionNumber: number, picture: Buffer) {
+    addPictureInQuestion(bigGameId: string, gamePart: string, roundNumber: number, questionNumber: number, picture: Buffer) {
         return this.manager.transaction(async manager => {
             const bigGame = await manager.findOne(BigGame, bigGameId, {relations: ['games', 'games.rounds', 'games.rounds.questions']});
-            const chgk = bigGame.games.find(game => game.type == GameType.CHGK);
-            if (chgk) {
-                const round = chgk.rounds.find(round => round.number == roundNumber);
+            console.log(gamePart, "1");
+            const game = bigGame.games.find(game => game.type.toString() == gamePart);
+            if (game) {
+                const round = game.rounds.find(round => round.number == roundNumber);
                 console.log(round)
                 if (round) {
                     const question = round.questions.find(question => question.number == questionNumber);

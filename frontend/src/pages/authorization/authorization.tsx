@@ -66,7 +66,7 @@ const Authorization: FC<AuthorizationProps> = props => {
         const formData = new FormData()
 
         formData.append("file", file);
-        await uploadFile(formData)
+        await uploadFile("2604ecbc-f9d2-43df-88c8-4ef1293bf908", "chgk", 1, 1, formData)
             .then(res => {
                 res.json().then(data => {
                     console.log(data);

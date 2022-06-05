@@ -29,9 +29,9 @@ export class RoundsController {
     public async uploadFile(req: any, res: Response) {
         try {
             const { gameId } = req.params;
-            const { roundNumber, questionNumber } = req.query;
+            const { gamePart, roundNumber, questionNumber } = req.query;
             console.log('buffer', req.file.buffer);
-            const question = await getCustomRepository(BigGameRepository).addPictureInQuestion(gameId, roundNumber, questionNumber, req.file.buffer);
+            const question = await getCustomRepository(BigGameRepository).addPictureInQuestion(gameId, gamePart, roundNumber, questionNumber, req.file.buffer);
             console.log(question.picture);
             res.status(200).json(question.picture);
         } catch (error) {
