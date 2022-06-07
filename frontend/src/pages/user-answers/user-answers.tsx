@@ -22,7 +22,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const [answers, setAnswers] = useState<{ [key: string]: Answer[] }>({matrix: [], chgk: []});
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [gamePart, setGamePart] = useState<string>('matrix');
-    const [isBothPartsInGame, setIsBothPartsInGame] = useState<boolean>(true);
+    const [isBothPartsInGame, setIsBothPartsInGame] = useState<boolean>();
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
     const requester = {
@@ -108,8 +108,12 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             if (res.status === 200) {
                 res.json().then(({
                                      name,
+                                     chgkSettings,
+                                     matrixSettings
                                  }) => {
                     setGameName(name);
+                    setGamePart(matrixSettings ? "matrix": "chgk");
+                    setIsBothPartsInGame(chgkSettings && matrixSettings);
                 });
             }
         });
