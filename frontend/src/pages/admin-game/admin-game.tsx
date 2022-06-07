@@ -123,23 +123,6 @@ const AdminGame: FC<AdminGameProps> = props => {
     const handlers = {
         handleTimeCheckMessage: (time: number) => {
             setTimer(time);
-            console.log("cheeck");
-            if (playOrPause === 'pause') {
-                console.log("cheeck1")
-                interval = setInterval(() =>
-                    setTimer(t => {
-                        console.log(t);
-                        let res = t - 1000;
-                        if (res <= 0) {
-                            clearInterval(interval);
-                            setPlayOrPause('play');
-                        }
-                        return res > 0 ? res : 0;
-                    }), 1000);
-            } else {
-                console.log("cheeck2")
-                clearInterval(interval);
-            }
         },
 
         handleTimeMessage: (time: number, isStarted: boolean) => {
@@ -316,17 +299,17 @@ const AdminGame: FC<AdminGameProps> = props => {
         if (playOrPause === 'play') {
             requester.startTimer();
             setPlayOrPause('pause');
-            // interval = setInterval(() =>
-            //     setTimer(t => {
-            //         let res = t - 1000;
-            //         if (res <= 0) {
-            //             clearInterval(interval);
-            //             setPlayOrPause('play');
-            //         }
-            //         return res > 0 ? res : 0;
-            //     }), 1000);
+            interval = setInterval(() =>
+                setTimer(t => {
+                    let res = t - 1000;
+                    if (res <= 0) {
+                        clearInterval(interval);
+                        setPlayOrPause('play');
+                    }
+                    return res > 0 ? res : 0;
+                }), 1000);
         } else {
-            //clearInterval(interval);
+            clearInterval(interval);
             requester.pauseTimer();
             setPlayOrPause('play');
         }
