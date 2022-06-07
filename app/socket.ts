@@ -25,6 +25,14 @@ function GiveAddedTime(gameId: number) {
                 'isStarted': false,
             }));
         }
+
+        for (let admins of gameAdmins[gameId]) {
+            admins.send(JSON.stringify({
+                'action': 'timeCheck',
+                'time': bigGames[gameId].CurrentGame.leftTime,
+            }));
+        }
+
     } else {
         if (!bigGames[gameId].CurrentGame.isTimerStart) {
             bigGames[gameId].CurrentGame.leftTime += extra10Seconds;
@@ -35,6 +43,13 @@ function GiveAddedTime(gameId: number) {
                     'maxTime': bigGames[gameId].CurrentGame.maxTime,
                     'time': bigGames[gameId].CurrentGame.leftTime,
                     'isStarted': false,
+                }));
+            }
+
+            for (let admins of gameAdmins[gameId]) {
+                admins.send(JSON.stringify({
+                    'action': 'timeCheck',
+                    'time': bigGames[gameId].CurrentGame.leftTime,
                 }));
             }
         } else {
@@ -57,6 +72,13 @@ function GiveAddedTime(gameId: number) {
                     'maxTime': bigGames[gameId].CurrentGame.maxTime,
                     'time': bigGames[gameId].CurrentGame.leftTime,
                     'isStarted': true,
+                }));
+            }
+
+            for (let admins of gameAdmins[gameId]) {
+                admins.send(JSON.stringify({
+                    'action': 'timeCheck',
+                    'time': bigGames[gameId].CurrentGame.leftTime,
                 }));
             }
         }
@@ -95,6 +117,14 @@ function StartTimer(gameId: number) {
                 'time': bigGames[gameId].CurrentGame.leftTime
             }));
         }
+
+        for (let admins of gameAdmins[gameId]) {
+            admins.send(JSON.stringify({
+                'action': 'timeCheck',
+                'time': bigGames[gameId].CurrentGame.leftTime,
+            }));
+        }
+
     } else {
         console.log('startFromPause gameId = ', gameId);
         bigGames[gameId].CurrentGame.isTimerStart = true;
@@ -110,6 +140,13 @@ function StartTimer(gameId: number) {
                 'action': 'start',
                 'maxTime': bigGames[gameId].CurrentGame.maxTime,
                 'time': bigGames[gameId].CurrentGame.leftTime
+            }));
+        }
+
+        for (let admins of gameAdmins[gameId]) {
+            admins.send(JSON.stringify({
+                'action': 'timeCheck',
+                'time': bigGames[gameId].CurrentGame.leftTime,
             }));
         }
     }
@@ -142,9 +179,17 @@ function PauseTimer(gameId: number) {
         bigGames[gameId].CurrentGame.leftTime -= Math.floor(process.uptime() * 1000 - bigGames[gameId].CurrentGame.timer._idleStart);
         clearTimeout(bigGames[gameId].CurrentGame.timer);
 
+        for (let admins of gameAdmins[gameId]) {
+            admins.send(JSON.stringify({
+                'action': 'timeCheck',
+                'time': bigGames[gameId].CurrentGame.leftTime,
+            }));
+        }
+
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
-                'action': 'pause'
+                'action': 'pause',
+                'time': bigGames[gameId].CurrentGame.leftTime
             }));
         }
     }

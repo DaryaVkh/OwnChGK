@@ -84,21 +84,21 @@ const AdminGame: FC<AdminGameProps> = props => {
             }));
         },
 
-        startGame: () => {
+        startTimer: () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Start',
             }));
         },
 
-        pauseGame: () => {
+        pauseTimer: () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Pause'
             }));
         },
 
-        stopGame: () => {
+        stopTimer: () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Stop'
@@ -121,6 +121,27 @@ const AdminGame: FC<AdminGameProps> = props => {
     };
 
     const handlers = {
+        handleTimeCheckMessage: (time: number) => {
+            setTimer(time);
+            console.log("cheeck");
+            if (playOrPause === 'pause') {
+                console.log("cheeck1")
+                interval = setInterval(() =>
+                    setTimer(t => {
+                        console.log(t);
+                        let res = t - 1000;
+                        if (res <= 0) {
+                            clearInterval(interval);
+                            setPlayOrPause('play');
+                        }
+                        return res > 0 ? res : 0;
+                    }), 1000);
+            } else {
+                console.log("cheeck2")
+                clearInterval(interval);
+            }
+        },
+
         handleTimeMessage: (time: number, isStarted: boolean) => {
             setTimer(time);
             if (isStarted) {
@@ -204,6 +225,9 @@ const AdminGame: FC<AdminGameProps> = props => {
             const jsonMessage = JSON.parse(event.data);
 
             switch (jsonMessage.action) {
+                case 'handleTimeCheckMessage':
+                    handlers.handleTimeCheckMessage(jsonMessage.time);
+                    break;
                 case 'time':
                     handlers.handleTimeMessage(jsonMessage.time, jsonMessage.isStarted);
                     break;
@@ -290,27 +314,27 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const handlePlayClick = () => {
         if (playOrPause === 'play') {
-            requester.startGame();
+            requester.startTimer();
             setPlayOrPause('pause');
-            interval = setInterval(() =>
-                setTimer(t => {
-                    let res = t - 1000;
-                    if (res <= 0) {
-                        clearInterval(interval);
-                        setPlayOrPause('play');
-                    }
-                    return res > 0 ? res : 0;
-                }), 1000);
+            // interval = setInterval(() =>
+            //     setTimer(t => {
+            //         let res = t - 1000;
+            //         if (res <= 0) {
+            //             clearInterval(interval);
+            //             setPlayOrPause('play');
+            //         }
+            //         return res > 0 ? res : 0;
+            //     }), 1000);
         } else {
-            clearInterval(interval);
-            requester.pauseGame();
+            //clearInterval(interval);
+            requester.pauseTimer();
             setPlayOrPause('play');
         }
     };
 
     const handleStopClick = (gamePart: 'matrix' | 'chgk' | undefined) => {
         setPlayOrPause('play');
-        requester.stopGame();
+        requester.stopTimer();
         clearInterval(interval);
         setTimer(gamePart === 'chgk' ? 70000 : 20000);
     };

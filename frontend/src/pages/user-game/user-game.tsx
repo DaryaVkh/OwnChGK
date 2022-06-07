@@ -77,7 +77,7 @@ const UserGame: FC<UserGameProps> = props => {
                 conn.send(JSON.stringify({
                     'action': 'ping'
                 }));
-            }, 30000);
+            }, 20000);
         },
 
         checkBreak: () => {
@@ -149,7 +149,7 @@ const UserGame: FC<UserGameProps> = props => {
                     }
                     setActiveMatrixQuestion(matrixActive.question);
                 }
-                setTimeForAnswer(time / 1000);
+                setTimeForAnswer(Math.floor(time / 1000));
                 setMaxTime(maxTime / 1000);
                 if (isOnBreak) {
                     setIsBreak(true);
@@ -202,7 +202,7 @@ const UserGame: FC<UserGameProps> = props => {
         },
 
         handleStartMessage: (time: number, maxTime: number) => {
-            setTimeForAnswer(time / 1000);
+            setTimeForAnswer(Math.floor(time / 1000));
             clearInterval(progressBar);
             progressBar = moveProgressBar(time, maxTime);
             setMaxTime(maxTime / 1000);
@@ -218,8 +218,9 @@ const UserGame: FC<UserGameProps> = props => {
             setMaxTime(maxTime / 1000);
         },
 
-        handlePauseMessage: () => {
+        handlePauseMessage: (time: number) => {
             clearInterval(progressBar);
+            setTimeForAnswer(Math.floor(time / 1000));
         },
 
         handleStopMessage: (gamePart: 'chgk' | 'matrix') => {
@@ -368,7 +369,7 @@ const UserGame: FC<UserGameProps> = props => {
                         handler.handleAddTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
                         break;
                     case 'pause':
-                        handler.handlePauseMessage();
+                        handler.handlePauseMessage(jsonMessage.time);
                         break;
                     case 'stop':
                         handler.handleStopMessage(jsonMessage.activeGamePart);
