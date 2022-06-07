@@ -225,7 +225,7 @@ const AdminGame: FC<AdminGameProps> = props => {
             const jsonMessage = JSON.parse(event.data);
 
             switch (jsonMessage.action) {
-                case 'handleTimeCheckMessage':
+                case 'timeCheck':
                     handlers.handleTimeCheckMessage(jsonMessage.time);
                     break;
                 case 'time':
