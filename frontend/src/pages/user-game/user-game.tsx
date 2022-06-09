@@ -601,15 +601,26 @@ const UserGame: FC<UserGameProps> = props => {
                                         <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
                                                      style={{
                                                          width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
-                                                         height: mediaMatch.matches ? '8.7vw' : '7vh', marginRight: '2%'
+                                                         height: mediaMatch.matches ? '8.7vw' : '7vh',
+                                                         marginRight: mediaMatch.matches ? '0' : '2%'
                                                      }} value={matrixAnswers?.[i + 1][j]}
                                                      onChange={(event) => handleMatrixAnswer(event, j, i + 1)}/>
+                                        {
+                                            acceptedMatrixAnswers?.[i + 1][j] && mediaMatch.matches
+                                                ?
+                                                <small className={classes.accepted}>{'Принятый ответ: '}
+                                                    <span
+                                                        className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[i + 1][j]}</span>
+                                                </small>
+                                                : null
+                                        }
+
                                         <button className={classes.sendAnswerButton}
                                                 onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}>Отправить
                                         </button>
 
                                         {
-                                            acceptedMatrixAnswers?.[i + 1][j]
+                                            acceptedMatrixAnswers?.[i + 1][j] && !mediaMatch.matches
                                                 ?
                                                 <small className={classes.accepted}>{'Принятый ответ: '}
                                                     <span

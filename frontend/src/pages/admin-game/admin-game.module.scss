@@ -35,6 +35,12 @@
   font-family: Roboto, sans-serif;
   min-height: 26px;
 
+  &:disabled {
+    background-color: #F6F7FF;
+    color: rgba(27, 38, 44, .5);
+    border-color: rgba(27, 38, 44, .5);
+  }
+
   &:hover {
     cursor: pointer;
     box-shadow: 0 0 2vh 2px var(--foreground-color);

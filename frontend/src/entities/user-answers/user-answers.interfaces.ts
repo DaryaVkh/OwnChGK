@@ -6,6 +6,6 @@ export type UserAnswersPageProps = UserAnswersPageStateProps;
 
 export interface Answer {
     answer: string;
-    status: 'success' | 'error' | 'opposition';
+    status: 'success' | 'error' | 'opposition' | 'no-answer';
     number: number;
 }

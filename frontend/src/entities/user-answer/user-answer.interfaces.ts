@@ -1,5 +1,5 @@
 export interface UserAnswerProps {
-    answer: string;
-    status: 'success' | 'error' | 'opposition';
+    answer?: string;
+    status: 'success' | 'error' | 'opposition' | 'no-answer';
     order: number;
 }

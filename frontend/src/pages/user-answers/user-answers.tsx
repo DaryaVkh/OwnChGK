@@ -72,7 +72,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     useEffect(() => {
         const resizeEventHandler = () => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
-            handleWindowResize();
+            activateIndicator();
         };
 
         window.addEventListener('resize', resizeEventHandler);
@@ -81,16 +81,6 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             window.removeEventListener('resize', resizeEventHandler);
         };
     }, []);
-
-    const handleWindowResize = () => {
-        const indicator = document.querySelector('#indicator') as HTMLSpanElement;
-        const el = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
-        if (el) {
-            indicator.style.width = `${el.offsetWidth}px`;
-            indicator.style.left = `${el.offsetLeft}px`;
-            indicator.style.backgroundColor = 'white';
-        }
-    };
 
     const activateIndicator = () => {
         const indicator = document.querySelector('#indicator') as HTMLSpanElement;

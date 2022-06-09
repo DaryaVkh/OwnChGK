@@ -9,7 +9,7 @@ let conn: WebSocket;
 const UserAnswer: FC<UserAnswerProps> = props => {
     const [isOppositionClicked, setIsOppositionClicked] = useState<boolean>(false);
     const [opposition, setOpposition] = useState<string>('');
-    const [answerStatus, setAnswerStatus] = useState<'success' | 'error' | 'opposition'>(props.status);
+    const [answerStatus, setAnswerStatus] = useState<'success' | 'error' | 'opposition' | 'no-answer'>(props.status);
 
     const requester = {
         sendAppeal: (opposition: string) => {
@@ -40,13 +40,28 @@ const UserAnswer: FC<UserAnswerProps> = props => {
         setIsOppositionClicked(false);
     };
 
+    const getInputClass = () => {
+        switch (answerStatus) {
+            case 'success':
+                return classes.success;
+            case 'error':
+                return classes.invalid;
+            case 'no-answer':
+                return classes.noAnswer;
+            default:
+                return '';
+        }
+    };
+
+    const getAnswer = () => {
+        return answerStatus === 'no-answer' ? 'Нет ответа' : props.answer;
+    };
+
     return (
         <div className={classes.userAnswerWrapper}>
             <div className={classes.answerWrapper}>
                 <div className={classes.answerNumber}>{props.order}</div>
-                <input readOnly className={`${classes.answer} ${answerStatus === 'success'
-                    ? classes.success
-                    : (answerStatus === 'error' ? classes.invalid : '')}`} value={props.answer}/>
+                <input readOnly className={`${classes.answer} ${getInputClass()}`} value={getAnswer()}/>
                 {
                     answerStatus === 'error'
                         ? <button className={

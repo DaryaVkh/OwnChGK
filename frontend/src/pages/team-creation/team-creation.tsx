@@ -181,7 +181,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
 
     const renderMembers = () => {
         return members.map((member, index) => (
-            <div className={classes.memberWrapper}>
+            <div className={classes.memberWrapper} style={{marginBottom: mediaMatch.matches ? (index === members.length - 1 ? '0' : '5vw') : '0'}}>
                 <OutlinedInput className={`${classes.adminName} ${classes.adminInput}`}
                                sx={{
                                    '& .MuiOutlinedInput-notchedOutline': {
@@ -200,7 +200,11 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleMemberEmailChange(event, index)}
                                value={member.email} placeholder='Почта'/>
                 <Button className={classes.adminButton} onClick={() => handleDeleteMemberClick(index)}>
-                    <CloseIcon sx={{color: 'red', fontSize: '5vmin'}}/>
+                    {
+                        mediaMatch.matches
+                            ? 'Удалить'
+                            : <CloseIcon sx={{color: 'red', fontSize: '5vmin'}}/>
+                    }
                 </Button>
             </div>
         ));
@@ -241,7 +245,8 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                 usersFromDB
                                     ? <CustomInput type='text' id='teamName'
                                                    name='teamName'
-                                                   style={{width: '49%'}}
+                                                   style={{width: mediaMatch.matches ? '100%' : '49%',
+                                                       marginBottom: mediaMatch.matches ? '8%' : '5%'}}
                                                    placeholder='Название команды'
                                                    value={teamName}
                                                    defaultValue={teamName}
@@ -256,7 +261,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                             {
                                 usersFromDB
                                     ?
-                                    <div style={{position: 'relative', width: '49%'}}>
+                                    <div style={{position: 'relative', width: mediaMatch.matches ? '100%' : '49%'}}>
                                         <Autocomplete disablePortal
                                                         fullWidth
                                                         id="captain"
@@ -266,23 +271,24 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                                         disabled={!props.isAdmin && props.mode === 'creation'}
                                                         sx={{
                                                             border: 'none',
-                                                            fontSize: '1.5vw',
+                                                            fontSize: mediaMatch.matches ? '5.3vw' : '1.5vw',
                                                             minHeight: '26px',
-                                                            height: '7vh !important',
+                                                            height: mediaMatch.matches ? '13vw !important' : '7vh !important',
                                                             borderRadius: '8px',
                                                             backgroundColor: 'white',
                                                             boxShadow: 'inset 0 4px 10px rgba(0, 0, 0, 0.5)',
+                                                            marginBottom: mediaMatch.matches ? '5%' : '0',
                                                             '& .MuiOutlinedInput-input': {
                                                                 padding: '0 0 0 1.5vw !important',
                                                                 border: 'none',
                                                                 fontFamily: 'Roboto, sans-serif',
                                                                 color: 'black',
-                                                                fontSize: '1.5vw',
+                                                                fontSize:  mediaMatch.matches ? '5.3vw' : '1.5vw',
                                                             },
                                                             '& .MuiOutlinedInput-root': {
-                                                                height: '7vh !important',
+                                                                height: mediaMatch.matches ? '13vw !important' : '7vh !important',
                                                                 minHeight: '26px',
-                                                                padding: '0'
+                                                                padding: mediaMatch.matches ? '0 4vw 0 !important' : '0'
                                                             },
                                                             '& .MuiOutlinedInput-notchedOutline': {
                                                                 border: '2px solid var(--foreground-color) !important',
@@ -320,7 +326,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                         onClick={addMember}
                                         disabled={members.length === 9}
                                         type='button'
-                                >Добавить участника
+                                >{mediaMatch.matches ? 'Добавить' : 'Добавить участника'}
                                 </button>
                             </div>
 
@@ -349,7 +355,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                     <FormButton text={props.mode === 'creation' ? 'Создать' : 'Сохранить'} disabled={props.isAdmin && !usersFromDB}
                                 style={{
                                     padding: mediaMatch.matches ? '0 13vw' : '0 2vw',
-                                    fontSize: mediaMatch.matches ? '6.5vw' : '1.5vw',
+                                    fontSize: mediaMatch.matches ? '5.5vw' : '1.5vw',
                                     height: mediaMatch.matches ? '13vw' : '7vh',
                                     marginBottom: '2vh',
                                     marginTop: '2vh',

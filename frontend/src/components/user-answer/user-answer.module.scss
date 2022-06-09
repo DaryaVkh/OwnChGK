@@ -8,12 +8,12 @@
   font-family: Roboto, sans-serif;
   min-height: 26px;
 
-  &:hover {
+  &:not(:disabled):hover {
     cursor: pointer;
     box-shadow: 0 0 6px 1px var(--foreground-color);
   }
 
-  &:active {
+  &:not(:disabled):active {
     box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
   }
 }
@@ -89,6 +89,11 @@
 
       &.success {
         background-color: #CDFFC9;
+      }
+
+      &.noAnswer {
+        background-color: transparent;
+        color: white;
       }
     }
   }

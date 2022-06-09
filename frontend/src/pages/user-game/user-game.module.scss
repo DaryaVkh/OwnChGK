@@ -199,12 +199,12 @@
     font-family: Roboto, sans-serif;
     min-height: 26px;
 
-    &:hover {
+    &:not(:disabled):hover {
       cursor: pointer;
       box-shadow: 0 0 2vh 2px var(--foreground-color);
     }
 
-    &:active {
+    &:not(:disabled):active {
       box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
     }
   }
@@ -362,7 +362,8 @@
     font-size: 4.5vw;
   }
 
-  .acceptedChgk {
+  .acceptedChgk,
+  .accepted {
     position: relative;
     align-self: flex-start;
     margin-top: -2vw;
@@ -378,6 +379,40 @@
   }
 
   .matrixTime {
+    font-size: 4vw;
+  }
+
+  .activeRoundName {
+    font-size: 5vw;
+  }
+
+  .matrixQuestion {
     font-size: 4.5vw;
+    margin-bottom: 5vw;
+  }
+
+  .answersBox {
+    padding: 2vw 3vw;
+  }
+
+  .tourName {
+    font-size: 5vw;
+  }
+
+  .matrixAnswerNumber {
+    font-size: 4.5vw;
+  }
+
+  .answerInputWrapper {
+    flex-direction: column;
+    align-items: flex-end;
+
+    .sendAnswerButton {
+      padding: 5px 14px;
+      height: 8.7vw;
+      width: 47%;
+      font-size: 4.5vw;
+      margin-top: 2vw;
+    }
   }
 }

@@ -37,13 +37,13 @@
 
 .membersWrapper {
   width: 100%;
-  height: 65%;
   border: 3px solid var(--foreground-color);
   border-radius: 10px;
   padding: 2vh 2vw;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .membersPanel {
@@ -51,16 +51,16 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 1vh;
+}
 
-  .membersLabel {
-    height: 5vh;
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    font-size: 1.5vw;
-    color: white;
-  }
+.membersLabel {
+  height: 5vh;
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 1.5vw;
+  color: white;
 }
 
 .members {
@@ -132,7 +132,7 @@
   font-family: Roboto, sans-serif;
   min-height: 26px;
 
-  &:hover {
+  &:not(:disabled):hover {
     cursor: pointer;
   }
 }
@@ -149,10 +149,65 @@
 @media only screen and (max-width: 600px) {
   .teamCreationForm {
     width: 80%;
+    height: calc(100% - 28vw);
   }
 
   .pageTitle {
-    margin: 9vh 0;
+    margin: 9vw 0;
     font-size: 7vmin;
+  }
+
+  .settingsWrapper {
+    flex-direction: column;
+  }
+
+  .membersWrapper {
+    border: 2px solid var(--foreground-color);
+    border-radius: 3px;
+    padding: 3vw;
+  }
+
+  .membersPanel {
+    margin-bottom: 2vw;
+  }
+
+  .membersLabel {
+    height: auto;
+    width: auto;
+    font-size: 4.5vw;
+  }
+
+  .button {
+    height: 9vw;
+    font-size: 3.5vw;
+    padding: 0 5vw;
+  }
+
+  .memberWrapper {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .adminName {
+    width: 100%;
+  }
+
+  .adminEmail {
+    width: 100%;
+  }
+
+  .adminButton {
+    width: auto !important;
+    text-transform: capitalize !important;
+    color: black !important;
+    padding: 0 5vw !important;
+    font-size: 3.5vw !important;
+    height: 9vw !important;
+  }
+
+  .adminInput {
+    height: 11vw !important;
+    font-size: 5.3vw !important;
+    margin-bottom: 3% !important;
   }
 }
