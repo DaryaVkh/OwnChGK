@@ -361,13 +361,21 @@ export class GamesController {
                 return res.status(400).json({message: 'user without team'});
             }
 
+            const bigGame = bigGames[gameId];
+            const game = bigGame.isFullGame() ? bigGame.ChGK : bigGame.CurrentGame;
+            const totalScoreForAllTeams = 'user' && teamId && bigGame.isIntrigue
+                ? game.getScoreTableForTeam(teamId)
+                : game.getScoreTable()
+
+            const matrixSums = bigGame.isFullGame() ? bigGame.Matrix.getTotalScoreForAllTeams() : undefined;
+
             const answer = { // TODO: DTO
                 gameId,
-                isIntrigue: bigGames[gameId].isIntrigue,
-                roundsCount: bigGames[gameId].CurrentGame.rounds.length,
-                questionsCount: bigGames[gameId].CurrentGame.rounds[0].questionsCount,
-                totalScoreForAllTeams: roles === 'user' && teamId && bigGames[gameId].isIntrigue ?
-                    bigGames[gameId].CurrentGame.getScoreTableForTeam(teamId) : bigGames[gameId].CurrentGame.getScoreTable(),
+                isIntrigue: bigGame.isIntrigue,
+                roundsCount: game.rounds.length,
+                questionsCount: game.rounds[0].questionsCount,
+                matrixSums,
+                totalScoreForAllTeams,
             };
 
             return res.status(200).json(answer);
@@ -398,34 +406,49 @@ export class GamesController {
                 return res.status(400).json({message: 'user without team'});
             }
 
+            const bigGame = bigGames[gameId];
             const headersList = ['Название команды', 'Сумма']; // TODO: DTO
-            for (let i = 1; i <= bigGames[gameId].CurrentGame.rounds.length; i++) {
+            if (bigGame.isFullGame()) {
+                headersList.push('Матрица');
+            }
+
+            const game = bigGame.isFullGame() ? bigGame.ChGK : bigGame.CurrentGame;
+
+            for (let i = 1; i <= game.rounds.length; i++) {
                 headersList.push('Тур ' + i);
-                for (let j = 1; j <= bigGames[gameId].CurrentGame.rounds[i - 1].questionsCount; j++) {
+                for (let j = 1; j <= game.rounds[i - 1].questionsCount; j++) {
                     headersList.push('Вопрос ' + j);
                 }
             }
+
             const teamRows = [];
-            const totalScoreForAllTeams = bigGames[gameId].CurrentGame.getTotalScoreForAllTeams();
-            const scoreTable = roles === 'user' && teamId && bigGames[gameId].isIntrigue ?
-                bigGames[gameId].CurrentGame.getScoreTableForTeam(teamId) : bigGames[gameId].CurrentGame.getScoreTable();
+            const totalScoreForAllTeams = game.getTotalScoreForAllTeams();
+            const matrixSums = bigGame.isFullGame() ? bigGame.Matrix.getTotalScoreForAllTeams() : undefined;
+
+            const scoreTable = roles === 'user' && teamId && bigGames[gameId].isIntrigue
+                ? game.getScoreTableForTeam(teamId)
+                : game.getScoreTable()
+
             let roundsResultList = [];
             for (const team in scoreTable) {
                 let roundSum = 0;
-                for (let i = 0; i < bigGames[gameId].CurrentGame.rounds.length; i++) {
-                    for (let j = 0; j < bigGames[gameId].CurrentGame.rounds[i].questionsCount; j++) {
+                for (let i = 0; i < game.rounds.length; i++) {
+                    for (let j = 0; j < game.rounds[i].questionsCount; j++) {
                         roundSum += scoreTable[team][i][j];
                     }
                     roundsResultList.push(roundSum);
                     roundsResultList.push(scoreTable[team][i].join(';'));
                     roundSum = 0;
                 }
-                teamRows.push(team + ';' + totalScoreForAllTeams[team] + ';' + roundsResultList.join(';'));
+                teamRows.push(team + ';' + totalScoreForAllTeams[team] + ';' + (matrixSums ? `${matrixSums[team]};` : '') + roundsResultList.join(';'));
                 roundsResultList = [];
             }
 
+            const headers = headersList.join(';');
+            const value = teamRows.join('\n');
+
             const answer = {
-                totalTable: Game.getScoreTableWithFormat(bigGames[gameId].CurrentGame, scoreTable)
+                totalTable: [headers, value].join('\n')
             };
 
             console.log(answer.totalTable, 'gameId = ', gameId);

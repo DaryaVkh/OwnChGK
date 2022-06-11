@@ -23,6 +23,7 @@ const Rating: FC<RatingProps> = props => {
     const [teams, setTeams] = useState<TeamResult[]>();
     const [expandedTours, setExpandedTours] = useState<boolean[]>([]);
     const [isIntrigue, setIsIntrigue] = useState(false);
+    const [isFullGame, setIsFullGame] = useState(false);
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
     useEffect(() => {
@@ -50,17 +51,23 @@ const Rating: FC<RatingProps> = props => {
                                      isIntrigue,
                                      roundsCount,
                                      questionsCount,
-                                     totalScoreForAllTeams
+                                     totalScoreForAllTeams,
+                                     matrixSums,
                                  }) => {
                     setIsIntrigue(isIntrigue);
                     setGameParams({toursCount: roundsCount, questionsCount: questionsCount});
                     setExpandedTours(new Array(roundsCount).fill(false));
+                    if (matrixSums) {
+                        setIsFullGame(true);
+                    }
+
                     const result = [];
                     const teams = Object.keys(totalScoreForAllTeams);
                     for (const team of teams) {
                         result.push({
                             teamName: team,
-                            toursWithResults: totalScoreForAllTeams[team]
+                            matrixSum: matrixSums?.[team],
+                            toursWithResults: totalScoreForAllTeams[team],
                         })
                     }
                     setTeams(result);
@@ -96,11 +103,12 @@ const Rating: FC<RatingProps> = props => {
         teams.sort((a, b) => {
             const firstSum = countSums(a.toursWithResults).reduce((x, y) => x + y);
             const secondSum = countSums(b.toursWithResults).reduce((x, y) => x + y);
-            return firstSum < secondSum ? 1 : (firstSum > secondSum ? -1 : 0);
+            return firstSum < secondSum ? 1 : (firstSum > secondSum ? -1 : (a.matrixSum < b.matrixSum ? 1 : -1));
         });
 
         return teams.map((teamResult, i) => {
             return <TeamTableRow key={teamResult.teamName} place={isIntrigue && !props.isAdmin ? '-' : i + 1} teamName={teamResult.teamName}
+                                 matrixSum={teamResult.matrixSum}
                                  toursWithResults={teamResult.toursWithResults} isExpanded={expandedTours}/>;
         });
     };
@@ -239,6 +247,12 @@ const Rating: FC<RatingProps> = props => {
                                                    minWidth: mediaMatch.matches ? '20vw' : '8vw',
                                                    maxWidth: mediaMatch.matches ? '20vw' : '8vw'
                                                }}>Сумма</TableCell>
+                                    {isFullGame ? <TableCell sx={headerTableCellStyles} align="center" variant="head"
+                                               style={{
+                                                   fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                   minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                                   maxWidth: mediaMatch.matches ? '20vw' : '8vw'
+                                               }}>Матрица</TableCell> : null}
                                     {renderTourHeaders()}
                                 </TableRow>
                             </TableHead>

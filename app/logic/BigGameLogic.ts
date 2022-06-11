@@ -1,5 +1,4 @@
 import {Game, GameStatus} from './Game';
-import {seconds70PerQuestion} from "../socket";
 
 
 export class BigGameLogic {
@@ -21,6 +20,10 @@ export class BigGameLogic {
 
         this.status = GameStatus.Start;
         this.breakTime = 0;
+    }
+
+    isFullGame() {
+        return this.Matrix && this.ChGK;
     }
 
     startBreak(time: number): void {

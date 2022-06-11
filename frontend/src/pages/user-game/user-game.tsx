@@ -240,7 +240,7 @@ const UserGame: FC<UserGameProps> = props => {
                 progress.style.width = '100%';
             }
             let answerInput = document.querySelector('#answer') as HTMLInputElement;
-            if (answerInput) {
+            if (answerInput && gamePart === 'chgk') {
                 answerInput.focus();
             }
             changeColor(progress);

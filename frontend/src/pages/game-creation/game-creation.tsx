@@ -148,7 +148,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                 <div className={classes.questionNumber}>{questionIndex + 1}</div>
 
                                 <TextareaAutosize className={classes.questionInput} minRows={1}
-                                                  value={tempChgkQuestions?.[roundIndex + 1][questionIndex] || chgkSettings?.questions?.[roundIndex + 1]?.[questionIndex]}
+                                                  value={tempChgkQuestions?.[roundIndex + 1]?.[questionIndex] || chgkSettings?.questions?.[roundIndex + 1]?.[questionIndex]}
                                                   onChange={(event) => handleChgkQuestionChange(event, roundIndex, questionIndex)}
                                 />
                             </div>

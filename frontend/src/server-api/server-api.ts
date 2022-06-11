@@ -10,10 +10,6 @@ export const getTeamsParticipants = async (gameId: string) => {
     return await fetch(`/api/games/${gameId}/teamsParticipants`);
 };
 
-export const getResult = async (gameId: string) => {
-    return await fetch(`/api/games/${gameId}/result`);
-};
-
 export const getResultTable = async (gameId: string) => {
     return await fetch(`/api/games/${gameId}/resultTable`);
 };

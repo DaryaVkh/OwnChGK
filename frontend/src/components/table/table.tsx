@@ -99,10 +99,10 @@ const TourCell: FC<{ tourResults: number[], isExpanded: boolean }> = props => {
     const renderExpandedResults = () => {
         return props.tourResults.map((result) => {
             return (
-                <TableCell key={`${props.tourResults.toString()}`}
-                           sx={result === 0 ? errorResult : successResult}
+                <TableCell key={`${props.tourResults.toString()}_${result}`}
+                           sx={result <= 0 ? errorResult : successResult}
                            align='center' variant='body'>
-                    {result === 0 ? '\u2212' : '+'}
+                    {result <= 0 ? '\u2212' : '+'}
                 </TableCell>
             );
         });
@@ -174,6 +174,14 @@ export const TeamTableRow: FC<TeamTableRowProps> = props => {
                            maxWidth: mediaMatch.matches ? '20vw' : '8vw',
                            fontWeight: 700}}>{countSums().reduce((a, b) => a +
                 b)}</TableCell>
+            {props.matrixSum !== undefined
+                ? <TableCell sx={bodyTableCellStyles} align='center' variant='body'
+                             style={{
+                                 minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                 maxWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                 fontWeight: 700
+                             }}>{props.matrixSum}</TableCell>
+                : null}
             {renderTourCells()}
         </TableRow>
     );
