@@ -28,8 +28,8 @@ export const teamsRouter = () => {
         body('newTeamName').isString().notEmpty(),
         body('captain').optional({nullable: true}).isEmail(),
         body('participants').optional({nullable: true}).isArray(),
-        body('participants.*.email').isEmail(),
-        body('participants.*.name').isString(), teamsController.editTeam); // TODO: внутри есть проверка юзера, мб перенести в новый middleware
+        body('participants.*.email').optional().isString(), // TODO: потом добавить валидацию на мыло
+        body('participants.*.name').optional().isString(), teamsController.editTeam); // TODO: внутри есть проверка юзера, мб перенести в новый middleware
 
     router.patch('/:teamId/changeCaptain',
         middleware,
@@ -48,8 +48,8 @@ export const teamsRouter = () => {
         body('teamName').isString().notEmpty(),
         body('captain').optional({nullable: true}).isEmail(),
         body('participants').optional({nullable: true}).isArray(),
-        body('participants.*.email').isEmail(),
-        body('participants.*.name').isString(), teamsController.insertTeam);
+        body('participants.*.email').optional().isString(), // TODO: потом добавить валидацию на мыло
+        body('participants.*.name').optional().isString(), teamsController.insertTeam);
 
     return router;
 }

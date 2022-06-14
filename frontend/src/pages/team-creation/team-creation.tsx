@@ -8,7 +8,7 @@ import {
     TeamCreatorStateProps
 } from '../../entities/team-creation/team-creation.interfaces';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
-import {Autocomplete, Button, OutlinedInput, Skeleton, TextField} from '@mui/material';
+import {Alert, Autocomplete, Button, OutlinedInput, Skeleton, Snackbar, TextField} from '@mui/material';
 import {CustomInput} from '../../components/custom-input/custom-input';
 import {createTeam, editTeam, getTeam, getUsersWithoutTeam} from '../../server-api/server-api';
 import {Redirect, useLocation} from 'react-router-dom';
@@ -42,6 +42,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isPageLoading, setIsPageLoading] = useState<boolean>(true);
     const [members, setMembers] = useState<TeamMember[]>([]);
+    const [isSaveError, setIsSaveError] = useState<boolean>(false);
     const scrollbars = useRef<Scrollbars>(null);
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
@@ -123,7 +124,7 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
         }*/
         setIsLoading(true);
         if (props.mode === 'creation') {
-            createTeam(teamName, captain, members).then(res => {
+            createTeam(teamName, captain, members.filter(member => member.name !== "" || member.email !== "")).then(res => {
                 if (res.status === 200) {
                     setIsCreatedSuccessfully(true);
                     if (!props.isAdmin) {
@@ -133,11 +134,12 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                     setIsLoading(false);
                     setIsNameInvalid(true);
                 } else {
-                    // TODO
+                    setIsSaveError(true);
+                    setIsLoading(false);
                 }
             });
         } else {
-            editTeam(location.state.id, teamName, captain, members).then(res => {
+            editTeam(location.state.id, teamName, captain, members.filter(member => member.name !== "" || member.email !== "")).then(res => {
                 if (res.status === 200) {
                     if (!props.isAdmin) {
                         props.onAddUserTeam(teamName);
@@ -148,7 +150,8 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                     setIsLoading(false);
                     setIsNameInvalid(true);
                 } else {
-                    // TODO
+                    setIsSaveError(true);
+                    setIsLoading(false);
                 }
             });
         }
@@ -365,6 +368,12 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
                                 }}/>
                 </form>
                 <PageBackdrop isOpen={isLoading}/>
+                <Snackbar sx={{marginTop: '8vh'}} open={isSaveError}
+                          anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000} onClose={() => setIsSaveError(false)}>
+                    <Alert severity='error' sx={{width: '100%'}} onClose={() => setIsSaveError(false)}>
+                        Не удалось сохранить изменения
+                    </Alert>
+                </Snackbar>
             </PageWrapper>
         );
 };
