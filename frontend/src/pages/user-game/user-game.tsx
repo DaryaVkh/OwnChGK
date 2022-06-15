@@ -20,6 +20,7 @@ let interval: any;
 let checkStart: any;
 let ping: any;
 let conn: WebSocket;
+let checkTimeInterval: any;
 let matrixSettingsCurrent: GamePartSettings | undefined;
 
 const UserGame: FC<UserGameProps> = props => {
@@ -101,6 +102,15 @@ const UserGame: FC<UserGameProps> = props => {
             }));
         },
 
+        checkTime: (currentTime: number, currentMaxTime: number) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'checkTime',
+                'currentTime': currentTime,
+                'currentMaxTime': currentMaxTime,
+            }))
+        },
+
         giveAnswerToChgk: (answer: string) => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
@@ -125,7 +135,15 @@ const UserGame: FC<UserGameProps> = props => {
                 'cookie': getCookie('authorization'),
                 'action': 'getTeamAnswers'
             }));
-        }
+        },
+
+        checkBreakTime: (time: number) => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'checkBreakTime',
+                'time': time,
+            }))
+        },
     }
 
     const handler = {
@@ -155,6 +173,7 @@ const UserGame: FC<UserGameProps> = props => {
                     setIsBreak(true);
                     setBreakTime(breakTime);
                     interval = setInterval(() => setBreakTime((time) => {
+                        requester.checkBreakTime(time);
                         if (time - 1 <= 0) {
                             clearInterval(interval);
                             setIsBreak(false);
@@ -165,6 +184,8 @@ const UserGame: FC<UserGameProps> = props => {
 
                 setIsLoading(false);
                 requester.getQuestionTime();
+            } else {
+                setIsLoading(false);
             }
         },
 
@@ -199,6 +220,19 @@ const UserGame: FC<UserGameProps> = props => {
                 progressBar = moveProgressBar(time, maxTime);
             }
             setMaxTime(maxTime / 1000);
+        },
+
+        handleCheckTimeMessage: (currentTime: number, currentMaxTime: number, time: number, maxTime: number) => {
+            if (Math.abs(currentTime - time) > 800) {
+                setTimeForAnswer(time / 1000);
+                setMaxTime(maxTime / 1000);
+            }
+        },
+
+        handleCheckBreakTimeMessage: (currentTime: number, time: number) => {
+            if (Math.abs(currentTime - time) > 0.8) {
+                setBreakTime(time);
+            }
         },
 
         handleStartMessage: (time: number, maxTime: number) => {
@@ -308,6 +342,7 @@ const UserGame: FC<UserGameProps> = props => {
                 setBreakTime(time);
                 clearInterval(interval);
                 interval = setInterval(() => setBreakTime((time) => {
+                    requester.checkBreakTime(time);
                     if (time - 1 <= 0) {
                         clearInterval(interval);
                         setIsBreak(false);
@@ -361,6 +396,9 @@ const UserGame: FC<UserGameProps> = props => {
                     case 'time':
                         handler.handleTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
                         break;
+                    case 'checkTime':
+                        handler.handleCheckTimeMessage(jsonMessage.currentTime, jsonMessage.currentMaxTime, jsonMessage.time, jsonMessage.maxTime);
+                        break;
                     case 'start':
                         handler.handleStartMessage(jsonMessage.time, jsonMessage.maxTime);
                         break;
@@ -388,6 +426,9 @@ const UserGame: FC<UserGameProps> = props => {
                         break;
                     case 'teamAnswers':
                         handler.handleGetTeamAnswers(jsonMessage.matrixAnswers);
+                        break;
+                    case 'checkBreakTime':
+                        handler.handleCheckBreakTimeMessage(jsonMessage.currentTime, jsonMessage.time);
                         break;
                 }
             }
@@ -499,6 +540,7 @@ const UserGame: FC<UserGameProps> = props => {
             } else {
                 changeColor(progressBar);
                 setTimeForAnswer(t => {
+                    requester.checkTime(t * 1000, maxTime);
                     width = Math.ceil(100 * (t ?? 0) / (maxTime / 1000));
                     const result = (t ?? 0) - 1;
                     progressBar.style.width = (result <= 0 ? 0 : width) + '%';

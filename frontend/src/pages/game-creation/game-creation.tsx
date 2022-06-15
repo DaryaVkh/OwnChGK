@@ -43,6 +43,9 @@ const GameCreator: FC<GameCreatorProps> = props => {
     const [isDeleteChgkModalVisible, setIsDeleteChgkModalVisible] = useState<boolean>(false);
     const [isDeleteMatrixModalVisible, setIsDeleteMatrixModalVisible] = useState<boolean>(false);
     const [submitted, setSubmitted] = useState<boolean>(false);
+    const [isSaveChgkQuestions, setIsSaveChgkQuestions] = useState<boolean>(false);
+    const [isSaveMatrixTours, setIsSaveMatrixTours] = useState<boolean>(false);
+    const [isSaveMatrixQuestions, setIsSaveMatrixQuestions] = useState<boolean>(false);
     const oldGameId = props.mode === 'edit' ? location.state.id : '';
 
     if (teamsFromDB && (props.mode != 'edit' || chosenTeams) && isPageLoading) {
@@ -530,6 +533,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                             <button type='button' className={classes.undoButton} onClick={() => {
                                 setTempChgkRoundCount(undefined);
                                 setTempChgkQuestionsCount(undefined);
+                                setTempChgkQuestions(undefined);
                                 setPage('main');
                             }}>
                                 Отменить
@@ -550,13 +554,17 @@ const GameCreator: FC<GameCreatorProps> = props => {
 
                         <div className={classes.buttonsWrapper}>
                             <button type='submit' className={classes.createButton} onClick={() => {
+                                setIsSaveChgkQuestions(true);
                                 setPage('chgk-settings');
                             }}>
                                 Сохранить
                             </button>
 
                             <button type='button' className={classes.undoButton} onClick={() => {
-                                setTempChgkQuestions(undefined);
+                                if (!isSaveChgkQuestions) {
+                                    setTempChgkQuestions(undefined);
+                                }
+
                                 setPage('chgk-settings');
                             }}>
                                 Отменить
@@ -613,6 +621,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                 setTempMatrixQuestionsCount(undefined);
                                 setTempMatrixRoundCount(undefined);
                                 setTempMatrixRoundNames(undefined);
+                                setTempMatrixQuestions(undefined);
                                 setPage('main');
                             }}>
                                 Отменить
@@ -670,6 +679,7 @@ const GameCreator: FC<GameCreatorProps> = props => {
                                             questions: tempMatrixQuestions || prevValue?.questions || {}
                                         };
                                     });
+                                    setIsSaveMatrixTours(true);
                                     setTempMatrixRoundCount(undefined);
                                     setTempMatrixQuestionsCount(undefined);
                                     setTempMatrixQuestions(undefined);
@@ -684,7 +694,11 @@ const GameCreator: FC<GameCreatorProps> = props => {
                             </button>
 
                             <button type='button' className={classes.undoButton} onClick={() => {
-                                setTempMatrixRoundNames(undefined);
+                                if (!isSaveMatrixTours) {
+                                    setTempMatrixRoundNames(undefined);
+                                    setTempMatrixQuestions(undefined);
+                                }
+
                                 setPage('matrix-settings');
                             }}>
                                 Назад
@@ -706,12 +720,15 @@ const GameCreator: FC<GameCreatorProps> = props => {
                         <div className={classes.buttonsWrapper}>
                             <button type='submit' className={classes.createButton} onClick={() => {
                                 setPage('matrix-tours');
+                                setIsSaveMatrixQuestions(true);
                             }}>
                                 Сохранить
                             </button>
 
                             <button type='button' className={classes.undoButton} onClick={() => {
-                                setTempMatrixQuestions(undefined);
+                                if (!isSaveMatrixQuestions) {
+                                    setTempMatrixQuestions(undefined);
+                                }
                                 setPage('matrix-tours');
                             }}>
                                 Отменить

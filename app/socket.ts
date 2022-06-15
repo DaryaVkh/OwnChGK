@@ -290,6 +290,15 @@ function StopBreakTime(gameId) {
 }
 
 function GetQuestionNumber(gameId, ws) {
+    if (!bigGames[gameId].CurrentGame.currentQuestion) {
+        console.log('currentQuestion is undefined');
+        ws.send(JSON.stringify({
+            'action': 'questionNumberIsUndefined',
+            'activeGamePart': bigGames[gameId].CurrentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
+        }));
+        return;
+    }
+
     console.log('tour ' + bigGames[gameId].CurrentGame.currentQuestion[0], 'in game = ', gameId);
     console.log('question ' + bigGames[gameId].CurrentGame.currentQuestion[1], 'in game = ', gameId);
     ws.send(JSON.stringify({
@@ -460,27 +469,48 @@ function GetTime(gameId, ws) {
     }));
 }
 
+function CheckTime(gameId, ws, jsonMessage) {
+    ws.send(JSON.stringify({
+        'action': 'checkTime',
+        'maxTime': bigGames[gameId].CurrentGame.maxTime,
+        'time': GetPreliminaryTime(gameId),
+        'currentTime': jsonMessage.currentTime,
+        'currentMaxTime': jsonMessage.currentMaxTime,
+    }));
+}
+
+function CheckBreakTime(gameId, ws, jsonMessage) {
+    ws.send(JSON.stringify({
+        'action': 'checkBreakTime',
+        'currentTime': jsonMessage.time,
+        'time': bigGames[gameId].breakTime
+    }))
+}
+
 function IsOnBreak(gameId, ws) {
     ws.send(JSON.stringify({
         action: 'isOnBreak',
         status: bigGames[gameId].status === GameStatus.IsOnBreak,
         time: bigGames[gameId].breakTime
-    }))
+    }));
 }
 
 function getGameStatus(gameId, ws) {
     const currentGame = bigGames[gameId]?.CurrentGame
 
     if (currentGame) {
-        const currentQuestionNumber = currentGame.rounds[0].questionsCount * (currentGame.currentQuestion[0] - 1) + currentGame.currentQuestion[1];
+        const currentQuestionNumber = currentGame.currentQuestion
+            ? currentGame.rounds[0].questionsCount * (currentGame.currentQuestion[0] - 1) + currentGame.currentQuestion[1]
+            : undefined;
+
         ws.send(JSON.stringify({
             'action': 'gameStatus',
-            'isStarted': !!bigGames[gameId],
+            'isStarted': !!bigGames[gameId] && bigGames[gameId].CurrentGame.currentQuestion,
             'activeGamePart': currentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
             'isOnBreak': bigGames[gameId].status === GameStatus.IsOnBreak,
             'breakTime': bigGames[gameId].breakTime,
             'currentQuestionNumber': currentQuestionNumber, //todo: тут вроде надо ток для чгк
-            'matrixActive': currentGame.type === GameTypeLogic.Matrix ? {round: currentGame.currentQuestion[0], question: currentGame.currentQuestion[1]} : null,
+            'matrixActive': currentGame.type === GameTypeLogic.Matrix && currentGame.currentQuestion ? {round: currentGame.currentQuestion[0], question: currentGame.currentQuestion[1]} : null,
             'maxTime': currentGame.maxTime,
             'time': GetPreliminaryTime(gameId),
         }));
@@ -520,6 +550,12 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
         switch (jsonMessage.action) {
             case 'time':
                 GetTime(gameId, ws);
+                break;
+            case 'checkTime':
+                CheckTime(gameId, ws, jsonMessage);
+                break;
+            case 'checkBreakTime':
+                CheckBreakTime(gameId, ws, jsonMessage);
                 break;
             case 'isOnBreak':
                 IsOnBreak(gameId, ws);

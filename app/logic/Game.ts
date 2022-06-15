@@ -62,7 +62,7 @@ export class Game {
         this.name = name;
         this.rounds = [];
         this.teams = {};
-        this.currentQuestion = [1, 1];
+        this.currentQuestion = undefined;
         this.type = type;
 
         this.isTimerStart = false;
