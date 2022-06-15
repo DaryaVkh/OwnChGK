@@ -65,10 +65,10 @@ const Authorization: FC<AuthorizationProps> = props => {
 
                 <form onSubmit={handleSubmit}>
                     <CustomInput type="email" id="email" name="email" placeholder="Почта" value={email}
-                                 onChange={handleEmailChange} isInvalid={wrongEmailOrPassword}
+                                 onChange={handleEmailChange} isInvalid={wrongEmailOrPassword} autocomplete={true}
                                  onFocus={handleErrorFixes}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль" value={password}
-                                 onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword}
+                                 onChange={handlePasswordChange} isInvalid={wrongEmailOrPassword} autocomplete={true}
                                  onFocus={handleErrorFixes} errorHelperText='Неверный логин или пароль'/>
 
                     <FormButton type="signInButton" text="Войти"/>

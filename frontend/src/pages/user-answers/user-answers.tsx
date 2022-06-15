@@ -104,6 +104,9 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                     setGameName(name);
                     setGamePart(matrixSettings ? "matrix": "chgk");
                     setIsBothPartsInGame(chgkSettings && matrixSettings);
+                    if (chgkSettings && matrixSettings) {
+                        activateIndicator();
+                    }
                 });
             }
         });
@@ -150,7 +153,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             .map((answer, index) => {
                 return (
                     <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                                order={answer.number}/>
+                                order={answer.number} gamePart={gamePart}/>
                 );
             });
     };

@@ -66,7 +66,7 @@ export const CustomInput: FC<InputProps> = props => {
         <FormControl variant='outlined' sx={{marginBottom: mediaMatch.matches ? '5%' : '3%'}} fullWidth={true} style={props.style}>
             <OutlinedInput className={cls.join(' ')}
                            fullWidth={true}
-                           autoComplete={props.type === 'password' ? 'new-password' : 'off'}
+                           autoComplete={props.type === 'password' ? 'on' : (props.autocomplete ? 'on' : 'off')}
                            type={values.showPassword && props.type === 'password' ? 'text' : props.type}
                            id={props.id}
                            error={props.isInvalid}

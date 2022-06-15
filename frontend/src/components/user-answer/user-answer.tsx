@@ -63,7 +63,7 @@ const UserAnswer: FC<UserAnswerProps> = props => {
                 <div className={classes.answerNumber}>{props.order}</div>
                 <input readOnly className={`${classes.answer} ${getInputClass()}`} value={getAnswer()}/>
                 {
-                    answerStatus === 'error'
+                    answerStatus === 'error' && props.gamePart === 'chgk'
                         ? <button className={
                             `${classes.button} ${classes.oppositionButton} ${isOppositionClicked ? classes.clickedOppositionButton : ''}`}
                                   onClick={handleOppositionButtonClick}>Апелляция</button>
