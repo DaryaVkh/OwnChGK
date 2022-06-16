@@ -241,18 +241,18 @@ const Rating: FC<RatingProps> = props => {
                                                    minWidth: mediaMatch.matches ? '40vw' : '16vw',
                                                    maxWidth: mediaMatch.matches ? '40vw' : '16vw'
                                                }}>Команда</TableCell>
+                                    {isFullGame ? <TableCell sx={headerTableCellStyles} align="center" variant="head"
+                                                             style={{
+                                                                 fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                                 minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                                                 maxWidth: mediaMatch.matches ? '20vw' : '8vw'
+                                                             }}>Матрица</TableCell> : null}
                                     <TableCell sx={headerTableCellStyles} align="center" variant="head"
                                                style={{
                                                    fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
                                                    minWidth: mediaMatch.matches ? '20vw' : '8vw',
                                                    maxWidth: mediaMatch.matches ? '20vw' : '8vw'
                                                }}>Сумма</TableCell>
-                                    {isFullGame ? <TableCell sx={headerTableCellStyles} align="center" variant="head"
-                                               style={{
-                                                   fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
-                                                   minWidth: mediaMatch.matches ? '20vw' : '8vw',
-                                                   maxWidth: mediaMatch.matches ? '20vw' : '8vw'
-                                               }}>Матрица</TableCell> : null}
                                     {renderTourHeaders()}
                                 </TableRow>
                             </TableHead>

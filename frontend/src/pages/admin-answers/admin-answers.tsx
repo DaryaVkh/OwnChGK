@@ -216,7 +216,7 @@ const AdminAnswersPage: FC = () => {
             return (
                 <div className={classes.answerWrapper} key={`${answersType}_${answer}`}>
                     <CustomCheckbox name={answer} checked={checked} onChange={handleCheckboxChange}
-                                    style={{marginLeft: 0, marginBottom: 0, height: '6vh'}}/>
+                                    style={{marginLeft: 0, marginBottom: 0}}/>
                     <div className={classes.answerCountWrapper}>{count}</div>
                 </div>
             );

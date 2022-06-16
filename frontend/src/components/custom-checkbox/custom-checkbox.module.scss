@@ -3,7 +3,7 @@
   width: 90%;
   margin-bottom: 1.3vh;
   margin-left: 1.3vw;
-  padding: 0 0.4vw 0 1vw;
+  padding: 1vh 0.4vw 1vh 1vw;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -14,11 +14,15 @@
 }
 
 .labelWrapper {
-  align-items: center;
   width: 90%;
+  max-width: 90%;
   font-size: 1vw;
   overflow: hidden;
-  display: inline-block;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  word-break: break-word;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  cursor: default;
 }
