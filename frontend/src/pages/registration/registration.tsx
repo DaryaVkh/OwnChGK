@@ -81,7 +81,7 @@ const Registration: FC<RegistrationProps> = props => {
 
                 <form onSubmit={validateForm}>
                     <CustomInput type="email" id="email" name="email" placeholder="Почта"
-                                 style={{marginBottom: '9%'}}
+                                 style={{marginBottom: '9%'}} autocomplete={true}
                                  value={email} onChange={handleEmailChange}
                                  isInvalid={isError || isRegisteredAlready}
                                  errorHelperText={isRegisteredAlready ? 'Эта почта уже зарегистрирована' : ''}
@@ -90,8 +90,10 @@ const Registration: FC<RegistrationProps> = props => {
                                      setIsError(false);
                                  }}/>
                     <CustomInput type="password" id="password" name="password" placeholder="Пароль" value={password}
+                                 autocomplete={true}
                                  isInvalid={isRepeatedPasswordInvalid || isError} onChange={handlePasswordChange}/>
-                    <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите пароль" value={repeatedPassword}
+                    <CustomInput type="password" id="repeatPassword" name="repeatPassword" placeholder="Повторите пароль"
+                                 value={repeatedPassword} autocomplete={true}
                                  isInvalid={isRepeatedPasswordInvalid || isError} onChange={handleRepeatedPasswordChange}
                                  errorHelperText={isRepeatedPasswordInvalid ? 'Пароли не совпадают' : 'Ошибка регистрации, попробуйте снова'}
                     />

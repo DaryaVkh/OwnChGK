@@ -49,6 +49,7 @@ const UserGame: FC<UserGameProps> = props => {
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
     const [activeMatrixRound, setActiveMatrixRound] = useState<{ name: string, index: number }>();
     const [activeMatrixQuestion, setActiveMatrixQuestion] = useState<number>(1);
+    const [focusedMatrixAnswerInfo, setFocusedMatrixAnswerInfo] = useState<{index: number, roundName: string, roundNumber: number}>();
 
     const requester = {
         startRequests: () => {
@@ -367,13 +368,33 @@ const UserGame: FC<UserGameProps> = props => {
     useEffect(() => {
         const resizeEventHandler = () => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
-        }
+        };
 
         window.addEventListener('resize', resizeEventHandler);
 
         return () => {
             window.removeEventListener('resize', resizeEventHandler);
         };
+    }, []);
+
+    useEffect(() => {
+        const enterEventHandler = (e: KeyboardEvent) => {
+            if (e.key === 'Enter') {
+                if (gamePart === 'matrix') {
+                    if (focusedMatrixAnswerInfo) {
+                        handleSendMatrixAnswer(focusedMatrixAnswerInfo.index, focusedMatrixAnswerInfo.roundName, focusedMatrixAnswerInfo.roundNumber);
+                    }
+                } else if (gamePart === 'chgk') {
+                    handleSendButtonClick();
+                }
+            }
+        };
+
+        window.addEventListener('keypress', enterEventHandler);
+
+        return () => {
+            window.removeEventListener('keypress', enterEventHandler);
+        }
     }, []);
 
     useEffect(() => {
@@ -623,7 +644,7 @@ const UserGame: FC<UserGameProps> = props => {
                                                          width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
                                                          height: mediaMatch.matches ? '8.7vw' : '7vh',
                                                          marginRight: mediaMatch.matches ? '0' : '2%'
-                                                     }} value={matrixAnswers?.[i + 1][j]}
+                                                     }} value={matrixAnswers?.[i + 1][j]} onFocus={() => setFocusedMatrixAnswerInfo({index: j + 1, roundName: tourName, roundNumber: i + 1})}
                                                      onChange={(event) => handleMatrixAnswer(event, j, i + 1)}/>
                                         {
                                             acceptedMatrixAnswers?.[i + 1][j] && mediaMatch.matches

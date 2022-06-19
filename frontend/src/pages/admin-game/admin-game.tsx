@@ -283,8 +283,10 @@ const AdminGame: FC<AdminGameProps> = props => {
         }
 
         return (
-            <div className={`${classes.tour} ${props.tourIndex === clickedTourIndex && clickedGamePart === props.gamePart ? classes.activeTour : ''}`} id={`${props.tourIndex}_${props.gamePart}`}
-                 onClick={handleTourClick} key={`tour_${props.tourNumber}`}>
+            <div
+                className={`${classes.tour} ${props.tourIndex === clickedTourIndex && clickedGamePart === props.gamePart ? classes.activeTour : ''}`}
+                id={`${props.tourIndex}_${props.gamePart}`}
+                onClick={handleTourClick} key={`tour_${props.tourNumber}`}>
                 {
                     activeTourIndex !== undefined && props.tourIndex === activeTourIndex && activeGamePart === props.gamePart
                         ? <span>&#9654;</span>
@@ -307,7 +309,7 @@ const AdminGame: FC<AdminGameProps> = props => {
         }
     }
 
-    const parseTimer = (time:number) => {
+    const parseTimer = (time: number) => {
         const minutes = Math.floor(time / 1000 / 60).toString().padStart(1, '0');
         const sec = Math.ceil(time / 1000 % 60).toString().padStart(2, '0');
         return `${minutes}:${sec}`;
@@ -364,7 +366,8 @@ const AdminGame: FC<AdminGameProps> = props => {
 
         //const startTourNumber = matrixSettings ? (gamePart === 'matrix' ? 0 : matrixSettings.roundCount) : 0;
 
-        return Array.from(Array(toursCount).keys()).map(i => <Tour gamePart={gamePart} key={`tour_${i}_${gamePart}`} tourIndex={i + 1}
+        return Array.from(Array(toursCount).keys()).map(i => <Tour gamePart={gamePart} key={`tour_${i}_${gamePart}`}
+                                                                   tourIndex={i + 1}
                                                                    tourNumber={i + 1} tourName={tourNames?.[i]}/>);
     };
 
@@ -376,9 +379,10 @@ const AdminGame: FC<AdminGameProps> = props => {
         return Array.from(Array(questionsCount).keys()).map(i => {
             return (
                 <div className={classes.questionWrapper} key={`tour_${activeTourIndex}_question_${i + 1}`}>
-                    <div className={`${classes.question} ${activeQuestionNumber !== undefined && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`}
-                         id={`${i + 1}`}
-                         onClick={(event) => handleQuestionClick(event, gamePart)}>
+                    <div
+                        className={`${classes.question} ${activeQuestionNumber !== undefined && i === activeQuestionNumber - 1 ? classes.activeQuestion : ''}`}
+                        id={`${i + 1}`}
+                        onClick={(event) => handleQuestionClick(event, gamePart)}>
                         Вопрос {i + 1}
                     </div>
 
@@ -419,7 +423,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     }
 
     if (isLoading || !gameName) {
-        return <Loader />;
+        return <Loader/>;
     }
 
     return (
@@ -444,19 +448,25 @@ const AdminGame: FC<AdminGameProps> = props => {
                     <button className={`${classes.button} ${classes.breakButton}`}
                             onClick={isBreak ? stopBreak : openBreakModal}>{isBreak ? 'Остановить перерыв' : 'Перерыв'}</button>
 
-                    <button className={`${classes.button} ${classes.playButton}`} disabled={isBreak} onClick={handlePlayClick}>
-                        {playOrPause === 'play'
-                            ? <PlayArrowIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
-                            : <PauseIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
+                    <button className={`${classes.button} ${classes.playButton}`} disabled={isBreak}
+                            onClick={handlePlayClick}>
+                        {
+                            playOrPause === 'play'
+                                ? <PlayArrowIcon
+                                    sx={{fontSize: '2.5vw', color: isBreak ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
+                                : <PauseIcon
+                                    sx={{fontSize: '2.5vw', color: isBreak ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
                         }
                     </button>
 
-                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak} onClick={() => handleStopClick(activeGamePart)}>
-                        <StopIcon sx={{fontSize: '2.5vw', color: 'black'}}/>
+                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak}
+                            onClick={() => handleStopClick(activeGamePart)}>
+                        <StopIcon sx={{fontSize: '2.5vw', color: isBreak ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
                     </button>
 
-                    <button className={`${classes.button} ${classes.tenSecondsButton}`} disabled={isBreak} onClick={handleAddedTimeClick}>+
-                        10 сек.
+                    <button className={`${classes.button} ${classes.tenSecondsButton}`} disabled={isBreak}
+                            onClick={handleAddedTimeClick}>
+                        + 10 сек.
                     </button>
 
                     <div className={classes.answerTime}>{parseTimer(timer)}</div>
@@ -503,11 +513,12 @@ const AdminGame: FC<AdminGameProps> = props => {
                 </div>
                 {
                     isBreak
-                        ? <p className={classes.breakInformer}>Идет перерыв: <b>{parseTimer(breakTime*1000)}</b></p>
+                        ? <p className={classes.breakInformer}>Идет перерыв: <b>{parseTimer(breakTime * 1000)}</b></p>
                         : null
                 }
             </div>
-            <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError} anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
+            <Snackbar sx={{marginTop: '8vh'}} open={isConnectionError}
+                      anchorOrigin={{vertical: 'top', horizontal: 'right'}} autoHideDuration={5000}>
                 <Alert severity='error' sx={{width: '100%'}}>
                     Ошибка соединения. Обновите страницу
                 </Alert>

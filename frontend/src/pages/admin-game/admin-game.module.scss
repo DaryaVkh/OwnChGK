@@ -41,12 +41,12 @@
     border-color: rgba(27, 38, 44, .5);
   }
 
-  &:hover {
+  &:not(:disabled):hover {
     cursor: pointer;
     box-shadow: 0 0 2vh 2px var(--foreground-color);
   }
 
-  &:active {
+  &:not(:disabled):active {
     box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .50);
   }
 }

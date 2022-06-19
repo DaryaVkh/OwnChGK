@@ -168,12 +168,6 @@ export const TeamTableRow: FC<TeamTableRowProps> = props => {
                            minWidth: mediaMatch.matches ? '40vw' : '16vw',
                            maxWidth: mediaMatch.matches ? '40vw' : '16vw',
                            whiteSpace: 'nowrap'}}>{props.teamName}</TableCell>
-            <TableCell sx={bodyTableCellStyles} align='center' variant='body'
-                       style={{
-                           minWidth: mediaMatch.matches ? '20vw' : '8vw',
-                           maxWidth: mediaMatch.matches ? '20vw' : '8vw',
-                           fontWeight: 700}}>{countSums().reduce((a, b) => a +
-                b)}</TableCell>
             {props.matrixSum !== undefined
                 ? <TableCell sx={bodyTableCellStyles} align='center' variant='body'
                              style={{
@@ -182,6 +176,12 @@ export const TeamTableRow: FC<TeamTableRowProps> = props => {
                                  fontWeight: 700
                              }}>{props.matrixSum}</TableCell>
                 : null}
+            <TableCell sx={bodyTableCellStyles} align='center' variant='body'
+                       style={{
+                           minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                           maxWidth: mediaMatch.matches ? '20vw' : '8vw',
+                           fontWeight: 700}}>{countSums().reduce((a, b) => a +
+                b)}</TableCell>
             {renderTourCells()}
         </TableRow>
     );

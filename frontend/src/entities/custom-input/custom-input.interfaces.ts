@@ -5,6 +5,7 @@ export interface InputProps {
     id: string;
     name: string;
     placeholder: string;
+    autocomplete?: boolean;
     isInvalid?: boolean,
     onBlur?: () => void;
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;

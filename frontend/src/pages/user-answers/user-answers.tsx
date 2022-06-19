@@ -104,6 +104,9 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                     setGameName(name);
                     setGamePart(matrixSettings ? "matrix": "chgk");
                     setIsBothPartsInGame(chgkSettings && matrixSettings);
+                    if (chgkSettings && matrixSettings) {
+                        activateIndicator();
+                    }
                 });
             }
         });
