@@ -98,10 +98,11 @@ const AdminGame: FC<AdminGameProps> = props => {
             }));
         },
 
-        stopGame: () => {
+        stopGame: (gamePart: 'chgk' | 'matrix') => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': 'Stop'
+                'action': 'Stop',
+                'gamePart': gamePart
             }));
         },
 
@@ -119,12 +120,10 @@ const AdminGame: FC<AdminGameProps> = props => {
             }));
         },
 
-        checkTime: (currentTime: number, currentMaxTime: number) => {
+        checkTime: () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'checkTime',
-                'currentTime': currentTime,
-                'currentMaxTime': currentMaxTime,
             }))
         },
 
@@ -142,28 +141,22 @@ const AdminGame: FC<AdminGameProps> = props => {
             setTimer(time);
             if (isStarted) {
                 setPlayOrPause('pause');
-                interval = setInterval(() => setTimer(t => {
-                    let res = t - 1000;
-                    requester.checkTime(t, 70000);
-                    if (res <= 0) {
-                        clearInterval(interval);
-                        setPlayOrPause('play');
-                    }
-                    return res > 0 ? res : 0;
-                }), 1000);
+                clearInterval(interval);
+                interval = setInterval(() => requester.checkTime(), 1000);
             }
         },
 
-        handleCheckTimeMessage: (currentTime: number, currentMaxTime: number, time: number, maxTime: number) => {
-            if (Math.abs(currentTime - time) > 800) {
-                setTimer(time);
+        handleCheckTimeMessage: (time: number) => {
+            if (time == 0) {
+                clearInterval(interval);
+                setPlayOrPause('play');
             }
+
+            setTimer(time);
         },
 
         handleCheckBreakTimeMessage: (currentTime: number, time: number) => {
-            if (Math.abs(currentTime - time) > 0.8) {
-                setBreakTime(time);
-            }
+            setBreakTime(time);
         },
 
         handleAppealMessage: (questionNumber: number) => {
@@ -263,7 +256,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                     handlers.handleQuestionNumberIsUndefinedMessage(jsonMessage.activeGamePart);
                     break;
                 case 'checkTime':
-                    handlers.handleCheckTimeMessage(jsonMessage.currentTime, jsonMessage.currentMaxTime, jsonMessage.time, jsonMessage.maxTime);
+                    handlers.handleCheckTimeMessage(jsonMessage.time);
                     break;
                 case 'checkBreakTime':
                     handlers.handleCheckBreakTimeMessage(jsonMessage.currentTime, jsonMessage.time);
@@ -316,7 +309,7 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const parseTimer = (time:number) => {
         const minutes = Math.floor(time / 1000 / 60).toString().padStart(1, '0');
-        const sec = Math.floor(time / 1000 % 60).toString().padStart(2, '0');
+        const sec = Math.ceil(time / 1000 % 60).toString().padStart(2, '0');
         return `${minutes}:${sec}`;
     };
 
@@ -341,16 +334,8 @@ const AdminGame: FC<AdminGameProps> = props => {
         if (playOrPause === 'play') {
             requester.startGame();
             setPlayOrPause('pause');
-            interval = setInterval(() =>
-                setTimer(t => {
-                    let res = t - 1000;
-                    requester.checkTime(t, 70000);
-                    if (res <= 0) {
-                        clearInterval(interval);
-                        setPlayOrPause('play');
-                    }
-                    return res > 0 ? res : 0;
-                }), 1000);
+            clearInterval(interval);
+            interval = setInterval(() => requester.checkTime(), 1000);
         } else {
             clearInterval(interval);
             requester.pauseGame();
@@ -360,7 +345,9 @@ const AdminGame: FC<AdminGameProps> = props => {
 
     const handleStopClick = (gamePart: 'matrix' | 'chgk' | undefined) => {
         setPlayOrPause('play');
-        requester.stopGame();
+        if (gamePart !== undefined) {
+            requester.stopGame(gamePart);
+        }
         clearInterval(interval);
         setTimer(gamePart === 'chgk' ? 70000 : 20000);
     };

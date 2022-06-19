@@ -15,12 +15,11 @@ import {connect} from 'react-redux';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
 import Scrollbar from '../../components/scrollbar/scrollbar';
 
-let progressBar: any;
+let progressBarInterval: any;
 let interval: any;
 let checkStart: any;
 let ping: any;
 let conn: WebSocket;
-let checkTimeInterval: any;
 let matrixSettingsCurrent: GamePartSettings | undefined;
 
 const UserGame: FC<UserGameProps> = props => {
@@ -102,12 +101,10 @@ const UserGame: FC<UserGameProps> = props => {
             }));
         },
 
-        checkTime: (currentTime: number, currentMaxTime: number) => {
+        checkTime: () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'checkTime',
-                'currentTime': currentTime,
-                'currentMaxTime': currentMaxTime,
             }))
         },
 
@@ -203,7 +200,7 @@ const UserGame: FC<UserGameProps> = props => {
             });
         },
 
-        handleTimeMessage: (time: number, maxTime: number, isStarted: boolean) => {
+        handleTimeMessage: (time: number, maxTime: number, isStarted: boolean, gamePart: 'chgk' | 'matrix') => {
             setTimeForAnswer(() => {
                 const progress = document.querySelector('#progress-bar') as HTMLDivElement;
                 const width = Math.ceil(100 * time / maxTime);
@@ -211,63 +208,69 @@ const UserGame: FC<UserGameProps> = props => {
                     //setIsConnectionError(true)
                 } else {
                     progress.style.width = width + '%';
-                    changeColor(progress);
+                    changeColor(progress, gamePart);
                 }
                 return time / 1000;
             });
             if (isStarted) {
-                clearInterval(progressBar);
-                progressBar = moveProgressBar(time, maxTime);
+                clearInterval(progressBarInterval);
+                progressBarInterval = moveProgressBar(time, maxTime);
             }
             setMaxTime(maxTime / 1000);
         },
 
-        handleCheckTimeMessage: (currentTime: number, currentMaxTime: number, time: number, maxTime: number) => {
-            if (Math.abs(currentTime - time) > 800) {
-                setTimeForAnswer(time / 1000);
-                setMaxTime(maxTime / 1000);
+        handleCheckTimeMessage: (time: number, maxTime: number, gamePart: 'chgk' | 'matrix') => {
+            const progressBar = document.querySelector('#progress-bar') as HTMLDivElement;
+            if (!progressBar || time == 0) {
+                clearInterval(progressBarInterval);
             }
+
+            const width = Math.ceil(100 * time / maxTime);
+            progressBar.style.width = width + '%';
+            changeColor(progressBar, gamePart);
+
+            const newTime = Math.round(time / 1000)
+            setTimeForAnswer(newTime);
+            setMaxTime(Math.round(maxTime / 1000));
         },
 
         handleCheckBreakTimeMessage: (currentTime: number, time: number) => {
-            if (Math.abs(currentTime - time) > 0.8) {
-                setBreakTime(time);
-            }
+            setBreakTime(time);
         },
 
         handleStartMessage: (time: number, maxTime: number) => {
             setTimeForAnswer(time / 1000);
-            clearInterval(progressBar);
-            progressBar = moveProgressBar(time, maxTime);
+            clearInterval(progressBarInterval);
+            progressBarInterval = moveProgressBar(time, maxTime);
             setMaxTime(maxTime / 1000);
         },
 
         handleAddTimeMessage: (time: number, maxTime: number, isStarted: boolean) => {
-            clearInterval(progressBar);
+            clearInterval(progressBarInterval);
             setTimeForAnswer(t => (t ?? 0) + 10);
             if (isStarted) {
-                clearInterval(progressBar);
-                progressBar = moveProgressBar(time, maxTime);
+                clearInterval(progressBarInterval);
+                progressBarInterval = moveProgressBar(time, maxTime);
             }
             setMaxTime(maxTime / 1000);
         },
 
         handlePauseMessage: () => {
-            clearInterval(progressBar);
+            clearInterval(progressBarInterval);
         },
 
         handleStopMessage: (gamePart: 'chgk' | 'matrix') => {
-            clearInterval(progressBar);
+            clearInterval(progressBarInterval);
             setTimeForAnswer(gamePart === 'chgk' ? 70 : 20);
             let progress = document.querySelector('#progress-bar') as HTMLDivElement;
             if (progress) {
                 progress.style.width = '100%';
-                changeColor(progress);
+                changeColor(progress, gamePart);
             }
         },
 
         handleChangeQuestionNumberMessage: (gamePart: 'chgk' | 'matrix', number: number, matrixActive: { round: number, question: number }) => {
-            clearInterval(progressBar);
+            clearInterval(progressBarInterval);
             setAnswer('');
             let progress = document.querySelector('#progress-bar') as HTMLDivElement;
             if (progress) {
@@ -277,7 +280,7 @@ const UserGame: FC<UserGameProps> = props => {
             if (answerInput && gamePart === 'chgk') {
                 answerInput.focus();
             }
-            changeColor(progress);
+            changeColor(progress, gamePart);
             setTimeForAnswer(gamePart === 'chgk' ? 70 : 20);
             setMaxTime(gamePart === 'chgk' ? 70 : 20);
             if (number != questionNumber) {
@@ -394,10 +397,10 @@ const UserGame: FC<UserGameProps> = props => {
                             jsonMessage.matrixActive, jsonMessage.maxTime, jsonMessage.time);
                         break;
                     case 'time':
-                        handler.handleTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted);
+                        handler.handleTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.isStarted, jsonMessage.gamePart);
                         break;
                     case 'checkTime':
-                        handler.handleCheckTimeMessage(jsonMessage.currentTime, jsonMessage.currentMaxTime, jsonMessage.time, jsonMessage.maxTime);
+                        handler.handleCheckTimeMessage(jsonMessage.time, jsonMessage.maxTime, jsonMessage.gamePart);
                         break;
                     case 'start':
                         handler.handleStartMessage(jsonMessage.time, jsonMessage.maxTime);
@@ -502,56 +505,31 @@ const UserGame: FC<UserGameProps> = props => {
         return `${minutes}:${sec}`;
     };
 
-    const changeColor = (progressBar: HTMLDivElement) => {
+    const changeColor = (progressBar: HTMLDivElement, gamePart: 'chgk' | 'matrix') => {
         if (!progressBar) {
             return;
         }
 
         if (progressBar.style.width) {
             let width = +(progressBar.style.width).slice(0, -1);
-            progressBar.style.backgroundColor = chooseColor(width);
+            progressBar.style.backgroundColor = chooseColor(width, gamePart);
         }
     };
 
-    const chooseColor = (width: number) => {
+    const chooseColor = (width: number, gamePart: 'chgk' | 'matrix') => {
+        const redTime = (gamePart === 'chgk' ? 10 / 70 * 100 + 1 : 5 / 20 * 100);
         switch (true) {
-            case (width <= 10):
+            case (width <= redTime): // 10-0, 5-0
                 return 'red';
-            case (width >= 11 && width <= 25):
-                return 'orange';
-            case (width >= 26 && width <= 50):
+            case (redTime < width && width <= 50): // 35-11, 10-6
                 return 'yellow';
         }
 
-        return 'green';
+        return 'green';  // 70-36, 20-11
     }
 
     const moveProgressBar = (time: number, maxTime: number) => {
-        const progressBar = document.querySelector('#progress-bar') as HTMLDivElement;
-        if (!progressBar) {
-            //setIsConnectionError(true);
-            return;
-        }
-
-        const frame = () => {
-            if (width <= 0) {
-                progressBar.style.width = 0 + '%';
-                clearInterval(id);
-            } else {
-                changeColor(progressBar);
-                setTimeForAnswer(t => {
-                    requester.checkTime(t * 1000, maxTime);
-                    width = Math.ceil(100 * (t ?? 0) / (maxTime / 1000));
-                    const result = (t ?? 0) - 1;
-                    progressBar.style.width = (result <= 0 ? 0 : width) + '%';
-                    return result;
-                });
-            }
-        };
-
-        let width = Math.ceil(100 * time / maxTime);
-        const id = setInterval(frame, 1000);
-        return id;
+        return setInterval(() => requester.checkTime(), 1000);
     };
 
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -741,7 +719,7 @@ const UserGame: FC<UserGameProps> = props => {
 
                         <div style={{width: '100%', height: '2%', minHeight: '10px'}}>
                             <div className={classes.progressBar} id="progress-bar"
-                                 style={{width: width + '%', backgroundColor: chooseColor(width)}}/>
+                                 style={{width: width + '%', backgroundColor: chooseColor(width, gamePart)}}/>
                         </div>
 
                         <div className={classes.answersBox}>
@@ -769,7 +747,7 @@ const UserGame: FC<UserGameProps> = props => {
                         </div>
                         <div style={{width: '100%', height: '2%', minHeight: '10px'}}>
                             <div className={classes.progressBar} id="progress-bar"
-                                 style={{width: width + '%', backgroundColor: chooseColor(width)}}/>
+                                 style={{width: width + '%', backgroundColor: chooseColor(width, gamePart)}}/>
                         </div>
                         <div className={classes.answerBox}>
                             <div style={{display: 'flex', flexDirection: 'column', width: '85%'}}>

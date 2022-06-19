@@ -21,7 +21,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     const [gameName, setGameName] = useState<string>();
     const [answers, setAnswers] = useState<{ [key: string]: Answer[] }>({matrix: [], chgk: []});
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [gamePart, setGamePart] = useState<string>('matrix');
+    const [gamePart, setGamePart] = useState<'chgk' | 'matrix'>('matrix');
     const [isBothPartsInGame, setIsBothPartsInGame] = useState<boolean>();
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
 
@@ -150,7 +150,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             .map((answer, index) => {
                 return (
                     <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                                order={answer.number}/>
+                                order={answer.number} gamePart={gamePart}/>
                 );
             });
     };
@@ -170,7 +170,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         indicator.style.backgroundColor = 'white';
 
         el.classList.add(classes['is-active']);
-        setGamePart((e.target as HTMLElement).id);
+        setGamePart((e.target as HTMLElement).id as 'chgk' | 'matrix');
     };
 
     if (!gameName || isLoading) {

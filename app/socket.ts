@@ -115,21 +115,22 @@ function StartTimer(gameId: number) {
     }
 }
 
-function StopTimer(gameId: number) {
+function StopTimer(gameId: number, gamePart: 'chgk' | 'matrix') {
     console.log('STOP gameId = ', gameId);
-    bigGames[gameId].CurrentGame.isTimerStart = false;
-    clearTimeout(bigGames[gameId].CurrentGame.timer);
-    bigGames[gameId].CurrentGame.timeIsOnPause = false;
-    bigGames[gameId].CurrentGame.leftTime = bigGames[gameId].CurrentGame.type === GameTypeLogic.ChGK
+    const game = gamePart === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
+    game.isTimerStart = false;
+    clearTimeout(game.timer);
+    game.timeIsOnPause = false;
+    game.leftTime = game.type === GameTypeLogic.ChGK
         ? seconds70PerQuestion
         : seconds20PerQuestion;
-    bigGames[gameId].CurrentGame.maxTime = bigGames[gameId].CurrentGame.type === GameTypeLogic.ChGK
+    game.maxTime = game.type === GameTypeLogic.ChGK
         ? seconds70PerQuestion
         : seconds20PerQuestion;
     for (let user of gameUsers[gameId]) {
         user.send(JSON.stringify({
             'action': 'stop',
-            'activeGamePart': bigGames[gameId].CurrentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
+            'activeGamePart': game.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix',
         }));
     }
 }
@@ -163,11 +164,12 @@ function GiveAnswer(answer: string, teamId: string, gameId: number, ws) {
     }));
 }
 
-function GiveAppeal(appeal: string, teamId: string, gameId: number, number: number, answer: string) {
+function GiveAppeal(appeal: string, teamId: string, gameId: number, number: number, answer: string, gamePart: string) {
     console.log('received: %s', appeal, teamId);
-    const roundNumber = Math.ceil(number / bigGames[gameId].CurrentGame.rounds[0].questionsCount);
-    let questionNumber = number - (roundNumber - 1) * bigGames[gameId].CurrentGame.rounds[0].questionsCount;
-    bigGames[gameId].CurrentGame.rounds[roundNumber - 1].questions[questionNumber - 1].giveAppeal(teamId, appeal, answer);
+    const game = gamePart === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
+    const roundNumber = Math.ceil(number / game.rounds[0].questionsCount);
+    let questionNumber = number - (roundNumber - 1) * game.rounds[0].questionsCount;
+    game.rounds[roundNumber - 1].questions[questionNumber - 1].giveAppeal(teamId, appeal, answer);
 }
 
 function AcceptAnswer(gameId: number, gameType: string, roundNumber: number, questionNumber: number, answers: string[]) {
@@ -218,9 +220,9 @@ function GetAppealsByNumber(gameId: number, gameType: string, roundNumber: numbe
         .filter(value => value.status === Status.UnChecked)
         .map(appeal => {
             return {
-                teamName: bigGames[gameId].CurrentGame.teams[appeal.teamId].name,
+                teamName: game.teams[appeal.teamId].name,
                 text: appeal.text,
-                answer: bigGames[gameId].CurrentGame.teams[appeal.teamId].getAnswer(roundNumber, questionNumber).text
+                answer: game.teams[appeal.teamId].getAnswer(roundNumber, questionNumber).text
             }
         });
 
@@ -231,7 +233,7 @@ function GetAppealsByNumber(gameId: number, gameType: string, roundNumber: numbe
     }));
 }
 
-function GetAllAppeals(gameId: number, ws) {
+function GetAllAppeals(gameId: number, ws) { // Тут вроде CurrentGame законно: метод нужен для индикации апелляций в текущей игре
     const res = [];
     for (let roundNumber = 0; roundNumber < bigGames[gameId].CurrentGame.rounds.length; roundNumber++) {
         for (let questionNumber = 0; questionNumber < bigGames[gameId].CurrentGame.rounds[roundNumber].questions.length; questionNumber++) {
@@ -247,8 +249,8 @@ function GetAllAppeals(gameId: number, ws) {
 }
 
 function GiveAnswerMatrix(answer: string, roundNumber: number, questionNumber: number, roundName: string, teamId: any, gameId: any, ws) {
-    console.log('received: %s', answer, roundNumber, questionNumber, teamId, bigGames[gameId].CurrentGame.type);
-    bigGames[gameId].CurrentGame.rounds[roundNumber - 1].questions[questionNumber - 1].giveAnswer(bigGames[gameId].CurrentGame.teams[teamId], answer);
+    console.log('received: %s', answer, roundNumber, questionNumber, teamId, bigGames[gameId].Matrix.type);
+    bigGames[gameId].Matrix.rounds[roundNumber - 1].questions[questionNumber - 1].giveAnswer(bigGames[gameId].Matrix.teams[teamId], answer);
     ws.send(JSON.stringify({
         'action': 'statusAnswer',
         'isAccepted': true,
@@ -378,7 +380,7 @@ function AdminsAction(gameId, ws, jsonMessage, gameType) {
             PauseTimer(gameId);
             break;
         case 'Stop':
-            StopTimer(gameId);
+            StopTimer(gameId, jsonMessage.gamePart);
             break;
         case 'AcceptAnswer':
             AcceptAnswer(gameId, jsonMessage.gamePart, jsonMessage.roundNumber, jsonMessage.questionNumber, jsonMessage.answers);
@@ -434,7 +436,7 @@ function UsersAction(gameId, ws, jsonMessage, gameType, teamId) {
             }
             break;
         case 'appeal':
-            GiveAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer);
+            GiveAppeal(jsonMessage.appeal, teamId, gameId, jsonMessage.number, jsonMessage.answer, jsonMessage.gamePart);
             NotifyAdminsAboutAppeal(gameId, jsonMessage.number);
             break;
         case 'getTeamAnswers':
@@ -465,17 +467,17 @@ function GetTime(gameId, ws) {
         'action': 'time',
         'isStarted': bigGames[gameId].CurrentGame.isTimerStart,
         'maxTime': bigGames[gameId].CurrentGame.maxTime,
-        'time': GetPreliminaryTime(gameId)
+        'time': GetPreliminaryTime(gameId),
+        'gamePart': bigGames[gameId].CurrentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix'
     }));
 }
 
-function CheckTime(gameId, ws, jsonMessage) {
+function CheckTime(gameId, ws) {
     ws.send(JSON.stringify({
         'action': 'checkTime',
         'maxTime': bigGames[gameId].CurrentGame.maxTime,
         'time': GetPreliminaryTime(gameId),
-        'currentTime': jsonMessage.currentTime,
-        'currentMaxTime': jsonMessage.currentMaxTime,
+        'gamePart': bigGames[gameId].CurrentGame.type === GameTypeLogic.ChGK ? 'chgk' : 'matrix'
     }));
 }
 
@@ -552,7 +554,7 @@ export function HandlerWebsocket(ws: WebSocket, message: string) {
                 GetTime(gameId, ws);
                 break;
             case 'checkTime':
-                CheckTime(gameId, ws, jsonMessage);
+                CheckTime(gameId, ws);
                 break;
             case 'checkBreakTime':
                 CheckBreakTime(gameId, ws, jsonMessage);

@@ -6,6 +6,6 @@ export class MatrixSettingsDto extends ChgkSettingsDto {
 
     constructor(game: Game) {
         super(game);
-        this.roundNames = this.roundCount !== 0 ? game.rounds.map(round => round.name) : [];
+        this.roundNames = this.roundCount !== 0 ? game.rounds.sort((a, b) => a.number > b.number ? 1 : -1).map(round => round.name) : [];
     }
 }

@@ -18,7 +18,8 @@ const UserAnswer: FC<UserAnswerProps> = props => {
                 'action': 'appeal',
                 'number': props.order,
                 'appeal': opposition,
-                'answer': props.answer
+                'answer': props.answer,
+                'gamePart': props.gamePart,
             }));
         }
     };
