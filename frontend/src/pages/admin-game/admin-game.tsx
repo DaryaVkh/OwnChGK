@@ -40,6 +40,7 @@ const AdminGame: FC<AdminGameProps> = props => {
     const [isAppeal, setIsAppeal] = useState<boolean[]>([]);
     const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isStop, setIsStop] = useState<boolean>(false);
 
     const requester = {
         startRequests: () => {
@@ -84,17 +85,19 @@ const AdminGame: FC<AdminGameProps> = props => {
             }));
         },
 
-        startGame: () => {
+        startGame: (gamePart: 'chgk' | 'matrix') => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'Start',
+                'gamePart': gamePart,
             }));
         },
 
-        pauseGame: () => {
+        pauseGame: (gamePart: 'chgk' | 'matrix') => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': 'Pause'
+                'action': 'Pause',
+                'gamePart': gamePart,
             }));
         },
 
@@ -106,10 +109,11 @@ const AdminGame: FC<AdminGameProps> = props => {
             }));
         },
 
-        addTenSeconds: () => {
+        addTenSeconds: (gamePart: 'chgk' | 'matrix') => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': '+10sec'
+                'action': '+10sec',
+                'gamePart': gamePart
             }));
         },
 
@@ -149,10 +153,19 @@ const AdminGame: FC<AdminGameProps> = props => {
         handleCheckTimeMessage: (time: number) => {
             if (time == 0) {
                 clearInterval(interval);
-                setPlayOrPause('play');
             }
 
-            setTimer(time);
+            setIsStop(stop => {
+                if (!stop) {
+                    if (time == 0) {
+                        setPlayOrPause('play');
+                    }
+
+                    setTimer(time);
+                }
+
+                return stop;
+            })
         },
 
         handleCheckBreakTimeMessage: (currentTime: number, time: number) => {
@@ -332,15 +345,16 @@ const AdminGame: FC<AdminGameProps> = props => {
         handleStopClick(gamePart); // Прошлый вопрос остановится!
     };
 
-    const handlePlayClick = () => {
+    const handlePlayClick = (gamePart: 'chgk' | 'matrix') => {
         if (playOrPause === 'play') {
-            requester.startGame();
+            requester.startGame(gamePart);
+            setIsStop(false);
             setPlayOrPause('pause');
             clearInterval(interval);
             interval = setInterval(() => requester.checkTime(), 1000);
         } else {
             clearInterval(interval);
-            requester.pauseGame();
+            requester.pauseGame(gamePart);
             setPlayOrPause('play');
         }
     };
@@ -350,12 +364,13 @@ const AdminGame: FC<AdminGameProps> = props => {
         if (gamePart !== undefined) {
             requester.stopGame(gamePart);
         }
+        setIsStop(true);
         clearInterval(interval);
         setTimer(gamePart === 'chgk' ? 70000 : 20000);
     };
 
-    const handleAddedTimeClick = () => {
-        requester.addTenSeconds();
+    const handleAddedTimeClick = (gamePart: 'chgk' | 'matrix') => {
+        requester.addTenSeconds(gamePart);
         setTimer(t => t + 10000);
     };
 
@@ -448,24 +463,24 @@ const AdminGame: FC<AdminGameProps> = props => {
                     <button className={`${classes.button} ${classes.breakButton}`}
                             onClick={isBreak ? stopBreak : openBreakModal}>{isBreak ? 'Остановить перерыв' : 'Перерыв'}</button>
 
-                    <button className={`${classes.button} ${classes.playButton}`} disabled={isBreak}
-                            onClick={handlePlayClick}>
+                    <button className={`${classes.button} ${classes.playButton}`} disabled={isBreak || activeQuestionNumber === undefined}
+                            onClick={() => handlePlayClick(activeGamePart as 'chgk' | 'matrix')}>
                         {
                             playOrPause === 'play'
                                 ? <PlayArrowIcon
-                                    sx={{fontSize: '2.5vw', color: isBreak ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
+                                    sx={{fontSize: '2.5vw', color: isBreak || activeQuestionNumber === undefined ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
                                 : <PauseIcon
-                                    sx={{fontSize: '2.5vw', color: isBreak ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
+                                    sx={{fontSize: '2.5vw', color: isBreak || activeQuestionNumber === undefined ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
                         }
                     </button>
 
-                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak}
+                    <button className={`${classes.button} ${classes.stopButton}`} disabled={isBreak || activeQuestionNumber === undefined}
                             onClick={() => handleStopClick(activeGamePart)}>
-                        <StopIcon sx={{fontSize: '2.5vw', color: isBreak ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
+                        <StopIcon sx={{fontSize: '2.5vw', color: isBreak || activeQuestionNumber === undefined ? 'rgba(27, 38, 44, 0.5)' : 'black'}}/>
                     </button>
 
-                    <button className={`${classes.button} ${classes.tenSecondsButton}`} disabled={isBreak}
-                            onClick={handleAddedTimeClick}>
+                    <button className={`${classes.button} ${classes.tenSecondsButton}`} disabled={isBreak || activeQuestionNumber === undefined}
+                            onClick={() => handleAddedTimeClick(activeGamePart as 'chgk' | 'matrix')}>
                         + 10 сек.
                     </button>
 

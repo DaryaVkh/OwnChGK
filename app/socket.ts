@@ -12,50 +12,51 @@ export const seconds70PerQuestion = 70000;
 export const seconds20PerQuestion = 20000;
 export const extra10Seconds = 10000;
 
-function GiveAddedTime(gameId: number) {
-    if (bigGames[gameId].CurrentGame.timeIsOnPause) {
-        bigGames[gameId].CurrentGame.leftTime += extra10Seconds;
-        bigGames[gameId].CurrentGame.maxTime += extra10Seconds;
-        console.log('added time is ', bigGames[gameId].CurrentGame.leftTime);
+function GiveAddedTime(gameId: number, gamePart: 'chgk' | 'matrix') {
+    const game = gamePart === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
+    if (game.timeIsOnPause) {
+        game.leftTime += extra10Seconds;
+        game.maxTime += extra10Seconds;
+        console.log('added time is ', game.leftTime);
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'addTime',
-                'maxTime': bigGames[gameId].CurrentGame.maxTime,
-                'time': bigGames[gameId].CurrentGame.leftTime,
+                'maxTime': game.maxTime,
+                'time': game.leftTime,
                 'isStarted': false,
             }));
         }
     } else {
-        if (!bigGames[gameId].CurrentGame.isTimerStart) {
-            bigGames[gameId].CurrentGame.leftTime += extra10Seconds;
-            bigGames[gameId].CurrentGame.maxTime += extra10Seconds;
+        if (!game.isTimerStart) {
+            game.leftTime += extra10Seconds;
+            game.maxTime += extra10Seconds;
             for (let user of gameUsers[gameId]) {
                 user.send(JSON.stringify({
                     'action': 'addTime',
-                    'maxTime': bigGames[gameId].CurrentGame.maxTime,
-                    'time': bigGames[gameId].CurrentGame.leftTime,
+                    'maxTime': game.maxTime,
+                    'time': game.leftTime,
                     'isStarted': false,
                 }));
             }
         } else {
-            const pastDelay = Math.floor(process.uptime() * 1000 - bigGames[gameId].CurrentGame.timer._idleStart);
-            const initialDelay = bigGames[gameId].CurrentGame.timer._idleTimeout;
-            clearTimeout(bigGames[gameId].CurrentGame.timer);
-            bigGames[gameId].CurrentGame.isTimerStart = true;
+            const pastDelay = Math.floor(process.uptime() * 1000 - game.timer._idleStart);
+            const initialDelay = game.timer._idleTimeout;
+            clearTimeout(game.timer);
+            game.isTimerStart = true;
             if (initialDelay - pastDelay < 0) {
-                bigGames[gameId].CurrentGame.leftTime = extra10Seconds;
-            } else bigGames[gameId].CurrentGame.leftTime = initialDelay - pastDelay + extra10Seconds;
-            bigGames[gameId].CurrentGame.maxTime += extra10Seconds;
-            bigGames[gameId].CurrentGame.timer = setTimeout(() => {
+                game.leftTime = extra10Seconds;
+            } else game.leftTime = initialDelay - pastDelay + extra10Seconds;
+            game.maxTime += extra10Seconds;
+            game.timer = setTimeout(() => {
                 console.log('added time end, gameId = ', gameId);
-                bigGames[gameId].CurrentGame.isTimerStart = false;
-                bigGames[gameId].CurrentGame.leftTime = 0;
-            }, bigGames[gameId].CurrentGame.leftTime);
+                game.isTimerStart = false;
+                game.leftTime = 0;
+            }, game.leftTime);
             for (let user of gameUsers[gameId]) {
                 user.send(JSON.stringify({
                     'action': 'addTime',
-                    'maxTime': bigGames[gameId].CurrentGame.maxTime,
-                    'time': bigGames[gameId].CurrentGame.leftTime,
+                    'maxTime': game.maxTime,
+                    'time': game.leftTime,
                     'isStarted': true,
                 }));
             }
@@ -78,38 +79,39 @@ function ChangeQuestionNumber(gameId: number, questionNumber: number, tourNumber
     }
 }
 
-function StartTimer(gameId: number) {
-    if (!bigGames[gameId].CurrentGame.timeIsOnPause) {
+function StartTimer(gameId: number, gamePart: 'chgk' | 'matrix') {
+    const game = gamePart === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
+    if (!game.timeIsOnPause) {
         console.log('start gameId = ', gameId);
-        bigGames[gameId].CurrentGame.isTimerStart = true;
-        bigGames[gameId].CurrentGame.timer = setTimeout(() => {
-            bigGames[gameId].CurrentGame.isTimerStart = false;
-            bigGames[gameId].CurrentGame.leftTime = 0;
+        game.isTimerStart = true;
+        game.timer = setTimeout(() => {
+            game.isTimerStart = false;
+            game.leftTime = 0;
             console.log('stop gameId = ', gameId);
-        }, bigGames[gameId].CurrentGame.leftTime);
+        }, game.leftTime);
 
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
-                'maxTime': bigGames[gameId].CurrentGame.maxTime,
-                'time': bigGames[gameId].CurrentGame.leftTime
+                'maxTime': game.maxTime,
+                'time': game.leftTime
             }));
         }
     } else {
         console.log('startFromPause gameId = ', gameId);
-        bigGames[gameId].CurrentGame.isTimerStart = true;
-        bigGames[gameId].CurrentGame.timeIsOnPause = false;
-        bigGames[gameId].CurrentGame.timer = setTimeout(() => {
-            bigGames[gameId].CurrentGame.isTimerStart = false;
+        game.isTimerStart = true;
+        game.timeIsOnPause = false;
+        game.timer = setTimeout(() => {
+            game.isTimerStart = false;
             console.log('stop after pause gameId = ', gameId);
-            bigGames[gameId].CurrentGame.leftTime = 0
-        }, bigGames[gameId].CurrentGame.leftTime);
-        console.log(bigGames[gameId].CurrentGame.leftTime, 'added time to resp gameId = ', gameId);
+            game.leftTime = 0
+        }, game.leftTime);
+        console.log(game.leftTime, 'added time to resp gameId = ', gameId);
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
                 'action': 'start',
-                'maxTime': bigGames[gameId].CurrentGame.maxTime,
-                'time': bigGames[gameId].CurrentGame.leftTime
+                'maxTime': game.maxTime,
+                'time': game.leftTime
             }));
         }
     }
@@ -135,13 +137,14 @@ function StopTimer(gameId: number, gamePart: 'chgk' | 'matrix') {
     }
 }
 
-function PauseTimer(gameId: number) {
-    if (bigGames[gameId].CurrentGame.isTimerStart) {
+function PauseTimer(gameId: number, gamePart: 'chgk' | 'matrix') {
+    const game = gamePart === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
+    if (game.isTimerStart) {
         console.log('pause gameId = ', gameId);
-        bigGames[gameId].CurrentGame.isTimerStart = false;
-        bigGames[gameId].CurrentGame.timeIsOnPause = true;
-        bigGames[gameId].CurrentGame.leftTime -= Math.floor(process.uptime() * 1000 - bigGames[gameId].CurrentGame.timer._idleStart);
-        clearTimeout(bigGames[gameId].CurrentGame.timer);
+        game.isTimerStart = false;
+        game.timeIsOnPause = true;
+        game.leftTime -= Math.floor(process.uptime() * 1000 - game.timer._idleStart);
+        clearTimeout(game.timer);
 
         for (let user of gameUsers[gameId]) {
             user.send(JSON.stringify({
@@ -371,13 +374,13 @@ function AdminsAction(gameId, ws, jsonMessage, gameType) {
     gameAdmins[gameId].add(ws);
     switch (jsonMessage.action) {
         case '+10sec':
-            GiveAddedTime(gameId);
+            GiveAddedTime(gameId, jsonMessage.gamePart);
             break;
         case 'Start':
-            StartTimer(gameId);
+            StartTimer(gameId, jsonMessage.gamePart);
             break;
         case 'Pause':
-            PauseTimer(gameId);
+            PauseTimer(gameId, jsonMessage.gamePart);
             break;
         case 'Stop':
             StopTimer(gameId, jsonMessage.gamePart);
