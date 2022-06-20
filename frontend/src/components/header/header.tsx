@@ -1,4 +1,4 @@
-import React, {FC, Fragment, useEffect, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import classes from './header.module.scss';
 import {HeaderDispatchProps, HeaderProps, HeaderStateProps} from '../../entities/header/header.interfaces';
 import {Link} from 'react-router-dom';
@@ -17,10 +17,10 @@ const Header: FC<HeaderProps> = props => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
         }
 
-        window.addEventListener('resize', resizeEventHandler);
+        mediaMatch.addEventListener('change', resizeEventHandler);
 
         return () => {
-            window.removeEventListener('resize', resizeEventHandler);
+            mediaMatch.removeEventListener('change', resizeEventHandler);
         };
     }, []);
 
@@ -49,7 +49,7 @@ const Header: FC<HeaderProps> = props => {
                                 <img className={classes.Menu} src={require('../../images/Menu.svg').default} alt='Menu'/>
                             </Link>
                             :
-                            <Fragment>
+                            <div className={classes.userActionsWrapper}>
                                 <Link className={classes.Profile} to={props.isAdmin ? '/admin/profile' : '/profile'}>
                                     <img className={classes.Profile} src={require('../../images/Profile.svg').default}
                                          alt="Profile" id="profile"/>
@@ -59,7 +59,7 @@ const Header: FC<HeaderProps> = props => {
                                     <img className={classes.LogOut} src={require('../../images/LogOut.svg').default}
                                          alt="LogOut" id="logout"/>
                                 </Link>
-                            </Fragment>
+                            </div>
                     )
                     : null
             }

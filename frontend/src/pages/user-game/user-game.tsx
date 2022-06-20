@@ -395,7 +395,7 @@ const UserGame: FC<UserGameProps> = props => {
         return () => {
             window.removeEventListener('keypress', enterEventHandler);
         }
-    }, []);
+    }, [answer, focusedMatrixAnswerInfo, gamePart]);
 
     useEffect(() => {
         const openWs = () => {
@@ -492,32 +492,21 @@ const UserGame: FC<UserGameProps> = props => {
         setAcceptedMatrixAnswers(answers);
     };
 
-    const getGameName = () => {
-        const maxLength = mediaMatch.matches ? 22 : 34;
-        if ((gameName as string).length > maxLength) {
-            return (gameName as string).substring(0, maxLength + 1) + '\u2026';
-        } else {
-            return gameName;
-        }
-    }
-
     const getTeamName = () => {
         const teamName = props.userTeam;
         const maxLength = mediaMatch.matches ? 25 : 45;
         if (teamName.length > maxLength) {
             return teamName.substring(0, maxLength + 1) + '\u2026';
-        } else {
-            return teamName;
         }
+        return teamName;
     }
 
     const getGameNameForWaitingScreen = () => {
         const maxLength = mediaMatch.matches ? 30 : 52;
         if ((gameName as string).length > maxLength) {
             return `«${(gameName as string).substring(0, maxLength + 1)}\u2026»`;
-        } else {
-            return `«${gameName}»`;
         }
+        return `«${gameName}»`;
     }
 
     const parseTimer = () => {
@@ -626,6 +615,14 @@ const UserGame: FC<UserGameProps> = props => {
         }, 1000);
     };
 
+    const getShortenedAnswer = (answer: string) => {
+        const maxLength = mediaMatch.matches ? 30 : 52;
+        if (answer.length > maxLength) {
+            return `${answer.substring(0, maxLength + 1)}\u2026`;
+        }
+        return `${answer}`;
+    };
+
     const renderMatrix = () => {
         return matrixSettingsCurrent?.roundNames?.map((tourName, i) => {
             return (
@@ -635,7 +632,7 @@ const UserGame: FC<UserGameProps> = props => {
                     {
                         Array.from(Array(matrixSettingsCurrent?.questionCount).keys()).map((j) => {
                             return (
-                                <div key={`matrix_question_${j}`}>
+                                <div key={`matrix_question_${j}`} style={{marginBottom: j === (matrixSettingsCurrent?.questionCount as number) - 1 ? (mediaMatch.matches ? '10vw' : '4vh') : 0}}>
                                     <p className={classes.matrixAnswerNumber}>Вопрос {j + 1}</p>
 
                                     <div className={classes.answerInputWrapper}>
@@ -651,7 +648,7 @@ const UserGame: FC<UserGameProps> = props => {
                                                 ?
                                                 <small className={classes.accepted}>{'Принятый ответ: '}
                                                     <span
-                                                        className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[i + 1][j]}</span>
+                                                        className={classes.acceptedAnswer}>{getShortenedAnswer(acceptedMatrixAnswers?.[i + 1][j] as string)}</span>
                                                 </small>
                                                 : null
                                         }
@@ -665,7 +662,7 @@ const UserGame: FC<UserGameProps> = props => {
                                                 ?
                                                 <small className={classes.accepted}>{'Принятый ответ: '}
                                                     <span
-                                                        className={classes.acceptedAnswer}>{acceptedMatrixAnswers?.[i + 1][j]}</span>
+                                                        className={classes.acceptedAnswer}>{getShortenedAnswer(acceptedMatrixAnswers?.[i + 1][j] as string)}</span>
                                                 </small>
                                                 : null
                                         }
@@ -786,7 +783,7 @@ const UserGame: FC<UserGameProps> = props => {
                                         acceptedAnswer && mediaMatch.matches
                                             ?
                                             <small className={classes.acceptedChgk}>{'Принятый ответ: '}
-                                                <span className={classes.acceptedAnswer}>{acceptedAnswer}</span>
+                                                <span className={classes.acceptedAnswer}>{getShortenedAnswer(acceptedAnswer)}</span>
                                             </small>
                                             : null
                                     }
@@ -798,7 +795,7 @@ const UserGame: FC<UserGameProps> = props => {
                                         acceptedAnswer && !mediaMatch.matches
                                             ?
                                             <small className={classes.acceptedChgk}>{'Принятый ответ: '}
-                                                <span className={classes.acceptedAnswer}>{acceptedAnswer}</span>
+                                                <span className={classes.acceptedAnswer}>{getShortenedAnswer(acceptedAnswer)}</span>
                                             </small>
                                             : null
                                     }
@@ -911,7 +908,7 @@ const UserGame: FC<UserGameProps> = props => {
                     }
 
                     <div className={classes.gameName}>
-                        <p>{getGameName()}</p>
+                        {gameName}
                     </div>
                 </Header>
 

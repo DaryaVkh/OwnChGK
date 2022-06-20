@@ -4,7 +4,7 @@ import Header from '../../components/header/header';
 import NavBar from '../../components/nav-bar/nav-bar';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {AdminStartScreenProps} from '../../entities/admin-start-screen/admin-start-screen.interfaces';
-import {IconButton, OutlinedInput, Button, Skeleton} from '@mui/material';
+import {Button, IconButton, OutlinedInput, Skeleton} from '@mui/material';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import {Scrollbars} from 'rc-scrollbars';
 import {Link, useLocation} from 'react-router-dom';

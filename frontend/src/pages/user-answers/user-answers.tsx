@@ -129,15 +129,6 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         return () => clearInterval(ping);
     }, []);
 
-    const getGameName = () => {
-        const maxLength = mediaMatch.matches ? 22 : 34;
-        if ((gameName as string)?.length > maxLength) {
-            return (gameName as string).substring(0, maxLength + 1) + '\u2026';
-        } else {
-            return gameName;
-        }
-    };
-
     const getTeamName = () => {
         const teamName = props.userTeam;
         const maxLength = mediaMatch.matches ? 25 : 55;
@@ -196,7 +187,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                 }
 
                 <div className={classes.gameName}>
-                    <p>{getGameName()}</p>
+                    {gameName}
                 </div>
             </Header>
 

@@ -6,15 +6,13 @@
   background-color: var(--background-color);
   filter: drop-shadow(0 1vh 1vh rgba(50, 130, 184, 0.25));
   display: flex;
-  justify-content: center;
   z-index: 1;
   user-select: none;
 }
 
 .logo {
-  height: 6vmin;
-  position: fixed;
-  left: 10%;
+  width: 9vmin;
+  margin-left: 80px;
   user-select: none;
 
   &:hover {
@@ -37,15 +35,17 @@
 }
 
 .Menu {
-  position: fixed;
   height: 8vmin;
-  right: 7%;
+  margin-right: 30px;
+}
+
+.userActionsWrapper {
+  display: flex;
 }
 
 .Profile {
-  height: 4vmin;
-  position: fixed;
-  right: 24vmin;
+  width: 4vmin;
+  margin-right: 60px;
   align-self: center;
   user-select: none;
 
@@ -55,9 +55,8 @@
 }
 
 .LogOut {
-  height: 4vmin;
-  position: fixed;
-  right: 15vmin;
+  width: 4vmin;
+  margin-right: 80px;
   align-self: center;
   user-select: none;
 
@@ -67,11 +66,31 @@
 }
 
 .childrenWrapper {
+  padding: 0 30px;
   display: flex;
-  align-self: center;
   position: relative;
-  width: 60%;
   height: 100%;
+  flex: 1;
+}
+
+@media only screen and (max-width: 1440px) {
+  .Profile {
+    margin-right: 35px;
+  }
+
+  .childrenWrapper {
+    padding: 0 25px;
+  }
+}
+
+@media only screen and (max-width: 960px) {
+  .Profile {
+    margin-right: 30px;
+  }
+
+  .childrenWrapper {
+    padding: 0 20px;
+  }
 }
 
 @media only screen and (max-width: 600px) {
@@ -80,10 +99,11 @@
   }
 
   .logo {
-    height: 8vmin;
-    left: 7%;
+    height: 35px;
+    margin-left: 30px;
   }
 
   .childrenWrapper {
+    padding: 0 20px;
   }
 }

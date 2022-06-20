@@ -353,13 +353,15 @@ const AdminAnswersPage: FC = () => {
         }
     };
 
-    return isLoading ? <Loader /> : (
+    return isLoading ? <Loader/> : (
         <PageWrapper>
-            <Header isAuthorized={true} isAdmin={true}>
+            <Header isAuthorized={false} isAdmin={true}>
                 <Link to={`/admin/game/${gameId}`} className={classes.toGameLink}>В игру</Link>
 
-                <div className={classes.tourNumber}>Тур {tour}</div>
-                <div className={classes.questionNumber}>Вопрос {question}</div>
+                <div className={classes.questionWrapper}>
+                    <div className={classes.tourNumber}>Тур {tour}</div>
+                    <div className={classes.questionNumber}>Вопрос {question}</div>
+                </div>
 
                 <nav className={classes.nav}>
                     <Link to={{}}

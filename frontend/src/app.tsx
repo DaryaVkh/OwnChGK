@@ -14,18 +14,17 @@ import {authorizeUserWithRole, checkToken as testToken} from './redux/actions/ap
 import {adminRoles, userRoles} from './entities/common/common.constants';
 import Loader from './components/loader/loader';
 import MobileMenu from './pages/mobile-menu/mobile-menu';
-
-const AdminStartScreen = React.lazy(() => Promise.all([import('./pages/admin-start-screen/admin-start-screen'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const GameCreator = React.lazy(() => Promise.all([import('./pages/game-creation/game-creation'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const TeamCreator = React.lazy(() => Promise.all([import('./pages/team-creation/team-creation'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const UserStartScreen = React.lazy(() => Promise.all([import('./pages/user-start-screen/user-start-screen'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const Profile = React.lazy(() => Promise.all([import('./pages/profile/profile'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const UserGame = React.lazy(() => Promise.all([import('./pages/user-game/user-game'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const AdminGame = React.lazy(() => Promise.all([import('./pages/admin-game/admin-game'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const AdminAnswersPage = React.lazy(() => Promise.all([import('./pages/admin-answers/admin-answers'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const UserAnswersPage = React.lazy(() => Promise.all([import('./pages/user-answers/user-answers'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const StartGame = React.lazy(() => Promise.all([import('./pages/admin-start-game/admin-start-game'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
-const Rating = React.lazy(() => Promise.all([import('./pages/rating/rating'), new Promise(resolve => setTimeout(resolve, 1000))]).then(([moduleExports]) => moduleExports));
+import AdminGame from './pages/admin-game/admin-game';
+import AdminAnswersPage from './pages/admin-answers/admin-answers';
+import StartGame from './pages/admin-start-game/admin-start-game';
+import Rating from './pages/rating/rating';
+import UserStartScreen from './pages/user-start-screen/user-start-screen';
+import Profile from './pages/profile/profile';
+import TeamCreator from "./pages/team-creation/team-creation";
+import UserGame from "./pages/user-game/user-game";
+import UserAnswersPage from "./pages/user-answers/user-answers";
+import AdminStartScreen from "./pages/admin-start-screen/admin-start-screen";
+import GameCreator from "./pages/game-creation/game-creation";
 
 const App: FC<AppProps> = props => {
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
@@ -35,10 +34,10 @@ const App: FC<AppProps> = props => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
         }
 
-        window.addEventListener('resize', resizeEventHandler);
+        mediaMatch.addEventListener('change', resizeEventHandler);
 
         return () => {
-            window.removeEventListener('resize', resizeEventHandler);
+            mediaMatch.removeEventListener('change', resizeEventHandler);
         };
     }, []);
 

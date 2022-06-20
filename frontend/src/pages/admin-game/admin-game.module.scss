@@ -1,26 +1,27 @@
 .menuLink {
   text-decoration: none;
   color: white;
-  position: absolute;
-  top: 35%;
   font-weight: 300;
   font-size: 2.5vmin;
-  left: 10%;
+  display: flex;
+  align-items: center;
 }
 
 .gameName {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  margin-left: 60px;
+  flex: 1;
   font-size: 2.5vmax;
-  width: 80%;
+  line-height: 3vmax;
   color: #fff;
-  display: flex;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
+  word-break: break-all;
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
   font-weight: 300;
+  height: 3vmax;
+  align-self: center;
 }
 
 .button {

@@ -10,10 +10,10 @@ export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
         }
 
-        window.addEventListener('resize', resizeEventHandler);
+        mediaMatch.addEventListener('change', resizeEventHandler);
 
         return () => {
-            window.removeEventListener('resize', resizeEventHandler);
+            mediaMatch.removeEventListener('change', resizeEventHandler);
         };
     }, []);
 
@@ -67,10 +67,10 @@ const TourCell: FC<{ tourResults: number[], isExpanded: boolean }> = props => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
         }
 
-        window.addEventListener('resize', resizeEventHandler);
+        mediaMatch.addEventListener('change', resizeEventHandler);
 
         return () => {
-            window.removeEventListener('resize', resizeEventHandler);
+            mediaMatch.removeEventListener('change', resizeEventHandler);
         };
     }, []);
 
@@ -124,10 +124,10 @@ export const TeamTableRow: FC<TeamTableRowProps> = props => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
         }
 
-        window.addEventListener('resize', resizeEventHandler);
+        mediaMatch.addEventListener('change', resizeEventHandler);
 
         return () => {
-            window.removeEventListener('resize', resizeEventHandler);
+            mediaMatch.removeEventListener('change', resizeEventHandler);
         };
     }, []);
 

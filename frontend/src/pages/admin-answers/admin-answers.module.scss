@@ -1,18 +1,22 @@
 .toGameLink {
   text-decoration: none;
   color: white;
-  position: absolute;
-  top: 35%;
   font-weight: 300;
   font-size: 2.5vmin;
-  left: 0;
+  display: flex;
+  align-items: center;
+}
+
+.questionWrapper {
+  display: flex;
+  justify-content: center;
+  flex: 1;
 }
 
 .tourNumber,
 .questionNumber {
   text-decoration: none;
   color: white;
-  position: absolute;
   display: flex;
   text-align: center;
   align-self: center;
@@ -21,16 +25,13 @@
 }
 
 .tourNumber {
-  left: 15%;
+  margin-right: 30px;
 }
 
 .questionNumber {
-  left: 30%;
 }
 
 .nav {
-  position: absolute;
-  right: 0;
   display: inline-flex;
   overflow: hidden;
   background-color: transparent;

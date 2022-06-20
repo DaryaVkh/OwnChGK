@@ -51,10 +51,10 @@ const TeamCreator: FC<TeamCreatorProps> = props => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
         }
 
-        window.addEventListener('resize', resizeEventHandler);
+        mediaMatch.addEventListener('change', resizeEventHandler);
 
         return () => {
-            window.removeEventListener('resize', resizeEventHandler);
+            mediaMatch.removeEventListener('change', resizeEventHandler);
         };
     }, []);
 
