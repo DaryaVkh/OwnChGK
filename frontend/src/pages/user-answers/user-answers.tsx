@@ -70,6 +70,12 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     };
 
     useEffect(() => {
+        if (isBothPartsInGame) {
+            activateIndicator();
+        }
+    }, [isBothPartsInGame]);
+
+    useEffect(() => {
         const resizeEventHandler = () => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
             activateIndicator();
