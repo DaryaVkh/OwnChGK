@@ -134,9 +134,8 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         const maxLength = mediaMatch.matches ? 25 : 55;
         if ((teamName as string)?.length > maxLength) {
             return (teamName as string).substring(0, maxLength + 1) + '\u2026';
-        } else {
-            return teamName;
         }
+        return teamName;
     };
 
     const renderAnswers = () => {
