@@ -75,23 +75,12 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             activateIndicator();
         };
 
-        window.addEventListener('resize', resizeEventHandler);
+        mediaMatch.addEventListener('change', resizeEventHandler);
 
         return () => {
-            window.removeEventListener('resize', resizeEventHandler);
+            mediaMatch.removeEventListener('change', resizeEventHandler);
         };
     }, []);
-
-    const activateIndicator = () => {
-        const indicator = document.querySelector('#indicator') as HTMLSpanElement;
-        const activeItem = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
-
-        if (activeItem) {
-            indicator.style.width = `${activeItem.offsetWidth}px`;
-            indicator.style.left = `${activeItem.offsetLeft}px`;
-            indicator.style.backgroundColor = 'white';
-        }
-    };
 
     useEffect(() => {
         getGame(gameId).then((res) => {
@@ -103,15 +92,15 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                                  }) => {
                     setGameName(name);
                     setGamePart(matrixSettings ? "matrix": "chgk");
-                    setIsBothPartsInGame(chgkSettings && matrixSettings);
-                    if (chgkSettings && matrixSettings) {
-                        activateIndicator();
-                    }
+                    setIsBothPartsInGame(() => {
+                        if (chgkSettings && matrixSettings) {
+                            activateIndicator();
+                        }
+                        return chgkSettings && matrixSettings;
+                    });
                 });
             }
         });
-
-        activateIndicator();
 
         conn = new WebSocket(getUrlForSocket());
 
@@ -128,6 +117,17 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
 
         return () => clearInterval(ping);
     }, []);
+
+    const activateIndicator = () => {
+        const indicator = document.querySelector('#indicator') as HTMLSpanElement;
+        const activeItem = document.querySelector(`.${classes['is-active']}`) as HTMLElement;
+
+        if (activeItem) {
+            indicator.style.width = `${activeItem.offsetWidth}px`;
+            indicator.style.left = `${activeItem.offsetLeft}px`;
+            indicator.style.backgroundColor = 'white';
+        }
+    };
 
     const getTeamName = () => {
         const teamName = props.userTeam;
