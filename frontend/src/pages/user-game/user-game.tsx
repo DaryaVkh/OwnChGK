@@ -394,7 +394,7 @@ const UserGame: FC<UserGameProps> = props => {
 
         return () => {
             window.removeEventListener('keypress', enterEventHandler);
-        }
+        };
     }, [answer, focusedMatrixAnswerInfo, gamePart]);
 
     useEffect(() => {
