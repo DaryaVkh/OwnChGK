@@ -159,6 +159,7 @@ function GiveAnswer(answer: string, teamId: string, gameId: number, ws) {
     const roundNumber = bigGames[gameId].CurrentGame.currentQuestion[0] - 1;
     const questionNumber = bigGames[gameId].CurrentGame.currentQuestion[1] - 1;
     bigGames[gameId].CurrentGame.rounds[roundNumber].questions[questionNumber].giveAnswer(bigGames[gameId].CurrentGame.teams[teamId], answer);
+    bigGames[gameId].CurrentGame.rounds[roundNumber].questions[questionNumber].acceptAnswers(process.env.ANSWER);
     ws.send(JSON.stringify({
         'action': 'statusAnswer',
         'isAccepted': true,
@@ -206,7 +207,7 @@ function RejectAnswer(gameId: number, gameType: string, roundNumber: number, que
 function GetAllTeamsAnswers(gameId: number, gameType: string, roundNumber: number, questionNumber: number, ws) {
     const game = gameType === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
     const answers = game.rounds[roundNumber - 1].questions[questionNumber - 1].answers.filter(ans => ans.text.length > 0);
-    const acceptedAnswers = answers.filter(ans => ans.status === 0).map(ans => ans.text);
+    const acceptedAnswers = answers.filter(ans => ans.status === 0 && ans.text != process.env.ANSWER).map(ans => ans.text);
     const rejectedAnswers = answers.filter(ans => ans.status === 1 || ans.status === 3).map(ans => ans.text);
     const uncheckedAnswers = answers.filter(ans => ans.status === 2).map(ans => ans.text);
     ws.send(JSON.stringify({
@@ -326,7 +327,7 @@ function GetQuestionNumberForUser(gameId, ws) {
 }
 
 function GetTeamAnswers(gameId, teamId, ws) {
-    let answer: { [key: string]: {number:number, answer:string, status:Status}[] };
+    let answer: { [key: string]: { number: number, answer: string, status: Status }[] };
     answer = {};
     if (bigGames[gameId].ChGK) {
         const chgk = bigGames[gameId].ChGK.teams[teamId].getAnswers();
@@ -515,7 +516,10 @@ function getGameStatus(gameId, ws) {
             'isOnBreak': bigGames[gameId].status === GameStatus.IsOnBreak,
             'breakTime': bigGames[gameId].breakTime,
             'currentQuestionNumber': currentQuestionNumber, //todo: тут вроде надо ток для чгк
-            'matrixActive': currentGame.type === GameTypeLogic.Matrix && currentGame.currentQuestion ? {round: currentGame.currentQuestion[0], question: currentGame.currentQuestion[1]} : null,
+            'matrixActive': currentGame.type === GameTypeLogic.Matrix && currentGame.currentQuestion ? {
+                round: currentGame.currentQuestion[0],
+                question: currentGame.currentQuestion[1]
+            } : null,
             'maxTime': currentGame.maxTime,
             'time': GetPreliminaryTime(gameId),
         }));
