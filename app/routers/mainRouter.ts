@@ -8,6 +8,10 @@ export const mainRouter = () => {
     const router = Router();
 
     router.get('/*', (req, res) => {
+        if (req.protocol == 'http') {
+            res.redirect('https://' +
+                req.get('host') + req.originalUrl);
+        }
         res.sendFile(resolve('./build/frontend/index.html'));
     });
 

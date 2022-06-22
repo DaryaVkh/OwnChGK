@@ -32,7 +32,7 @@ const App: FC<AppProps> = props => {
     useEffect(() => {
         const resizeEventHandler = () => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
-        }
+        };
 
         mediaMatch.addEventListener('change', resizeEventHandler);
 
