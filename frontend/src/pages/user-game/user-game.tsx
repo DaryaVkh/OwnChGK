@@ -209,7 +209,7 @@ const UserGame: FC<UserGameProps> = props => {
                     //setIsConnectionError(true)
                 } else {
                     progress.style.width = width + '%';
-                    changeColor(progress, gamePart);
+                    changeColor(progress, gamePart, Math.round(time / 1000));
                 }
                 return time / 1000;
             });
@@ -228,7 +228,7 @@ const UserGame: FC<UserGameProps> = props => {
 
             const width = Math.ceil(100 * time / maxTime);
             progressBar.style.width = width + '%';
-            changeColor(progressBar, gamePart);
+            changeColor(progressBar, gamePart, Math.round(time / 1000));
 
             const newTime = Math.round(time / 1000)
             setTimeForAnswer(newTime);
@@ -266,7 +266,7 @@ const UserGame: FC<UserGameProps> = props => {
             let progress = document.querySelector('#progress-bar') as HTMLDivElement;
             if (progress) {
                 progress.style.width = '100%';
-                changeColor(progress, gamePart);
+                changeColor(progress, gamePart, gamePart === 'chgk' ? 70 : 20);
             }
         },
 
@@ -281,7 +281,7 @@ const UserGame: FC<UserGameProps> = props => {
             if (answerInput && gamePart === 'chgk') {
                 answerInput.focus();
             }
-            changeColor(progress, gamePart);
+            changeColor(progress, gamePart, gamePart === 'chgk' ? 70 : 20);
             setTimeForAnswer(gamePart === 'chgk' ? 70 : 20);
             setMaxTime(gamePart === 'chgk' ? 70 : 20);
             if (number != questionNumber) {
@@ -515,23 +515,23 @@ const UserGame: FC<UserGameProps> = props => {
         return `${minutes}:${sec}`;
     };
 
-    const changeColor = (progressBar: HTMLDivElement, gamePart: 'chgk' | 'matrix') => {
+    const changeColor = (progressBar: HTMLDivElement, gamePart: 'chgk' | 'matrix', time: number) => {
         if (!progressBar) {
             return;
         }
 
         if (progressBar.style.width) {
-            let width = +(progressBar.style.width).slice(0, -1);
-            progressBar.style.backgroundColor = chooseColor(width, gamePart);
+            progressBar.style.backgroundColor = chooseColor(time, gamePart);
         }
     };
 
-    const chooseColor = (width: number, gamePart: 'chgk' | 'matrix') => {
-        const redTime = (gamePart === 'chgk' ? 10 / 70 * 100 + 1 : 5 / 20 * 100);
+    const chooseColor = (time: number, gamePart: 'chgk' | 'matrix') => {
+        const redTime = (gamePart === 'chgk' ? 10 : 5);
+        const yellowTime = (gamePart === 'chgk' ? 20 : 10);
         switch (true) {
-            case (width <= redTime): // 10-0, 5-0
+            case (time <= redTime): // 10-0, 5-0
                 return 'red';
-            case (redTime < width && width <= 50): // 35-11, 10-6
+            case (redTime < time && time <= yellowTime): // 35-11, 10-6
                 return 'yellow';
         }
 
@@ -737,7 +737,7 @@ const UserGame: FC<UserGameProps> = props => {
 
                         <div style={{width: '100%', height: '2%', minHeight: '10px'}}>
                             <div className={classes.progressBar} id="progress-bar"
-                                 style={{width: width + '%', backgroundColor: chooseColor(width, gamePart)}}/>
+                                 style={{width: width + '%', backgroundColor: chooseColor(timeForAnswer, gamePart)}}/>
                         </div>
 
                         <div className={classes.answersBox}>
@@ -765,7 +765,7 @@ const UserGame: FC<UserGameProps> = props => {
                         </div>
                         <div style={{width: '100%', height: '2%', minHeight: '10px'}}>
                             <div className={classes.progressBar} id="progress-bar"
-                                 style={{width: width + '%', backgroundColor: chooseColor(width, gamePart)}}/>
+                                 style={{width: width + '%', backgroundColor: chooseColor(timeForAnswer, gamePart)}}/>
                         </div>
                         <div className={classes.answerBox}>
                             <div style={{display: 'flex', flexDirection: 'column', width: '85%'}}>
