@@ -107,6 +107,16 @@ const UserStartScreen: FC<UserStartScreenProps> = props => {
                         });
                         setIsTeamNotFree(false);
                         props.onAddUserTeam(dataset.teamName);
+                        getAmIParticipateGames().then(res => {
+                            if (res.status === 200) {
+                                res.json().then(({games}) => {
+                                    setGamesFromDB(games.sort((game1: Game, game2: Game) => game1.name.toLowerCase() > game2.name.toLowerCase() ? 1 : -1));
+                                    setNumberLoading(prev => Math.min(prev + 1, 2));
+                                });
+                            } else {
+                                // TODO: код не 200, мейби всплывашку, что что-то не так?
+                            }
+                        });
                     } else {
                         setTeamsFromDB(arr => arr?.filter(x => x.id != dataset.teamId));
                         setIsTeamNotFree(true);
