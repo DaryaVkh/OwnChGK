@@ -1,5 +1,6 @@
 import React, {ChangeEvent, FC, useEffect, useState} from 'react';
 import classes from './user-game.module.scss';
+import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import Header from '../../components/header/header';
 import {Link, useParams} from 'react-router-dom';
@@ -638,7 +639,7 @@ const UserGame: FC<UserGameProps> = props => {
                                     <div className={classes.answerInputWrapper}>
                                         <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
                                                      style={{
-                                                         width: mediaMatch.matches ? '100%' : '79%', marginBottom: '4%',
+                                                         width: mediaMatch.matches ? '70%' : '79%', marginBottom: '4%',
                                                          height: mediaMatch.matches ? '8.7vw' : '7vh',
                                                          marginRight: mediaMatch.matches ? '0' : '2%'
                                                      }} value={matrixAnswers?.[i + 1][j]} onFocus={() => setFocusedMatrixAnswerInfo({index: j + 1, roundName: tourName, roundNumber: i + 1})}
@@ -654,7 +655,8 @@ const UserGame: FC<UserGameProps> = props => {
                                         }
 
                                         <button className={classes.sendAnswerButton}
-                                                onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}>Отправить
+                                                onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}> <SendRoundedIcon>
+                                        </SendRoundedIcon>
                                         </button>
 
                                         {

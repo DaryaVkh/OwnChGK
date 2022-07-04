@@ -342,15 +342,13 @@
       padding: 6vw 0;
 
       .answerInputWrapper {
-        flex-direction: column;
-        align-items: flex-end;
 
         .sendAnswerButton {
-          padding: 5px 14px;
+          padding: 2px 5px;
           height: 8.7vw;
-          width: 47%;
+          width: 30%;
           font-size: 4.5vw;
-          margin-top: 2vw;
+          margin-left: 2vw;
         }
       }
 
