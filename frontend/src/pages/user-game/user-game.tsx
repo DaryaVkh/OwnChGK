@@ -655,7 +655,7 @@ const UserGame: FC<UserGameProps> = props => {
                                         }
 
                                         <button className={classes.sendAnswerButton}
-                                                onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}> <span className={classes.SendText}>Отправить</span> <SendRoundedIcon className={classes.SendIcon}>
+                                                onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}> <span className={classes.sendText}>Отправить</span> <SendRoundedIcon className={classes.sendIcon}>
                                         </SendRoundedIcon>
                                         </button>
 
@@ -790,7 +790,7 @@ const UserGame: FC<UserGameProps> = props => {
                                             : null
                                     }
                                     <button className={classes.sendAnswerButton}
-                                            onClick={handleSendButtonClick}><span className={classes.SendText}>Отправить</span> <SendRoundedIcon className={classes.SendIcon}>
+                                            onClick={handleSendButtonClick}><span className={classes.sendText}>Отправить</span> <SendRoundedIcon className={classes.sendIcon}>
                                     </SendRoundedIcon>
                                     </button>
 

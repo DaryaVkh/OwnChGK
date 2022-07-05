@@ -14,6 +14,13 @@
 .answersLink {
 }
 
+.sendText {
+}
+
+.sendIcon {
+}
+
+
 .gameName {
   margin-left: 60px;
   flex: 1;
@@ -283,6 +290,12 @@
   font-size: 1.4vw;
 }
 
+@media only screen and (min-width: 601px) {
+  .sendIcon {
+    display: none !important;
+  }
+}
+
 @media only screen and (max-width: 600px) {
   .gameStartContentWrapper {
     .logo {
@@ -350,6 +363,10 @@
           font-size: 4.5vw;
           margin-left: 2vw;
         }
+
+        .sendText {
+          display: none;
+        }
       }
 
       .answerNumber {
@@ -413,6 +430,10 @@
       width: 30%;
       font-size: 4.5vw;
       margin-left: 2vw;
+    }
+
+    .sendText {
+      display: none;
     }
   }
 }
