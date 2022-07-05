@@ -634,7 +634,7 @@ const UserGame: FC<UserGameProps> = props => {
                         Array.from(Array(matrixSettingsCurrent?.questionCount).keys()).map((j) => {
                             return (
                                 <div key={`matrix_question_${j}`} style={{marginBottom: j === (matrixSettingsCurrent?.questionCount as number) - 1 ? (mediaMatch.matches ? '10vw' : '4vh') : 0}}>
-                                    <p className={classes.matrixAnswerNumber}>Вопрос {j + 1}</p>
+                                    <p className={classes.matrixAnswerNumber}>Вопрос за {j + 1}0</p>
 
                                     <div className={classes.answerInputWrapper}>
                                         <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
@@ -655,7 +655,7 @@ const UserGame: FC<UserGameProps> = props => {
                                         }
 
                                         <button className={classes.sendAnswerButton}
-                                                onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}> <SendRoundedIcon>
+                                                onClick={() => handleSendMatrixAnswer(j + 1, tourName, i + 1)}> <span className={classes.SendText}>Отправить</span> <SendRoundedIcon className={classes.SendIcon}>
                                         </SendRoundedIcon>
                                         </button>
 
@@ -728,7 +728,7 @@ const UserGame: FC<UserGameProps> = props => {
                     <div className={classes.answersWrapper}>
                         <div className={classes.questionWrapper}>
                             <div className={classes.activeRoundName}>
-                                <div>Вопрос {activeMatrixQuestion}</div>
+                                <div>Вопрос за {activeMatrixQuestion}0</div>
                                 <div style={{maxWidth: '60%'}}>{activeMatrixRound?.name}</div>
                             </div>
                             {renderMatrixQuestionText()}
@@ -777,7 +777,7 @@ const UserGame: FC<UserGameProps> = props => {
                                 <div className={classes.answerInputWrapper}>
                                     <CustomInput type="text" id="answer" name="answer" placeholder="Ответ"
                                                  style={{
-                                                     width: mediaMatch.matches ? '100%' : '79%',
+                                                     width: mediaMatch.matches ? '70%' : '79%',
                                                      height: mediaMatch.matches ? '8.7vw' : '7vh',
                                                      marginRight: mediaMatch.matches ? 0 : '20px'
                                                  }} value={answer} onChange={handleAnswer}/>
@@ -790,7 +790,8 @@ const UserGame: FC<UserGameProps> = props => {
                                             : null
                                     }
                                     <button className={classes.sendAnswerButton}
-                                            onClick={handleSendButtonClick}>Отправить
+                                            onClick={handleSendButtonClick}><span className={classes.SendText}>Отправить</span> <SendRoundedIcon className={classes.SendIcon}>
+                                    </SendRoundedIcon>
                                     </button>
 
                                     {
