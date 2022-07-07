@@ -11,15 +11,10 @@
   margin-right: 16px;
 }
 
-.answersLink {
+.answerButtonWrapper {
+  display: flex;
+  width: 100%;
 }
-
-.sendText {
-}
-
-.sendIcon {
-}
-
 
 .gameName {
   margin-left: 60px;
@@ -422,7 +417,14 @@
     font-size: 4.5vw;
   }
 
+  .answerButtonWrapper {
+    display: flex;
+    width: 100%;
+  }
+
   .answerInputWrapper {
+    flex-wrap: wrap;
+    margin-bottom: 10px;
 
     .sendAnswerButton {
       padding: 2px 5px;
