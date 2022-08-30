@@ -363,6 +363,55 @@ function GetTeamAnswers(gameId, teamId, ws) {
     }))
 }
 
+function GetTeamAnswersForAdmin(gameId, teamName, ws) {
+    let answer: { [key: string]: { number: number, answer: string, status: Status }[] };
+    answer = {};
+    let chgk;
+    if (bigGames[gameId].ChGK) {
+        for (let id in bigGames[gameId].ChGK.teams)
+        {
+            if (bigGames[gameId].ChGK.teams[id].name === teamName) {
+                chgk = bigGames[gameId].ChGK.teams[id].getAnswers();
+            }
+        }
+        answer['chgk'] = chgk.map((ans) => {
+            return {
+                number: (ans.roundNumber - 1) * bigGames[gameId].ChGK.rounds[0].questionsCount + ans.questionNumber,
+                roundNumber: ans.roundNumber,
+                questionNumber: ans.questionNumber,
+                answer: ans.text,
+                status: ans.status
+            }
+        });
+    }
+    if (bigGames[gameId].Matrix) {
+        let matrix;
+        for (let id in bigGames[gameId].Matrix.teams)
+        {
+            if (bigGames[gameId].Matrix.teams[id].name === teamName) {
+                matrix = bigGames[gameId].Matrix.teams[id].getAnswers();
+            }
+        }
+
+        answer['matrix'] = matrix.map((ans) => {
+            return {
+                number: (ans.roundNumber - 1) * bigGames[gameId].Matrix.rounds[0].questionsCount + ans.questionNumber,
+                roundNumber: ans.roundNumber,
+                questionNumber: ans.questionNumber,
+                answer: ans.text,
+                status: ans.status
+            }
+        });
+
+    }
+
+    ws.send(JSON.stringify({
+        'action': 'teamAnswersForAdmin',
+        'chgkAnswers': answer['chgk'],
+        'matrixAnswers': answer['matrix']
+    }))
+}
+
 function NotifyAdminsAboutAppeal(gameId, number) {
     for (let ws of gameAdmins[gameId])
         ws.send(JSON.stringify({
@@ -418,6 +467,9 @@ function AdminsAction(gameId, ws, jsonMessage, gameType) {
             break;
         case 'getQuestionNumber':
             GetQuestionNumber(gameId, ws);
+            break;
+        case 'getTeamAnswersForAdmin':
+            GetTeamAnswersForAdmin(gameId, jsonMessage.teamName, ws);
             break;
     }
 }

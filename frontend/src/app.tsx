@@ -25,6 +25,7 @@ import UserGame from "./pages/user-game/user-game";
 import UserAnswersPage from "./pages/user-answers/user-answers";
 import AdminStartScreen from "./pages/admin-start-screen/admin-start-screen";
 import GameCreator from "./pages/game-creation/game-creation";
+import UserAnswersPageForAdmin from "./pages/user-answers-for-admin/user-answers-for-admin";
 
 const App: FC<AppProps> = props => {
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
@@ -165,6 +166,10 @@ const App: FC<AppProps> = props => {
 
                     <ProtectedRoute path="/game-answers/:gameId" exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath='/auth'>
                         <UserAnswersPage/>
+                    </ProtectedRoute>
+
+                    <ProtectedRoute path="/game-answers/:gameId/:teamName" exact currentUserRole={props.user.role} neededRole={adminRoles} redirectPath='/auth'>
+                        <UserAnswersPageForAdmin/>
                     </ProtectedRoute>
 
                     <ProtectedRoute path='/rating/:gameId' exact currentUserRole={props.user.role} neededRole={userRoles} redirectPath='/auth'>
