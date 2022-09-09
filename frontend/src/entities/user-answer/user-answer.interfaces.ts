@@ -3,4 +3,6 @@ export interface UserAnswerProps {
     status: 'success' | 'error' | 'opposition' | 'no-answer';
     order: number;
     gamePart: 'chgk' | 'matrix';
+    isAdmin: boolean;
+    teamName?: string;
 }

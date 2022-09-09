@@ -1,6 +1,8 @@
 import React, {FC, useEffect, useState} from 'react';
 import {TableCell, TableRow} from '@mui/material';
 import {TeamTableRowProps, TourHeaderCellProps} from '../../entities/table/table.interfaces';
+import {Link} from 'react-router-dom';
+import classes from "../../pages/user-game/user-game.module.scss";
 
 export const TourHeaderCell: FC<TourHeaderCellProps> = props => {
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
@@ -167,7 +169,7 @@ export const TeamTableRow: FC<TeamTableRowProps> = props => {
                        style={{
                            minWidth: mediaMatch.matches ? '40vw' : '16vw',
                            maxWidth: mediaMatch.matches ? '40vw' : '16vw',
-                           whiteSpace: 'nowrap'}}>{props.teamName}</TableCell>
+                           whiteSpace: 'nowrap'}}> {props.isAdmin ? <Link to={`/game-answers/${props.gameId}/${props.teamName}`} className={`${classes.menuLink}`}> {props.teamName} </Link> : props.teamName} </TableCell>
             {props.matrixSum !== undefined
                 ? <TableCell sx={bodyTableCellStyles} align='center' variant='body'
                              style={{

@@ -400,7 +400,7 @@ const AdminGame: FC<AdminGameProps> = props => {
                         1 ? classes.activeQuestion : ''}`}
                         id={`${i + 1}`}
                         onClick={(event) => handleQuestionClick(event, gamePart)}>
-                        Вопрос {i + 1}
+                        Вопрос {questionsCount * (clickedTourIndex-1) + (i+1)}
                     </div>
 
                     <Link className={classes.answersButtonLink}

@@ -1,4 +1,4 @@
-import {Answer, Appeal} from './AnswerAndAppeal';
+import {Answer, Status} from './AnswerAndAppeal';
 
 export class Team {
     public readonly name: string;

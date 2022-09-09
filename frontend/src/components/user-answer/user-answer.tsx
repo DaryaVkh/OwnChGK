@@ -21,10 +21,27 @@ const UserAnswer: FC<UserAnswerProps> = props => {
                 'answer': props.answer,
                 'gamePart': props.gamePart,
             }));
+        },
+
+        changeAnswer: () => {
+            conn.send(JSON.stringify({
+                'cookie': getCookie('authorization'),
+                'action': 'changeAnswer',
+                'gamePart': props.gamePart,
+                'teamName': props.teamName,
+                'number': props.order,
+            }));
         }
     };
 
-    const handleOppositionButtonClick = () => {
+    const handleButtonClick = () => {
+        if (props.isAdmin) {
+            conn = new WebSocket(getUrlForSocket());
+            conn.onopen = () => requester.changeAnswer();;
+            setAnswerStatus(lastStatus => lastStatus === 'success' ? 'error' : 'success');
+            return;
+        }
+
         setIsOppositionClicked(!isOppositionClicked);
     };
 
@@ -58,16 +75,24 @@ const UserAnswer: FC<UserAnswerProps> = props => {
         return answerStatus === 'no-answer' ? 'Нет ответа' : props.answer;
     };
 
+    const getButtonText = () => {
+        if (answerStatus === 'success') {
+            return '-Отклонить';
+        } else {
+            return '+Засчитать';
+        }
+    };
+
     return (
         <div className={classes.userAnswerWrapper}>
             <div className={classes.answerWrapper}>
                 <div className={classes.answerNumber}>{props.order}</div>
                 <input readOnly className={`${classes.answer} ${getInputClass()}`} value={getAnswer()}/>
                 {
-                    answerStatus === 'error' && props.gamePart === 'chgk'
+                    answerStatus === 'error' && props.gamePart === 'chgk' || props.isAdmin
                         ? <button className={
                             `${classes.button} ${classes.oppositionButton} ${isOppositionClicked ? classes.clickedOppositionButton : ''}`}
-                                  onClick={handleOppositionButtonClick}>Апелляция</button>
+                                  onClick={handleButtonClick}>{props.isAdmin ? getButtonText() : 'Апелляция'}</button>
                         : null
                 }
             </div>

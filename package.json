@@ -5,6 +5,7 @@
   "main": "build/app/app.js",
   "scripts": {
     "build": "tsc && cd frontend && npm install && npm run build",
+    "build-win": "tsc && cd frontend && npm install && npm run build-win",
     "start": "node build/app/app.js",
     "heroku-postbuild": "tsc && cd frontend && npm install && npm run build",
     "test": "jest"

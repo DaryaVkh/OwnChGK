@@ -110,7 +110,10 @@ const Rating: FC<RatingProps> = props => {
             return <TeamTableRow key={teamResult.teamName} place={isIntrigue && !props.isAdmin ? '-' : i + 1}
                                  teamName={teamResult.teamName}
                                  matrixSum={teamResult.matrixSum}
-                                 toursWithResults={teamResult.toursWithResults} isExpanded={expandedTours}/>;
+                                 toursWithResults={teamResult.toursWithResults} isExpanded={expandedTours}
+                                 gameId={gameId}
+                                 isAdmin={props.isAdmin}
+            />
         });
     };
 

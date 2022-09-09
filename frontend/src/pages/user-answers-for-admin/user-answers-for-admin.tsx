@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from 'react';
-import classes from './user-answers.module.scss';
+import classes from './user-answers-for-admin.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
 import {Link, useParams} from 'react-router-dom';
 import Header from '../../components/header/header';
@@ -9,15 +9,14 @@ import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
-import {AppState} from '../../entities/app/app.interfaces';
-import {connect} from 'react-redux';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
 
 let conn: WebSocket;
 let ping: any;
 
-const UserAnswersPage: FC<UserAnswersPageProps> = props => {
+const UserAnswersPageForAdmin = () => {
     const {gameId} = useParams<{ gameId: string }>();
+    const {teamName} = useParams<{ teamName: string }>();
     const [gameName, setGameName] = useState<string>();
     const [answers, setAnswers] = useState<{ [key: string]: Answer[] }>({matrix: [], chgk: []});
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -29,7 +28,8 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         startRequests: () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
-                'action': 'getTeamAnswers'
+                'action': 'getTeamAnswersForAdmin',
+                'teamName': teamName
             }));
 
             ping = setInterval(() => {
@@ -41,7 +41,10 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     };
 
     const handler = {
-        handleTeamAnswersMessage: (chgkAnswers: { answer: string; status: number; number: number }[], matrixAnswers: { answer: string; status: number; number: number }[]) => {
+        handleTeamAnswersMessage: (chgkAnswers: { answer: string; status: number; number: number }[],
+                                   matrixAnswers: { answer: string; status: number; number: number }[],
+                                   chgkQuestionsCount: number,
+                                   matrixQuestionsCount: number) => {
             let dictionary: { [key: string]: Answer[] };
             dictionary = {};
             if (matrixAnswers) {
@@ -52,6 +55,12 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                         number: ans.number
                     };
                 });
+                let numbers = dictionary['matrix'].map(ans => ans.number);
+                for (let i = 1; i <= matrixQuestionsCount; i++) {
+                    if (!numbers.includes(i)) {
+                        dictionary['matrix'].push({ status: 'no-answer', number: i, answer: '' });
+                    }
+                }
             }
 
             if (chgkAnswers) {
@@ -64,8 +73,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                 });
 
                 let numbers = dictionary['chgk'].map(ans => ans.number);
-                const max = Math.max(...numbers);
-                for (let i = 1; i <= max; i++) {
+                for (let i = 1; i <= chgkQuestionsCount; i++) {
                     if (!numbers.includes(i)) {
                         dictionary['chgk'].push({ status: 'no-answer', number: i, answer: '' });
                     }
@@ -123,8 +131,9 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
         conn.onmessage = function (event) {
             const jsonMessage = JSON.parse(event.data);
             switch (jsonMessage.action) {
-                case 'teamAnswers':
-                    handler.handleTeamAnswersMessage(jsonMessage.chgkAnswers, jsonMessage.matrixAnswers);
+                case 'teamAnswersForAdmin':
+                    handler.handleTeamAnswersMessage(jsonMessage.chgkAnswers, jsonMessage.matrixAnswers,
+                        jsonMessage.chgkQuestionsCount, jsonMessage.matrixQuestionsCount);
                     break;
             }
         };
@@ -144,7 +153,6 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     };
 
     const getTeamName = () => {
-        const teamName = props.userTeam;
         const maxLength = mediaMatch.matches ? 25 : 55;
         if ((teamName as string)?.length > maxLength) {
             return (teamName as string).substring(0, maxLength + 1) + '\u2026';
@@ -157,7 +165,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             .map((answer, index) => {
                 return (
                     <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                                order={answer.number} gamePart={gamePart} isAdmin={false}/>
+                                order={answer.number} gamePart={gamePart} isAdmin={true} teamName={teamName}/>
                 );
             });
     };
@@ -191,9 +199,9 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                     !mediaMatch.matches
                         ?
                         <>
-                            <Link to={`/rating/${gameId}`}
+                            <Link to={`/admin/rating/${gameId}`}
                                   className={`${classes.menuLink} ${classes.ratingLink}`}>Рейтинг</Link>
-                            <Link to={`/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В
+                            <Link to={`/admin/game/${gameId}`} className={`${classes.menuLink} ${classes.toGameLink}`}>В
                                 игру</Link>
                         </>
                         : null
@@ -243,10 +251,4 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
     );
 };
 
-function mapStateToProps(state: AppState) {
-    return {
-        userTeam: state.appReducer.user.team
-    };
-}
-
-export default connect(mapStateToProps)(UserAnswersPage);
+export default UserAnswersPageForAdmin;

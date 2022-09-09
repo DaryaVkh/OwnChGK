@@ -183,6 +183,22 @@ function AcceptAnswer(gameId: number, gameType: string, roundNumber: number, que
     }
 }
 
+function ChangeAnswer(gameId: number, gameType: string, teamName: string, number: number) {
+    const game = gameType === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
+    let team;
+    for (let id in game.teams)
+    {
+        if (game.teams[id].name === teamName) {
+            team = game.teams[id];
+            break;
+        }
+    }
+
+    const roundNumber = Math.ceil(number / game.rounds[0].questionsCount);
+    let questionNumber = number - (roundNumber - 1) * game.rounds[0].questionsCount;
+    game.rounds[roundNumber - 1].questions[questionNumber - 1].changeAnswer(team, roundNumber, questionNumber, gameType === 'matrix');
+}
+
 function AcceptAppeal(gameId: number, gameType: string, roundNumber: number, questionNumber: number, answers: string[]) {
     const game = gameType === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
     for (const answer of answers) {
@@ -363,6 +379,58 @@ function GetTeamAnswers(gameId, teamId, ws) {
     }))
 }
 
+function GetTeamAnswersForAdmin(gameId, teamName, ws) {
+    let answer: { [key: string]: { number: number, answer: string, status: Status }[] };
+    answer = {};
+    let chgk;
+    if (bigGames[gameId].ChGK) {
+        for (let id in bigGames[gameId].ChGK.teams)
+        {
+            if (bigGames[gameId].ChGK.teams[id].name === teamName) {
+                chgk = bigGames[gameId].ChGK.teams[id].getAnswers();
+                break;
+            }
+        }
+        answer['chgk'] = chgk.map((ans) => {
+            return {
+                number: (ans.roundNumber - 1) * bigGames[gameId].ChGK.rounds[0].questionsCount + ans.questionNumber,
+                roundNumber: ans.roundNumber,
+                questionNumber: ans.questionNumber,
+                answer: ans.text,
+                status: ans.status
+            }
+        });
+    }
+    if (bigGames[gameId].Matrix) {
+        let matrix;
+        for (let id in bigGames[gameId].Matrix.teams)
+        {
+            if (bigGames[gameId].Matrix.teams[id].name === teamName) {
+                matrix = bigGames[gameId].Matrix.teams[id].getAnswers();
+            }
+        }
+
+        answer['matrix'] = matrix.map((ans) => {
+            return {
+                number: (ans.roundNumber - 1) * bigGames[gameId].Matrix.rounds[0].questionsCount + ans.questionNumber,
+                roundNumber: ans.roundNumber,
+                questionNumber: ans.questionNumber,
+                answer: ans.text,
+                status: ans.status
+            }
+        });
+
+    }
+
+    ws.send(JSON.stringify({
+        'action': 'teamAnswersForAdmin',
+        'chgkAnswers': answer['chgk'],
+        'matrixAnswers': answer['matrix'],
+        'chgkQuestionsCount': bigGames[gameId].ChGK ? bigGames[gameId].ChGK.rounds.length * bigGames[gameId].ChGK.rounds[0].questionsCount : 0,
+        'matrixQuestionsCount': bigGames[gameId].Matrix ? bigGames[gameId].Matrix.rounds.length * bigGames[gameId].Matrix.rounds[0].questionsCount : 0,
+    }))
+}
+
 function NotifyAdminsAboutAppeal(gameId, number) {
     for (let ws of gameAdmins[gameId])
         ws.send(JSON.stringify({
@@ -372,7 +440,13 @@ function NotifyAdminsAboutAppeal(gameId, number) {
 }
 
 function AdminsAction(gameId, ws, jsonMessage, gameType) {
-    gameAdmins[gameId].add(ws);
+    if (!gameAdmins[gameId].has(ws)) {
+        gameAdmins[gameId].add(ws);
+        ws.on('close', function() {
+            gameAdmins[gameId].delete(ws);
+        });
+    }
+
     switch (jsonMessage.action) {
         case '+10sec':
             GiveAddedTime(gameId, jsonMessage.gamePart);
@@ -419,6 +493,12 @@ function AdminsAction(gameId, ws, jsonMessage, gameType) {
         case 'getQuestionNumber':
             GetQuestionNumber(gameId, ws);
             break;
+        case 'getTeamAnswersForAdmin':
+            GetTeamAnswersForAdmin(gameId, jsonMessage.teamName, ws);
+            break;
+        case 'changeAnswer':
+            ChangeAnswer(gameId, jsonMessage.gamePart, jsonMessage.teamName, jsonMessage.number);
+            break;
     }
 }
 
@@ -430,7 +510,12 @@ function UsersAction(gameId, ws, jsonMessage, gameType, teamId) {
         }));
         return;
     }
-    gameUsers[gameId].add(ws);
+    if (!gameUsers[gameId].has(ws)) {
+        gameUsers[gameId].add(ws);
+        ws.on('close', function() {
+            gameUsers[gameId].delete(ws);
+        });
+    }
     switch (jsonMessage.action) {
         case 'Answer':
             if (gameType === GameTypeLogic.ChGK && bigGames[gameId].CurrentGame.isTimerStart) {
