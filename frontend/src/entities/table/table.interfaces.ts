@@ -14,4 +14,6 @@ export interface TeamTableRowProps {
     matrixSum: number;
     toursWithResults: Tour[];
     isExpanded: boolean[];
+    gameId: string;
+    isAdmin: boolean;
 }
