@@ -1,12 +1,12 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import classes from './rating.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
-import {GameParams, RatingProps, TeamResult, Tour} from '../../entities/rating/rating.interfaces';
+import { GameParams, RatingProps, TeamResult, Tour } from '../../entities/rating/rating.interfaces';
 import Header from '../../components/header/header';
-import {Scrollbars} from 'rc-scrollbars';
-import {Table, TableBody, TableCell, tableCellClasses, TableHead, TableRow} from '@mui/material';
-import {TeamTableRow, TourHeaderCell} from '../../components/table/table';
-import {Link, useParams} from 'react-router-dom';
+import { Scrollbars } from 'rc-scrollbars';
+import { Table, TableBody, TableCell, tableCellClasses, TableHead, TableRow } from '@mui/material';
+import { TeamTableRow, TourHeaderCell } from '../../components/table/table';
+import { Link, useParams } from 'react-router-dom';
 import {
     changeIntrigueGameStatus,
     getResultTable,
@@ -14,40 +14,13 @@ import {
     getTeamsParticipantTable
 } from '../../server-api/server-api';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
-import {createFileLink} from '../../fileWorker';
+import { createFileLink } from '../../fileWorker';
+import Loader from '../../components/loader/loader';
 
 const Rating: FC<RatingProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
-    const [gameParams, setGameParams] = useState<GameParams>({toursCount: 10, questionsCount: 1});
-    const [teams, setTeams] = useState<TeamResult[]>([{
-        teamName: 'hello',
-        matrixSum: 50,
-        toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-    }, {teamName: 'hello', matrixSum: 50, toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]}, {
-        teamName: 'hello',
-        matrixSum: 50,
-        toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-    }, {teamName: 'hello', matrixSum: 50, toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]}, {
-        teamName: 'hello',
-        matrixSum: 50,
-        toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-    }, {teamName: 'hello', matrixSum: 50, toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]}, {
-        teamName: 'hello',
-        matrixSum: 50,
-        toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-    }, {teamName: 'hello', matrixSum: 50, toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]}, {
-        teamName: 'hello',
-        matrixSum: 50,
-        toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-    }, {teamName: 'hello', matrixSum: 50, toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]}, {
-        teamName: 'hello',
-        matrixSum: 50,
-        toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-    }, {teamName: 'hello', matrixSum: 50, toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]}, {
-        teamName: 'hello',
-        matrixSum: 50,
-        toursWithResults: [[1], [1], [1], [1], [1], [1], [1], [1], [1], [1]]
-    }]);
+    const [gameParams, setGameParams] = useState<GameParams>();
+    const [teams, setTeams] = useState<TeamResult[]>();
     const [expandedTours, setExpandedTours] = useState<boolean[]>([]);
     const [isIntrigue, setIsIntrigue] = useState(false);
     const [isFullGame, setIsFullGame] = useState(false);
@@ -178,7 +151,7 @@ const Rating: FC<RatingProps> = props => {
     };
 
     if (!teams || !expandedTours || !gameParams) {
-        // return <Loader />;
+        return <Loader/>;
     }
 
     return (
@@ -240,20 +213,6 @@ const Rating: FC<RatingProps> = props => {
                         </div>
 
                         <div className={classes.tableWrapper}>
-                            {/*<Scrollbars autoHide autoHideTimeout={500}*/}
-                            {/*            autoHideDuration={200}*/}
-                            {/*            renderThumbVertical={() => <div style={{*/}
-                            {/*                // backgroundColor: 'white',*/}
-                            {/*                // borderRadius: '4px',*/}
-                            {/*                // cursor: 'pointer'*/}
-                            {/*            }}/>}*/}
-                            {/*            renderThumbHorizontal={props => <div {...props} style={{*/}
-                            {/*                backgroundColor: 'white',*/}
-                            {/*                borderRadius: '4px',*/}
-                            {/*                cursor: 'pointer',*/}
-                            {/*                height: '5px'*/}
-                            {/*            }}/>}*/}
-                            {/*            classes={{view: classes.scrollbarView}}>*/}
                             <Table
                                 sx={{
                                     width: 'unset',
@@ -306,7 +265,6 @@ const Rating: FC<RatingProps> = props => {
                                     {renderTeams()}
                                 </TableBody>
                             </Table>
-                            {/*</Scrollbars>*/}
                         </div>
                     </div>
                 </Scrollbars>

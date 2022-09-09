@@ -27,7 +27,6 @@
 
 .contentWrapper {
     display: flex;
-    overflow-x: hidden;
     align-self: center;
     flex-direction: column;
     width: 75%;
@@ -82,6 +81,27 @@
         background-color: #1A2C37;
         padding: 4vh 2vw 3vh 1vw;
         box-sizing: border-box;
+        overflow: scroll;
+        -ms-overflow-style: none;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, .7);
+        margin-bottom: 18px;
+
+        &::-webkit-scrollbar {
+            width: 0;
+            height: 6px;
+            cursor: pointer;
+        }
+
+        &::-webkit-scrollbar-track {
+            border-radius: 0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        &::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7);
+        }
     }
 }
 
@@ -118,6 +138,7 @@
         width: 90%;
 
         .buttonsWrapper {
+            margin-top: 0;
 
             .button {
                 height: 5vh;
@@ -133,5 +154,10 @@
     .intrigueParagraph {
         height: 5vh;
         font-size: 1.5vmax;
+    }
+
+    .scrollbarContainer {
+        height: calc(100% - 33vw) !important;
+        align-self: flex-end;
     }
 }

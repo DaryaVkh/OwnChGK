@@ -1,17 +1,17 @@
-import React, {FC, Suspense, useEffect, useState} from 'react';
+import React, { FC, Suspense, useEffect, useState } from 'react';
 import Wrapper from './wrapper';
 import Authorization from './pages/authorization/authorization';
 import Registration from './pages/registration/registration';
-import {Redirect, Route, Switch} from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import RestoringPassword from './pages/restoring-password/restoring-password';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import ProtectedRoute from './components/private-route/private-route';
-import {AppDispatchProps, AppProps, AppState, AppStateProps} from './entities/app/app.interfaces';
-import {checkToken} from './server-api/server-api';
-import {Dispatch} from 'redux';
-import {AppAction} from './redux/reducers/app-reducer/app-reducer.interfaces';
-import {authorizeUserWithRole, checkToken as testToken} from './redux/actions/app-actions/app-actions';
-import {adminRoles, userRoles} from './entities/common/common.constants';
+import { AppDispatchProps, AppProps, AppState, AppStateProps } from './entities/app/app.interfaces';
+import { checkToken } from './server-api/server-api';
+import { Dispatch } from 'redux';
+import { AppAction } from './redux/reducers/app-reducer/app-reducer.interfaces';
+import { authorizeUserWithRole, checkToken as testToken } from './redux/actions/app-actions/app-actions';
+import { adminRoles, userRoles } from './entities/common/common.constants';
 import Loader from './components/loader/loader';
 import MobileMenu from './pages/mobile-menu/mobile-menu';
 import AdminGame from './pages/admin-game/admin-game';
@@ -186,8 +186,7 @@ function mapStateToProps(state: AppState): AppStateProps {
     return {
         user: state.appReducer.user,
         isLoggedIn: state.appReducer.isLoggedIn,
-        isTokenChecked: true
-        // isTokenChecked: state.appReducer.isTokenChecked
+        isTokenChecked: state.appReducer.isTokenChecked
     };
 }
 
