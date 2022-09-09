@@ -36,6 +36,22 @@ export class Question {
         this.answers[index].onAppeal();
     }
 
+    changeAnswer(team: Team, roundNumber: number, questionNumber: number, isMatrixType = false): void {
+        let answer = this.answers.find(ans => ans.teamId === team.id && ans.roundNumber === roundNumber && ans.questionNumber === questionNumber);
+        if (answer) {
+            if (answer.status === Status.Right) {
+                answer.reject(isMatrixType ? this.cost : 0);
+            } else {
+                answer.accept(this.cost);
+            }
+        } else {
+            answer = new Answer(team.id, this.roundNumber, this.number, '');
+            this.answers.push(answer);
+            answer.accept(this.cost);
+            team.addAnswer(answer);
+        }
+    }
+
     acceptAnswers(rightAnswer: string): void {
         for (let answer of this.answers) {
             if (answer.text === rightAnswer) {

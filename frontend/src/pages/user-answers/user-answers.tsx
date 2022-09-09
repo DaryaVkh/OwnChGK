@@ -62,6 +62,14 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
                         number: ans.number
                     };
                 });
+
+                let numbers = dictionary['chgk'].map(ans => ans.number);
+                const max = Math.max(...numbers);
+                for (let i = 1; i <= max; i++) {
+                    if (!numbers.includes(i)) {
+                        dictionary['chgk'].push({ status: 'no-answer', number: i, answer: '' });
+                    }
+                }
             }
             setAnswers(dictionary);
 
@@ -149,7 +157,7 @@ const UserAnswersPage: FC<UserAnswersPageProps> = props => {
             .map((answer, index) => {
                 return (
                     <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                                order={answer.number} gamePart={gamePart}/>
+                                order={answer.number} gamePart={gamePart} isAdmin={false}/>
                 );
             });
     };

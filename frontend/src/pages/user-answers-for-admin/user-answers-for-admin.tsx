@@ -9,8 +9,6 @@ import Scrollbar from '../../components/scrollbar/scrollbar';
 import {getGame} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
-import {AppState} from '../../entities/app/app.interfaces';
-import {connect} from 'react-redux';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
 
 let conn: WebSocket;
@@ -43,7 +41,10 @@ const UserAnswersPageForAdmin = () => {
     };
 
     const handler = {
-        handleTeamAnswersMessage: (chgkAnswers: { answer: string; status: number; number: number }[], matrixAnswers: { answer: string; status: number; number: number }[]) => {
+        handleTeamAnswersMessage: (chgkAnswers: { answer: string; status: number; number: number }[],
+                                   matrixAnswers: { answer: string; status: number; number: number }[],
+                                   chgkQuestionsCount: number,
+                                   matrixQuestionsCount: number) => {
             let dictionary: { [key: string]: Answer[] };
             dictionary = {};
             if (matrixAnswers) {
@@ -54,6 +55,12 @@ const UserAnswersPageForAdmin = () => {
                         number: ans.number
                     };
                 });
+                let numbers = dictionary['matrix'].map(ans => ans.number);
+                for (let i = 1; i <= matrixQuestionsCount; i++) {
+                    if (!numbers.includes(i)) {
+                        dictionary['matrix'].push({ status: 'no-answer', number: i, answer: '' });
+                    }
+                }
             }
 
             if (chgkAnswers) {
@@ -64,6 +71,13 @@ const UserAnswersPageForAdmin = () => {
                         number: ans.number
                     };
                 });
+
+                let numbers = dictionary['chgk'].map(ans => ans.number);
+                for (let i = 1; i <= chgkQuestionsCount; i++) {
+                    if (!numbers.includes(i)) {
+                        dictionary['chgk'].push({ status: 'no-answer', number: i, answer: '' });
+                    }
+                }
             }
             setAnswers(dictionary);
 
@@ -118,7 +132,8 @@ const UserAnswersPageForAdmin = () => {
             const jsonMessage = JSON.parse(event.data);
             switch (jsonMessage.action) {
                 case 'teamAnswersForAdmin':
-                    handler.handleTeamAnswersMessage(jsonMessage.chgkAnswers, jsonMessage.matrixAnswers);
+                    handler.handleTeamAnswersMessage(jsonMessage.chgkAnswers, jsonMessage.matrixAnswers,
+                        jsonMessage.chgkQuestionsCount, jsonMessage.matrixQuestionsCount);
                     break;
             }
         };
@@ -150,7 +165,7 @@ const UserAnswersPageForAdmin = () => {
             .map((answer, index) => {
                 return (
                     <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                                order={answer.number} gamePart={gamePart}/>
+                                order={answer.number} gamePart={gamePart} isAdmin={true} teamName={teamName}/>
                 );
             });
     };
