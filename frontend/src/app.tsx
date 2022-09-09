@@ -20,11 +20,11 @@ import StartGame from './pages/admin-start-game/admin-start-game';
 import Rating from './pages/rating/rating';
 import UserStartScreen from './pages/user-start-screen/user-start-screen';
 import Profile from './pages/profile/profile';
-import TeamCreator from "./pages/team-creation/team-creation";
-import UserGame from "./pages/user-game/user-game";
-import UserAnswersPage from "./pages/user-answers/user-answers";
-import AdminStartScreen from "./pages/admin-start-screen/admin-start-screen";
-import GameCreator from "./pages/game-creation/game-creation";
+import TeamCreator from './pages/team-creation/team-creation';
+import UserGame from './pages/user-game/user-game';
+import UserAnswersPage from './pages/user-answers/user-answers';
+import AdminStartScreen from './pages/admin-start-screen/admin-start-screen';
+import GameCreator from './pages/game-creation/game-creation';
 
 const App: FC<AppProps> = props => {
     const [mediaMatch, setMediaMatch] = useState<MediaQueryList>(window.matchMedia('(max-width: 600px)'));
@@ -186,7 +186,8 @@ function mapStateToProps(state: AppState): AppStateProps {
     return {
         user: state.appReducer.user,
         isLoggedIn: state.appReducer.isLoggedIn,
-        isTokenChecked: state.appReducer.isTokenChecked
+        isTokenChecked: true
+        // isTokenChecked: state.appReducer.isTokenChecked
     };
 }
 
