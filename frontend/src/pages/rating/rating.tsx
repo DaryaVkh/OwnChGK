@@ -1,21 +1,21 @@
-import React, {FC, useEffect, useState} from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import classes from './rating.module.scss';
 import PageWrapper from '../../components/page-wrapper/page-wrapper';
-import {GameParams, RatingProps, TeamResult, Tour} from '../../entities/rating/rating.interfaces';
+import { GameParams, RatingProps, TeamResult, Tour } from '../../entities/rating/rating.interfaces';
 import Header from '../../components/header/header';
-import {Scrollbars} from 'rc-scrollbars';
-import {Table, TableBody, TableCell, tableCellClasses, TableHead, TableRow} from '@mui/material';
-import {TeamTableRow, TourHeaderCell} from '../../components/table/table';
-import {Link, useParams} from 'react-router-dom';
+import { Scrollbars } from 'rc-scrollbars';
+import { Table, TableBody, TableCell, tableCellClasses, TableHead, TableRow } from '@mui/material';
+import { TeamTableRow, TourHeaderCell } from '../../components/table/table';
+import { Link, useParams } from 'react-router-dom';
 import {
     changeIntrigueGameStatus,
     getResultTable,
     getResultTableFormat,
     getTeamsParticipantTable
 } from '../../server-api/server-api';
-import Loader from '../../components/loader/loader';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
-import {createFileLink} from '../../fileWorker';
+import { createFileLink } from '../../fileWorker';
+import Loader from '../../components/loader/loader';
 
 const Rating: FC<RatingProps> = props => {
     const {gameId} = useParams<{ gameId: string }>();
@@ -29,7 +29,7 @@ const Rating: FC<RatingProps> = props => {
     useEffect(() => {
         const resizeEventHandler = () => {
             setMediaMatch(window.matchMedia('(max-width: 600px)'));
-        }
+        };
 
         mediaMatch.addEventListener('change', resizeEventHandler);
 
@@ -68,12 +68,12 @@ const Rating: FC<RatingProps> = props => {
                             teamName: team,
                             matrixSum: matrixSums?.[team],
                             toursWithResults: totalScoreForAllTeams[team],
-                        })
+                        });
                     }
                     setTeams(result);
                 });
             }
-        })
+        });
     }, []);
 
     const renderTourHeaders = () => {
@@ -107,7 +107,8 @@ const Rating: FC<RatingProps> = props => {
         });
 
         return teams.map((teamResult, i) => {
-            return <TeamTableRow key={teamResult.teamName} place={isIntrigue && !props.isAdmin ? '-' : i + 1} teamName={teamResult.teamName}
+            return <TeamTableRow key={teamResult.teamName} place={isIntrigue && !props.isAdmin ? '-' : i + 1}
+                                 teamName={teamResult.teamName}
                                  matrixSum={teamResult.matrixSum}
                                  toursWithResults={teamResult.toursWithResults} isExpanded={expandedTours}/>;
         });
@@ -119,15 +120,15 @@ const Rating: FC<RatingProps> = props => {
                 if (res.status === 200) {
                     setIsIntrigue(true);
                 }
-            })
+            });
         } else {
             changeIntrigueGameStatus(gameId, false).then(res => {
                 if (res.status === 200) {
                     setIsIntrigue(false);
                 }
-            })
+            });
         }
-    }
+    };
 
     const downloadResults = async () => {
         getResultTableFormat(gameId).then(res => {
@@ -136,8 +137,8 @@ const Rating: FC<RatingProps> = props => {
                     createFileLink(totalTable, `game-${gameId}-result.csv`);
                 });
             }
-        })
-    }
+        });
+    };
 
     const downloadTeams = async () => {
         getTeamsParticipantTable(gameId).then(res => {
@@ -146,11 +147,11 @@ const Rating: FC<RatingProps> = props => {
                     createFileLink(participants, `game-${gameId}-participants.csv`);
                 });
             }
-        })
-    }
+        });
+    };
 
     if (!teams || !expandedTours || !gameParams) {
-        return <Loader />;
+        return <Loader/>;
     }
 
     return (
@@ -158,7 +159,8 @@ const Rating: FC<RatingProps> = props => {
             <Header isAuthorized={true} isAdmin={props.isAdmin}>
                 {
                     !mediaMatch.matches
-                        ? <Link to={props.isAdmin ? `/admin/game/${gameId}` : `/game/${gameId}`} className={classes.menuLink}>В игру</Link>
+                        ? <Link to={props.isAdmin ? `/admin/game/${gameId}` : `/game/${gameId}`}
+                                className={classes.menuLink}>В игру</Link>
                         : null
                 }
 
@@ -167,102 +169,105 @@ const Rating: FC<RatingProps> = props => {
 
             {
                 mediaMatch.matches
-                    ? <MobileNavbar isGame={true} isAdmin={false} page='' toGame={true} gameId={gameId} />
+                    ? <MobileNavbar isGame={true} isAdmin={false} page="" toGame={true} gameId={gameId}/>
                     : null
             }
-            <div className={classes.contentWrapper}>
-                <div className={classes.buttonsWrapper}>
-                    {
-                        props.isAdmin
-                            ? <button className={classes.button}
-                                      onClick={turnOnIntrigue}>{isIntrigue ? 'Выключить «Интригу»' : 'Включить «Интригу»'}</button>
-                            : null
-                    }
-
-                    <div>
-                        <button className={`${classes.button} ${classes.downloadResultsButton}`} onClick={downloadResults}>Скачать результаты</button>
-                        {
-                            props.isAdmin
-                                ? <button className={classes.button} onClick={downloadTeams}>Скачать список команд</button>
-                                : null
-                        }
-                    </div>
-
-                    {
-                        isIntrigue && !props.isAdmin
-                            ? <p className={classes.intrigueParagraph}>Включен режим «Интрига»</p>
-                            : null
-                    }
-                </div>
-
-                <div className={classes.tableWrapper}>
-                    <Scrollbars autoHide autoHideTimeout={500}
-                                autoHideDuration={200}
-                                renderThumbVertical={() => <div style={{
-                                    backgroundColor: 'white',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}/>}
-                                renderThumbHorizontal={props => <div {...props} style={{
-                                    backgroundColor: 'white',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    height: '5px'
-                                }}/>}
-                                classes={{view: classes.scrollbarView}}>
-                        <Table
-                            sx={{
-                                width: 'unset',
-
-                                [`& .${tableCellClasses.root}`]: {
-                                    borderBottom: 'none',
-                                    padding: 0
-                                },
-
-                                [`& .${tableCellClasses.head}`]: {
-                                    paddingBottom: '2.5vh'
-                                },
-
-                                [`& .${tableCellClasses.body}`]: {
-                                    paddingBottom: '1vh'
-                                },
+            <div className={classes.mainWrapper}>
+                <Scrollbars autoHide autoHideTimeout={500}
+                            autoHideDuration={200}
+                            renderThumbVertical={() =>
+                                <div style={{backgroundColor: 'white', borderRadius: '4px', cursor: 'pointer'}}/>
+                            }
+                            renderTrackHorizontal={props => <div {...props} style={{display: 'none'}}/>}
+                            classes={{
+                                view: classes.mainScrollbarView,
+                                trackVertical: classes.verticalTrack,
+                                root: classes.scrollbarContainer
                             }}>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={headerTableCellStyles} align="center" variant="head"
-                                               style={{
-                                                   fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
-                                                   minWidth: mediaMatch.matches ? '20vw' : '8vw',
-                                                   maxWidth: mediaMatch.matches ? '20vw' : '8vw'
-                                               }}>Место</TableCell>
-                                    <TableCell sx={headerTableCellStyles} align="left" variant="head"
-                                               style={{
-                                                   fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
-                                                   minWidth: mediaMatch.matches ? '40vw' : '16vw',
-                                                   maxWidth: mediaMatch.matches ? '40vw' : '16vw'
-                                               }}>Команда</TableCell>
-                                    {isFullGame ? <TableCell sx={headerTableCellStyles} align="center" variant="head"
-                                                             style={{
-                                                                 fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
-                                                                 minWidth: mediaMatch.matches ? '20vw' : '8vw',
-                                                                 maxWidth: mediaMatch.matches ? '20vw' : '8vw'
-                                                             }}>Матрица</TableCell> : null}
-                                    <TableCell sx={headerTableCellStyles} align="center" variant="head"
-                                               style={{
-                                                   fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
-                                                   minWidth: mediaMatch.matches ? '20vw' : '8vw',
-                                                   maxWidth: mediaMatch.matches ? '20vw' : '8vw'
-                                               }}>Сумма</TableCell>
-                                    {renderTourHeaders()}
-                                </TableRow>
-                            </TableHead>
+                    <div className={classes.contentWrapper}>
+                        <div className={classes.buttonsWrapper}>
+                            {
+                                props.isAdmin
+                                    ? <button className={classes.button}
+                                              onClick={turnOnIntrigue}>{isIntrigue ? 'Выключить «Интригу»' : 'Включить «Интригу»'}</button>
+                                    : null
+                            }
 
-                            <TableBody>
-                                {renderTeams()}
-                            </TableBody>
-                        </Table>
-                    </Scrollbars>
-                </div>
+                            <div>
+                                <button className={`${classes.button} ${classes.downloadResultsButton}`}
+                                        onClick={downloadResults}>Скачать результаты
+                                </button>
+                                {
+                                    props.isAdmin
+                                        ? <button className={classes.button} onClick={downloadTeams}>Скачать список
+                                            команд</button>
+                                        : null
+                                }
+                            </div>
+
+                            {
+                                isIntrigue && !props.isAdmin
+                                    ? <p className={classes.intrigueParagraph}>Включен режим «Интрига»</p>
+                                    : null
+                            }
+                        </div>
+
+                        <div className={classes.tableWrapper}>
+                            <Table
+                                sx={{
+                                    width: 'unset',
+
+                                    [`& .${tableCellClasses.root}`]: {
+                                        borderBottom: 'none',
+                                        padding: 0
+                                    },
+
+                                    [`& .${tableCellClasses.head}`]: {
+                                        paddingBottom: '2.5vh'
+                                    },
+
+                                    [`& .${tableCellClasses.body}`]: {
+                                        paddingBottom: '1vh'
+                                    },
+                                }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={headerTableCellStyles} align="center" variant="head"
+                                                   style={{
+                                                       fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                       minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                                       maxWidth: mediaMatch.matches ? '20vw' : '8vw'
+                                                   }}>Место</TableCell>
+                                        <TableCell sx={headerTableCellStyles} align="left" variant="head"
+                                                   style={{
+                                                       fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                       minWidth: mediaMatch.matches ? '40vw' : '16vw',
+                                                       maxWidth: mediaMatch.matches ? '40vw' : '16vw'
+                                                   }}>Команда</TableCell>
+                                        {isFullGame ? <TableCell sx={headerTableCellStyles} align="center"
+                                                                 variant="head"
+                                                                 style={{
+                                                                     fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                                     minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                                                     maxWidth: mediaMatch.matches ? '20vw' : '8vw'
+                                                                 }}>Матрица</TableCell> : null}
+                                        <TableCell sx={headerTableCellStyles} align="center" variant="head"
+                                                   style={{
+                                                       fontSize: mediaMatch.matches ? '2vmax' : '1.5vw',
+                                                       minWidth: mediaMatch.matches ? '20vw' : '8vw',
+                                                       maxWidth: mediaMatch.matches ? '20vw' : '8vw'
+                                                   }}>Сумма</TableCell>
+                                        {renderTourHeaders()}
+                                    </TableRow>
+                                </TableHead>
+
+                                <TableBody>
+                                    {renderTeams()}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </div>
+                </Scrollbars>
             </div>
         </PageWrapper>
     );
