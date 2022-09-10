@@ -183,20 +183,11 @@ function AcceptAnswer(gameId: number, gameType: string, roundNumber: number, que
     }
 }
 
-function ChangeAnswer(gameId: number, gameType: string, teamName: string, number: number) {
+function ChangeAnswer(gameId: number, gameType: string, teamId: string, number: number) {
     const game = gameType === 'chgk' ? bigGames[gameId].ChGK : bigGames[gameId].Matrix;
-    let team;
-    for (let id in game.teams)
-    {
-        if (game.teams[id].name === teamName) {
-            team = game.teams[id];
-            break;
-        }
-    }
-
     const roundNumber = Math.ceil(number / game.rounds[0].questionsCount);
     let questionNumber = number - (roundNumber - 1) * game.rounds[0].questionsCount;
-    game.rounds[roundNumber - 1].questions[questionNumber - 1].changeAnswer(team, roundNumber, questionNumber, gameType === 'matrix');
+    game.rounds[roundNumber - 1].questions[questionNumber - 1].changeAnswer(game.teams[teamId], roundNumber, questionNumber, gameType === 'matrix');
 }
 
 function AcceptAppeal(gameId: number, gameType: string, roundNumber: number, questionNumber: number, answers: string[]) {
@@ -379,18 +370,11 @@ function GetTeamAnswers(gameId, teamId, ws) {
     }))
 }
 
-function GetTeamAnswersForAdmin(gameId, teamName, ws) {
+function GetTeamAnswersForAdmin(gameId, teamId, ws) {
     let answer: { [key: string]: { number: number, answer: string, status: Status }[] };
     answer = {};
-    let chgk;
     if (bigGames[gameId].ChGK) {
-        for (let id in bigGames[gameId].ChGK.teams)
-        {
-            if (bigGames[gameId].ChGK.teams[id].name === teamName) {
-                chgk = bigGames[gameId].ChGK.teams[id].getAnswers();
-                break;
-            }
-        }
+        const chgk = bigGames[gameId].ChGK.teams[teamId].getAnswers();
         answer['chgk'] = chgk.map((ans) => {
             return {
                 number: (ans.roundNumber - 1) * bigGames[gameId].ChGK.rounds[0].questionsCount + ans.questionNumber,
@@ -402,14 +386,7 @@ function GetTeamAnswersForAdmin(gameId, teamName, ws) {
         });
     }
     if (bigGames[gameId].Matrix) {
-        let matrix;
-        for (let id in bigGames[gameId].Matrix.teams)
-        {
-            if (bigGames[gameId].Matrix.teams[id].name === teamName) {
-                matrix = bigGames[gameId].Matrix.teams[id].getAnswers();
-            }
-        }
-
+        const matrix = bigGames[gameId].Matrix.teams[teamId].getAnswers();
         answer['matrix'] = matrix.map((ans) => {
             return {
                 number: (ans.roundNumber - 1) * bigGames[gameId].Matrix.rounds[0].questionsCount + ans.questionNumber,
@@ -494,10 +471,10 @@ function AdminsAction(gameId, ws, jsonMessage, gameType) {
             GetQuestionNumber(gameId, ws);
             break;
         case 'getTeamAnswersForAdmin':
-            GetTeamAnswersForAdmin(gameId, jsonMessage.teamName, ws);
+            GetTeamAnswersForAdmin(gameId, jsonMessage.teamId, ws);
             break;
         case 'changeAnswer':
-            ChangeAnswer(gameId, jsonMessage.gamePart, jsonMessage.teamName, jsonMessage.number);
+            ChangeAnswer(gameId, jsonMessage.gamePart, jsonMessage.teamId, jsonMessage.number);
             break;
     }
 }

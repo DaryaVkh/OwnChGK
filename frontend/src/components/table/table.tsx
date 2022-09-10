@@ -169,7 +169,7 @@ export const TeamTableRow: FC<TeamTableRowProps> = props => {
                        style={{
                            minWidth: mediaMatch.matches ? '40vw' : '16vw',
                            maxWidth: mediaMatch.matches ? '40vw' : '16vw',
-                           whiteSpace: 'nowrap'}}> {props.isAdmin ? <Link to={`/game-answers/${props.gameId}/${props.teamName}`} className={`${classes.menuLink}`}> {props.teamName} </Link> : props.teamName} </TableCell>
+                           whiteSpace: 'nowrap'}}> {props.isAdmin ? <Link to={`/game-answers/${props.gameId}/teamId/${props.teamId}`} className={`${classes.menuLink}`}> {props.teamName} </Link> : props.teamName} </TableCell>
             {props.matrixSum !== undefined
                 ? <TableCell sx={bodyTableCellStyles} align='center' variant='body'
                              style={{

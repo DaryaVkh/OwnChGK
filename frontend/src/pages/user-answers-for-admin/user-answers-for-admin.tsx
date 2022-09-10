@@ -6,7 +6,7 @@ import Header from '../../components/header/header';
 import {Answer, UserAnswersPageProps} from '../../entities/user-answers/user-answers.interfaces';
 import UserAnswer from '../../components/user-answer/user-answer';
 import Scrollbar from '../../components/scrollbar/scrollbar';
-import {getGame} from '../../server-api/server-api';
+import {getGame, getTeam} from '../../server-api/server-api';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 import Loader from '../../components/loader/loader';
 import MobileNavbar from '../../components/mobile-navbar/mobile-navbar';
@@ -16,8 +16,9 @@ let ping: any;
 
 const UserAnswersPageForAdmin = () => {
     const {gameId} = useParams<{ gameId: string }>();
-    const {teamName} = useParams<{ teamName: string }>();
+    const {teamId} = useParams<{ teamId: string }>();
     const [gameName, setGameName] = useState<string>();
+    const [teamName, setTeamName] = useState<string>();
     const [answers, setAnswers] = useState<{ [key: string]: Answer[] }>({matrix: [], chgk: []});
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [gamePart, setGamePart] = useState<'chgk' | 'matrix'>('matrix');
@@ -29,7 +30,7 @@ const UserAnswersPageForAdmin = () => {
             conn.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'getTeamAnswersForAdmin',
-                'teamName': teamName
+                'teamId': teamId
             }));
 
             ping = setInterval(() => {
@@ -80,8 +81,6 @@ const UserAnswersPageForAdmin = () => {
                 }
             }
             setAnswers(dictionary);
-
-            setIsLoading(false);
         }
     };
 
@@ -124,6 +123,14 @@ const UserAnswersPageForAdmin = () => {
             }
         });
 
+        getTeam(teamId).then((res) => {
+           if (res.status === 200) {
+               res.json().then(({ name }) => {
+                   setTeamName(name);
+               })
+           }
+        });
+
         conn = new WebSocket(getUrlForSocket());
 
         conn.onopen = () => requester.startRequests();
@@ -140,6 +147,12 @@ const UserAnswersPageForAdmin = () => {
 
         return () => clearInterval(ping);
     }, []);
+
+    useEffect(() => {
+        if (isLoading && gameName && teamName && answers && (answers['chgk'].length > 0 || answers['matrix'].length > 0)) {
+            setIsLoading(false)
+        }
+    }, [gameName, teamName, answers])
 
     const activateIndicator = () => {
         const indicator = document.querySelector('#indicator') as HTMLSpanElement;
@@ -165,7 +178,7 @@ const UserAnswersPageForAdmin = () => {
             .map((answer, index) => {
                 return (
                     <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
-                                order={answer.number} gamePart={gamePart} isAdmin={true} teamName={teamName}/>
+                                order={answer.number} gamePart={gamePart} isAdmin={true} teamId={teamId}/>
                 );
             });
     };

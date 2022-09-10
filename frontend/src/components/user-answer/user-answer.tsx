@@ -4,16 +4,14 @@ import {TextareaAutosize} from '@mui/material';
 import {UserAnswerProps} from '../../entities/user-answer/user-answer.interfaces';
 import {getCookie, getUrlForSocket} from '../../commonFunctions';
 
-let conn: WebSocket;
-
 const UserAnswer: FC<UserAnswerProps> = props => {
     const [isOppositionClicked, setIsOppositionClicked] = useState<boolean>(false);
     const [opposition, setOpposition] = useState<string>('');
     const [answerStatus, setAnswerStatus] = useState<'success' | 'error' | 'opposition' | 'no-answer'>(props.status);
 
     const requester = {
-        sendAppeal: (opposition: string) => {
-            conn.send(JSON.stringify({
+        sendAppeal: (ws: WebSocket, opposition: string) => {
+            ws.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'appeal',
                 'number': props.order,
@@ -23,12 +21,12 @@ const UserAnswer: FC<UserAnswerProps> = props => {
             }));
         },
 
-        changeAnswer: () => {
-            conn.send(JSON.stringify({
+        changeAnswer: (ws: WebSocket) => {
+            ws.send(JSON.stringify({
                 'cookie': getCookie('authorization'),
                 'action': 'changeAnswer',
                 'gamePart': props.gamePart,
-                'teamName': props.teamName,
+                'teamId': props.teamId,
                 'number': props.order,
             }));
         }
@@ -36,8 +34,8 @@ const UserAnswer: FC<UserAnswerProps> = props => {
 
     const handleButtonClick = () => {
         if (props.isAdmin) {
-            conn = new WebSocket(getUrlForSocket());
-            conn.onopen = () => requester.changeAnswer();;
+            let conn = new WebSocket(getUrlForSocket());
+            conn.onopen = () => requester.changeAnswer(conn);
             setAnswerStatus(lastStatus => lastStatus === 'success' ? 'error' : 'success');
             return;
         }
@@ -52,8 +50,8 @@ const UserAnswer: FC<UserAnswerProps> = props => {
     const handleSendOpposition = () => {
         if (opposition !== '') {
             setAnswerStatus('opposition');
-            conn = new WebSocket(getUrlForSocket());
-            conn.onopen = () => requester.sendAppeal(opposition);
+            let conn = new WebSocket(getUrlForSocket());
+            conn.onopen = () => requester.sendAppeal(conn, opposition);
         }
         setIsOppositionClicked(false);
     };

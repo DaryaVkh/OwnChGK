@@ -6,6 +6,7 @@ export type Tour = number[];
 
 export interface TeamResult {
     teamName: string;
+    teamId: string;
     matrixSum: number;
     toursWithResults: Tour[];
 }

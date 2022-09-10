@@ -53,6 +53,7 @@ const Rating: FC<RatingProps> = props => {
                                      questionsCount,
                                      totalScoreForAllTeams,
                                      matrixSums,
+                                     teamsDictionary,
                                  }) => {
                     setIsIntrigue(isIntrigue);
                     setGameParams({toursCount: roundsCount, questionsCount: questionsCount});
@@ -66,6 +67,7 @@ const Rating: FC<RatingProps> = props => {
                     for (const team of teams) {
                         result.push({
                             teamName: team,
+                            teamId: teamsDictionary[team],
                             matrixSum: matrixSums?.[team],
                             toursWithResults: totalScoreForAllTeams[team],
                         });
@@ -109,6 +111,7 @@ const Rating: FC<RatingProps> = props => {
         return teams.map((teamResult, i) => {
             return <TeamTableRow key={teamResult.teamName} place={isIntrigue && !props.isAdmin ? '-' : i + 1}
                                  teamName={teamResult.teamName}
+                                 teamId={teamResult.teamId}
                                  matrixSum={teamResult.matrixSum}
                                  toursWithResults={teamResult.toursWithResults} isExpanded={expandedTours}
                                  gameId={gameId}
