@@ -224,8 +224,26 @@ const GameCreator: FC<GameCreatorProps> = props => {
         if (+event.target.value <= 99) {
             if (mode === 'chgk') {
                 setTempChgkRoundCount(+event.target.value);
+                const questions: Record<number, string[]> = {};
+                for (let i = 0; i < (+event.target.value || 0); i++) {
+                    if (chgkSettings?.questions && chgkSettings?.questions[i + 1]) {
+                        questions[i + 1] = chgkSettings?.questions[i + 1];
+                    } else {
+                        questions[i + 1] = new Array(tempChgkQuestionsCount).fill('');
+                    }
+                }
+                setTempChgkQuestions(questions);
             } else {
                 setTempMatrixRoundCount(+event.target.value);
+                const questions: Record<number, string[]> = {};
+                for (let i = 0; i < (+event.target.value || 0); i++) {
+                    if (matrixSettings?.questions && matrixSettings?.questions[i + 1]) {
+                        questions[i + 1] = matrixSettings?.questions[i + 1];
+                    } else {
+                        questions[i + 1] = new Array(tempMatrixQuestionsCount).fill('');
+                    }
+                }
+                setTempMatrixQuestions(questions);
             }
         }
     };
@@ -234,8 +252,18 @@ const GameCreator: FC<GameCreatorProps> = props => {
         if (+event.target.value <= 99) {
             if (mode === 'chgk') {
                 setTempChgkQuestionsCount(+event.target.value);
+                const questions: Record<number, string[]> = {};
+                for (let i = 0; i < (tempChgkRoundCount || 0); i++) {
+                    questions[i + 1] = new Array(+event.target.value).fill('');
+                }
+                setTempChgkQuestions(questions);
             } else {
                 setTempMatrixQuestionsCount(+event.target.value);
+                const questions: Record<number, string[]> = {};
+                for (let i = 0; i < (tempMatrixRoundCount || 0); i++) {
+                    questions[i + 1] = new Array(+event.target.value).fill('');
+                }
+                setTempMatrixQuestions(questions);
             }
         }
     };
