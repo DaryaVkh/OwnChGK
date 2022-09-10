@@ -363,9 +363,14 @@ export class GamesController {
 
             const bigGame = bigGames[gameId];
             const game = bigGame.isFullGame() ? bigGame.ChGK : bigGame.CurrentGame;
-            const totalScoreForAllTeams = 'user' && teamId && bigGame.isIntrigue
+            const totalScoreForAllTeams = roles === 'user' && teamId && bigGame.isIntrigue
                 ? game.getScoreTableForTeam(teamId)
-                : game.getScoreTable()
+                : game.getScoreTable();
+
+            const teamsDictionary = roles === 'user' && teamId
+                ? game.getTeamDictionary(teamId)
+                : game.getAllTeamsDictionary();
+
 
             const matrixSums = bigGame.isFullGame() ? bigGame.Matrix.getTotalScoreForAllTeams() : undefined;
 
@@ -376,6 +381,7 @@ export class GamesController {
                 questionsCount: game.rounds[0].questionsCount,
                 matrixSums,
                 totalScoreForAllTeams,
+                teamsDictionary,
             };
 
             return res.status(200).json(answer);

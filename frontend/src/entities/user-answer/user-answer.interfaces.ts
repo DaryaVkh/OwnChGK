@@ -4,5 +4,5 @@ export interface UserAnswerProps {
     order: number;
     gamePart: 'chgk' | 'matrix';
     isAdmin: boolean;
-    teamName?: string;
+    teamId?: string;
 }

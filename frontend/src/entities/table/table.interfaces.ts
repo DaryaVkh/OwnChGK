@@ -11,6 +11,7 @@ export interface TourHeaderCellProps {
 export interface TeamTableRowProps {
     place: number | string;
     teamName: string;
+    teamId: string;
     matrixSum: number;
     toursWithResults: Tour[];
     isExpanded: boolean[];

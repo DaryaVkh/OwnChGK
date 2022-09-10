@@ -79,12 +79,27 @@ export class Game {
         this.rounds.push(round);
     }
 
+    getTeamDictionary(teamId: string): { [name: string]: string } {
+        let result = {};
+        result[this.teams[teamId].name] = teamId;
+        return result;
+    }
+
+    getAllTeamsDictionary(): { [name: string]: string } {
+        let result = {};
+        for (let teamId of Object.keys(this.teams)) {
+            result[this.teams[teamId].name] = teamId;
+        }
+
+        return result;
+    }
+
     getScoreTable(): { name: string, scoreTable: number[][] } {
         let table = {};
         const roundsCount = this.rounds.length;
         const questionsCount = this.rounds[0].questions.length;
 
-        for (let teamId in this.teams) {
+        for (let teamId of Object.keys(this.teams)) {
             table[this.teams[teamId].name] = new Array(roundsCount);
             for (let round = 0; round < roundsCount; round++) {
                 table[this.teams[teamId].name][round] = new Array(questionsCount).fill(0);
