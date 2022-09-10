@@ -173,11 +173,25 @@ const UserAnswersPageForAdmin = () => {
         return teamName;
     };
 
+    const changeStatusHandler = (gamePart: string, order: number, status: 'success' | 'error' | 'opposition' | 'no-answer'): void => {
+        setAnswers(last => {
+            const old: { [gamePart: string]: Answer[] } = {
+                'matrix': last['matrix'],
+                'chgk': last['chgk']
+            }
+
+            let answer = old[gamePart].find(ans => ans.number === order);
+            answer!.status = status;
+            return old;
+        })
+    }
+
     const renderAnswers = () => {
         return answers[gamePart]?.sort((answer1, answer2) => answer1.number > answer2.number ? 1 : -1)
             .map((answer, index) => {
                 return (
-                    <UserAnswer key={`${answer.answer}_${index}`} answer={answer.answer} status={answer.status}
+                    <UserAnswer key={`${gamePart}_{answer.answer}_${index}`} answer={answer.answer} status={answer.status}
+                                onChangeStatus={(gamePart, order, status) => changeStatusHandler(gamePart, order, status)}
                                 order={answer.number} gamePart={gamePart} isAdmin={true} teamId={teamId}/>
                 );
             });

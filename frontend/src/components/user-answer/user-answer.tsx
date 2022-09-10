@@ -36,7 +36,13 @@ const UserAnswer: FC<UserAnswerProps> = props => {
         if (props.isAdmin) {
             let conn = new WebSocket(getUrlForSocket());
             conn.onopen = () => requester.changeAnswer(conn);
-            setAnswerStatus(lastStatus => lastStatus === 'success' ? 'error' : 'success');
+            setAnswerStatus(lastStatus => {
+                const newStatus = lastStatus === 'success' ? 'error' : 'success'
+                if (props.onChangeStatus) {
+                    props.onChangeStatus(props.gamePart, props.order, newStatus);
+                }
+                return newStatus
+            });
             return;
         }
 
