@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:15.1-alpine
+    env_file:
+      - .env
+    networks:
+      - postgres
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    image: app
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - postgres
+    ports:
+      - "80:3000"
+      - "443:3000"
+
+networks:
+  postgres:
+    driver: bridge

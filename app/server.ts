@@ -32,17 +32,32 @@ export class Server {
 
     private async DBconnection() {
         try {
+            console.log('DOTENV');
+            console.log(process.env.DATABASE_URL);
             await createConnection({
                 type: 'postgres',
                 url: process.env.DATABASE_URL,
                 entities: [User, Admin, Team, BigGame, Game, Round, Question],
                 synchronize: true,
-                ssl: {rejectUnauthorized:false} // для хероку
             }).then(() => {
                 console.log('Connected to Postgres')
             });
         } catch (error) {
             console.error(error);
+            console.log('Try again after 10 seconds');
+            setTimeout(async () => {
+                await createConnection({
+                    type: 'postgres',
+                    url: process.env.DATABASE_URL,
+                    entities: [User, Admin, Team, BigGame, Game, Round, Question],
+                    synchronize: true,
+                }).then(() => {
+                    console.log('Connected to Postgres')
+                }).catch(() => {
+                    throw new Error('Unable to connect to db');
+                });
+            }, 10000);
+
             throw new Error('Unable to connect to db');
         }
     }
