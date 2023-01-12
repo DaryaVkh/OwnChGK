@@ -23,9 +23,14 @@ services:
       dockerfile: Dockerfile
     networks:
       - postgres
+    volumes:
+      - /etc/letsencrypt/live/ownchgk.ru/fullchain.pem:/etc/letsencrypt/live/ownchgk.ru/fullchain.pem
+      - /etc/letsencrypt/live/ownchgk.ru/privkey.pem:/etc/letsencrypt/live/ownchgk.ru/privkey.pem
+      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
+      - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem
     ports:
-      - "80:3000"
-      - "443:3000"
+      - "80:80"
+      - "443:443"
 
 networks:
   postgres:
