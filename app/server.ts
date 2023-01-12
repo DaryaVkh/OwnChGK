@@ -57,8 +57,6 @@ export class Server {
                     throw new Error('Unable to connect to db');
                 });
             }, 10000);
-
-            throw new Error('Unable to connect to db');
         }
     }
 
