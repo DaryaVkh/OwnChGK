@@ -36,6 +36,7 @@ services:
     networks:
       - postgres
     volumes:
+      - ./logs:/var/log/nginx
       - /etc/letsencrypt/live/ownchgk.ru/fullchain.pem:/etc/letsencrypt/live/ownchgk.ru/fullchain.pem
       - /etc/letsencrypt/live/ownchgk.ru/privkey.pem:/etc/letsencrypt/live/ownchgk.ru/privkey.pem
       - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
