@@ -23,6 +23,18 @@ services:
       dockerfile: Dockerfile
     networks:
       - postgres
+    ports:
+      - "3000:3000"
+
+  frontend:
+    image: frontend
+    depends_on:
+      - app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    networks:
+      - postgres
     volumes:
       - /etc/letsencrypt/live/ownchgk.ru/fullchain.pem:/etc/letsencrypt/live/ownchgk.ru/fullchain.pem
       - /etc/letsencrypt/live/ownchgk.ru/privkey.pem:/etc/letsencrypt/live/ownchgk.ru/privkey.pem
