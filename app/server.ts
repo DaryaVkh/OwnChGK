@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import bodyParser from 'body-parser';
 import {usersRouter} from './routers/usersRouter';
 import {adminsRouter} from './routers/adminsRouter';
@@ -57,12 +58,11 @@ export class Server {
                     throw new Error('Unable to connect to db');
                 });
             }, 10000);
-
-            throw new Error('Unable to connect to db');
         }
     }
 
     private config() {
+        this.app.use(cors({origin: '*'}));
         this.app.use(bodyParser.json()); // 100kb default
         this.app.use(bodyParser.urlencoded({extended: true}));
         this.app.use(boolParser());

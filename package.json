@@ -4,6 +4,7 @@
   "description": "",
   "main": "build/app/app.js",
   "scripts": {
+    "build-standard": "tsc",
     "build": "tsc && cd frontend && npm install && npm run build",
     "build-win": "tsc && cd frontend && npm install && npm run build-win",
     "start": "node build/app/app.js",

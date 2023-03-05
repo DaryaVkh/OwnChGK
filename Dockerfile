@@ -4,6 +4,7 @@ COPY package.json package-lock.json ./
 RUN npm install -g npm@9.2.0
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npm run build-standard
 
+EXPOSE 3000
 ENTRYPOINT ["npm", "start"]
