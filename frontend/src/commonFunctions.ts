@@ -6,5 +6,5 @@ export const getCookie = (name: string) => {
 }
 
 export const getUrlForSocket = () => {
-    return window.location.origin.replace(/^http/, 'ws')
+    return `${window.location.origin.replace(/^http/, 'ws')}/api/ws`
 }

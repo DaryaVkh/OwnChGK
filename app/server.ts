@@ -85,7 +85,7 @@ export class Server {
                 resolve(port);
             }).on('error', (err: Object) => reject(err));
 
-            const wss = new WSServer({server});
+            const wss = new WSServer({server, path: '/api/ws'});
             wss.on('connection', (ws) => {
                 ws.on('message', (message: string) => {
                     try {
