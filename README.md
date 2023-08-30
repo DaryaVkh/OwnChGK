@@ -1,3 +1,4 @@
+Актуальная версия лежит здесь: https://github.com/prefie/OwnChGK
 # Своя ЧГК
 Вихлянцева Дарья - DaryaVkh (frontend)
 
